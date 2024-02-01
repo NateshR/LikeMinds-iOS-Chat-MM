@@ -1,0 +1,457 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F4C790972B28652E0084823E /* LikeMindsChatSDK.docc in Sources */ = {isa = PBXBuildFile; fileRef = F4C790962B28652E0084823E /* LikeMindsChatSDK.docc */; };
+		F4C790982B28652E0084823E /* LikeMindsChatSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = F4C790952B28652E0084823E /* LikeMindsChatSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F4C790B62B2865610084823E /* LMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C7909F2B2865600084823E /* LMButton.swift */; };
+		F4C790B72B2865610084823E /* LMLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A02B2865600084823E /* LMLabel.swift */; };
+		F4C790B82B2865610084823E /* LMViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A12B2865600084823E /* LMViewController.swift */; };
+		F4C790B92B2865610084823E /* LMImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A22B2865600084823E /* LMImageView.swift */; };
+		F4C790BA2B2865610084823E /* LMCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A32B2865600084823E /* LMCollectionView.swift */; };
+		F4C790BB2B2865610084823E /* LMTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A42B2865600084823E /* LMTableViewCell.swift */; };
+		F4C790BC2B2865610084823E /* NSAttributedString.Key+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A52B2865600084823E /* NSAttributedString.Key+Extension.swift */; };
+		F4C790BD2B2865610084823E /* LMTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A62B2865600084823E /* LMTableView.swift */; };
+		F4C790BE2B2865610084823E /* LMCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A72B2865600084823E /* LMCollectionViewCell.swift */; };
+		F4C790BF2B2865610084823E /* LMViewLifeCycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A82B2865600084823E /* LMViewLifeCycle.swift */; };
+		F4C790C02B2865610084823E /* LMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790A92B2865600084823E /* LMView.swift */; };
+		F4C790C12B2865610084823E /* LMStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790AA2B2865600084823E /* LMStackView.swift */; };
+		F4C790C22B2865610084823E /* UINavigationItem+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790AB2B2865600084823E /* UINavigationItem+Extension.swift */; };
+		F4C790C32B2865610084823E /* LMTappableLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790AC2B2865600084823E /* LMTappableLabel.swift */; };
+		F4C790C42B2865610084823E /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790AE2B2865600084823E /* Constants.swift */; };
+		F4C790C52B2865610084823E /* Appearance+Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790AF2B2865600084823E /* Appearance+Fonts.swift */; };
+		F4C790C62B2865610084823E /* Constants+Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B02B2865600084823E /* Constants+Strings.swift */; };
+		F4C790C72B2865610084823E /* Appearance+Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B12B2865600084823E /* Appearance+Colors.swift */; };
+		F4C790C82B2865610084823E /* Constants+Numbers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B22B2865600084823E /* Constants+Numbers.swift */; };
+		F4C790C92B2865610084823E /* Constants+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B32B2865600084823E /* Constants+Images.swift */; };
+		F4C790CA2B2865610084823E /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B42B2865600084823E /* Components.swift */; };
+		F4C790CB2B2865610084823E /* LMTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790B52B2865600084823E /* LMTheme.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F4C790922B28652E0084823E /* LikeMindsChatSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LikeMindsChatSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4C790952B28652E0084823E /* LikeMindsChatSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LikeMindsChatSDK.h; sourceTree = "<group>"; };
+		F4C790962B28652E0084823E /* LikeMindsChatSDK.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = LikeMindsChatSDK.docc; sourceTree = "<group>"; };
+		F4C7909F2B2865600084823E /* LMButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMButton.swift; sourceTree = "<group>"; };
+		F4C790A02B2865600084823E /* LMLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMLabel.swift; sourceTree = "<group>"; };
+		F4C790A12B2865600084823E /* LMViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMViewController.swift; sourceTree = "<group>"; };
+		F4C790A22B2865600084823E /* LMImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMImageView.swift; sourceTree = "<group>"; };
+		F4C790A32B2865600084823E /* LMCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMCollectionView.swift; sourceTree = "<group>"; };
+		F4C790A42B2865600084823E /* LMTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMTableViewCell.swift; sourceTree = "<group>"; };
+		F4C790A52B2865600084823E /* NSAttributedString.Key+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSAttributedString.Key+Extension.swift"; sourceTree = "<group>"; };
+		F4C790A62B2865600084823E /* LMTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMTableView.swift; sourceTree = "<group>"; };
+		F4C790A72B2865600084823E /* LMCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMCollectionViewCell.swift; sourceTree = "<group>"; };
+		F4C790A82B2865600084823E /* LMViewLifeCycle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMViewLifeCycle.swift; sourceTree = "<group>"; };
+		F4C790A92B2865600084823E /* LMView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMView.swift; sourceTree = "<group>"; };
+		F4C790AA2B2865600084823E /* LMStackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMStackView.swift; sourceTree = "<group>"; };
+		F4C790AB2B2865600084823E /* UINavigationItem+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UINavigationItem+Extension.swift"; sourceTree = "<group>"; };
+		F4C790AC2B2865600084823E /* LMTappableLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMTappableLabel.swift; sourceTree = "<group>"; };
+		F4C790AE2B2865600084823E /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F4C790AF2B2865600084823E /* Appearance+Fonts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Appearance+Fonts.swift"; sourceTree = "<group>"; };
+		F4C790B02B2865600084823E /* Constants+Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Constants+Strings.swift"; sourceTree = "<group>"; };
+		F4C790B12B2865600084823E /* Appearance+Colors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Appearance+Colors.swift"; sourceTree = "<group>"; };
+		F4C790B22B2865600084823E /* Constants+Numbers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Constants+Numbers.swift"; sourceTree = "<group>"; };
+		F4C790B32B2865600084823E /* Constants+Images.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Constants+Images.swift"; sourceTree = "<group>"; };
+		F4C790B42B2865600084823E /* Components.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		F4C790B52B2865600084823E /* LMTheme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMTheme.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F4C7908F2B28652E0084823E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F4C790882B28652E0084823E = {
+			isa = PBXGroup;
+			children = (
+				F4C790942B28652E0084823E /* LikeMindsChatSDK */,
+				F4C790932B28652E0084823E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F4C790932B28652E0084823E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F4C790922B28652E0084823E /* LikeMindsChatSDK.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4C790942B28652E0084823E /* LikeMindsChatSDK */ = {
+			isa = PBXGroup;
+			children = (
+				F4C790AD2B2865600084823E /* Constants */,
+				F4C7909E2B2865600084823E /* Initials */,
+				F4C790952B28652E0084823E /* LikeMindsChatSDK.h */,
+				F4C790962B28652E0084823E /* LikeMindsChatSDK.docc */,
+			);
+			path = LikeMindsChatSDK;
+			sourceTree = "<group>";
+		};
+		F4C7909E2B2865600084823E /* Initials */ = {
+			isa = PBXGroup;
+			children = (
+				F4C7909F2B2865600084823E /* LMButton.swift */,
+				F4C790A02B2865600084823E /* LMLabel.swift */,
+				F4C790A12B2865600084823E /* LMViewController.swift */,
+				F4C790A22B2865600084823E /* LMImageView.swift */,
+				F4C790A32B2865600084823E /* LMCollectionView.swift */,
+				F4C790A42B2865600084823E /* LMTableViewCell.swift */,
+				F4C790A52B2865600084823E /* NSAttributedString.Key+Extension.swift */,
+				F4C790A62B2865600084823E /* LMTableView.swift */,
+				F4C790A72B2865600084823E /* LMCollectionViewCell.swift */,
+				F4C790A82B2865600084823E /* LMViewLifeCycle.swift */,
+				F4C790A92B2865600084823E /* LMView.swift */,
+				F4C790AA2B2865600084823E /* LMStackView.swift */,
+				F4C790AB2B2865600084823E /* UINavigationItem+Extension.swift */,
+				F4C790AC2B2865600084823E /* LMTappableLabel.swift */,
+			);
+			path = Initials;
+			sourceTree = SOURCE_ROOT;
+		};
+		F4C790AD2B2865600084823E /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				F4C790AE2B2865600084823E /* Constants.swift */,
+				F4C790AF2B2865600084823E /* Appearance+Fonts.swift */,
+				F4C790B02B2865600084823E /* Constants+Strings.swift */,
+				F4C790B12B2865600084823E /* Appearance+Colors.swift */,
+				F4C790B22B2865600084823E /* Constants+Numbers.swift */,
+				F4C790B32B2865600084823E /* Constants+Images.swift */,
+				F4C790B42B2865600084823E /* Components.swift */,
+				F4C790B52B2865600084823E /* LMTheme.swift */,
+			);
+			path = Constants;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		F4C7908D2B28652E0084823E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4C790982B28652E0084823E /* LikeMindsChatSDK.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		F4C790912B28652E0084823E /* LikeMindsChatSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4C7909B2B28652E0084823E /* Build configuration list for PBXNativeTarget "LikeMindsChatSDK" */;
+			buildPhases = (
+				F4C7908D2B28652E0084823E /* Headers */,
+				F4C7908E2B28652E0084823E /* Sources */,
+				F4C7908F2B28652E0084823E /* Frameworks */,
+				F4C790902B28652E0084823E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LikeMindsChatSDK;
+			productName = LikeMindsChatSDK;
+			productReference = F4C790922B28652E0084823E /* LikeMindsChatSDK.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F4C790892B28652E0084823E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F4C790912B28652E0084823E = {
+						CreatedOnToolsVersion = 15.0.1;
+					};
+				};
+			};
+			buildConfigurationList = F4C7908C2B28652E0084823E /* Build configuration list for PBXProject "LikeMindsChatSDK" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F4C790882B28652E0084823E;
+			productRefGroup = F4C790932B28652E0084823E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F4C790912B28652E0084823E /* LikeMindsChatSDK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F4C790902B28652E0084823E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F4C7908E2B28652E0084823E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4C790C22B2865610084823E /* UINavigationItem+Extension.swift in Sources */,
+				F4C790BC2B2865610084823E /* NSAttributedString.Key+Extension.swift in Sources */,
+				F4C790BE2B2865610084823E /* LMCollectionViewCell.swift in Sources */,
+				F4C790C52B2865610084823E /* Appearance+Fonts.swift in Sources */,
+				F4C790B72B2865610084823E /* LMLabel.swift in Sources */,
+				F4C790BA2B2865610084823E /* LMCollectionView.swift in Sources */,
+				F4C790B82B2865610084823E /* LMViewController.swift in Sources */,
+				F4C790BF2B2865610084823E /* LMViewLifeCycle.swift in Sources */,
+				F4C790C42B2865610084823E /* Constants.swift in Sources */,
+				F4C790C92B2865610084823E /* Constants+Images.swift in Sources */,
+				F4C790B62B2865610084823E /* LMButton.swift in Sources */,
+				F4C790C72B2865610084823E /* Appearance+Colors.swift in Sources */,
+				F4C790C62B2865610084823E /* Constants+Strings.swift in Sources */,
+				F4C790CA2B2865610084823E /* Components.swift in Sources */,
+				F4C790972B28652E0084823E /* LikeMindsChatSDK.docc in Sources */,
+				F4C790BB2B2865610084823E /* LMTableViewCell.swift in Sources */,
+				F4C790C82B2865610084823E /* Constants+Numbers.swift in Sources */,
+				F4C790BD2B2865610084823E /* LMTableView.swift in Sources */,
+				F4C790B92B2865610084823E /* LMImageView.swift in Sources */,
+				F4C790C02B2865610084823E /* LMView.swift in Sources */,
+				F4C790CB2B2865610084823E /* LMTheme.swift in Sources */,
+				F4C790C12B2865610084823E /* LMStackView.swift in Sources */,
+				F4C790C32B2865610084823E /* LMTappableLabel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F4C790992B28652E0084823E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		F4C7909A2B28652E0084823E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		F4C7909C2B28652E0084823E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = HPC929F5X6;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.likemindschat.LikeMindsChatSDK;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F4C7909D2B28652E0084823E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = HPC929F5X6;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.likemindschat.LikeMindsChatSDK;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F4C7908C2B28652E0084823E /* Build configuration list for PBXProject "LikeMindsChatSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4C790992B28652E0084823E /* Debug */,
+				F4C7909A2B28652E0084823E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4C7909B2B28652E0084823E /* Build configuration list for PBXNativeTarget "LikeMindsChatSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4C7909C2B28652E0084823E /* Debug */,
+				F4C7909D2B28652E0084823E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F4C790892B28652E0084823E /* Project object */;
+}

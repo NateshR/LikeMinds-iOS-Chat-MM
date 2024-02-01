@@ -1,0 +1,49 @@
+PODS:
+  - Alamofire (5.8.1)
+  - Kingfisher (7.10.1)
+  - LikeMindsChat (0.0.1):
+    - Alamofire
+    - RealmSwift (~> 10)
+  - LMChatCore_iOS (0.0.1):
+    - LikeMindsChat
+    - LMChatUI_iOS
+  - LMChatUI_iOS (0.0.1):
+    - Kingfisher (~> 7.0)
+  - Realm (10.45.1):
+    - Realm/Headers (= 10.45.1)
+  - Realm/Headers (10.45.1)
+  - RealmSwift (10.45.1):
+    - Realm (= 10.45.1)
+
+DEPENDENCIES:
+  - LikeMindsChat (from `/Users/pushpendra/likeminds_workspace/GroupChatV2/LikeMindsChat/LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec`)
+  - LMChatCore_iOS (from `../LMChatCore_iOS/LMChatCore_iOS.podspec`)
+  - LMChatUI_iOS (from `../LMChatUI_iOS/LMChatUI_iOS.podspec`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - Kingfisher
+    - Realm
+    - RealmSwift
+
+EXTERNAL SOURCES:
+  LikeMindsChat:
+    :path: "/Users/pushpendra/likeminds_workspace/GroupChatV2/LikeMindsChat/LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec"
+  LMChatCore_iOS:
+    :path: "../LMChatCore_iOS/LMChatCore_iOS.podspec"
+  LMChatUI_iOS:
+    :path: "../LMChatUI_iOS/LMChatUI_iOS.podspec"
+
+SPEC CHECKSUMS:
+  Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
+  Kingfisher: bc5abe80a8e0144537ef1dd5a0b2621b04f7f439
+  LikeMindsChat: 91d8bce86ad4c7335bec16de93aeea8ae7ae332c
+  LMChatCore_iOS: f0388010c1abdedee332cfe36de8844458bb74f6
+  LMChatUI_iOS: a6ce53da34e653fb0ab0b3fdaa0e9a16b679eeed
+  Realm: e0bee0f167c0165312d80cb0def019fdb6a26be8
+  RealmSwift: 2a92c510fee3dace3e0ad809c2f10c6a6a4b65d5
+
+PODFILE CHECKSUM: 475501105dc0db78d2cde1e89d64f1dc9216314b
+
+COCOAPODS: 1.13.0
