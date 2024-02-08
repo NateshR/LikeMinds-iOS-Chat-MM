@@ -10,17 +10,23 @@ import LMChatCore_iOS
 
 class ViewController: UIViewController {
     
-//    open private(set) lazy var containerView: BottomMessageComposerView = {
-//        let view = BottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var containerView: BottomMessageComposerView = {
+        let view = BottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
+//        view.backgroundColor = .cyan
+        return view
+    }()
+    
+//    open private(set) lazy var containerView: BottomMessageReplyPreview = {
+//        let view = BottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .cyan
 //        return view
 //    }()
     
-    open private(set) lazy var containerView: BottomMessageReplyPreview = {
-        let view = BottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .cyan
-        return view
-    }()
+//    open private(set) lazy var containerView: BottomMessageLinkPreview = {
+//        let view = BottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+//        view.backgroundColor = .cyan
+//        return view
+//    }()
     
 
     override func viewDidLoad() {

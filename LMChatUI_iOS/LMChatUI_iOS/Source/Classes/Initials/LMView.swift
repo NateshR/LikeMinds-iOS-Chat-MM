@@ -20,6 +20,11 @@ public extension UIView {
         layer.cornerRadius = cornerRadius
     }
     
+    func borderColor(withBorderWidth width: CGFloat, with color: UIColor) {
+        layer.borderWidth = width
+        layer.borderColor = color.cgColor
+    }
+    
     func roundCornerWithShadow(cornerRadius: CGFloat, shadowRadius: CGFloat, offsetX: CGFloat, offsetY: CGFloat, colour: UIColor, opacity: Float, corners: CACornerMask = [.layerMinXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner, .layerMaxXMinYCorner]) {
         self.clipsToBounds = false
         
@@ -79,7 +84,7 @@ public extension UIView {
     }
     
     @discardableResult
-    func setHeightConstraint(with value: CGFloat, relatedBy: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .defaultHigh) -> NSLayoutConstraint {
+    func setHeightConstraint(with value: CGFloat, relatedBy: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .required) -> NSLayoutConstraint {
         let heightConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: relatedBy, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: value)
         heightConstraint.priority = priority
         heightConstraint.isActive = true
@@ -88,7 +93,7 @@ public extension UIView {
     }
     
     @discardableResult
-    func setWidthConstraint(with value: CGFloat, relatedBy: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .defaultHigh) -> NSLayoutConstraint {
+    func setWidthConstraint(with value: CGFloat, relatedBy: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .required) -> NSLayoutConstraint {
         let widthConstraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: relatedBy, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: value)
         widthConstraint.priority = priority
         widthConstraint.isActive = true

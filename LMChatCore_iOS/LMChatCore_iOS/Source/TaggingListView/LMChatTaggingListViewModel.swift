@@ -7,7 +7,7 @@
 
 import LikeMindsChat
 
-public protocol LMFeedTaggingListViewModelProtocol: AnyObject { 
+public protocol LMChatTaggingListViewModelProtocol: AnyObject { 
     func updateList(with users: [LMChatTaggingUserTableCell.ViewModel])
 }
 
@@ -22,11 +22,11 @@ public final class LMChatTaggingListViewModel {
     public var debounerTimer: Timer?
     public let debounceTime: TimeInterval
     public var shouldFetchNames: Bool
-    public weak var delegate: LMFeedTaggingListViewModelProtocol?
+    public weak var delegate: LMChatTaggingListViewModelProtocol?
     
     
     // MARK: Init
-    init(delegate: LMFeedTaggingListViewModelProtocol?) {
+    init(delegate: LMChatTaggingListViewModelProtocol?) {
         self.currentPage = 1
         self.pageSize = 10
         self.isFetching = false
@@ -40,7 +40,7 @@ public final class LMChatTaggingListViewModel {
   /*
     public static func createModule(delegate: LMChatTaggedUserFoundProtocol?) -> LMChatTaggingListView {
         let viewController = Components.shared.taggingListView.init()
-        let viewModel = LMFeedTaggingListViewModel(delegate: viewController)
+        let viewModel = LMChatTaggingListViewModel(delegate: viewController)
         
         viewController.viewModel = viewModel
         viewController.delegate = delegate
@@ -78,6 +78,8 @@ public final class LMChatTaggingListViewModel {
     
     private func fetchTaggingList(_ searchString: String) {
         isFetching = true
+        taggedUsers.append(contentsOf: TagUser.getUsers(search: searchString))
+        convertToViewModel()
       /*
         let request = GetTaggingListRequest.builder()
             .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")

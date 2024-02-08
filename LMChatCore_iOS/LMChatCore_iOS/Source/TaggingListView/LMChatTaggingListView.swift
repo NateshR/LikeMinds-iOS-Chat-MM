@@ -100,11 +100,11 @@ extension LMChatTaggingListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if let cell = tableView.dequeueReusableCell(withIdentifier: LMUIComponents.shared.taggingTableViewCell) {
-//            let data = taggingCellsData[indexPath.row]
-//            cell.configure(with: data)
-//            return cell
-//        }
+        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.taggingTableViewCell) {
+            let data = taggingCellsData[indexPath.row]
+            cell.configure(with: data)
+            return cell
+        }
         
         return UITableViewCell()
     }
@@ -125,7 +125,7 @@ extension LMChatTaggingListView: UITableViewDataSource, UITableViewDelegate {
 
 
 // MARK: LMFeedTaggingListViewModelProtocol
-extension LMChatTaggingListView: LMFeedTaggingListViewModelProtocol {
+extension LMChatTaggingListView: LMChatTaggingListViewModelProtocol {
     public func updateList(with users: [LMChatTaggingUserTableCell.ViewModel]) {
         taggingCellsData.removeAll(keepingCapacity: true)
         taggingCellsData.append(contentsOf: users)

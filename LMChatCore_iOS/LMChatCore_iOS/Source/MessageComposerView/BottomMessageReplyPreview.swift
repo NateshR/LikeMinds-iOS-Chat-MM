@@ -13,7 +13,6 @@ open class BottomMessageReplyPreview: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .gray
         return view
     }()
     
@@ -33,18 +32,26 @@ open class BottomMessageReplyPreview: LMView {
     open private(set) lazy var userNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Username"
+        label.font = Appearance.shared.fonts.headingFont1
+        label.textColor = Appearance.shared.colors.textColor
+        label.setContentHuggingPriority(.required, for: .vertical)
         return label
     }()
     
     open private(set) lazy var messageLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Message"
+        label.text = "Message Message "
+        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.numberOfLines = 2
+        label.textColor = Appearance.shared.colors.textColor
         return label
     }()
     
     open private(set) lazy var messageAttachmentImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
+        image.backgroundColor = .green
+        image.cornerRadius(with: 8)
         return image
     }()
     
@@ -65,7 +72,8 @@ open class BottomMessageReplyPreview: LMView {
     open private(set) lazy var verticleUsernameAndMessageContainerStackView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.spacing = 8
+        view.alignment = .top
+        view.spacing = 0
         return view
     }()
     
@@ -76,6 +84,7 @@ open class BottomMessageReplyPreview: LMView {
         containerView.addSubview(sidePannelColorView)
         containerView.addSubview(horizontalReplyStackView)
         horizontalReplyStackView.addArrangedSubview(verticleUsernameAndMessageContainerStackView)
+        horizontalReplyStackView.addArrangedSubview(messageAttachmentImageView)
         horizontalReplyStackView.addArrangedSubview(closeReplyButton)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(userNameLabel)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(messageLabel)
@@ -98,7 +107,11 @@ open class BottomMessageReplyPreview: LMView {
             horizontalReplyStackView.leadingAnchor.constraint(equalTo: sidePannelColorView.leadingAnchor, constant: 10),
             horizontalReplyStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             horizontalReplyStackView.topAnchor.constraint(equalTo: sidePannelColorView.topAnchor),
-            horizontalReplyStackView.bottomAnchor.constraint(equalTo: sidePannelColorView.bottomAnchor)
+            horizontalReplyStackView.bottomAnchor.constraint(equalTo: sidePannelColorView.bottomAnchor),
+            
+            messageAttachmentImageView.widthAnchor.constraint(equalToConstant: 50),
+            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 50)
+            
             ])
     }
 }
