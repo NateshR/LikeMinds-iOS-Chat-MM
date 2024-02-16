@@ -1,5 +1,5 @@
 //
-//  BottomMessageReplyPreview.swift
+//  LMBottomMessageReplyPreview.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 31/01/24.
@@ -9,7 +9,20 @@ import Foundation
 import LMChatUI_iOS
 
 @IBDesignable
-open class BottomMessageReplyPreview: LMView {
+open class LMBottomMessageReplyPreview: LMView {
+    
+    public struct ContentModel {
+        public let username: String
+        public let replyMessage: String
+        public let attachmentsUrls: [String]?
+        
+        public init(username: String, replyMessage: String, attachmentsUrls: [String]?) {
+            self.username = username
+            self.replyMessage = replyMessage
+            self.attachmentsUrls = attachmentsUrls
+        }
+    }
+    
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -113,5 +126,15 @@ open class BottomMessageReplyPreview: LMView {
             messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 50)
             
             ])
+    }
+    
+    public func setData(_ data: ContentModel) {
+        self.userNameLabel.text = data.username
+        self.messageLabel.text = data.replyMessage
+        if let attachmentsUrls = data.attachmentsUrls,
+           let firstUrl = attachmentsUrls.first,
+           let url = URL(string: firstUrl) {
+           messageAttachmentImageView.kf.setImage(with: url)
+        }
     }
 }

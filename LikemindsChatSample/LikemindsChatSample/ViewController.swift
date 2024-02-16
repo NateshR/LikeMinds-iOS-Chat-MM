@@ -7,23 +7,42 @@
 
 import UIKit
 import LMChatCore_iOS
+import LikeMindsChat
 
 class ViewController: UIViewController {
     
-    open private(set) lazy var containerView: BottomMessageComposerView = {
-        let view = BottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .cyan
+//    open private(set) lazy var containerView: LMBottomMessageComposerView = {
+//        let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
+////        view.backgroundColor = .cyan
+//        return view
+//    }()
+    
+//    open private(set) lazy var containerView: LMHomeFeedChatroomView = {
+//        let view = LMHomeFeedChatroomView().translatesAutoresizingMaskIntoConstraints()
+////                view.backgroundColor = .cyan
+//        return view
+//    }()
+    
+//    open private(set) lazy var containerView: LMHomeFeedExploreTabView = {
+//        let view = LMHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
+//        view.backgroundColor = .systemGroupedBackground
+//        return view
+//    }()
+    
+    open private(set) lazy var containerView: LMHomeFeedListView = {
+        let view = LMHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .systemGroupedBackground
         return view
     }()
     
-//    open private(set) lazy var containerView: BottomMessageReplyPreview = {
-//        let view = BottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMBottomMessageReplyPreview = {
+//        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .cyan
 //        return view
 //    }()
     
-//    open private(set) lazy var containerView: BottomMessageLinkPreview = {
-//        let view = BottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMBottomMessageLinkPreview = {
+//        let view = LMBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .cyan
 //        return view
 //    }()
@@ -32,8 +51,12 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
+//        setupViews()
+//        setupLayouts()
+        let homefeedvc = LMParticipantListViewModel.createModule()//LMHomeFeedViewModel.createModule()
+        addChild(homefeedvc)
+        view.addSubview(homefeedvc.view)
+        homefeedvc.didMove(toParent: self)
     }
     // MARK: setupViews
     open func setupViews() {
@@ -46,9 +69,24 @@ class ViewController: UIViewController {
         NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
 //            containerView.heightAnchor.constraint(equalToConstant: 40),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
+    }
+    
+    func syncChatroom() {
+        let request = InitiateUserRequest.builder()
+            .apiKey("5f567ca1-9d74-4a1b-be8b-a7a81fef796f")
+            .uuid("53b0176d-246f-4954-a746-9de96a572cc6")
+            .userName("DEFCON")
+            .isGuest(false)
+            .deviceId(UIDevice.current.identifierForVendor?.uuidString ?? "")
+            .build()
+        LMChatClient.shared.initiateUser(request: request) { response in
+            print(response)
+        }
     }
 
 }

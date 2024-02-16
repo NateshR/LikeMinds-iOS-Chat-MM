@@ -9,7 +9,8 @@ import Foundation
 import LMChatUI_iOS
 
 @IBDesignable
-open class BottomMessageComposerView: LMView {
+open class LMBottomMessageComposerView: LMView {
+    
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -161,7 +162,7 @@ open class BottomMessageComposerView: LMView {
     }
 }
 
-extension BottomMessageComposerView: LMFeedTaggingTextViewProtocol {
+extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
     
     public func mentionStarted(with text: String) {
         taggingListView.fetchUsers(for: text)
@@ -183,7 +184,7 @@ extension BottomMessageComposerView: LMFeedTaggingTextViewProtocol {
     }
 }
 
-extension BottomMessageComposerView: LMChatTaggedUserFoundProtocol {
+extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
     
     public func userSelected(with route: String, and userName: String) {
         inputTextView.addTaggedUser(with: userName, route: route)

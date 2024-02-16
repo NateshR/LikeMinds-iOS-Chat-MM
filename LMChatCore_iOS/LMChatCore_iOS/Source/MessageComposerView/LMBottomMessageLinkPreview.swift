@@ -7,9 +7,25 @@
 
 import Foundation
 import LMChatUI_iOS
+import Kingfisher
 
 @IBDesignable
-open class BottomMessageLinkPreview: LMView {
+open class LMBottomMessageLinkPreview: LMView {
+    
+    public struct ContentModel {
+        public let link: String
+        public let title: String
+        public let description: String
+        public let imageUrl: String?
+        
+        public init(title: String, description: String, link: String, imageUrl: String?) {
+            self.title = title
+            self.description = description
+            self.link = link
+            self.imageUrl = imageUrl
+        }
+    }
+    
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -51,7 +67,7 @@ open class BottomMessageLinkPreview: LMView {
         return label
     }()
     
-    open private(set) lazy var messageAttachmentImageView: LMImageView = {
+    open private(set) lazy var linkPreviewImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
         image.backgroundColor = .green
@@ -85,7 +101,7 @@ open class BottomMessageLinkPreview: LMView {
         super.setupViews()
         addSubview(containerView)
         containerView.addSubview(horizontalReplyStackView)
-        containerView.addSubview(messageAttachmentImageView)
+        containerView.addSubview(linkPreviewImageView)
         horizontalReplyStackView.addArrangedSubview(verticleLinkDetailContainerStackView)
         horizontalReplyStackView.addArrangedSubview(closeReplyButton)
         verticleLinkDetailContainerStackView.addArrangedSubview(linkTitleLabel)
@@ -102,15 +118,27 @@ open class BottomMessageLinkPreview: LMView {
             containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            messageAttachmentImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            messageAttachmentImageView.widthAnchor.constraint(equalToConstant: 50),
-            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 50),
-            messageAttachmentImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            horizontalReplyStackView.leadingAnchor.constraint(equalTo: messageAttachmentImageView.trailingAnchor, constant: 10),
+            linkPreviewImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            linkPreviewImageView.widthAnchor.constraint(equalToConstant: 50),
+            linkPreviewImageView.heightAnchor.constraint(equalToConstant: 50),
+            linkPreviewImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            horizontalReplyStackView.leadingAnchor.constraint(equalTo: linkPreviewImageView.trailingAnchor, constant: 10),
             horizontalReplyStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -10),
             horizontalReplyStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
             horizontalReplyStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
             
         ])
+    }
+    
+    public func setData(_ data: ContentModel) {
+        linkLabel.text = data.link
+        linkTitleLabel.text = data.title
+        linkSubtitleLabel.text = data.description
+        let placeholder = Constants.Images.shared.brokenLink
+        if let imageUrl = data.imageUrl, let url = URL(string: imageUrl) {
+            linkPreviewImageView.kf.setImage(with: url)
+        } else {
+            linkPreviewImageView.image = placeholder
+        }
     }
 }
