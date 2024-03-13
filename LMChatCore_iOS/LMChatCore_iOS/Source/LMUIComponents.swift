@@ -51,4 +51,14 @@ public struct LMUIComponents {
     
     // MARK: Tagging View
     public var taggingTableViewCell: LMChatTaggingUserTableCell.Type = LMChatTaggingUserTableCell.self
+    
+    //MARK: LMHomeFeed
+    public var homeFeedChatroomCell: LMHomeFeedChatroomCell.Type = LMHomeFeedChatroomCell.self
+    public var homeFeedExploreTabCell: LMHomeFeedExploreTabCell.Type = LMHomeFeedExploreTabCell.self
+    
+    // MARK: Participant List View
+    public var participantListCell: LMParticipantCell.Type = LMParticipantCell.self
+    
+    // MARK: Report Screen Components
+    public var reportCollectionCell: LMChatReportViewCell.Type = LMChatReportViewCell.self
 }

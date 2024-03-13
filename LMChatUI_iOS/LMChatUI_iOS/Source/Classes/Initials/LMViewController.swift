@@ -32,6 +32,8 @@ public extension UIViewController {
 public protocol LMBaseViewControllerProtocol: AnyObject {
     func presentAlert(with alert: UIAlertController, animated: Bool)
     func showHideLoaderView(isShow: Bool)
+    func showError(with message: String, isPopVC: Bool)
+    func popViewController(animated: Bool)
 }
 
 /// Base LM View Controller Class with LM Life Cycle Methods
@@ -169,6 +171,9 @@ extension LMViewController: LMViewLifeCycle {
     
     /// This function handles the initialization of styles.
     open func setupAppearance() { }
+    
+    /// This function handles the initialization of observers.
+    open func setupObservers() { }
 }
 
 
@@ -177,5 +182,49 @@ extension LMViewController: LMViewLifeCycle {
 extension LMViewController: LMBaseViewControllerProtocol {
     open func presentAlert(with alert: UIAlertController, animated: Bool = true) {
         present(alert, animated: animated)
+    }
+    
+    open func showError(with message: String, isPopVC: Bool) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            if isPopVC {
+                self?.navigationController?.popViewController(animated: true)
+            }
+        }
+        
+        alert.addAction(action)
+        presentAlert(with: alert)
+    }
+    
+    open func showHideLoaderView(isShow: Bool, backgroundColor: UIColor) {
+        if isShow {
+            view.addSubview(loaderScreen)
+            loaderScreen.backgroundColor = backgroundColor
+            loaderScreen.addSubview(loaderView)
+            
+            NSLayoutConstraint.activate([
+                loaderScreen.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                loaderScreen.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                loaderScreen.topAnchor.constraint(equalTo: view.topAnchor),
+                loaderScreen.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                
+                loaderView.centerXAnchor.constraint(equalTo: loaderScreen.centerXAnchor),
+                loaderView.centerYAnchor.constraint(equalTo: loaderScreen.centerYAnchor),
+                loaderView.heightAnchor.constraint(equalToConstant: 50),
+                loaderView.widthAnchor.constraint(equalTo: loaderView.heightAnchor, multiplier: 1)
+            ])
+            view.bringSubviewToFront(loaderScreen)
+            loaderView.startAnimating()
+        } else if loaderView.isDescendant(of: view) {
+            view.sendSubviewToBack(loaderScreen)
+            loaderView.stopAnimating()
+            loaderView.removeFromSuperview()
+            loaderScreen.removeFromSuperview()
+        }
+    }
+    
+    open func popViewController(animated: Bool) {
+        navigationController?.popViewController(animated: animated)
     }
 }

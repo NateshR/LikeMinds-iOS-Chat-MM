@@ -1,5 +1,5 @@
 //
-//  BottomMessageLinkPreview.swift
+//  LMBottomMessageLinkPreview.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 31/01/24.

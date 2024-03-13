@@ -41,6 +41,8 @@ open class LMCollectionViewCell: UICollectionViewCell {
 // MARK: LMViewLifeCycle
 // Default Implementation is Empty
 extension LMCollectionViewCell: LMViewLifeCycle {
+    open func setupObservers() {}
+    
     open func setupViews() { }
     
     open func setupLayouts() { }

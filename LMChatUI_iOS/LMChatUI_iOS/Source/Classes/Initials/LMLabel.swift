@@ -37,25 +37,25 @@ public class LMLabel: UILabel {
     }
     
     @IBInspectable
-    var paddingLeft: CGFloat {
+    public var paddingLeft: CGFloat {
         set { textEdgeInsets.left = newValue }
         get { return textEdgeInsets.left }
     }
     
     @IBInspectable
-    var paddingRight: CGFloat {
+    public var paddingRight: CGFloat {
         set { textEdgeInsets.right = newValue }
         get { return textEdgeInsets.right }
     }
     
     @IBInspectable
-    var paddingTop: CGFloat {
+    public var paddingTop: CGFloat {
         set { textEdgeInsets.top = newValue }
         get { return textEdgeInsets.top }
     }
     
     @IBInspectable
-    var paddingBottom: CGFloat {
+    public var paddingBottom: CGFloat {
         set { textEdgeInsets.bottom = newValue }
         get { return textEdgeInsets.bottom }
     }

@@ -13,15 +13,16 @@ import Kingfisher
 open class LMHomeFeedExploreTabView: LMView {
     
     public struct ContentModel {
-        
         public let tilesName: String
         public let tilesIcon: String?
         public let unreadCount: Int
+        public let totalCount: Int
         
-        init(tilesName: String, tilesIcon: String?, unreadCount: Int) {
+        init(tilesName: String, tilesIcon: String?, unreadCount: Int, totalCount: Int) {
             self.tilesName = tilesName
             self.tilesIcon = tilesIcon
             self.unreadCount = unreadCount
+            self.totalCount = totalCount
         }
     }
     
@@ -78,7 +79,7 @@ open class LMHomeFeedExploreTabView: LMView {
         image.setWidthConstraint(with: 54)
         image.setHeightConstraint(with: 54)
         image.contentMode = .center
-        image.image = Constants.shared.images.personCircleFillIcon
+        image.image = Constants.shared.images.personCircleFillIcon.withSystemImageConfig(pointSize: 30)
         image.cornerRadius(with: 27)
         return image
     }()
@@ -143,8 +144,11 @@ open class LMHomeFeedExploreTabView: LMView {
     
     public func setData(_ data: ContentModel) {
         exploreTitleLabel.text = data.tilesName
-        chatroomCountBadgeLabel.isHidden = data.unreadCount <= 0
-        chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "+99" : "\(data.unreadCount)"
+        if data.unreadCount <= 0 {
+            chatroomCountBadgeLabel.text = data.totalCount > 99 ? "+99" : "\(data.totalCount)"
+        } else {
+            chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "+99" : "\(data.unreadCount) NEW"
+        }
     }
 }
 

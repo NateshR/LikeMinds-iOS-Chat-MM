@@ -38,4 +38,7 @@ extension LMTableViewHeaderFooterView: LMViewLifeCycle {
     public func setupActions() { }
     
     public func setupAppearance() { }
+    
+    public func setupObservers() {
+    }
 }

@@ -38,7 +38,7 @@ public extension Constants {
         public var shareIcon = loadSystemImage(with: "arrowshape.turn.up.right")
         public var xmarkIcon = loadSystemImage(with: "xmark")
         public var crossIcon = loadSystemImage(with: "xmark.circle")
-        public var ellipsis = loadSystemImage(with: "ellipsis")
+        public var ellipsisIcon = loadSystemImage(with: "ellipsis")
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
         public var pencilIcon = loadSystemImage(with: "pencil")
@@ -57,5 +57,14 @@ public extension Constants {
         public var videoIcon = loadImage(with: "videoIcon")
         public var paperclipIcon = loadImage(with: "paperclip")
         public var createPostIcon = loadImage(with: "createPostIcon")
+        
+        public var lockFillIcon = loadSystemImage(with: "lock.fill")
+        public var annoucementIcon = loadSystemImage(with: "speaker.zzz.fill")
+        public var personCircleFillIcon = loadSystemImage(with: "person.circle.fill")
+        public var muteFillIcon = loadSystemImage(with: "speaker.slash.fill")
+        public var tagFillIcon = loadSystemImage(with: "tag.fill")
+        public var rightArrowIcon = loadSystemImage(with: "chevron.right")
+        public var checkmarkCircleIcon = loadSystemImage(with: "checkmark.circle")
+        public var leftArrowIcon = loadSystemImage(with: "chevron.left")
     }
 }

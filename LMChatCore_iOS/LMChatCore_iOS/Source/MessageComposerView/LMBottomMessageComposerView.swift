@@ -90,13 +90,13 @@ open class LMBottomMessageComposerView: LMView {
         return button
     }()
     
-    open private(set) lazy var replyMessageView: BottomMessageReplyPreview = {
-        let view = BottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var replyMessageView: LMBottomMessageReplyPreview = {
+        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
 
-    open private(set) lazy var linkPreviewView: BottomMessageLinkPreview = {
-        let view = BottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var linkPreviewView: LMBottomMessageLinkPreview = {
+        let view = LMBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     

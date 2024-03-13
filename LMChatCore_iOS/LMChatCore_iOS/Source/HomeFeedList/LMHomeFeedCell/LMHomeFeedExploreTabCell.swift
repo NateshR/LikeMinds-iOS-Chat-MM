@@ -1,8 +1,8 @@
 //
-//  LMParticipantCell.swift
+//  LMHomeFeedExploreTabCell.swift
 //  LMChatCore_iOS
 //
-//  Created by Pushpendra Singh on 16/02/24.
+//  Created by Pushpendra Singh on 12/02/24.
 //
 
 import Foundation
@@ -10,25 +10,21 @@ import Kingfisher
 import LMChatUI_iOS
 
 @IBDesignable
-open class LMParticipantCell: LMTableViewCell {
+open class LMHomeFeedExploreTabCell: LMTableViewCell {
     
     public struct ContentModel {
-        public let name: String
-        public let designationDetail: String?
-        public let profileImageUrl: String?
-        public let customTitle: String?
+        public let totalChatroomsCount: Int?
+        public let unseenChatroomsCount: Int?
         
-        init(name: String, designationDetail: String?, profileImageUrl: String?, customTitle: String?) {
-            self.name = name
-            self.designationDetail = designationDetail
-            self.profileImageUrl = profileImageUrl
-            self.customTitle = customTitle
+        init(totalChatroomsCount: Int?, unseenChatroomsCount: Int?) {
+            self.totalChatroomsCount = totalChatroomsCount
+            self.unseenChatroomsCount = unseenChatroomsCount
         }
     }
     
     // MARK: UI Elements
-    open private(set) lazy var participantView: LMParticipantView = {
-        let view = LMCoreComponents.shared.participantView.init().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var exploreTabView: LMHomeFeedExploreTabView = {
+        let view = LMHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -44,7 +40,7 @@ open class LMParticipantCell: LMTableViewCell {
         super.setupViews()
         
         contentView.addSubview(containerView)
-        containerView.addSubview(participantView)
+        containerView.addSubview(exploreTabView)
         containerView.addSubview(sepratorView)
     }
     
@@ -59,15 +55,15 @@ open class LMParticipantCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            participantView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            participantView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            participantView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            participantView.bottomAnchor.constraint(equalTo: sepratorView.topAnchor),
+            exploreTabView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            exploreTabView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            exploreTabView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            exploreTabView.bottomAnchor.constraint(equalTo: sepratorView.topAnchor),
             
-            sepratorView.leadingAnchor.constraint(equalTo: participantView.profileImageView.leadingAnchor, constant: 5),
+            sepratorView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             sepratorView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             sepratorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            sepratorView.heightAnchor.constraint(equalToConstant: 1)
+            sepratorView.heightAnchor.constraint(equalToConstant: 6)
         ])
     }
     
@@ -75,15 +71,15 @@ open class LMParticipantCell: LMTableViewCell {
     // MARK: setupAppearance
     open override func setupAppearance() {
         super.setupAppearance()
+        
         sepratorView.backgroundColor = Appearance.shared.colors.gray4
         backgroundColor = Appearance.shared.colors.clear
         contentView.backgroundColor = Appearance.shared.colors.clear
     }
     
-    
     // MARK: configure
     open func configure(with data: ContentModel) {
-        participantView.setData(.init(name: data.name, designationDetail: data.designationDetail, profileImageUrl: data.profileImageUrl, customTitle: data.customTitle, isPending: false))
+        exploreTabView.setData(LMHomeFeedExploreTabView.ContentModel(tilesName: "Explore", tilesIcon: "", unreadCount: data.unseenChatroomsCount ?? 0, totalCount: data.totalChatroomsCount ?? 0))
     }
 }
 

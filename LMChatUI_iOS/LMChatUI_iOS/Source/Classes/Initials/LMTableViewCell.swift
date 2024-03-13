@@ -41,6 +41,9 @@ open class LMTableViewCell: UITableViewCell {
 // MARK: LMViewLifeCycle
 // Default Implementation is Empty.
 extension LMTableViewCell: LMViewLifeCycle {
+    open func setupObservers() {
+    }
+    
     open func setupViews() { }
     
     open func setupLayouts() { }

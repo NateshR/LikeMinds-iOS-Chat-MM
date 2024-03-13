@@ -1,5 +1,5 @@
 //
-//  LMFeedTopicCollectionView.swift
+//  LMChatTagCollectionView.swift
 //  likeminds-feed-iOS
 //
 //  Created by Devansh Mohata on 20/12/23.
@@ -8,7 +8,7 @@
 import UIKit
 
 @IBDesignable
-open class LMFeedTopicCollectionView: LMCollectionView {
+open class LMChatTagCollectionView: LMCollectionView {
     open override var contentSize: CGSize {
         didSet {
             invalidateIntrinsicContentSize()

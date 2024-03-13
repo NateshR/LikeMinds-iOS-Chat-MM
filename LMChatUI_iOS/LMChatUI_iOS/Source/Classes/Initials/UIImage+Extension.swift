@@ -20,4 +20,10 @@ extension UIImage {
         }
         return circleImage
     }()
+    
+    public func withSystemImageConfig(pointSize: CGFloat, weight: UIImage.SymbolWeight = .light, scale: UIImage.SymbolScale = .medium) -> UIImage? {
+        let largeConfig = UIImage.SymbolConfiguration(pointSize: pointSize, weight: weight, scale: scale)
+        let image = self.applyingSymbolConfiguration(largeConfig)
+        return image
+    }
 }

@@ -100,6 +100,60 @@ public extension UIView {
         
         return widthConstraint
     }
+    
+    @discardableResult
+    func setHeightConstraint(
+        with anchor: NSLayoutDimension,
+        relatedBy: NSLayoutConstraint.Relation = .equal,
+        priority: UILayoutPriority = .required,
+        multiplier: CGFloat = 1,
+        constant: CGFloat = .zero
+    ) -> NSLayoutConstraint {
+        switch relatedBy {
+        case .lessThanOrEqual:
+            let height = self.heightAnchor.constraint(lessThanOrEqualTo: anchor, multiplier: multiplier, constant: constant)
+            height.priority = priority
+            height.isActive = true
+            return height
+        case .greaterThanOrEqual:
+            let height = self.heightAnchor.constraint(greaterThanOrEqualTo: anchor, multiplier: multiplier, constant: constant)
+            height.priority = priority
+            height.isActive = true
+            return height
+        default:
+            let height = self.heightAnchor.constraint(equalTo: anchor, multiplier: multiplier, constant: constant)
+            height.priority = priority
+            height.isActive = true
+            return height
+        }
+    }
+    
+    @discardableResult
+    func setWidthConstraint(
+        with anchor: NSLayoutDimension,
+        relatedBy: NSLayoutConstraint.Relation = .equal,
+        priority: UILayoutPriority = .required,
+        multiplier: CGFloat = 1,
+        constant: CGFloat = .zero
+    ) -> NSLayoutConstraint {
+        switch relatedBy {
+        case .lessThanOrEqual:
+            let width = self.widthAnchor.constraint(lessThanOrEqualTo: anchor, multiplier: multiplier, constant: constant)
+            width.priority = priority
+            width.isActive = true
+            return width
+        case .greaterThanOrEqual:
+            let width = self.widthAnchor.constraint(greaterThanOrEqualTo: anchor, multiplier: multiplier, constant: constant)
+            width.priority = priority
+            width.isActive = true
+            return width
+        default:
+            let width = self.widthAnchor.constraint(equalTo: anchor, multiplier: multiplier, constant: constant)
+            width.priority = priority
+            width.isActive = true
+            return width
+        }
+    }
 }
 
 @IBDesignable
@@ -133,6 +187,8 @@ open class LMView: UIView {
 // MARK: LMViewLifeCycle
 // Default Implementation is empty
 extension LMView: LMViewLifeCycle {
+    open func setupObservers() {
+    }
     open func setupViews() { }
     
     open func setupLayouts() { }

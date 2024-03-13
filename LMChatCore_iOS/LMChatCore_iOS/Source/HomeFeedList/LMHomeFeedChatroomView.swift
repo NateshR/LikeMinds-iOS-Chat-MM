@@ -13,7 +13,6 @@ import Kingfisher
 open class LMHomeFeedChatroomView: LMView {
     
     public struct ContentModel {
-        
         public let userName: String
         public let lastMessage: String
         public let chatroomName: String
@@ -35,6 +34,7 @@ open class LMHomeFeedChatroomView: LMView {
             self.unreadCount = unreadCount
             self.timestamp = timestamp
         }
+        
     }
     
     // MARK: UI Elements
@@ -65,7 +65,7 @@ open class LMHomeFeedChatroomView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fillProportionally
-        view.spacing = 2
+        view.spacing = 5
         view.addArrangedSubview(chatroomNameContainerStackView)
         view.addArrangedSubview(chatroomMessageContainerStackView)
         return view
@@ -95,7 +95,7 @@ open class LMHomeFeedChatroomView: LMView {
     
     open private(set) lazy var chatroomNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatroom name Chatroom name Chatroom name"
+        label.text = "Chatname"
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.textColor
         label.numberOfLines = 1
@@ -217,6 +217,10 @@ open class LMHomeFeedChatroomView: LMView {
         return label
     }()
     
+    open override func setupAppearance() {
+        super.setupAppearance()
+    }
+    
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
@@ -235,13 +239,13 @@ open class LMHomeFeedChatroomView: LMView {
             
             chatroomContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             chatroomContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            chatroomContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-            chatroomContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
+            chatroomContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
+            chatroomContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
             
         ])
     }
     
-    public func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel) {
         chatroomNameLabel.text = data.chatroomName
         lastMessageLabel.text = data.lastMessage
         muteIconImageView.isHidden = !data.isMuted
