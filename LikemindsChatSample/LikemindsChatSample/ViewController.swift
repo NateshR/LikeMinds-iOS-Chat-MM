@@ -53,10 +53,17 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
 //        setupViews()
 //        setupLayouts()
-        let homefeedvc = LMParticipantListViewModel.createModule()//LMHomeFeedViewModel.createModule()
-        addChild(homefeedvc)
-        view.addSubview(homefeedvc.view)
-        homefeedvc.didMove(toParent: self)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            guard let homefeedvc =
+            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
+//            try? LMHomeFeedViewModel.createModule() else { return }
+//            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
+            self.addChild(homefeedvc)
+            self.view.addSubview(homefeedvc.view)
+            homefeedvc.didMove(toParent: self)
+            
+//            self.navigationItem.leftBarButtonItem = LMBarButtonItem()
+        }
     }
     // MARK: setupViews
     open func setupViews() {
@@ -75,7 +82,8 @@ class ViewController: UIViewController {
             containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
     }
-    
+ 
+/*
     func syncChatroom() {
         let request = InitiateUserRequest.builder()
             .apiKey("5f567ca1-9d74-4a1b-be8b-a7a81fef796f")
@@ -88,6 +96,7 @@ class ViewController: UIViewController {
             print(response)
         }
     }
-
+*/
+    
 }
 
