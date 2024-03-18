@@ -6,3 +6,31 @@
 //
 
 import Foundation
+import LMChatUI_iOS
+import LikeMindsChat
+
+public protocol LMChatAttachmentViewModelProtocol: LMBaseViewControllerProtocol {
+}
+
+//public typealias ReportContentID = (chatroomId: String?, messageId: String?, memberId: String?)
+
+public final class LMChatAttachmentViewModel {
+    
+    weak var delegate: LMChatAttachmentViewModelProtocol?
+    
+    init(delegate: LMChatAttachmentViewModelProtocol?) {
+        self.delegate = delegate
+    }
+    
+    
+    public static func createModule() throws -> LMChatAttachmentViewController {
+        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        
+        let viewcontroller = LMCoreComponents.shared.attachmentMessageScreen.init()
+        let viewmodel = Self.init(delegate: viewcontroller)
+        
+        viewcontroller.viewmodel = viewmodel
+        return viewcontroller
+    }
+    
+}

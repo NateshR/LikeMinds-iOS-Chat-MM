@@ -12,7 +12,6 @@ public protocol LMChatReportViewModelProtocol: LMBaseViewControllerProtocol {
     func updateView(with tags: [(name: String, tagID: Int)], selectedTag: Int, showTextView: Bool)
 }
 
-@IBDesignable
 open class LMChatReportViewController: LMViewController {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
