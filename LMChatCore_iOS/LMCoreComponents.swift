@@ -55,6 +55,9 @@ public struct LMCoreComponents {
     public var participantView: LMParticipantView.Type = LMParticipantView.self
     
     // MARK: Attachment message screen
-    
     public var attachmentMessageScreen: LMChatAttachmentViewController.Type = LMChatAttachmentViewController.self
+    
+    public var messageListScreen: LMMessageListViewController.Type = LMMessageListViewController.self
+    public var messageContentView: LMChatMessageContentView.Type = LMChatMessageContentView.self
+    public var messageBubbleView: LMChatMessageBubbleView.Type = LMChatMessageBubbleView.self
 }

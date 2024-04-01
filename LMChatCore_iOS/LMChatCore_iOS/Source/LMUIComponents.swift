@@ -61,4 +61,6 @@ public struct LMUIComponents {
     
     // MARK: Report Screen Components
     public var reportCollectionCell: LMChatReportViewCell.Type = LMChatReportViewCell.self
+    
+    public var chatMessageCell: LMChatMessageCell.Type = LMChatMessageCell.self
 }
