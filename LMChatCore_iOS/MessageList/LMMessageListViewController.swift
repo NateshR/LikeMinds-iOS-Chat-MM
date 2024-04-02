@@ -55,7 +55,7 @@ open class LMMessageListViewController: LMViewController {
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            bottomMessageBoxView.heightAnchor.constraint(equalToConstant: 44),
+//            bottomMessageBoxView.heightAnchor.constraint(equalToConstant: 44),
             bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
         ])
     }

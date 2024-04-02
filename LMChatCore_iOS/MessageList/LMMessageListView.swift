@@ -138,6 +138,21 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
     }
+ /*
+    public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            let saveAction = UIAction(title: NSLocalizedString("Save", comment: ""),
+                                      image: UIImage(systemName: "arrow.down.square")) { action in
+            }
+            
+            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
+                                        image: UIImage(systemName: "trash"),
+                                        attributes: .destructive) { action in
+            }
+            return UIMenu(title: "", children: [saveAction, deleteAction])
+        }
+    }
+    */
 }
 
 

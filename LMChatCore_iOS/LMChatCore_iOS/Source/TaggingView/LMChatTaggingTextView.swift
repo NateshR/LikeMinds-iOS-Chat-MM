@@ -162,7 +162,7 @@ open class LMChatTaggingTextView: LMTextView {
 // MARK: UITextViewDelegate
 extension LMChatTaggingTextView: UITextViewDelegate {
     open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        if text.isEmpty {
+      /*  if text.isEmpty {
             if isMentioning {
                 if range.length <= characters.count {
                     characters.removeLast(range.length)
@@ -197,7 +197,8 @@ extension LMChatTaggingTextView: UITextViewDelegate {
             mentionDelegate?.contentHeightChanged()
             return false
         }
-        
+        */
+        mentionDelegate?.contentHeightChanged()
         return true
     }
     

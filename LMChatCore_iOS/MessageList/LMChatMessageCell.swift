@@ -43,9 +43,9 @@ open class LMChatMessageCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            chatroomView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            chatroomView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
+            chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             chatroomView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
     }
