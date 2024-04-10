@@ -13,18 +13,16 @@ import Kingfisher
 @IBDesignable
 open class LMChatMessageContentView: LMView {
     
-    public struct ContentModel {
-        public let message: Conversation?
-        public let isIncommingMessage: Bool
+//    public struct ContentModel {
+//        public let message: Conversation?
+//        public let isIncommingMessage: Bool
+//        
+//        init(message: Conversation?, isIncommingMessage: Bool) {
+//            self.message = message
+//            self.isIncommingMessage = isIncommingMessage
+//        }
+//    }
         
-        init(message: Conversation?, isIncommingMessage: Bool) {
-            self.message = message
-            self.isIncommingMessage = isIncommingMessage
-        }
-    }
-    
-    var isIncommingMessage: Bool = true
-    
     open private(set) lazy var bubbleView: LMChatMessageBubbleView = {
         return LMCoreComponents.shared
             .messageBubbleView
@@ -47,18 +45,39 @@ open class LMChatMessageContentView: LMView {
         return image
     }()
     
+    open private(set) lazy var reactionsView: LMChatMessageReactionsView = {
+        let view = LMChatMessageReactionsView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
+    open private(set) lazy var replyMessageView: LMBottomMessageReplyPreview = {
+        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
+    open private(set) lazy var galleryView: LMChatMessageGallaryView = {
+        let image = LMChatMessageGallaryView().translatesAutoresizingMaskIntoConstraints()
+        image.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: image, attribute: .width, relatedBy: .lessThanOrEqual, toItem: image, attribute: .height, multiplier: 1.4, constant: 0)
+        image.addConstraint(aspectRatioConstraints)
+//        image.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        image.backgroundColor = .clear
+        image.cornerRadius(with: 12)
+        return image
+    }()
+    
     var textLabel: LMTextView = {
         let label =  LMTextView()
             .translatesAutoresizingMaskIntoConstraints()
 //        label.numberOfLines = 0
         label.isScrollEnabled = false
-        label.font = UIFont.systemFont(ofSize: 18)
+        label.font = UIFont.systemFont(ofSize: 16)
         label.backgroundColor = .clear
-        label.textColor = .white
+        label.textColor = .black
         label.textAlignment = .left
         label.isEditable = false
-        label.textContainerInset = .zero
-        label.text = "Test viaslf alf asldjl asj dajs ldffj lasdj flajlsdf aldj f alsdjf las fjdlasd"
+        label.textContainerInset = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
+        label.text = ""
         return label
     }()
     
@@ -66,25 +85,31 @@ open class LMChatMessageContentView: LMView {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
         label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 11)
+        label.textColor = .black
         label.text = "12:20 PM"
         return label
     }()
+    
+    var bubbleLeadingConstraint: NSLayoutConstraint?
+    var bubbleTrailingConstraint: NSLayoutConstraint?
 
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
-        isIncommingMessage = ((Int(arc4random_uniform(6)) + 1)/2) == 0
-        let bubble = createBubbleView(forIncoming: isIncommingMessage)
+        let bubble = createBubbleView()
         bubbleView = bubble
         addSubview(bubble)
         addSubview(chatProfileImageContainerStackView)
+        addSubview(reactionsView)
+        bubble.addArrangeSubview(replyMessageView)
+        bubble.addArrangeSubview(galleryView)
         bubble.addArrangeSubview(textLabel)
         bubble.addSubview(timestampLabel)
-        let interaction = UIContextMenuInteraction(delegate: self)
-        bubble.addInteraction(interaction)
+//        let interaction = UIContextMenuInteraction(delegate: self)
+//        bubble.addInteraction(interaction)
+        backgroundColor = .clear
     }
     
     // MARK: setupLayouts
@@ -92,37 +117,88 @@ open class LMChatMessageContentView: LMView {
         super.setupLayouts()
         
         NSLayoutConstraint.activate([
+            reactionsView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            reactionsView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
+            reactionsView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
             chatProfileImageContainerStackView.topAnchor.constraint(equalTo: topAnchor),
-            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionsView.topAnchor),
             chatProfileImageContainerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             bubbleView.topAnchor.constraint(equalTo: topAnchor),
-            bubbleView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5),
+            bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
+            bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -5),
             timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -5),
             timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -15),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
         
-        if !isIncommingMessage {
-            chatProfileImageView.isHidden = true
-            bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40).isActive = true
-            bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        } else {
-            chatProfileImageView.isHidden = false
-            bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -40).isActive = true
-            bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor).isActive = true
-            
-        }
+         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
+         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        
     }
     
-    open func createBubbleView(forIncoming: Bool) -> LMChatMessageBubbleView {
+    open func createBubbleView() -> LMChatMessageBubbleView {
         let bubble = LMCoreComponents.shared
             .messageBubbleView
             .init()
             .translatesAutoresizingMaskIntoConstraints()
-        bubble.isIncoming = forIncoming
+        bubble.backgroundColor = Appearance.shared.colors.clear
         return bubble
     }
     
+    open func setDataView(_ data: LMChatMessageCell.ContentModel) {
+        self.textLabel.text = data.message?.message
+        self.timestampLabel.text = data.message?.createdTime
+        let isIncoming = data.message?.isIncoming ?? true
+        bubbleView.bubbleFor(isIncoming)
+        if !isIncoming {
+            chatProfileImageView.isHidden = true
+            bubbleLeadingConstraint?.constant = 40
+            bubbleTrailingConstraint?.constant = 0
+        } else {
+            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""))
+            chatProfileImageView.isHidden = false
+            bubbleLeadingConstraint?.constant = 00
+            bubbleTrailingConstraint?.constant = -40
+        }
+        bubbleLeadingConstraint?.isActive = true
+        bubbleTrailingConstraint?.isActive = true
+        
+        print("Image attachment: \(data.message?.attachments?.count ?? 0)")
+        replyView(data)
+        attachmentView(data)
+        reactionsView(data)
+    }
+    
+    
+    func attachmentView(_ data: LMChatMessageCell.ContentModel) {
+        if let attachments = data.message?.attachments, attachments.count > 0 {
+            galleryView.isHidden = false
+        } else {
+            galleryView.isHidden = true
+        }
+    }
+    
+    func replyView(_ data: LMChatMessageCell.ContentModel) {
+        if let repliedMessage = data.message?.replied?.first {
+            replyMessageView.isHidden = false
+        } else {
+            replyMessageView.isHidden = true
+        }
+    }
+    
+    func reactionsView(_ data: LMChatMessageCell.ContentModel) {
+        if let reactions = data.message?.reactions, reactions.count > 0 {
+            reactionsView.isHidden = false
+        } else {
+            reactionsView.isHidden = true
+        }
+    }
+    
+    func prepareToResuse() {
+        reactionsView.isHidden = true
+        galleryView.isHidden = true
+        replyMessageView.isHidden = true
+    }
 }
 
 extension LMChatMessageContentView: UIContextMenuInteractionDelegate {
@@ -131,8 +207,16 @@ extension LMChatMessageContentView: UIContextMenuInteractionDelegate {
         return UIContextMenuConfiguration(identifier: nil,
                                           previewProvider: nil,
                                           actionProvider: { suggestedActions in
-            let saveAction = UIAction(title: NSLocalizedString("Save", comment: ""),
-                                      image: UIImage(systemName: "arrow.down.square")) { action in
+            let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
+                                       image: UIImage(systemName: "arrow.down.square")) { action in
+            }
+            
+            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                      image: UIImage(systemName: "pencil")) { action in
+            }
+            
+            let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
+                                      image: UIImage(systemName: "doc.on.doc")) { action in
             }
             
             let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
@@ -140,7 +224,7 @@ extension LMChatMessageContentView: UIContextMenuInteractionDelegate {
                                         attributes: .destructive) { action in
             }
             
-            return UIMenu(title: "Select Action", children: [saveAction, deleteAction])
+            return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
         })
     }
 }

@@ -41,6 +41,7 @@ public extension Constants {
         public var ellipsisIcon = loadSystemImage(with: "ellipsis")
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
+        public var micIcon = loadSystemImage(with: "mic")
         public var pencilIcon = loadSystemImage(with: "pencil")
         public var downArrow = loadSystemImage(with: "arrow.down")
         public var menuIcon = loadSystemImage(with: "line.3.horizontal")
@@ -66,5 +67,7 @@ public extension Constants {
         public var rightArrowIcon = loadSystemImage(with: "chevron.right")
         public var checkmarkCircleIcon = loadSystemImage(with: "checkmark.circle")
         public var leftArrowIcon = loadSystemImage(with: "chevron.left")
+        
+        public var cameraIcon = loadSystemImage(with: "camera")
     }
 }

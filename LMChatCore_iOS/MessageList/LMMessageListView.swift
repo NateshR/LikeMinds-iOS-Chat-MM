@@ -17,12 +17,31 @@ public protocol LMMessageListViewDelegate: AnyObject {
 open class LMMessageListView: LMView {
     
     public struct ContentModel {
-        public let data: [Any]
+        public let data: [Message]
         public let section: String
         
-        init(data: [Any], section: String) {
+        init(data: [Message], section: String) {
             self.data = data
             self.section = section
+        }
+        
+        public struct Message {
+            public let message: String?
+            public let timestamp: Int?
+            public let reactions: [Reaction]?
+            public let attachments: [String]?
+            public let replied: [Message]?
+            public let isDeleted: Bool?
+            public let createdBy: String?
+            public let createdByImageUrl: String?
+            public let isIncoming: Bool?
+            public let messageType: Int
+            public let createdTime: String?
+        }
+        
+        public struct Reaction {
+            public let memberUUID: String
+            public let reaction: String
         }
     }
     
@@ -35,6 +54,7 @@ open class LMMessageListView: LMView {
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.chatMessageCell)
+        table.register(LMUIComponents.shared.chatNotificationCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -89,6 +109,18 @@ open class LMMessageListView: LMView {
     open func reloadData() {
         tableSections.sort(by: {$0.section < $1.section})
         tableView.reloadData()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            let indexPath = IndexPath(
+                row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
+                section: self.tableView.numberOfSections - 1)
+            if hasRowAtIndexPath(indexPath: indexPath) {
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+            }
+        }
+        
+        func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
+            return indexPath.section < tableView.numberOfSections && indexPath.row < tableView.numberOfRows(inSection: indexPath.section)
+        }
     }
     
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {
@@ -116,19 +148,28 @@ open class LMMessageListView: LMView {
 extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     
-//    open func numberOfSections(in tableView: UITableView) -> Int {
-//        tableSections.count
-//    }
+    open func numberOfSections(in tableView: UITableView) -> Int {
+        tableSections.count
+    }
     
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        20//tableSections[section].data.count
+        tableSections[section].data.count
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-            return cell
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        switch item.messageType {
+        case 0:
+            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
+                cell.configure(with: .init(message: item))
+                return cell
+            }
+        default:
+            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
+                cell.configure(with: .init(message: item))
+                return cell
+            }
         }
-        
         return UITableViewCell()
     }
     
@@ -138,21 +179,28 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
     }
- /*
+
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let saveAction = UIAction(title: NSLocalizedString("Save", comment: ""),
+            let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
                                       image: UIImage(systemName: "arrow.down.square")) { action in
+            }
+            
+            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                       image: UIImage(systemName: "pencil")) { action in
+            }
+            
+            let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
+                                        image: UIImage(systemName: "doc.on.doc")) { action in
             }
             
             let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
                                         image: UIImage(systemName: "trash"),
                                         attributes: .destructive) { action in
             }
-            return UIMenu(title: "", children: [saveAction, deleteAction])
+            return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
         }
     }
-    */
 }
 
 

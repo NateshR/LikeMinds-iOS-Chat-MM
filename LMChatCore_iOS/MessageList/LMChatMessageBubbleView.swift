@@ -13,61 +13,33 @@ open class LMChatMessageBubbleView: LMView {
     
     var isIncoming = true
     
-    var incomingColor = UIColor(red: 0.68, green: 0.72, blue: 0.8, alpha: 1)
-    var outgoingColor = UIColor(red: 0.09, green: 0.54, blue: 1, alpha: 1)
+    let receivedBubble = UIImage(named: "bubble_received", in: LMChatCoreBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+        .withRenderingMode(.alwaysTemplate)
+    
+    let sentBubble = UIImage(named: "bubble_sent", in: LMChatCoreBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+        .withRenderingMode(.alwaysTemplate)
+    
+    var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+    var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 1)
+    var containerViewLeadingConstraint: NSLayoutConstraint?
+    var containerViewTrailingConstraint: NSLayoutConstraint?
     
     open private(set) lazy var contentContainer: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.alignment = .center
+        view.alignment = .fill
         view.distribution = .fill
         view.spacing = 2
+        view.backgroundColor = Appearance.shared.colors.clear
         return view
     }()
     
-    open override func draw(_ rect: CGRect) {
-        let width = rect.width
-        let height = rect.height
-        
-        let bezierPath = UIBezierPath()
-        
-        if isIncoming {
-            bezierPath.move(to: CGPoint(x: 22, y: height))
-            bezierPath.addLine(to: CGPoint(x: width - 17, y: height))
-            bezierPath.addCurve(to: CGPoint(x: width, y: height - 17), controlPoint1: CGPoint(x: width - 7.61, y: height), controlPoint2: CGPoint(x: width, y: height - 7.61))
-            bezierPath.addLine(to: CGPoint(x: width, y: 17))
-            bezierPath.addCurve(to: CGPoint(x: width - 17, y: 0), controlPoint1: CGPoint(x: width, y: 7.61), controlPoint2: CGPoint(x: width - 7.61, y: 0))
-            bezierPath.addLine(to: CGPoint(x: 21, y: 0))
-            bezierPath.addCurve(to: CGPoint(x: 4, y: 17), controlPoint1: CGPoint(x: 11.61, y: 0), controlPoint2: CGPoint(x: 4, y: 7.61))
-            bezierPath.addLine(to: CGPoint(x: 4, y: height - 11))
-            bezierPath.addCurve(to: CGPoint(x: 0, y: height), controlPoint1: CGPoint(x: 4, y: height - 1), controlPoint2: CGPoint(x: 0, y: height))
-            bezierPath.addLine(to: CGPoint(x: -0.05, y: height - 0.01))
-            bezierPath.addCurve(to: CGPoint(x: 11.04, y: height - 4.04), controlPoint1: CGPoint(x: 4.07, y: height + 0.43), controlPoint2: CGPoint(x: 8.16, y: height - 1.06))
-            bezierPath.addCurve(to: CGPoint(x: 22, y: height), controlPoint1: CGPoint(x: 16, y: height), controlPoint2: CGPoint(x: 19, y: height))
-            
-            incomingColor.setFill()
-            
-        } else {
-            bezierPath.move(to: CGPoint(x: width - 22, y: height))
-            bezierPath.addLine(to: CGPoint(x: 17, y: height))
-            bezierPath.addCurve(to: CGPoint(x: 0, y: height - 17), controlPoint1: CGPoint(x: 7.61, y: height), controlPoint2: CGPoint(x: 0, y: height - 7.61))
-            bezierPath.addLine(to: CGPoint(x: 0, y: 17))
-            bezierPath.addCurve(to: CGPoint(x: 17, y: 0), controlPoint1: CGPoint(x: 0, y: 7.61), controlPoint2: CGPoint(x: 7.61, y: 0))
-            bezierPath.addLine(to: CGPoint(x: width - 21, y: 0))
-            bezierPath.addCurve(to: CGPoint(x: width - 4, y: 17), controlPoint1: CGPoint(x: width - 11.61, y: 0), controlPoint2: CGPoint(x: width - 4, y: 7.61))
-            bezierPath.addLine(to: CGPoint(x: width - 4, y: height - 11))
-            bezierPath.addCurve(to: CGPoint(x: width, y: height), controlPoint1: CGPoint(x: width - 4, y: height - 1), controlPoint2: CGPoint(x: width, y: height))
-            bezierPath.addLine(to: CGPoint(x: width + 0.05, y: height - 0.01))
-            bezierPath.addCurve(to: CGPoint(x: width - 11.04, y: height - 4.04), controlPoint1: CGPoint(x: width - 4.07, y: height + 0.43), controlPoint2: CGPoint(x: width - 8.16, y: height - 1.06))
-            bezierPath.addCurve(to: CGPoint(x: width - 22, y: height), controlPoint1: CGPoint(x: width - 16, y: height), controlPoint2: CGPoint(x: width - 19, y: height))
-            
-            outgoingColor.setFill()
-        }
-        
-        bezierPath.close()
-        bezierPath.fill()
-    }
-    
+    open private(set) var imageView: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+//        image.clipsToBounds = true
+        image.backgroundColor = Appearance.shared.colors.clear
+        return image
+    }()
     
     /// A type describing the content of this view.
     public struct ContentModel {
@@ -93,7 +65,7 @@ open class LMChatMessageBubbleView: LMView {
 //        layer.borderColor = Appearance.Colors.shared.gray4.cgColor//appearance.colorPalette.border3.cgColor
 //        layer.cornerRadius = 18
 //        layer.borderWidth = 1
-        backgroundColor = .white
+        backgroundColor = Appearance.shared.colors.clear
     }
     
     // MARK: setupViews
@@ -113,18 +85,52 @@ open class LMChatMessageBubbleView: LMView {
     }
     
     private func addContentContainerView() {
+        addSubview(imageView)
         addSubview(contentContainer)
-        let leading: CGFloat = isIncoming ? 15 : 10
+        let leading: CGFloat = isIncoming ? 4 : 8
+        let trailing: CGFloat = isIncoming ? 8 : 4
+        containerViewLeadingConstraint = contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading)
+        containerViewTrailingConstraint = contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -trailing)
         NSLayoutConstraint.activate([
-            contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading),
-            contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15),
-            contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            imageView.topAnchor.constraint(equalTo: topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 4),
             contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
         ])
+        
+        containerViewLeadingConstraint?.isActive = true
+        containerViewTrailingConstraint?.isActive = true
     }
     
     open func addArrangeSubview(_ view: UIView) {
+//        let leading: CGFloat = isIncoming ? 4 : 8
+//        let trailing: CGFloat = isIncoming ? 8 : 4
+//        
+//        containerViewLeadingConstraint?.constant = leading
+//        containerViewTrailingConstraint?.constant = -trailing
+        
         contentContainer.addArrangedSubview(view)
+    }
+    
+    func bubbleFor(_ isInComing: Bool) {
+        self.isIncoming = isInComing
+        containerViewLeadingConstraint?.isActive = false
+        containerViewTrailingConstraint?.isActive = false
+        if isInComing {
+            imageView.image = receivedBubble
+            imageView.tintColor = incomingColor
+            containerViewLeadingConstraint?.constant = 8
+            containerViewTrailingConstraint?.constant = -2
+        } else {
+            imageView.image = sentBubble
+            imageView.tintColor = outgoingColor
+            containerViewLeadingConstraint?.constant = 2
+            containerViewTrailingConstraint?.constant = -8
+        }
+        containerViewLeadingConstraint?.isActive = true
+        containerViewTrailingConstraint?.isActive = true
     }
     
 }

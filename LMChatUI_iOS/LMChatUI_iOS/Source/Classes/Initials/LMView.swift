@@ -52,6 +52,11 @@ public extension UIView {
         ])
     }
     
+    func addSubviewWithDefaultConstraints(_ subView: UIView) {
+        addSubview(subView)
+        pinSubView(subView: subView)
+    }
+    
     func addConstraint(top: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        bottom: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        leading: (anchor: NSLayoutXAxisAnchor, padding: CGFloat)? = nil,

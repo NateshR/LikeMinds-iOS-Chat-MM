@@ -8,6 +8,8 @@
 import Foundation
 import UIKit
 
+let LMChatCoreBundle = Bundle(for: LMMessageListViewController.self)
+
 public struct LMCoreComponents {
     public static var shared = Self()
    /*

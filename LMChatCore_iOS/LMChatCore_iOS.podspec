@@ -22,5 +22,6 @@ Pod::Spec.new do |spec|
   spec.swift_version = '5.0'
   spec.requires_arc = true
   spec.dependency 'LMChatUI_iOS'
+  spec.dependency 'Giphy'
   spec.dependency 'LikeMindsChat'
 end

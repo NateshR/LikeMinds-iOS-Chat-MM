@@ -14,22 +14,26 @@ import LikeMindsChat
 open class LMChatMessageCell: LMTableViewCell {
     
     public struct ContentModel {
-        public let chatroom: Conversation?
+        public let message: LMMessageListView.ContentModel.Message?
     }
     
     // MARK: UI Elements
-    open private(set) lazy var chatroomView: LMChatMessageContentView = {
+    open private(set) lazy var chatMessageView: LMChatMessageContentView = {
         let view = LMCoreComponents.shared.messageContentView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
     
+    open override func prepareForReuse() {
+        super.prepareForReuse()
+        chatMessageView.prepareToResuse()
+    }
+    
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
-        
         contentView.addSubview(containerView)
-        containerView.addSubview(chatroomView)
+        containerView.addSubview(chatMessageView)
     }
     
     
@@ -43,10 +47,10 @@ open class LMChatMessageCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            chatroomView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
-            chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            chatroomView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+            chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
+            chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            chatMessageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
     }
     
@@ -56,36 +60,14 @@ open class LMChatMessageCell: LMTableViewCell {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         contentView.backgroundColor = Appearance.shared.colors.clear
+        chatMessageView.backgroundColor = Appearance.shared.colors.clear
+        containerView.backgroundColor = Appearance.shared.colors.backgroundColor
     }
     
     
     // MARK: configure
     open func configure(with data: ContentModel) {
-        
-    }
-    
-    func timestampConverted(createdAtInEpoch: Int) -> String? {
-        guard createdAtInEpoch > .zero else { return nil }
-        var epochTime = Double(createdAtInEpoch)
-        
-        if epochTime > Date().timeIntervalSince1970 {
-            epochTime = epochTime / 1000
-        }
-        
-        let date = Date(timeIntervalSince1970: epochTime)
-        let dateFormatter = DateFormatter()
-        
-        if Calendar.current.isDateInToday(date) {
-            dateFormatter.dateFormat = "hh:mm a"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
-            return dateFormatter.string(from: date)
-        } else if Calendar.current.isDateInYesterday(date) {
-            return "Yesterday"
-        } else {
-            dateFormatter.dateFormat = "dd/MM/yy"
-            return dateFormatter.string(from: date)
-        }
+        chatMessageView.setDataView(data)
     }
 }
 

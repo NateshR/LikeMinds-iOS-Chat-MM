@@ -8,8 +8,19 @@
 import Foundation
 import LMChatUI_iOS
 
+public protocol LMBottomMessageComposerDelegate: AnyObject {
+    func composeMessage(message: String)
+    func composeAttachment()
+    func composeAudio()
+    func composeGif()
+}
+
 @IBDesignable
 open class LMBottomMessageComposerView: LMView {
+    
+    open weak var delegate: LMBottomMessageComposerDelegate?
+    let audioButtonTag = 10
+    let messageButtonTag = 11
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
@@ -72,14 +83,16 @@ open class LMBottomMessageComposerView: LMView {
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
 //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.addTarget(self, action: #selector(gifButtonClicked), for: .touchUpInside)
         return button
     }()
     
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.paperplaneIcon, for: .normal)
+        button.setImage(Constants.shared.images.micIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
 //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.addTarget(self, action: #selector(sendMessageButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -87,6 +100,7 @@ open class LMBottomMessageComposerView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.plusIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.addTarget(self, action: #selector(attachmentButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -160,6 +174,33 @@ open class LMBottomMessageComposerView: LMView {
         inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
         taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
     }
+    
+    @objc func sendMessageButtonClicked(_ sender: UIButton) {
+        if sender.tag == audioButtonTag {
+            audioButtonClicked(sender)
+            return
+        }
+        guard let message = inputTextView.text,
+                !message.isEmpty,
+              message != inputTextView.placeHolderText else {
+            return
+        }
+        inputTextView.text = ""
+        contentHeightChanged()
+        delegate?.composeMessage(message: message)
+    }
+    
+    @objc func attachmentButtonClicked(_ sender: UIButton) {
+        delegate?.composeAttachment()
+    }
+    
+    @objc func gifButtonClicked(_ sender: UIButton) {
+        delegate?.composeGif()
+    }
+    
+    @objc func audioButtonClicked(_ sender: UIButton) {
+        delegate?.composeAudio()
+    }
 }
 
 extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
@@ -181,6 +222,13 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
 //        sendButton.isEnabled = !inputTextView.attributedText.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines) != inputTextView.placeHolderText
+        if inputTextView.text.isEmpty || inputTextView.placeHolderText == inputTextView.text {
+            sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
+            sendButton.tag = audioButtonTag
+        } else {
+            sendButton.tag = messageButtonTag
+            sendButton.setImage(Constants.shared.images.paperplaneFilled, for: .normal)
+        }
     }
 }
 
