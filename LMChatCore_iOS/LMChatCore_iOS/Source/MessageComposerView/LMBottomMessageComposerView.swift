@@ -13,6 +13,7 @@ public protocol LMBottomMessageComposerDelegate: AnyObject {
     func composeAttachment()
     func composeAudio()
     func composeGif()
+    func linkDetected(_ link: String)
 }
 
 @IBDesignable
@@ -78,6 +79,8 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) var inputTextViewHeightConstraint: NSLayoutConstraint?
     open private(set) var taggingViewHeightConstraints: NSLayoutConstraint?
     
+    var linkDetectorTimer: Timer?
+    
     open private(set) lazy var gifButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
@@ -139,9 +142,12 @@ open class LMBottomMessageComposerView: LMView {
         horizontalStackView.addArrangedSubview(inputTextContainerView)
         horizontalStackView.addArrangedSubview(sendButton)
         
-//        addOnVerticleStackView.addArrangedSubview(linkPreviewView)
-//        addOnVerticleStackView.addArrangedSubview(replyMessageView)
+        addOnVerticleStackView.addArrangedSubview(linkPreviewView)
+        addOnVerticleStackView.addArrangedSubview(replyMessageView)
         addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
+        
+        linkPreviewView.isHidden = true
+        replyMessageView.isHidden = true
     }
     
     // MARK: setupLayouts
@@ -180,8 +186,8 @@ open class LMBottomMessageComposerView: LMView {
             audioButtonClicked(sender)
             return
         }
-        guard let message = inputTextView.text,
-                !message.isEmpty,
+        let message = inputTextView.getText()
+        guard !message.isEmpty,
               message != inputTextView.placeHolderText else {
             return
         }
@@ -221,13 +227,27 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
-//        sendButton.isEnabled = !inputTextView.attributedText.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines) != inputTextView.placeHolderText
+        
         if inputTextView.text.isEmpty || inputTextView.placeHolderText == inputTextView.text {
             sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
             sendButton.tag = audioButtonTag
         } else {
             sendButton.tag = messageButtonTag
             sendButton.setImage(Constants.shared.images.paperplaneFilled, for: .normal)
+        }
+    }
+    
+    public func textViewDidChange(_ textView: UITextView) {
+        // Find first url link here and ignore email
+        let links = textView.text.detectedLinks
+        if !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+            linkDetectorTimer?.invalidate()
+            linkDetectorTimer = Timer(timeInterval: 0.5, repeats: false, block: {[weak self] timer in
+                print("detected first link: \(link)")
+                self?.delegate?.linkDetected(link)
+            })
+        } else {
+            linkPreviewView.isHidden = true
         }
     }
 }

@@ -55,7 +55,7 @@ open class LMChatNotificationCell: LMTableViewCell {
             infoLabel.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
             infoLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16),
             infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -5)
         ])
     }
     
@@ -70,8 +70,8 @@ open class LMChatNotificationCell: LMTableViewCell {
     
     
     // MARK: configure
-    open func configure(with data: ContentModel) {
-        infoLabel.text = data.message?.message
+    open func setData(with data: ContentModel) {
+        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines))
     }
     
     func timestampConverted(createdAtInEpoch: Int) -> String? {

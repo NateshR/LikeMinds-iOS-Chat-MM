@@ -71,11 +71,90 @@ open class LMViewController: UIViewController {
         super.viewDidLoad()
         setupActions()
         setupNavigationBar()
+        initializeHideKeyboard()
     }
     
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         setupAppearance()
+    }
+    
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupKeyboardNotifications()
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        removeKeyboardNotifications()
+    }
+    
+    open func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+    
+    open func removeKeyboardNotifications() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    open func initializeHideKeyboard(){
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissMyKeyboard))
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc open func dismissMyKeyboard(){
+        view.endEditing(true)
+    }
+    
+    @objc
+    open func keyboardWillShow(_ sender: Notification) {
+        guard let userInfo = sender.userInfo else {
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc
+    open func keyboardWillHide(_ sender: Notification) {
+        self.view.layoutIfNeeded()
+    }
+    
+    open func setBackButtonWithAction() {
+        let backImage = Constants.shared.images.leftArrowIcon
+        self.navigationController?.navigationBar.backIndicatorImage = backImage
+        self.navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
+        let backItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
+        backItem.tintColor = Appearance.shared.colors.linkColor
+        self.navigationItem.backBarButtonItem = backItem
+    }
+    
+    open func showErrorAlert(_ title: String? = "Error", message: String?) {
+        guard let message = message else { return }
+//        self.presentAlert(title: title, message: message)
+    }
+    
+    @objc open func errorMessage(notification: Notification) {
+        if let errorMessage = notification.object as? String {
+            self.showErrorAlert(message: errorMessage)
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     open func setupNavigationBar() {

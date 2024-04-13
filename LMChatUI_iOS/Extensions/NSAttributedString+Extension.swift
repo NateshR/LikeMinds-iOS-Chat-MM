@@ -1,8 +1,8 @@
 //
-//  NSAttributedString.Key+Extension.swift
-//  LMFramework
+//  NSAttributedString+Extension.swift
+//  LMChatUI_iOS
 //
-//  Created by Devansh Mohata on 04/12/23.
+//  Created by Pushpendra Singh on 11/04/24.
 //
 
 import Foundation
@@ -21,6 +21,17 @@ public extension NSAttributedString {
         } else {
             return nil
         }
+    }
+    
+    func containsAttribute(_ attribute: NSAttributedString.Key, in range: NSRange) -> Bool {
+        var isContains: Bool = false
+        self.enumerateAttributes(in: range) { attr, range, _ in
+            if attr.contains(where: { $0.key == attribute }) {
+                isContains = true
+            }
+        }
+        
+        return isContains
     }
 }
 

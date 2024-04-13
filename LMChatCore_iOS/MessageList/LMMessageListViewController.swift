@@ -9,7 +9,11 @@ import Foundation
 import LMChatUI_iOS
 
 protocol LMMessageListControllerDelegate: AnyObject {
-    func postMessage(message: String)
+    func postMessage(message: String,
+                     filesUrls: [AttachmentMediaData]?,
+                     shareLink: String?,
+                     replyConversationId: String?,
+                     replyChatRoomId: String?)
     func postMessageWithAttachment()
     func postMessageWithGifAttachment()
     func postMessageWithAudioAttachment()
@@ -34,13 +38,15 @@ open class LMMessageListViewController: LMViewController {
     public var viewModel: LMMessageListViewModel?
     weak var delegate: LMMessageListControllerDelegate?
     
+    var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         setupViews()
         setupLayouts()
         
-        viewModel?.getConversations()
+        viewModel?.fetchBottomConversations()
         viewModel?.syncConversation()
         
     }
@@ -55,18 +61,40 @@ open class LMMessageListViewController: LMViewController {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
+        bottomTextViewContainerBottomConstraints?.isActive = true
         NSLayoutConstraint.activate([
             messageListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             messageListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.bottomAnchor),
+            messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
             messageListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-//            bottomMessageBoxView.heightAnchor.constraint(equalToConstant: 44),
-            bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
+//            bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
         ])
+    }
+    
+    @objc
+    open override func keyboardWillShow(_ sender: Notification) {
+        guard let userInfo = sender.userInfo,
+              let frame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
+            return
+        }
+        self.bottomTextViewContainerBottomConstraints?.isActive = false
+        self.bottomTextViewContainerBottomConstraints?.constant = -((frame.size.height - self.view.safeAreaInsets.bottom) + 97)
+        self.bottomTextViewContainerBottomConstraints?.isActive = true
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc
+    open override func keyboardWillHide(_ sender: Notification) {
+        self.bottomTextViewContainerBottomConstraints?.isActive = false
+        self.bottomTextViewContainerBottomConstraints?.constant = -100
+        self.bottomTextViewContainerBottomConstraints?.isActive = true
+        self.view.layoutIfNeeded()
     }
     
 }
@@ -80,19 +108,22 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
     
-    public func didTapOnCell(indexPath: IndexPath) {
+    public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
+        viewModel?.getMoreConversations(indexPath: indexPath, direction: direction)
     }
     
-    public func fetchMoreData() {
+    
+    public func didTapOnCell(indexPath: IndexPath) {
         
     }
+
 }
 
 extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func composeMessage(message: String) {
         print("\(message)")
-        delegate?.postMessage(message: message)
+        delegate?.postMessage(message: message, filesUrls: nil, shareLink: nil, replyConversationId: nil, replyChatRoomId: nil)
     }
     
     public func composeAttachment() {
@@ -156,5 +187,9 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func composeGif() {
         delegate?.postMessageWithGifAttachment()
+    }
+    
+    public func linkDetected(_ link: String) {
+        
     }
 }

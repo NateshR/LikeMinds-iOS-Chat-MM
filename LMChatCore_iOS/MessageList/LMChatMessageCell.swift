@@ -66,7 +66,7 @@ open class LMChatMessageCell: LMTableViewCell {
     
     
     // MARK: configure
-    open func configure(with data: ContentModel) {
+    open func setData(with data: ContentModel) {
         chatMessageView.setDataView(data)
     }
 }

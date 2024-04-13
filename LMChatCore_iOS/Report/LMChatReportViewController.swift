@@ -179,8 +179,6 @@ open class LMChatReportViewController: LMViewController {
     // MARK: setupObservers
     open override func setupObservers() {
         super.setupObservers()
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     
@@ -205,7 +203,7 @@ open class LMChatReportViewController: LMViewController {
     
     
     @objc
-    open func keyboardWillShow(notification: NSNotification) {
+    open override func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrameKey = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
         
         let keyboardFrame = view.convert(keyboardFrameKey.cgRectValue, from: nil)
@@ -217,7 +215,7 @@ open class LMChatReportViewController: LMViewController {
     }
     
     @objc
-    open func keyboardWillHide(notification: NSNotification){
+    open override func keyboardWillHide(_ notification: Notification){
         containerScrollView.contentInset.bottom = 0
     }
 }

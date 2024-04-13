@@ -80,6 +80,25 @@ public final class LMChatTaggingListViewModel {
         isFetching = true
         taggedUsers.append(contentsOf: TagUser.getUsers(search: searchString))
         convertToViewModel()
+        return 
+        let request = GetTaggingListRequest.Builder()
+            .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
+            .page(currentPage)
+            .pageSize(pageSize)
+            .build()
+        LMChatClient.shared.getTaggingList(request: request) { [weak self] response in
+            guard let self else { return }
+            isFetching = false
+            guard let users = response.data?.communityMembers else { return }
+            isLastPage = users.isEmpty
+            
+            let tempUsers: [TagUser] = users.compactMap { user in
+                return TagUser(name: user.name ?? "NA", routeUrl: user.route ?? "", userId: user.uuid ?? "")
+            }
+            
+            taggedUsers.append(contentsOf: tempUsers)
+            convertToViewModel()
+        }
       /*
         let request = GetTaggingListRequest.builder()
             .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")

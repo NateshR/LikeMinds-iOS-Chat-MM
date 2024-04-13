@@ -12,6 +12,11 @@ public protocol LMFeedTaggingTextViewProtocol: AnyObject {
     func mentionStarted(with text: String)
     func mentionStopped()
     func contentHeightChanged()
+    func textViewDidChange(_ textView: UITextView)
+}
+
+extension LMFeedTaggingTextViewProtocol {
+    public func textViewDidChange(_ textView: UITextView) {}
 }
 
 public extension LMFeedTaggingTextViewProtocol {
@@ -161,6 +166,7 @@ open class LMChatTaggingTextView: LMTextView {
 
 // MARK: UITextViewDelegate
 extension LMChatTaggingTextView: UITextViewDelegate {
+    
     open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
       /*  if text.isEmpty {
             if isMentioning {
@@ -204,7 +210,6 @@ extension LMChatTaggingTextView: UITextViewDelegate {
     
     open func textViewDidChangeSelection(_ textView: UITextView) {
         var position = textView.selectedRange
-        
         if position.length > .zero {
             textView.attributedText.enumerateAttributes(in: .init(location: 0, length: textView.attributedText.length)) { attr, range, _ in
                 if attr.contains(where: { $0.key == .route }),
@@ -243,6 +248,7 @@ extension LMChatTaggingTextView: UITextViewDelegate {
     }
     
     open func textViewDidChange(_ textView: UITextView) {
+        mentionDelegate?.textViewDidChange(textView)
         mentionDelegate?.contentHeightChanged()
     }
     

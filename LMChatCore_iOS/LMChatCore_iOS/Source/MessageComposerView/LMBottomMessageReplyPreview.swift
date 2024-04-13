@@ -8,20 +8,26 @@
 import Foundation
 import LMChatUI_iOS
 
+public protocol LMBottomMessageReplyPreviewDelegate: AnyObject {
+    func clearReplyPreview()
+}
+
 @IBDesignable
 open class LMBottomMessageReplyPreview: LMView {
     
     public struct ContentModel {
-        public let username: String
-        public let replyMessage: String
+        public let username: String?
+        public let replyMessage: String?
         public let attachmentsUrls: [String]?
         
-        public init(username: String, replyMessage: String, attachmentsUrls: [String]?) {
+        public init(username: String?, replyMessage: String?, attachmentsUrls: [String]?) {
             self.username = username
             self.replyMessage = replyMessage
             self.attachmentsUrls = attachmentsUrls
         }
     }
+    
+    public weak var delegate: LMBottomMessageReplyPreviewDelegate?
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
@@ -136,5 +142,9 @@ open class LMBottomMessageReplyPreview: LMView {
            let url = URL(string: firstUrl) {
            messageAttachmentImageView.kf.setImage(with: url)
         }
+    }
+    
+    @objc func clearButtonClicked(_ sender:UIButton) {
+        delegate?.clearReplyPreview()
     }
 }

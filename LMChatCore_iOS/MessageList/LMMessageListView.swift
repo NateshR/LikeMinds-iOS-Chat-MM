@@ -8,24 +8,33 @@
 import Foundation
 import LMChatUI_iOS
 
+public enum ScrollDirection : Int {
+    case scroll_DOWN = 1
+    case scroll_UP = 0
+    case none = -1
+}
+
 public protocol LMMessageListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
-    func fetchMoreData()
+    func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
 }
 
 @IBDesignable
 open class LMMessageListView: LMView {
     
     public struct ContentModel {
-        public let data: [Message]
+        public var data: [Message]
         public let section: String
+        public let timestamp: Int
         
-        init(data: [Message], section: String) {
+        init(data: [Message], section: String, timestamp: Int) {
             self.data = data
             self.section = section
+            self.timestamp = timestamp
         }
         
         public struct Message {
+            public let messageId: String
             public let message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
@@ -101,14 +110,17 @@ open class LMMessageListView: LMView {
     // MARK: setupAppearance
     open override func setupAppearance() {
         super.setupAppearance()
-        backgroundColor = Appearance.shared.colors.clear
-        containerView.backgroundColor = Appearance.shared.colors.white
-        tableView.backgroundColor = Appearance.shared.colors.clear
+        backgroundColor = Appearance.shared.colors.backgroundColor
+        containerView.backgroundColor = Appearance.shared.colors.backgroundColor
+        tableView.backgroundColor = Appearance.shared.colors.backgroundColor
     }
     
     open func reloadData() {
-        tableSections.sort(by: {$0.section < $1.section})
+        tableSections.sort(by: {$0.timestamp < $1.timestamp})
         tableView.reloadData()
+    }
+    
+    func scrollToBottom() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
@@ -161,12 +173,12 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         switch item.messageType {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.configure(with: .init(message: item))
+                cell.setData(with: .init(message: item))
                 return cell
             }
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
-                cell.configure(with: .init(message: item))
+                cell.setData(with: .init(message: item))
                 return cell
             }
         }
@@ -178,6 +190,32 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
+    }
+    
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
+            cell.infoLabel.text = tableSections[section].section
+            return cell
+        }
+        return LMView()
+    }
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        let offsetY = tableView.contentOffset.y
+        let contentHeight = tableView.contentSize.height
+
+        let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview)
+        if translation.y > 0 {
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let lastIndexPath = visibleIndexPaths.last else {return}
+            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_UP)
+            
+        } else {
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let firstIndexPath = visibleIndexPaths.first else {return}
+            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_DOWN)
+        }
     }
 
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {

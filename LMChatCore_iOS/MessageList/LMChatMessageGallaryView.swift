@@ -167,6 +167,10 @@ open class LMChatMessageGallaryView: LMView {
         return imagePreview
     }
     
+    func setData(_ data: [String]?) {
+        
+    }
+    
 }
 
 extension LMChatMessageGallaryView {

@@ -50,6 +50,15 @@ open class LMChatMessageContentView: LMView {
         return view
     }()
     
+    open private(set) lazy var reactionContainerStackView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .horizontal
+        view.distribution = .fill
+        view.spacing = 0
+        view.addArrangedSubview(reactionsView)
+        return view
+    }()
+    
     open private(set) lazy var replyMessageView: LMBottomMessageReplyPreview = {
         let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
         return view
@@ -87,7 +96,7 @@ open class LMChatMessageContentView: LMView {
         label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 11)
         label.textColor = .black
-        label.text = "12:20 PM"
+        label.text = ""
         return label
     }()
     
@@ -102,7 +111,7 @@ open class LMChatMessageContentView: LMView {
         bubbleView = bubble
         addSubview(bubble)
         addSubview(chatProfileImageContainerStackView)
-        addSubview(reactionsView)
+        addSubview(reactionContainerStackView)
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(galleryView)
         bubble.addArrangeSubview(textLabel)
@@ -117,11 +126,11 @@ open class LMChatMessageContentView: LMView {
         super.setupLayouts()
         
         NSLayoutConstraint.activate([
-            reactionsView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            reactionsView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
-            reactionsView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
+            reactionContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -2),
+            reactionContainerStackView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
+            reactionContainerStackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
             chatProfileImageContainerStackView.topAnchor.constraint(equalTo: topAnchor),
-            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionsView.topAnchor),
+            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionContainerStackView.topAnchor),
             chatProfileImageContainerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             bubbleView.topAnchor.constraint(equalTo: topAnchor),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
@@ -146,7 +155,7 @@ open class LMChatMessageContentView: LMView {
     }
     
     open func setDataView(_ data: LMChatMessageCell.ContentModel) {
-        self.textLabel.text = data.message?.message
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines))
         self.timestampLabel.text = data.message?.createdTime
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
@@ -173,6 +182,7 @@ open class LMChatMessageContentView: LMView {
     func attachmentView(_ data: LMChatMessageCell.ContentModel) {
         if let attachments = data.message?.attachments, attachments.count > 0 {
             galleryView.isHidden = false
+            galleryView.setData(attachments)
         } else {
             galleryView.isHidden = true
         }
@@ -181,6 +191,7 @@ open class LMChatMessageContentView: LMView {
     func replyView(_ data: LMChatMessageCell.ContentModel) {
         if let repliedMessage = data.message?.replied?.first {
             replyMessageView.isHidden = false
+            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: repliedMessage.message, attachmentsUrls: repliedMessage.attachments))
         } else {
             replyMessageView.isHidden = true
         }

@@ -9,6 +9,10 @@ import Foundation
 import LMChatUI_iOS
 import Kingfisher
 
+public protocol LMBottomMessageLinkPreviewDelete: AnyObject {
+    func closeLinkPreview()
+}
+
 @IBDesignable
 open class LMBottomMessageLinkPreview: LMView {
     
@@ -25,6 +29,8 @@ open class LMBottomMessageLinkPreview: LMView {
             self.imageUrl = imageUrl
         }
     }
+    
+    public weak var delegate: LMBottomMessageLinkPreviewDelete?
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
@@ -77,6 +83,7 @@ open class LMBottomMessageLinkPreview: LMView {
     open private(set) lazy var closeReplyButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.xmarkIcon, for: .normal)
+        button.addTarget(self, action: #selector(closeButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -141,4 +148,9 @@ open class LMBottomMessageLinkPreview: LMView {
             linkPreviewImageView.image = placeholder
         }
     }
+    
+    @objc func closeButtonClicked(_ sender:UIButton) {
+        delegate?.closeLinkPreview()
+    }
+    
 }
