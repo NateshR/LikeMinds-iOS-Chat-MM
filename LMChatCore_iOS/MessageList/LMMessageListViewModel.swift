@@ -394,12 +394,12 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         let postConversationRequest = requestBuilder.build()
         
         let tempConversation = saveTemporaryConversation(uuid: UserPreferences.shared.getLMUUID() ?? "", communityId: communityId, request: postConversationRequest, fileUrls: filesUrls)
-        // Send temp conversation to ui
+        //TODO:  Send temp conversation to ui
         
         LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
             guard let self, let conversation = response.data?.conversation else { return }
-            insertConversationIntoList(conversation)
-            delegate?.reloadChatMessageList()
+//            insertConversationIntoList(conversation)
+//            delegate?.reloadChatMessageList()
             print(response)
         }
     }
@@ -445,8 +445,24 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         
     }
     
-    func getUploadFileRequestList() {
+    func getUploadFileRequestList(fileUrls: [AttachmentMediaData], conversationId: String, chatroomId: String?) -> [AttachmentUploadRequest] {
+        for (index, attachment) in fileUrls.enumerated() {
+            let attachmentMetaDataRequest = AttachmentMetaDataRequest.builder()
+                .duration(attachment.duration)
+                .numberOfPage(attachment.pdfPageCount)
+                .size(attachment.size)
+                .build()
+            let attachmentDataRequest = AttachmentUploadRequest.builder()
+                .name(attachment.mediaName)
+                .fileUrl(attachment.url)
+                .fileType(attachment.fileType.rawValue)
+                .width(attachment.width)
+                .height(attachment.height)
+                .meta(attachmentMetaDataRequest)
+                .index(index)
+        }
         
+        return []
     }
     
     func postMessageWithAttachment() {
