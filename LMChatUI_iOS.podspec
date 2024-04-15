@@ -14,9 +14,9 @@ Pod::Spec.new do |spec|
   spec.license      = { :type => 'MIT', :file => '../LICENSE' }
   spec.author             = { "pushpendrasingh" => "pushpendra.singh@likeminds.community" }
   spec.source       = { :git => "https://github.com/LikeMindsCommunity/LikeMinds-iOS-Chat-Sample-App", :tag => "#{spec.version}" }
-  spec.source_files = 'LMChatUI_iOS/**/*.swift'
+  spec.source_files = 'LMChatUI_iOS/LMChatUI_iOS/Source/**/*.swift'
   spec.resource_bundles = {
-     'LMChatUI_iOS' => ['LMChatUI_iOS/Assets/*.{xcassets}']
+     'LMChatUI_iOS' => ['LMChatUI_iOS/LMChatUI_iOS/Source/**/*.{xcassets}']
   }
   spec.ios.deployment_target = '13.0'
   spec.swift_version = '5.0'

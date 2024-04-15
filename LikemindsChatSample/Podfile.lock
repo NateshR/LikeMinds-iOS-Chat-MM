@@ -1,49 +1,68 @@
 PODS:
-  - Alamofire (5.8.1)
-  - Kingfisher (7.10.1)
+  - Alamofire (5.9.1)
+  - Giphy (2.2.8):
+    - libwebp
+  - Kingfisher (7.11.0)
+  - libwebp (1.3.2):
+    - libwebp/demux (= 1.3.2)
+    - libwebp/mux (= 1.3.2)
+    - libwebp/sharpyuv (= 1.3.2)
+    - libwebp/webp (= 1.3.2)
+  - libwebp/demux (1.3.2):
+    - libwebp/webp
+  - libwebp/mux (1.3.2):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.3.2)
+  - libwebp/webp (1.3.2):
+    - libwebp/sharpyuv
   - LikeMindsChat (0.0.1):
     - Alamofire
     - RealmSwift (~> 10)
   - LMChatCore_iOS (0.0.1):
+    - Giphy
     - LikeMindsChat
     - LMChatUI_iOS
   - LMChatUI_iOS (0.0.1):
     - Kingfisher (~> 7.0)
-  - Realm (10.45.1):
-    - Realm/Headers (= 10.45.1)
-  - Realm/Headers (10.45.1)
-  - RealmSwift (10.45.1):
-    - Realm (= 10.45.1)
+  - Realm (10.49.1):
+    - Realm/Headers (= 10.49.1)
+  - Realm/Headers (10.49.1)
+  - RealmSwift (10.49.1):
+    - Realm (= 10.49.1)
 
 DEPENDENCIES:
-  - LikeMindsChat (from `/Users/pushpendra/likeminds_workspace/GroupChatV2/LikeMindsChat/LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec`)
-  - LMChatCore_iOS (from `../LMChatCore_iOS/LMChatCore_iOS.podspec`)
-  - LMChatUI_iOS (from `../LMChatUI_iOS/LMChatUI_iOS.podspec`)
+  - LikeMindsChat (from `../../LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec`)
+  - LMChatCore_iOS (from `../LMChatCore_iOS.podspec`)
+  - LMChatUI_iOS (from `../LMChatUI_iOS.podspec`)
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - Giphy
     - Kingfisher
+    - libwebp
     - Realm
     - RealmSwift
 
 EXTERNAL SOURCES:
   LikeMindsChat:
-    :path: "/Users/pushpendra/likeminds_workspace/GroupChatV2/LikeMindsChat/LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec"
+    :path: "../../LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec"
   LMChatCore_iOS:
-    :path: "../LMChatCore_iOS/LMChatCore_iOS.podspec"
+    :path: "../LMChatCore_iOS.podspec"
   LMChatUI_iOS:
-    :path: "../LMChatUI_iOS/LMChatUI_iOS.podspec"
+    :path: "../LMChatUI_iOS.podspec"
 
 SPEC CHECKSUMS:
-  Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
-  Kingfisher: bc5abe80a8e0144537ef1dd5a0b2621b04f7f439
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  Giphy: f63ab0e2dd819d6288feba07722aaafe8a5fe4b7
+  Kingfisher: b9c985d864d43515f404f1ef4a8ce7d802ace3ac
+  libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   LikeMindsChat: 91d8bce86ad4c7335bec16de93aeea8ae7ae332c
-  LMChatCore_iOS: f0388010c1abdedee332cfe36de8844458bb74f6
-  LMChatUI_iOS: a6ce53da34e653fb0ab0b3fdaa0e9a16b679eeed
-  Realm: e0bee0f167c0165312d80cb0def019fdb6a26be8
-  RealmSwift: 2a92c510fee3dace3e0ad809c2f10c6a6a4b65d5
+  LMChatCore_iOS: 758662d1d4ac82cf87110ed19f486f27a76b804f
+  LMChatUI_iOS: 2b5a3f021d7c41af0c84a34c3bd099a23406b1e2
+  Realm: 1fab4a224fd7a294eca142a0efe8b54546290fbf
+  RealmSwift: 7c3a9c001161eb01b96b171ad965a9c498b962b0
 
-PODFILE CHECKSUM: 475501105dc0db78d2cde1e89d64f1dc9216314b
+PODFILE CHECKSUM: 28705c694d7ba4a2ff4fd063e58449f502dd38c4
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2
