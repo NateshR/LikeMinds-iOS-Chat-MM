@@ -80,6 +80,9 @@ open class LMMessageListView: LMView {
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
     
+    let reactionHeight: CGFloat = 50.0
+    let spaceReactionHeight: CGFloat = 10.0
+    let menuHeight: CGFloat = 200
     
     // MARK: setupViews
     open override func setupViews() {
@@ -218,26 +221,122 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
+    @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
-                                      image: UIImage(systemName: "arrow.down.square")) { action in
-            }
-            
-            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                       image: UIImage(systemName: "pencil")) { action in
-            }
-            
-            let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
-                                        image: UIImage(systemName: "doc.on.doc")) { action in
-            }
-            
-            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
-                                        image: UIImage(systemName: "trash"),
-                                        attributes: .destructive) { action in
-            }
-            return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
+        let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
+        return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
+            guard let self = self else { return UIMenu() }
+            return self.createContextMenu()
         }
+    }
+    
+    @available(iOS 13.0, *)
+    public func tableView(_ tableView: UITableView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        makeTargetedPreview(for: configuration)
+    }
+    
+    @available(iOS 13.0, *)
+    public func tableView(_ tableView: UITableView, previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        makeTargetedDismissPreview(for: configuration)
+    }
+    
+    @available(iOS 13.0, *)
+    public func tableView(_ tableView: UITableView, willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionCommitAnimating) {
+        animator.preferredCommitStyle = .pop
+    }
+    
+    @available(iOS 13.0, *)
+    func makeTargetedPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let identifier = configuration.identifier as? String else { return nil }
+        let values = identifier.components(separatedBy: ",")
+        guard let row = Int(values.first ?? "0") else { return nil }
+        guard let section = Int(values.last ?? "0") else { return nil }
+        guard let cell = tableView.cellForRow(at: .init(row: row, section: section)) as? LMChatMessageCell else { return nil }
+        guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
+                                                                     size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
+                                                        afterScreenUpdates: false,
+                                                        withCapInsets: UIEdgeInsets.zero) else { return nil }
+        
+        let reactionView = LMReactionPopupView()
+        reactionView.onReaction = { [weak self] reactionType in
+            guard let self = self else { return }
+            print(reactionType.rawValue)
+            (delegate as? UIViewController)?.dismiss(animated: true)
+        }
+        reactionView.layer.cornerRadius = 10
+        reactionView.layer.masksToBounds = true
+        reactionView.translatesAutoresizingMaskIntoConstraints = false
+        
+        snapshot.layer.cornerRadius = 10
+        snapshot.layer.masksToBounds = true
+        snapshot.translatesAutoresizingMaskIntoConstraints = false
+        
+        let container = UIView(frame: CGRect(origin: .zero,
+                                             size: CGSize(width: cell.bounds.width,
+                                                          height: snapshot.bounds.height + reactionHeight + spaceReactionHeight)))
+        container.backgroundColor = .clear
+        container.addSubview(reactionView)
+        container.addSubview(snapshot)
+        
+        snapshot.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
+        snapshot.topAnchor.constraint(equalTo: container.topAnchor).isActive = true
+        snapshot.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
+        snapshot.bottomAnchor.constraint(equalTo: reactionView.topAnchor, constant: -spaceReactionHeight).isActive = true
+        
+        reactionView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10).isActive = true
+        reactionView.bottomAnchor.constraint(equalTo: container.bottomAnchor).isActive = true
+//        reactionView.widthAnchor.constraint(equalToConstant: 50*4).isActive = true
+        reactionView.heightAnchor.constraint(equalToConstant: reactionHeight).isActive = true
+        
+        let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y)
+        let previewTarget = UIPreviewTarget(container: tableView, center: centerPoint)
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        if #available(iOS 14.0, *) {
+            parameters.shadowPath = UIBezierPath()
+        }
+        return UITargetedPreview(view: container, parameters: parameters, target: previewTarget)
+    }
+    
+    @available(iOS 13.0, *)
+    func makeTargetedDismissPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let identifier = configuration.identifier as? String else { return nil }
+        guard let row = Int(identifier) else { return nil }
+        guard let cell = tableView.cellForRow(at: .init(row: row, section: 0)) as? LMChatMessageCell else { return nil }
+        guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
+                                                                     size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
+                                                        afterScreenUpdates: false,
+                                                        withCapInsets: UIEdgeInsets.zero) else { return nil }
+        
+        let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y)
+        let previewTarget = UIPreviewTarget(container: tableView, center: centerPoint)
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        if #available(iOS 14.0, *) {
+            parameters.shadowPath = UIBezierPath()
+        }
+        return UITargetedPreview(view: snapshot, parameters: parameters, target: previewTarget)
+    }
+    
+    @available(iOS 13.0, *)
+    func createContextMenu() -> UIMenu {
+        let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
+                                   image: UIImage(systemName: "arrow.down.square")) { action in
+        }
+        
+        let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                  image: UIImage(systemName: "pencil")) { action in
+        }
+        
+        let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
+                                  image: UIImage(systemName: "doc.on.doc")) { action in
+        }
+        
+        let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
+                                    image: UIImage(systemName: "trash"),
+                                    attributes: .destructive) { action in
+        }
+        return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
     }
 }
 

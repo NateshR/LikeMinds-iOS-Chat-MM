@@ -6,17 +6,19 @@
 //
 
 import Foundation
-import Foundation
+import PhotosUI
 
-enum AttachmentType: String {
-    case image
-    case gif
-    case video
-}
-
-struct AttachmentMediaData {
+public struct AttachmentMediaData {
+    
+    enum MediaType: String {
+        case image
+        case gif
+        case video
+        case livePhoto
+    }
+    
     let url: URL
-    let fileType: AttachmentType
+    let fileType: MediaType
     let width: Int?
     let height: Int?
     let thumbnailurl: URL?
@@ -26,9 +28,11 @@ struct AttachmentMediaData {
     let duration: Int?
     let awsFolderPath: String?
     let format: String?
+    let image: UIImage?
+    let livePhoto: PHLivePhoto?
     
     init(url: URL,
-         fileType: AttachmentType,
+         fileType: MediaType,
          width: Int?,
          height: Int?,
          thumbnailurl: URL?,
@@ -37,7 +41,9 @@ struct AttachmentMediaData {
          pdfPageCount: Int?,
          duration: Int?,
          awsFolderPath: String?,
-         format: String?) {
+         format: String?,
+         image: UIImage?,
+         livePhoto: PHLivePhoto?) {
         self.url = url
         self.fileType = fileType
         self.width = width
@@ -49,6 +55,8 @@ struct AttachmentMediaData {
         self.duration = duration
         self.awsFolderPath = awsFolderPath
         self.format = format
+        self.image = image
+        self.livePhoto = livePhoto
     }
     
     static func builder() -> Builder {
@@ -57,7 +65,7 @@ struct AttachmentMediaData {
 
     class Builder {
         private var url: URL?
-        private var fileType: AttachmentType = .image
+        private var fileType: MediaType = .image
         private var width: Int?
         private var height: Int?
         private var thumbnailurl: URL?
@@ -67,13 +75,15 @@ struct AttachmentMediaData {
         private var duration: Int?
         private var awsFolderPath: String?
         private var format: String?
+        private var image: UIImage?
+        private var livePhoto: PHLivePhoto?
         
         func url(_ url: URL) -> Builder {
             self.url = url
             return self
         }
         
-        func fileType(_ fileType: AttachmentType) -> Builder {
+        func fileType(_ fileType: MediaType) -> Builder {
             self.fileType = fileType
             return self
         }
@@ -123,18 +133,30 @@ struct AttachmentMediaData {
             return self
         }
         
+        func image(_ image: UIImage?) -> Builder {
+            self.image = image
+            return self
+        }
+        
+        func livePhoto(_ livePhoto: PHLivePhoto?) -> Builder {
+            self.livePhoto = livePhoto
+            return self
+        }
+        
         func build() -> AttachmentMediaData {
             return AttachmentMediaData(url: url!,
-                                 fileType: fileType,
-                                 width: width,
-                                 height: height,
-                                 thumbnailurl: thumbnailurl,
-                                 size: size,
-                                 mediaName: mediaName,
-                                 pdfPageCount: pdfPageCount,
-                                 duration: duration,
-                                 awsFolderPath: awsFolderPath,
-                                 format: format)
+                                       fileType: fileType,
+                                       width: width,
+                                       height: height,
+                                       thumbnailurl: thumbnailurl,
+                                       size: size,
+                                       mediaName: mediaName,
+                                       pdfPageCount: pdfPageCount,
+                                       duration: duration,
+                                       awsFolderPath: awsFolderPath,
+                                       format: format,
+                                       image: image,
+                                       livePhoto: livePhoto)
         }
     }
 }

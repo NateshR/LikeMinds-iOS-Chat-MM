@@ -70,11 +70,12 @@ public final class LMMessageListViewModel {
             //3rd case -> open a conversation directly through search/deep links
             if let medianConversationId {
                 // fetch list from searched or specific conversationid
-                fetchIntermintentConversations(chatroom: chatroom, conversationId: medianConversationId)
+                fetchIntermediateConversations(chatroom: chatroom, conversationId: medianConversationId)
             }
             //4th case -> chatroom is present and conversation is not present
             else  if chatroom.totalAllResponseCount == 0 {
                 // Convert chatroom data into first conversation and display
+                chatroomDataToHeaderConversation(chatroom)
             }
             //5th case -> chatroom is opened through deeplink/explore feed, which is open for the first time
             else if chatroomWasNotLoaded {
@@ -95,10 +96,21 @@ public final class LMMessageListViewModel {
             }
             //9th case -> chatroom is present and conversation is present, chatroom has unseen conversations
             else {
-                fetchIntermintentConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
+                fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
             }
             
         }
+    }
+    
+    func convertConversationsIntoGroupedArray(conversations: [Conversation]?) -> [LMMessageListView.ContentModel] {
+        guard let conversations else { return [] }
+        print("conversations ------> \(conversations)")
+        let dictionary = Dictionary(grouping: conversations, by: { $0.date })
+        var conversationsArray: [LMMessageListView.ContentModel] = []
+        for key in dictionary.keys {
+            conversationsArray.append(.init(data: (dictionary[key] ?? []).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? "")))
+        }
+        return conversationsArray
     }
     
     func fetchBottomConversations() {
@@ -107,30 +119,23 @@ public final class LMMessageListViewModel {
             .limit(conversationFetchLimit)
             .type(.bottom)
             .build()
-        LMChatClient.shared.getConversations(withRequest: request) {[weak self] response in
-            guard let self, let conversations = response.data?.conversations else { return }
-            print("conversations ------> \(conversations)")
-            let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-            
-            chatMessages = conversations
-            for key in dictionary.keys {
-                messagesList.append(.init(data: (dictionary[key] ?? []).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? "")))
+        let response = LMChatClient.shared.getConversations(withRequest: request)
+        guard let conversations = response?.data?.conversations else { return }
+        print("conversations ------> \(conversations)")
+        chatMessages = conversations
+        messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
+        if conversations.count <= conversationFetchLimit {
+            if  let chatroom = chatroomViewData {
+                let message = chatroomDataToConversation(chatroom)
+                var messages = messagesList.first?.data
+                messages?.insert(message, at: 0)
+                messagesList[0].data = messages!
             }
-            if conversations.count <= conversationFetchLimit {
-                if  let chatroom = chatroomViewData {
-                    let message = chatroomDataToConversation(chatroom)
-                    var messages = messagesList.first?.data
-                    messages?.insert(message, at: 0)
-                    messagesList[0].data = messages!
-                }
-            }
-            
-            delegate?.reloadChatMessageList()
         }
+        delegate?.reloadChatMessageList()
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
-        chatroom.date
         let message = chatroomDataToConversation(chatroom)
         var messages = messagesList.first?.data
         messages?.insert(message, at: 0)
@@ -153,24 +158,23 @@ public final class LMMessageListViewModel {
             .observer(self)
             .type(type)
             .build()
-        LMChatClient.shared.getConversations(withRequest: request) {[weak self] response in
-            guard let self, let conversations = response.data?.conversations, conversations.count > 0 else { return }
-            print("conversations ------> \(conversations)")
-            chatMessages.append(contentsOf: conversations)
-            let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-            
-            for key in dictionary.keys {
-                if let index = messagesList.firstIndex(where: {$0.section == (key ?? "")}) {
-                    guard let messages = dictionary[key]?.sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({ self.convertConversation($0)}) else { return}
-                   var messageSectionData = messagesList[index]
-                    messageSectionData.data.insert(contentsOf: messages, at: 0)
-                    messagesList[index] = messageSectionData
-                } else {
-                    messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
-                }
+        let response = LMChatClient.shared.getConversations(withRequest: request)
+        guard let conversations = response?.data?.conversations, conversations.count > 0 else { return }
+        print("conversations ------> \(conversations)")
+        chatMessages.append(contentsOf: conversations)
+        let dictionary = Dictionary(grouping: conversations, by: { $0.date })
+        
+        for key in dictionary.keys {
+            if let index = messagesList.firstIndex(where: {$0.section == (key ?? "")}) {
+                guard let messages = dictionary[key]?.sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({ self.convertConversation($0)}) else { return}
+                var messageSectionData = messagesList[index]
+                messageSectionData.data.insert(contentsOf: messages, at: 0)
+                messagesList[index] = messageSectionData
+            } else {
+                messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
             }
-            delegate?.reloadChatMessageList()
         }
+        delegate?.reloadChatMessageList()
     }
     
     func getMoreConversations(indexPath: IndexPath, direction: ScrollDirection) {
@@ -193,8 +197,33 @@ public final class LMMessageListViewModel {
         }
     }
     
-    func fetchIntermintentConversations(chatroom: Chatroom, conversationId: String) {
+    func fetchIntermediateConversations(chatroom: Chatroom, conversationId: String) {
+     
+        let getConversationRequest = GetConversationRequest.builder()
+            .conversationId(conversationId)
+            .build()
+        guard let mediumConversation = LMChatClient.shared.getConversation(request: getConversationRequest)?.data?.conversation else { return }
         
+        let getAboveConversationRequest = GetConversationsRequest.builder()
+            .conversation(mediumConversation)
+            .type(.above)
+            .chatroomId(chatroomViewData?.id ?? "")
+            .limit(conversationFetchLimit)
+            .build()
+        let aboveConversations = LMChatClient.shared.getConversations(withRequest: getAboveConversationRequest)?.data?.conversations ?? []
+        
+        let getBelowConversationRequest = GetConversationsRequest.builder()
+            .conversation(mediumConversation)
+            .type(.below)
+            .chatroomId(chatroomViewData?.id ?? "")
+            .limit(conversationFetchLimit)
+            .build()
+        let belowConversations = LMChatClient.shared.getConversations(withRequest: getBelowConversationRequest)?.data?.conversations ?? []
+        let allConversations = aboveConversations + [mediumConversation] + belowConversations
+        
+        chatMessages = allConversations
+        messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: allConversations))
+        delegate?.reloadChatMessageList()
     }
     
     func syncConversation() {
@@ -400,6 +429,24 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .member(member)
             .build()
         return conversation
+    }
+    
+    func onConversationPosted(response: PostConversationResponse?,
+                              updatedFileUrls: [AttachmentMediaData]?,
+                              tempConversation: Conversation?,
+                              replyConversationId: String?,
+                              replyChatRoomId: String?) {
+        guard let conversation = response?.conversation else {
+            return
+        }
+        if let updatedFileUrls, !updatedFileUrls.isEmpty {
+            
+        }
+        
+    }
+    
+    func getUploadFileRequestList() {
+        
     }
     
     func postMessageWithAttachment() {

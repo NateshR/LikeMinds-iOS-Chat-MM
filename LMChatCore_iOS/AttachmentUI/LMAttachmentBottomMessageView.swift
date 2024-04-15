@@ -8,6 +8,11 @@
 import Foundation
 import LMChatUI_iOS
 
+public protocol LMAttachmentBottomMessageDelegate: AnyObject {
+    func addMoreAttachment()
+    func sendAttachment()
+}
+
 @IBDesignable
 open class LMAttachmentBottomMessageView: LMView {
     
@@ -66,6 +71,7 @@ open class LMAttachmentBottomMessageView: LMView {
     
     open private(set) var inputTextViewHeightConstraint: NSLayoutConstraint?
     open private(set) var taggingViewHeightConstraints: NSLayoutConstraint?
+    open weak var delegate: LMAttachmentBottomMessageDelegate?
     
     open private(set) lazy var gifButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
@@ -80,6 +86,7 @@ open class LMAttachmentBottomMessageView: LMView {
         button.setImage(Constants.shared.images.paperplaneIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
         //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.addTarget(self, action: #selector(sendAttachmentButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -87,6 +94,7 @@ open class LMAttachmentBottomMessageView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.plusIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.addTarget(self, action: #selector(addMoreAttachmentButtonClicked), for: .touchUpInside)
         return button
     }()
     
@@ -125,8 +133,8 @@ open class LMAttachmentBottomMessageView: LMView {
         horizontalStackView.addArrangedSubview(inputTextContainerView)
         horizontalStackView.addArrangedSubview(sendButton)
         
-        //        addOnVerticleStackView.addArrangedSubview(linkPreviewView)
-        //        addOnVerticleStackView.addArrangedSubview(replyMessageView)
+//        addOnVerticleStackView.addArrangedSubview(linkPreviewView)
+//        addOnVerticleStackView.addArrangedSubview(replyMessageView)
         addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
     }
     
@@ -160,6 +168,21 @@ open class LMAttachmentBottomMessageView: LMView {
         inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
         taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
     }
+    
+    @objc func sendAttachmentButtonClicked(_ sender: UIButton) {
+        
+        let message = inputTextView.getText()
+        guard message != inputTextView.placeHolderText else {
+            return
+        }
+        inputTextView.text = ""
+        contentHeightChanged()
+        delegate?.sendAttachment()
+    }
+    
+    @objc func addMoreAttachmentButtonClicked(_ sender: UIButton) {
+        delegate?.addMoreAttachment()
+    }
 }
 
 extension LMAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
@@ -180,7 +203,6 @@ extension LMAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
         
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
-        //        sendButton.isEnabled = !inputTextView.attributedText.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines) != inputTextView.placeHolderText
     }
 }
 

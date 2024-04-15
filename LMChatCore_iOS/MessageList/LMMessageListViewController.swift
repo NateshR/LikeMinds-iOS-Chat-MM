@@ -136,22 +136,23 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         let cameraImage = Constants.shared.images.cameraIcon
         camera.setValue(cameraImage, forKey: "image")
         
-        let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { (UIAlertAction) in
-//            self.presenter?.openMediaPicker(mediaType: "gallery")
+        let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
+           guard let viewController =  try? LMChatAttachmentViewModel.createModule() else { return }
+            self?.present(viewController, animated: true)
         }
         
         let photoImage = Constants.shared.images.galleryIcon
         photo.setValue(photoImage, forKey: "image")
         
         let audio = UIAlertAction(title: "Audio", style: UIAlertAction.Style.default) { (UIAlertAction) in
-//            self.presenter?.openMediaPicker(mediaType: "audio")
+            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .audio)
         }
         
         let audioImage = Constants.shared.images.micIcon
         audio.setValue(audioImage, forKey: "image")
         
         let document = UIAlertAction(title: "Document", style: UIAlertAction.Style.default) { (UIAlertAction) in
-//            self.presenter?.openMediaPicker(mediaType: "doc")
+            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .audio)
         }
         
         let documentImage = Constants.shared.images.documentsIcon
@@ -190,6 +191,13 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func linkDetected(_ link: String) {
+        
+    }
+}
+
+extension LMMessageListViewController: MediaPickerDelegate {
+    
+    func filePicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel], fileType: MediaPickerModel.MediaType) {
         
     }
 }

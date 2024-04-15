@@ -69,5 +69,6 @@ public extension Constants {
         public var leftArrowIcon = loadSystemImage(with: "chevron.left")
         
         public var cameraIcon = loadSystemImage(with: "camera")
+        public var playIcon = loadSystemImage(with: "play.circle")
     }
 }

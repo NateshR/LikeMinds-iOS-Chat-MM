@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "lm_drawLine.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
