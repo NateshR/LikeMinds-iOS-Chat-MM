@@ -32,9 +32,9 @@ class ReactionViewCell: UITableViewCell {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
-        stack.alignment = .center
+        stack.alignment = .leading
         stack.distribution = .equalSpacing
-        stack.spacing = 8
+        stack.spacing = 4
         return stack
     }()
     
@@ -96,8 +96,8 @@ class ReactionViewCell: UITableViewCell {
             userImageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
             
             userStackView.leadingAnchor.constraint(equalTo: userImageView.trailingAnchor, constant: 16),
-            userStackView.topAnchor.constraint(equalTo: userImageView.topAnchor),
-            userStackView.bottomAnchor.constraint(equalTo: userImageView.bottomAnchor),
+            userStackView.topAnchor.constraint(greaterThanOrEqualTo: userImageView.topAnchor),
+            userStackView.bottomAnchor.constraint(lessThanOrEqualTo: userImageView.bottomAnchor),
             userStackView.trailingAnchor.constraint(lessThanOrEqualTo: reactionImage.leadingAnchor, constant: 8),
             
             reactionImage.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),

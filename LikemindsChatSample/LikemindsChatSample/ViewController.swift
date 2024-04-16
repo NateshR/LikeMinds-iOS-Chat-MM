@@ -55,14 +55,13 @@ class ViewController: UIViewController {
 //        setupLayouts()
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard let homefeedvc =
-              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
+                    try? SearchListViewModel.createModule() else { return }
+            
+            self.navigationController?.pushViewController(homefeedvc, animated: true)
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
 //            try? LMHomeFeedViewModel.createModule() else { return }
 //            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
-            self.addChild(homefeedvc)
-            self.view.addSubview(homefeedvc.view)
-            homefeedvc.didMove(toParent: self)
             
 //            self.navigationItem.leftBarButtonItem = LMBarButtonItem()
         }
