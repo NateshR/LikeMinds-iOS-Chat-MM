@@ -14,8 +14,8 @@ open class LMChatMessageReactionsView: LMView {
     open private(set) lazy var previewsContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
-        view.distribution = .fillEqually
-        view.alignment = .fill
+        view.distribution = .fillProportionally
+        view.alignment = .center
         view.spacing = 2
         view.isLayoutMarginsRelativeArrangement = true
         view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
@@ -36,6 +36,7 @@ open class LMChatMessageReactionsView: LMView {
         addSubview(previewsContainerView)
         previewsContainerView.addArrangedSubview(createEmojiView())
         previewsContainerView.addArrangedSubview(createEmojiView())
+        previewsContainerView.addArrangedSubview(createEmojiView())
     }
     
     // MARK: setupLayouts
@@ -47,5 +48,14 @@ open class LMChatMessageReactionsView: LMView {
     func createEmojiView() -> LMMessageReaction {
         let view = LMMessageReaction().translatesAutoresizingMaskIntoConstraints()
         return view
+    }
+    
+    func setData(_ data: [LMMessageListView.ContentModel.Reaction]) {
+        previewsContainerView.arrangedSubviews.forEach({$0.isHidden = true})
+        for (index, item) in data.enumerated() {
+            if index > 1 { return }
+            (previewsContainerView.arrangedSubviews[index] as? LMMessageReaction)?.setData(.init(reaction: item.reaction, reactionCount: "\(item.count)"))
+            previewsContainerView.arrangedSubviews[index].isHidden = false
+        }
     }
 }

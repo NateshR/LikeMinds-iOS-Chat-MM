@@ -16,16 +16,32 @@ open class LMChatNotificationCell: LMTableViewCell {
         public let message: LMMessageListView.ContentModel.Message?
     }
     
-    open private(set) lazy var infoLabel: LMLabel = {
-        let label =  LMLabel()
+//    open private(set) lazy var infoLabel: LMLabel = {
+//        let label =  LMLabel()
+//            .translatesAutoresizingMaskIntoConstraints()
+//        label.numberOfLines = 3
+//        label.textAlignment = .center
+//        label.font = Appearance.shared.fonts.subHeadingFont2
+//        label.textColor = Appearance.shared.colors.white
+//        label.text = ""
+//        label.setPadding(with: .init(top: 4, left: 8, bottom: 4, right: 8))
+//        label.cornerRadius(with: 12)
+//        label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
+//        return label
+//    }()
+    
+    open private(set) lazy var infoLabel: LMTextView = {
+        let label =  LMTextView()
             .translatesAutoresizingMaskIntoConstraints()
-        label.numberOfLines = 3
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = Appearance.shared.colors.white
-        label.text = ""
-        label.setPadding(with: .init(top: 4, left: 8, bottom: 4, right: 8))
-        label.cornerRadius(with: 12)
+        label.isScrollEnabled = false
+        label.font = Appearance.shared.fonts.subHeadingFont2
         label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
+        label.textColor = Appearance.shared.colors.white
+        label.textAlignment = .center
+        label.isEditable = false
+        label.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        label.cornerRadius(with: 12)
+        label.text = ""
         return label
     }()
     
@@ -71,7 +87,7 @@ open class LMChatNotificationCell: LMTableViewCell {
     
     // MARK: configure
     open func setData(with data: ContentModel) {
-        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines))
+        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.shared.fonts.subHeadingFont2, withTextColor: Appearance.shared.colors.white)
     }
     
     func timestampConverted(createdAtInEpoch: Int) -> String? {

@@ -76,7 +76,9 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
     // MARK: configure
     open func configure(with data: ContentModel) {
         let creatorName = data.chatroom?.member?.name ?? "NA"
-        let lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
+        var lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
+        lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
+        
         chatroomView.setData(LMHomeFeedChatroomView.ContentModel(userName: data.chatroom?.member?.name ?? "NA",
                                                                  lastMessage: lastMessage,
                                                                  chatroomName: data.chatroom?.header ?? "NA",

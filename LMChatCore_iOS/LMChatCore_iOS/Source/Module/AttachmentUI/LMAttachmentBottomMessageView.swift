@@ -98,8 +98,8 @@ open class LMAttachmentBottomMessageView: LMView {
         return button
     }()
     
-    open private(set) lazy var replyMessageView: LMBottomMessageReplyPreview = {
-        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var replyMessageView: LMMessageReplyPreview = {
+        let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     

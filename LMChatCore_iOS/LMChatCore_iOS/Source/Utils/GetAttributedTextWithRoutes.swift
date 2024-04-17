@@ -25,8 +25,14 @@ public struct NameWithRoute {
 
 // MARK: GetAttributedTextWithRoutes
 public struct GetAttributedTextWithRoutes {
-    static func getAttributedText(from text: String, andPrefix: Character? = nil, allowLink: Bool = true, allowHashtags: Bool = true) -> NSMutableAttributedString {
-        var attributedString = replaceRouteToName(with: text, andPrefix: andPrefix)
+    static func getAttributedText(from text: String,
+                                  andPrefix: Character? = nil,
+                                  allowLink: Bool = true,
+                                  allowHashtags: Bool = true,
+                                  font: UIFont = Appearance.shared.fonts.textFont1,
+                                  withHighlightedColor: UIColor = Appearance.shared.colors.linkColor,
+                                  withTextColor: UIColor = Appearance.shared.colors.textColor) -> NSMutableAttributedString {
+        var attributedString = replaceRouteToName(with: text, andPrefix: andPrefix, font: font, withHighlightedColor: withHighlightedColor, withTextColor: withTextColor)
         
         if allowLink {
             attributedString = detectAndHighlightURLs(in: attributedString)
@@ -102,13 +108,16 @@ public struct GetAttributedTextWithRoutes {
     
     static func replaceRouteToName(
         with answer: String,
-        andPrefix prefix: Character? = nil
+        andPrefix prefix: Character? = nil,
+        font: UIFont,
+        withHighlightedColor: UIColor,
+        withTextColor: UIColor
     ) -> NSMutableAttributedString {
         let nameWithRoutes = getUserNames(in: answer)
         
         let attrString = NSMutableAttributedString(string: answer, attributes: [
-            .foregroundColor: Appearance.shared.colors.textColor,
-            .font: Appearance.shared.fonts.textFont1
+            .foregroundColor: withTextColor,
+            .font: font
         ])
         
         for nameWithRoute in nameWithRoutes {
@@ -121,8 +130,8 @@ public struct GetAttributedTextWithRoutes {
             }
             
             let replaceAttributes: [NSAttributedString.Key: Any] = [
-                .foregroundColor: Appearance.shared.colors.userProfileColor,
-                .font: Appearance.shared.fonts.textFont1,
+                .foregroundColor: withHighlightedColor,
+                .font: font,
                 .route: routeString
             ]
             

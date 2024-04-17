@@ -6,3 +6,8 @@
 //
 
 import Foundation
+import LMChatUI_iOS
+
+class LMMessageLoadingShimmerView: LMView {
+    
+}

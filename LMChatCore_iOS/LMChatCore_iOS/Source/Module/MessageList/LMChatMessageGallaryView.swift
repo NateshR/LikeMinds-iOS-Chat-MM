@@ -6,9 +6,22 @@
 //
 
 import Foundation
+import Kingfisher
 import LMChatUI_iOS
 
+public protocol ChatMessageAttachment {}
+
 open class LMChatMessageGallaryView: LMView {
+    
+    struct ContentModel {
+        public let fileUrl: String?
+        public let thumbnailUrl: String?
+        public let fileSize: Int64?
+        public let duration: Int?
+        public let fileType: String?
+        public let fileName: String?
+    }
+    
     /// Content the gallery should display.
     public var content: [UIView] = []
     
@@ -53,65 +66,77 @@ open class LMChatMessageGallaryView: LMView {
         itemSpot3
     ]
     
-    open private(set) lazy var itemSpot0: LMView = {
-        let view = LMView()
+    open private(set) lazy var itemSpot0: ImagePreview = {
+        let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 12)
-        return view
+        imagePreview.backgroundColor = .black
+        imagePreview.cornerRadius(with: 12)
+        return imagePreview
     }()
     
-    open private(set) lazy var itemSpot1: LMView = {
-        let view = LMView()
+    open private(set) lazy var itemSpot1: ImagePreview = {
+        let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 12)
-        return view
+        imagePreview.backgroundColor = .black
+        imagePreview.cornerRadius(with: 12)
+        return imagePreview
     }()
     
-    open private(set) lazy var itemSpot2: LMView = {
-        let view = LMView()
+    open private(set) lazy var itemSpot2: ImagePreview = {
+        let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 12)
-        return view
+        imagePreview.backgroundColor = .black
+        imagePreview.cornerRadius(with: 12)
+        return imagePreview
     }()
     
-    open private(set) lazy var itemSpot3: LMView = {
-        let view = LMView()
+    open private(set) lazy var itemSpot3: ImagePreview = {
+        let imagePreview = ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 12)
-        return view
+        imagePreview.backgroundColor = .black
+        imagePreview.addSubviewWithDefaultConstraints(moreItemsOverlay)
+        imagePreview.cornerRadius(with: 12)
+        return imagePreview
     }()
     
     /// Overlay to be displayed when `content` contains more items than the gallery can display.
-    public private(set) lazy var moreItemsOverlay = LMLabel()
-        .translatesAutoresizingMaskIntoConstraints()
+    public private(set) lazy var moreItemsOverlay: LMLabel = {
+        let label = LMLabel()
+            .translatesAutoresizingMaskIntoConstraints()
+        label.textColor = Appearance.shared.colors.white
+        label.textAlignment = .center
+        label.backgroundColor = .gray.withAlphaComponent(0.6)
+        label.text = "+2"
+        return label
+    }()
     
     /// Container holding all previews.
     open private(set) lazy var previewsContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
-        view.axis = .horizontal
+        view.axis = .vertical
         view.distribution = .fillEqually
         view.alignment = .fill
-        view.spacing = 2
+        view.spacing = 4
         view.isLayoutMarginsRelativeArrangement = true
 //        view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
         return view
     }()
     
     /// Left container for previews.
-    public private(set) lazy var leftPreviewsContainerView: LMStackView = {
+    public private(set) lazy var topPreviewsContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
-        view.spacing = 1
-        view.axis = .vertical
+        view.spacing = 4
+        view.axis = .horizontal
         view.distribution = .fillEqually
         view.alignment = .fill
         return view
     }()
     
     /// Right container for previews.
-    public private(set) lazy var rightPreviewsContainerView: LMStackView = {
+    public private(set) lazy var bottomPreviewsContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
-        view.spacing = 1
-        view.axis = .vertical
+        view.spacing = 4
+        view.axis = .horizontal
         view.distribution = .fillEqually
         view.alignment = .fill
         return view
@@ -123,31 +148,23 @@ open class LMChatMessageGallaryView: LMView {
         super.setupLayouts()
         
         pinSubView(subView:previewsContainerView)
-        previewsContainerView.addArrangedSubview(leftPreviewsContainerView)
         
-        leftPreviewsContainerView.addArrangedSubview(itemSpots[0])
-        leftPreviewsContainerView.addArrangedSubview(itemSpots[2])
-        
-        previewsContainerView.addArrangedSubview(rightPreviewsContainerView)
-        
-        rightPreviewsContainerView.addArrangedSubview(itemSpots[1])
-        rightPreviewsContainerView.addArrangedSubview(itemSpots[3])
-        
-        addSubview(moreItemsOverlay)
-        moreItemsOverlay.pinSubView(subView: itemSpots[3])
     }
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
         addSubview(previewsContainerView)
-        itemSpots[0].addSubviewWithDefaultConstraints(createImagePreview())
-        itemSpots[1].addSubviewWithDefaultConstraints(createImagePreview())
-        itemSpots[2].addSubviewWithDefaultConstraints(createImagePreview())
-        itemSpots[3].addSubviewWithDefaultConstraints(createImagePreview())
-//        itemSpots[3].isHidden = true
-//        itemSpots[2].isHidden = true
-//        rightPreviewsContainerView.isHidden = true
+        
+        previewsContainerView.addArrangedSubview(topPreviewsContainerView)
+        
+        topPreviewsContainerView.addArrangedSubview(itemSpots[0])
+        topPreviewsContainerView.addArrangedSubview(itemSpots[1])
+        
+        previewsContainerView.addArrangedSubview(bottomPreviewsContainerView)
+        
+        bottomPreviewsContainerView.addArrangedSubview(itemSpots[2])
+        bottomPreviewsContainerView.addArrangedSubview(itemSpots[3])
     }
         
     override open func setupAppearance() {
@@ -159,16 +176,17 @@ open class LMChatMessageGallaryView: LMView {
 //        moreItemsOverlay.textColor = appearance.colorPalette.staticColorText
 //        moreItemsOverlay.backgroundColor = appearance.colorPalette.background5
     }
-    
-    func createImagePreview() -> ImagePreview {
-        let imagePreview =  ImagePreview()
-            .translatesAutoresizingMaskIntoConstraints()
-//        imagePreview.backgroundColor = .green
-        return imagePreview
-    }
-    
-    func setData(_ data: [String]?) {
-        
+    func setData(_ data: [ContentModel]) {
+        itemSpots.forEach({$0.isHidden = true})
+        bottomPreviewsContainerView.isHidden = data.count < 2
+        for (index, item) in data.enumerated() {
+            if index > 3 { break }
+            guard let imageUrl = item.thumbnailUrl ?? item.fileUrl else {
+                return
+            }
+            itemSpots[index].isHidden = false
+            itemSpots[index].setData(imageUrl)
+        }
     }
     
 }
@@ -224,6 +242,10 @@ extension LMChatMessageGallaryView {
         override open func setupLayouts() {
             super.setupLayouts()
             pinSubView(subView: imageView)
+        }
+        
+        func setData(_ url: String) {
+            imageView.kf.setImage(with: URL(string: url), placeholder: Constants.shared.images.placeholderImage)
         }
         
 //        override open func updateContent() {

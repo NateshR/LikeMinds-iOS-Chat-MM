@@ -9,16 +9,20 @@ import Foundation
 import LMChatUI_iOS
 
 open class LMMessageReaction: LMView {
+    
+    public struct ContentModel {
+        public let reaction: String
+        public let reactionCount: String
+    }
     /// The `UIImageView` instance that shows the avatar image.
     /// Container holding all previews.
     open private(set) lazy var previewsContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
-        view.distribution = .fillEqually
-        view.alignment = .fill
-        view.spacing = 2
+        view.alignment = .center
+        view.spacing = 4
         view.isLayoutMarginsRelativeArrangement = true
-        view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+        view.directionalLayoutMargins = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
         return view
     }()
     
@@ -28,17 +32,16 @@ open class LMMessageReaction: LMView {
         label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 18)
         label.textColor = .white
-        label.text = "🥰"
         return label
     }()
     
     open private(set) lazy var countLabel: LMLabel = {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
-        label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .white
-        label.text = "1"
+        label.numberOfLines = 1
+        label.textAlignment = .center
+        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.textColor = Appearance.shared.colors.previewSubtitleTextColor
         return label
     }()
     
@@ -48,8 +51,8 @@ open class LMMessageReaction: LMView {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        backgroundColor = .cyan
-        cornerRadius(with: 8)
+        backgroundColor = Appearance.shared.colors.white
+        cornerRadius(with: 14)
     }
     
     // MARK: setupViews
@@ -64,5 +67,10 @@ open class LMMessageReaction: LMView {
     open override func setupLayouts() {
         super.setupLayouts()
         pinSubView(subView: previewsContainerView)
+    }
+    
+    func setData(_ data: ContentModel) {
+        emojiLabel.text = data.reaction
+        countLabel.text = data.reactionCount
     }
 }

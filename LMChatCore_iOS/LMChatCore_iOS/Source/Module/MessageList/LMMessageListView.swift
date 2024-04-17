@@ -38,7 +38,7 @@ open class LMMessageListView: LMView {
             public let message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
-            public let attachments: [String]?
+            public let attachments: [Attachment]?
             public let replied: [Message]?
             public let isDeleted: Bool?
             public let createdBy: String?
@@ -46,11 +46,30 @@ open class LMMessageListView: LMView {
             public let isIncoming: Bool?
             public let messageType: Int
             public let createdTime: String?
+            public let ogTags: OgTags?
         }
         
         public struct Reaction {
-            public let memberUUID: String
+            public let memberUUID: [String]
             public let reaction: String
+            public let count: Int
+        }
+        
+        public struct Attachment {
+            public let fileUrl: String?
+            public let thumbnailUrl: String?
+            public let fileSize: Int64?
+            public let numberOfPages: Int?
+            public let duration: Int?
+            public let fileType: String?
+            public let fileName: String?
+        }
+        
+        public struct OgTags {
+            public let link: String?
+            public let thumbnailUrl: String?
+            public let title: String?
+            public let subtitle: String?
         }
     }
     
@@ -229,7 +248,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             return self.createContextMenu()
         }
     }
-    
+  /*
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         makeTargetedPreview(for: configuration)
@@ -244,7 +263,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionCommitAnimating) {
         animator.preferredCommitStyle = .pop
     }
-    
+    */
     @available(iOS 13.0, *)
     func makeTargetedPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         guard let identifier = configuration.identifier as? String else { return nil }

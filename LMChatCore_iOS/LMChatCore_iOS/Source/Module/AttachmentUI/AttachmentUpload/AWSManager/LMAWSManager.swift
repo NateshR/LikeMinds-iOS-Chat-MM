@@ -21,6 +21,14 @@ final class LMAWSManager {
     
     public static let shared = LMAWSManager()
     
+    public static func awsFilePathForConversation(chatroomId: String,
+                                                conversationId: String,
+                                                attachmentType: String,
+                                                  fileExtension: String,
+                                                isThumbnail: Bool = false) -> String {
+        "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+    }
+    
     typealias progressBlock = (_ progress: Double) -> Void
     typealias completionBlock = (_ response: String?, _ error: Error?) -> Void
     

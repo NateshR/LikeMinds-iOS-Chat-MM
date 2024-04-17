@@ -25,7 +25,7 @@ public final class LMChatAttachmentViewModel {
     
     
     public static func createModule() throws -> LMChatAttachmentViewController {
-//        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.attachmentMessageScreen.init()
         let viewmodel = Self.init(delegate: viewcontroller)

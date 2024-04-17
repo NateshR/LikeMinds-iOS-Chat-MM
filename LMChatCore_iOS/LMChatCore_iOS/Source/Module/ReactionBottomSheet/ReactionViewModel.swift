@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import LikeMindsChat
 
 protocol ReactionViewModelProtocol: AnyObject {
     func showData(with collection: [ReactionTitleCell.ContentModel], cells: [ReactionViewCell.ContentModel])
 }
 
-final class ReactionViewModel {
+final public  class ReactionViewModel {
     var delegate: ReactionViewModelProtocol?
     
     var reactions: [ReactionTitleCell.ContentModel] = [ .init(title: "All", count: 5, isSelected: true),
@@ -28,7 +29,8 @@ final class ReactionViewModel {
         self.delegate = delegate
     }
     
-    static func createModule() -> ReactionViewController {
+    public static func createModule() throws -> ReactionViewController? {
+        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         let vc = ReactionViewController()
         let viewmodel = Self.init(delegate: vc)
         vc.viewModel = viewmodel
@@ -37,5 +39,29 @@ final class ReactionViewModel {
     
     func getData() {
         delegate?.showData(with: reactions, cells: table)
+    }
+    
+    func deleteConversationReaction(conversationId: String) {
+        let request = DeleteReactionRequest.builder()
+            .conversationId(conversationId)
+            .build()
+        LMChatClient.shared.deleteReaction(request: request) { response in
+            guard response.success else {
+                print(response.errorMessage)
+                return
+            }
+        }
+    }
+    
+    func deleteChatroomReaction(chatroomId: String) {
+        let request = DeleteReactionRequest.builder()
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.deleteReaction(request: request) { response in
+            guard response.success else {
+                print(response.errorMessage)
+                return
+            }
+        }
     }
 }

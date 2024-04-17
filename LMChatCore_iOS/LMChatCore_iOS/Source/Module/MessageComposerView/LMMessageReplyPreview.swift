@@ -18,9 +18,9 @@ open class LMMessageReplyPreview: LMView {
     public struct ContentModel {
         public let username: String?
         public let replyMessage: String?
-        public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?)]?
+        public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?
         
-        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?)]?) {
+        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?) {
             self.username = username
             self.replyMessage = replyMessage
             self.attachmentsUrls = attachmentsUrls
@@ -32,13 +32,15 @@ open class LMMessageReplyPreview: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
+        view.cornerRadius(with: 8)
         return view
     }()
     
     open private(set) lazy var subviewContainer: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.cornerRadius(with: 8)
-        view.backgroundColor = Appearance.shared.colors.gray3
+        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
         return view
     }()
     
@@ -52,7 +54,7 @@ open class LMMessageReplyPreview: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Username"
         label.font = Appearance.shared.fonts.headingFont1
-        label.textColor = Appearance.shared.colors.textColor
+        label.textColor = Appearance.shared.colors.red
         label.setContentHuggingPriority(.required, for: .vertical)
         return label
     }()
@@ -69,8 +71,8 @@ open class LMMessageReplyPreview: LMView {
     open private(set) lazy var messageAttachmentImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
-        image.backgroundColor = .green
-        image.cornerRadius(with: 8)
+        image.backgroundColor = .clear
+//        image.cornerRadius(with: 8)
         return image
     }()
     
@@ -93,6 +95,7 @@ open class LMMessageReplyPreview: LMView {
         view.axis = .vertical
         view.alignment = .top
         view.spacing = 0
+        view.directionalLayoutMargins = .init(top: 6, leading: 0, bottom: 6, trailing:10)
         return view
     }()
     
@@ -118,13 +121,13 @@ open class LMMessageReplyPreview: LMView {
             containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            sidePannelColorView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            sidePannelColorView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
-            sidePannelColorView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10),
+            sidePannelColorView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            sidePannelColorView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            sidePannelColorView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             sidePannelColorView.widthAnchor.constraint(equalToConstant: 4),
             
             horizontalReplyStackView.leadingAnchor.constraint(equalTo: sidePannelColorView.leadingAnchor, constant: 10),
-            horizontalReplyStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            horizontalReplyStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             horizontalReplyStackView.topAnchor.constraint(equalTo: sidePannelColorView.topAnchor),
             horizontalReplyStackView.bottomAnchor.constraint(equalTo: sidePannelColorView.bottomAnchor),
             
@@ -136,12 +139,55 @@ open class LMMessageReplyPreview: LMView {
     
     public func setData(_ data: ContentModel) {
         self.userNameLabel.text = data.username
-        self.messageLabel.text = data.replyMessage
+        let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
+        self.messageLabel.attributedText = createAttributedString(for: data.attachmentsUrls?.first?.fileType, with: attributedText.string)
         if let attachmentsUrls = data.attachmentsUrls,
            let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),
            let url = URL(string: firstUrl) {
            messageAttachmentImageView.kf.setImage(with: url)
+            messageAttachmentImageView.isHidden = false
+        } else {
+            messageAttachmentImageView.isHidden = true
         }
+    }
+    
+    func createAttributedString(for fileType: String?, with message: String?) -> NSAttributedString {
+        guard let fileType else {
+            return NSAttributedString(string: message ?? "")
+        }
+        var image: UIImage = UIImage()
+        var initalType = ""
+        switch fileType.lowercased() {
+        case "image", "video":
+            image = Constants.shared.images.galleryIcon
+            initalType = "Photo"
+        case "audio":
+            image = Constants.shared.images.micIcon
+            initalType = "Audio"
+        case "pdf", "doc":
+            image = Constants.shared.images.documentsIcon
+            initalType = "Document"
+        case "link":
+            image = Constants.shared.images.linkIcon
+        default:
+            break
+        }
+        // Create Attachment
+        let imageAttachment = NSTextAttachment()
+        imageAttachment.image = image
+        // Set bound to reposition
+//        let imageOffsetY: CGFloat = -5.0
+//        imageAttachment.bounds = CGRect(x: 0, y: imageOffsetY, width: imageAttachment.image!.size.width, height: imageAttachment.image!.size.height)
+        // Create string with attachment
+        let attachmentString = NSAttributedString(attachment: imageAttachment)
+        // Initialize mutable string
+        let completeText = NSMutableAttributedString(string: "")
+        // Add image to mutable string
+        completeText.append(attachmentString)
+        // Add your text to mutable string
+        let textAfterIcon = NSAttributedString(string: initalType + " " + (message ?? ""))
+        completeText.append(textAfterIcon)
+        return textAfterIcon
     }
     
     @objc func clearButtonClicked(_ sender:UIButton) {

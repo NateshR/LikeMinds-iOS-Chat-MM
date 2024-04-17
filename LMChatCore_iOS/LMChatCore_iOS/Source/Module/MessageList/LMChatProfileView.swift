@@ -13,8 +13,8 @@ open class LMChatProfileView: LMView {
     open private(set) var imageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
-        image.setWidthConstraint(with: 48)
-        image.setHeightConstraint(with: 48)
+        image.setWidthConstraint(with: 36)
+        image.setHeightConstraint(with: 36)
         image.image = Constants.shared.images.personCircleFillIcon
         return image
     }()

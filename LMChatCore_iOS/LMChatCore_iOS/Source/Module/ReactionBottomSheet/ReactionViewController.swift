@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ReactionViewController: UIViewController {
+open class ReactionViewController: UIViewController {
     lazy var containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -69,7 +69,7 @@ class ReactionViewController: UIViewController {
     var titleData: [ReactionTitleCell.ContentModel] = []
     var emojiData: [ReactionViewCell.ContentModel] = []
     
-    override func loadView() {
+    open override func loadView() {
         super.loadView()
         setupViews()
         setupLayouts()
@@ -120,7 +120,7 @@ class ReactionViewController: UIViewController {
         bottomConstraint?.isActive = true
     }
     
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         bottomConstraint?.constant = containerView.frame.height
         
@@ -128,7 +128,7 @@ class ReactionViewController: UIViewController {
         dimmedView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDimmedView)))
     }
     
-    override func viewDidAppear(_ animated: Bool) {
+    open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         animateShowDimmedView()
         animatePresentContainer()
@@ -171,27 +171,27 @@ extension ReactionViewController: ReactionViewModelProtocol {
 
 
 extension ReactionViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         emojiData.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! ReactionViewCell
         cell.configure(with: emojiData[indexPath.row])
         return cell
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         64
     }
 }
 
 extension ReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         titleData.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! ReactionTitleCell
         cell.configure(data: titleData[indexPath.row])
         return cell
