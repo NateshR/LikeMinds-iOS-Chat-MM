@@ -13,14 +13,14 @@ public protocol LMBottomMessageReplyPreviewDelegate: AnyObject {
 }
 
 @IBDesignable
-open class LMBottomMessageReplyPreview: LMView {
+open class LMMessageReplyPreview: LMView {
     
     public struct ContentModel {
         public let username: String?
         public let replyMessage: String?
-        public let attachmentsUrls: [String]?
+        public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?)]?
         
-        public init(username: String?, replyMessage: String?, attachmentsUrls: [String]?) {
+        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?)]?) {
             self.username = username
             self.replyMessage = replyMessage
             self.attachmentsUrls = attachmentsUrls
@@ -138,7 +138,7 @@ open class LMBottomMessageReplyPreview: LMView {
         self.userNameLabel.text = data.username
         self.messageLabel.text = data.replyMessage
         if let attachmentsUrls = data.attachmentsUrls,
-           let firstUrl = attachmentsUrls.first,
+           let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),
            let url = URL(string: firstUrl) {
            messageAttachmentImageView.kf.setImage(with: url)
         }

@@ -35,8 +35,8 @@ class ViewController: UIViewController {
         return view
     }()
     
-//    open private(set) lazy var containerView: LMBottomMessageReplyPreview = {
-//        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMMessageReplyPreview = {
+//        let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .cyan
 //        return view
 //    }()
@@ -55,15 +55,16 @@ class ViewController: UIViewController {
 //        setupLayouts()
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard let homefeedvc =
-              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
+//              try? ReactionViewModel.createModule() else { return }
+//              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
-//            try? LMHomeFeedViewModel.createModule() else { return }
+            try? LMHomeFeedViewModel.createModule() else { return }
 //            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
-            self.addChild(homefeedvc)
-            self.view.addSubview(homefeedvc.view)
-            homefeedvc.didMove(toParent: self)
-            
+//            self.addChild(homefeedvc)
+//            self.view.addSubview(homefeedvc.view)
+//            homefeedvc.didMove(toParent: self)
+            self.navigationController?.pushViewController(homefeedvc, animated: true)
 //            self.navigationItem.leftBarButtonItem = LMBarButtonItem()
         }
     }
