@@ -99,8 +99,16 @@ open class LMChatMessageCell: LMTableViewCell {
     
     
     // MARK: configure
-    open func setData(with data: ContentModel) {
-        chatMessageView.setDataView(data)
+    open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+        chatMessageView.setDataView(data, delegate: delegate, index: index)
+    }
+    
+    public func resetAudio() {
+        chatMessageView.resetAudio()
+    }
+    
+    public func seekSlider(to position: Float, url: String) {
+        chatMessageView.seekSlider(to: position, url: url)
     }
 }
 

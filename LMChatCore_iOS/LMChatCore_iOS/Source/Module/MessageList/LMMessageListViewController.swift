@@ -61,7 +61,7 @@ open class LMMessageListViewController: LMViewController {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
+        bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
         bottomTextViewContainerBottomConstraints?.isActive = true
         NSLayoutConstraint.activate([
             messageListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -82,7 +82,7 @@ open class LMMessageListViewController: LMViewController {
             return
         }
         self.bottomTextViewContainerBottomConstraints?.isActive = false
-        self.bottomTextViewContainerBottomConstraints?.constant = -((frame.size.height - self.view.safeAreaInsets.bottom) + 97)
+        self.bottomTextViewContainerBottomConstraints?.constant = -((frame.size.height - self.view.safeAreaInsets.bottom))
         self.bottomTextViewContainerBottomConstraints?.isActive = true
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -92,7 +92,7 @@ open class LMMessageListViewController: LMViewController {
     @objc
     open override func keyboardWillHide(_ sender: Notification) {
         self.bottomTextViewContainerBottomConstraints?.isActive = false
-        self.bottomTextViewContainerBottomConstraints?.constant = -100
+        self.bottomTextViewContainerBottomConstraints?.constant = 0
         self.bottomTextViewContainerBottomConstraints?.isActive = true
         self.view.layoutIfNeeded()
     }

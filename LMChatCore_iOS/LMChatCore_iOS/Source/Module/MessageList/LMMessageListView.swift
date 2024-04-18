@@ -98,6 +98,7 @@ open class LMMessageListView: LMView {
     private var data: [BaseContentModel] = []
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
+    public var audioIndex: IndexPath?
     
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
@@ -135,6 +136,19 @@ open class LMMessageListView: LMView {
         backgroundColor = Appearance.shared.colors.backgroundColor
         containerView.backgroundColor = Appearance.shared.colors.backgroundColor
         tableView.backgroundColor = Appearance.shared.colors.backgroundColor
+    }
+    
+    
+    // MARK: setupObservers
+    open override func setupObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
+    }
+    
+    @objc 
+    open func audioEnded(notification: Notification) {
+        if let url = notification.object as? URL {
+            
+        }
     }
     
     open func reloadData() {
@@ -195,7 +209,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         switch item.messageType {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.setData(with: .init(message: item))
+                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 return cell
             }
         default:
@@ -223,10 +237,6 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-        let offsetY = tableView.contentOffset.y
-        let contentHeight = tableView.contentSize.height
-
         let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview)
         if translation.y > 0 {
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
@@ -360,3 +370,21 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
 }
 
 
+// MARK: LMChatAudioProtocol
+extension LMMessageListView: LMChatAudioProtocol {
+    public func didTapPlayPauseButton(for url: String, index: IndexPath) {
+        if let audioIndex {
+            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+        }
+        
+        audioIndex = index
+        
+        LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
+            (self?.tableView.cellForRow(at: index) as? LMChatMessageCell)?.seekSlider(to: Float(progress), url: url)
+        }
+    }
+    
+    public func didSeekTo(_ position: Float, _ url: String, index: IndexPath) {
+        LMChatAudioPlayManager.shared.seekAt(position, url: url)
+    }
+}

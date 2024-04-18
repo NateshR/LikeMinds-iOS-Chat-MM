@@ -56,10 +56,10 @@ class ViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard let homefeedvc =
 //              try? ReactionViewModel.createModule() else { return }
-//              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
+              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
-            try? LMHomeFeedViewModel.createModule() else { return }
+//            try? LMHomeFeedViewModel.createModule() else { return }
 //            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
 //            self.addChild(homefeedvc)
 //            self.view.addSubview(homefeedvc.view)
