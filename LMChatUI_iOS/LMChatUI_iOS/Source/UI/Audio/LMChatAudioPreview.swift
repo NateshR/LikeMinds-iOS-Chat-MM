@@ -5,21 +5,10 @@
 //  Created by Devansh Mohata on 17/04/24.
 //
 
+import Kingfisher
 import UIKit
 
 open class LMChatAudioPreview: LMView {
-    public struct ContentModel {
-        let url: String?
-        let thumbnail: String?
-        let duration: Int
-        
-        public init(url: String?, thumbnail: String?, duration: Int) {
-            self.url = url
-            self.thumbnail = thumbnail
-            self.duration = duration
-        }
-    }
-    
     // MARK: UI Elements
     lazy var containerView: LMView = {
         let view = LMView()
@@ -53,6 +42,8 @@ open class LMChatAudioPreview: LMView {
         let label = LMLabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "00:00"
+        label.textAlignment = .center
+        label.textColor = .white
         label.font = .systemFont(ofSize: 10)
         return label
     }()
@@ -77,7 +68,7 @@ open class LMChatAudioPreview: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Audio"
         label.font = .systemFont(ofSize: 14)
-        label.textColor = Appearance.shared.colors.gray1
+        label.textColor = .lightGray
         return label
     }()
     
@@ -119,20 +110,21 @@ open class LMChatAudioPreview: LMView {
         thumbnailImage.pinSubView(subView: headphoneContainerView)
         thumbnailImage.setWidthConstraint(with: thumbnailImage.heightAnchor)
         
-        headphoneImage.addConstraint(top: (headphoneContainerView.topAnchor, 8),
-                                     leading: (headphoneContainerView.leadingAnchor, 8),
-                                     trailing: (headphoneContainerView.trailingAnchor, -8))
-        headphoneImage.setWidthConstraint(with: headphoneImage.heightAnchor)
+        headphoneImage.addConstraint(top: (headphoneContainerView.topAnchor, 4),
+                                     leading: (headphoneContainerView.leadingAnchor, 4),
+                                     trailing: (headphoneContainerView.trailingAnchor, -4))
         
-        durationLbl.addConstraint(bottom: (headphoneContainerView.bottomAnchor, -4),
-                                  leading: (headphoneContainerView.leadingAnchor, 8),
-                                  trailing: (headphoneContainerView.trailingAnchor, -8))
+        durationLbl.topAnchor.constraint(equalTo: headphoneImage.bottomAnchor, constant: 2).isActive = true
+        durationLbl.leadingAnchor.constraint(equalTo: headphoneContainerView.leadingAnchor, constant: 4).isActive = true
+        durationLbl.trailingAnchor.constraint(equalTo: headphoneContainerView.trailingAnchor, constant: -4).isActive = true
+        durationLbl.bottomAnchor.constraint(equalTo: headphoneContainerView.bottomAnchor, constant: -4).isActive = true
         
         titleLabel.addConstraint(bottom: (thumbnailImage.bottomAnchor, 0),
-                                 leading: (thumbnailImage.trailingAnchor, 8))
+                                 leading: (thumbnailImage.trailingAnchor, 8),
+                                 trailing: (containerView.trailingAnchor, -8))
         
         playPauseButton.addConstraint(top: (thumbnailImage.topAnchor, 8),
-                                      bottom: (titleLabel.topAnchor, 8),
+                                      bottom: (titleLabel.topAnchor, -8),
                                       leading: (thumbnailImage.trailingAnchor, 8))
         playPauseButton.setHeightConstraint(with: 36)
         playPauseButton.setWidthConstraint(with: playPauseButton.heightAnchor)
@@ -189,9 +181,12 @@ open class LMChatAudioPreview: LMView {
     
     
     // MARK: configure
-    open func configure(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
-        self.url = data.url
-        self.duration = data.duration
+    open func configure(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+        titleLabel.text = data.fileName
+        titleLabel.isHidden = data.fileName?.isEmpty != false
+        url = data.url
+        duration = data.duration
+        thumbnailImage.kf.setImage(with: URL(string: data.thumbnail ?? ""))
         self.index = index
         durationLbl.text = convertSecondsToFormattedTime(seconds: data.duration)
         self.delegate = delegate

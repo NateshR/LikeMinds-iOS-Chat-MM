@@ -211,7 +211,7 @@ open class LMChatMessageContentView: LMView {
         return preview
     }
 
-    func createAudioPreview(with data: LMChatVoiceNotePreview.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) -> LMChatVoiceNotePreview {
+    func createAudioPreview(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol, index: IndexPath) -> LMChatVoiceNotePreview {
         let preview = LMChatVoiceNotePreview().translatesAutoresizingMaskIntoConstraints()
         preview.translatesAutoresizingMaskIntoConstraints = false
         preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
@@ -272,6 +272,8 @@ open class LMChatMessageContentView: LMView {
             docPreview(attachments)
         case "audio":
             audioPreview(attachments, delegate: delegate, index: index)
+        case "voice_note":
+            voiceNotePreview(attachments, delegate: delegate, index: index)
         default:
             break
         }
@@ -305,6 +307,19 @@ open class LMChatMessageContentView: LMView {
         docPreviewContainerStackView.isHidden = false
     }
     
+    func voiceNotePreview(_ attachments: [LMMessageListView.ContentModel.Attachment], delegate: LMChatAudioProtocol, index: IndexPath) {
+        guard !attachments.isEmpty else {
+            audioPreviewContainerStackView.isHidden = true
+            return
+        }
+        
+        attachments.forEach { attachment in
+            audioPreviewContainerStackView.addArrangedSubview(createAudioPreview(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index))
+        }
+        
+        audioPreviewContainerStackView.isHidden = false
+    }
+    
     func audioPreview(_ attachments: [LMMessageListView.ContentModel.Attachment], delegate: LMChatAudioProtocol, index: IndexPath) {
         guard !attachments.isEmpty else {
             audioPreviewContainerStackView.isHidden = true
@@ -312,10 +327,11 @@ open class LMChatMessageContentView: LMView {
         }
         
         attachments.forEach { attachment in
-            let lc = LMChatAudioPreview()
-            lc.translatesAutoresizingMaskIntoConstraints = false
-            audioPreviewContainerStackView.addArrangedSubview(lc)
-//            audioPreviewContainerStackView.addArrangedSubview(createAudioPreview(with: .init(url: attachment.fileUrl, duration: attachment.duration ?? 0), delegate: delegate, index: index))
+            let preview = LMChatAudioPreview()
+            preview.translatesAutoresizingMaskIntoConstraints = false
+            preview.configure(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index)
+            preview.setHeightConstraint(with: 72)
+            audioPreviewContainerStackView.addArrangedSubview(preview)
         }
         
         audioPreviewContainerStackView.isHidden = false
@@ -417,12 +433,14 @@ extension LMChatMessageContentView: UIContextMenuInteractionDelegate {
     public func resetAudio() {
         audioPreviewContainerStackView.subviews.forEach { sub in
             (sub as? LMChatVoiceNotePreview)?.resetView()
+            (sub as? LMChatAudioPreview)?.resetView()
         }
     }
     
     public func seekSlider(to position: Float, url: String) {
         audioPreviewContainerStackView.subviews.forEach { sub in
             (sub as? LMChatVoiceNotePreview)?.updateSeekerValue(with: position, for: url)
+            (sub as? LMChatAudioPreview)?.updateSeekerValue(with: position, for: url)
         }
     }
 }

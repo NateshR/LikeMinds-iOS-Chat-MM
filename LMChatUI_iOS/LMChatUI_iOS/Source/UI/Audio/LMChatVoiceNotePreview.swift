@@ -12,17 +12,21 @@ public protocol LMChatAudioProtocol {
     func didSeekTo(_ position: Float, _ url: String, index: IndexPath)
 }
 
-open class LMChatVoiceNotePreview: LMView {
-    public struct ContentModel {
-        let url: String?
-        let duration: Int
-        
-        public init(url: String?, duration: Int) {
-            self.url = url
-            self.duration = duration
-        }
-    }
+public struct LMChatAudioContentModel {
+    let fileName: String?
+    let url: String?
+    let duration: Int
+    let thumbnail: String?
     
+    public init(fileName: String?, url: String?, duration: Int, thumbnail: String?) {
+        self.fileName = fileName
+        self.url = url
+        self.duration = duration
+        self.thumbnail = thumbnail
+    }
+}
+
+open class LMChatVoiceNotePreview: LMView {
     // MARK: UI Elements
     var containerView: LMView = {
         let view = LMView()
@@ -153,7 +157,7 @@ open class LMChatVoiceNotePreview: LMView {
     
     
     // MARK: configure
-    open func configure(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+    open func configure(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         self.url = data.url
         self.duration = data.duration
         self.index = index
