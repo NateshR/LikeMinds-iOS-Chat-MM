@@ -5,29 +5,26 @@
 //  Created by Devansh Mohata on 20/04/24.
 //
 
-import AVFoundation
 import LMChatUI_iOS
-import AVKit
+import UIKit
 
-public final class LMChatVideoPlayer: LMView {
-    let playerViewController = AVPlayerViewController()
+open class LMChatMediaVideoPreview: LMCollectionViewCell {
+    open private(set) lazy var videoPlayer: LMChatVideoPlayer = {
+        let player = LMChatVideoPlayer()
+        player.translatesAutoresizingMaskIntoConstraints = false
+        return player
+    }()
     
-    func configure(with videoURL: String) {
-        guard let url = URL(string: videoURL) else { return }
-        let player = AVPlayer(url: url)
-        
-        
-        playerViewController.player = player
-        playerViewController.allowsPictureInPicturePlayback = false
-        playerViewController.entersFullScreenWhenPlaybackBegins = false
-        playerViewController.showsPlaybackControls = true
-        
-        playerViewController.view.frame.size.height = frame.size.height
-        playerViewController.view.frame.size.width = frame.size.width
-        addSubview(playerViewController.view)
+    open override func setupViews() {
+        super.setupViews()
+        contentView.addSubviewWithDefaultConstraints(videoPlayer)
     }
     
-    func stopVideo() {
-        playerViewController.player?.pause()
+    open func configure(with url: String) {
+        videoPlayer.configure(with: url)
+    }
+    
+    open func stopVideo() {
+        videoPlayer.stopVideo()
     }
 }
