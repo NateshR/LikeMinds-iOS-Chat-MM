@@ -141,7 +141,7 @@ open class LMChatAttachmentViewController: LMViewController {
     
     func editImage(_ image: UIImage, editModel: LMEditImageModel?) {
         LMEditImageViewController.showEditImageVC(parentVC: self, image: image, editModel: editModel) { [weak self] resImage, editModel in
-            self?.zoomableImageViewContainer.image = resImage
+            self?.zoomableImageViewContainer.configure(with: resImage)
             self?.selectedMedia?.photo = resImage
         }
     }
@@ -162,7 +162,8 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
                 cell.imageView.borderColor(withBorderWidth: 2, with: .green)
                 self?.zoomableImageViewContainer.zoomScale = 1
                 self?.selectedMedia = data
-                self?.zoomableImageViewContainer.image = data.photo
+//                self?.zoomableImageViewContainer.image = data.photo
+                self?.zoomableImageViewContainer.configure(with: data.url)
             }
             return cell
         }
