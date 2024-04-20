@@ -30,4 +30,8 @@ public final class LMChatVideoPlayer: LMView {
     func stopVideo() {
         playerViewController.player?.pause()
     }
+    
+    func playVideo() {
+        playerViewController.player?.play()
+    }
 }

@@ -17,6 +17,11 @@ open class LMChatMediaImagePreview: LMCollectionViewCell {
         return image
     }()
     
+    open override func prepareForReuse() {
+        super.prepareForReuse()
+        resetZoomScale()
+    }
+    
     open override func setupViews() {
         super.setupViews()
         contentView.addSubviewWithDefaultConstraints(previewImageView)
@@ -25,5 +30,9 @@ open class LMChatMediaImagePreview: LMCollectionViewCell {
     open func configure(with urlString: String) {
         guard let url = URL(string: urlString) else { return }
         previewImageView.configure(with: url)
+    }
+    
+    open func resetZoomScale() {
+        previewImageView.zoomScale = 1
     }
 }

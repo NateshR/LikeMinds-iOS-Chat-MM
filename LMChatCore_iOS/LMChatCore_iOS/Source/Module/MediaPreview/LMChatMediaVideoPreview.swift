@@ -22,6 +22,7 @@ open class LMChatMediaVideoPreview: LMCollectionViewCell {
     
     open func configure(with url: String) {
         videoPlayer.configure(with: url)
+        videoPlayer.playVideo()
     }
     
     open func stopVideo() {
