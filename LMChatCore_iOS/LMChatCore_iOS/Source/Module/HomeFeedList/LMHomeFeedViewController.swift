@@ -12,7 +12,7 @@ open class LMHomeFeedViewController: LMViewController {
     
     var viewModel: LMHomeFeedViewModel?
     
-    open private(set) lazy var containerView: LMHomeFeedListView = {
+    open private(set) lazy var feedListView: LMHomeFeedListView = {
         let view = LMHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
         view.delegate = self
@@ -32,19 +32,19 @@ open class LMHomeFeedViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
-        self.view.addSubview(containerView)
+        self.view.addSubview(feedListView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             //            containerView.heightAnchor.constraint(equalToConstant: 40),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+            feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
     }
 }
@@ -55,14 +55,14 @@ extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
        let chatrooms =  (viewModel?.chatrooms ?? []).compactMap({ chatroom in
             LMHomeFeedChatroomCell.ContentModel(chatroom: chatroom)
         })
-        containerView.updateChatroomsData(chatroomData: chatrooms)
-        containerView.reloadData()
+        feedListView.updateChatroomsData(chatroomData: chatrooms)
+        feedListView.reloadData()
     }
     
     public func updateHomeFeedExploreCountData() {
         guard let countData = viewModel?.exploreTabCountData else { return }
-        containerView.updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
-        containerView.reloadData()
+        feedListView.updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
+        feedListView.reloadData()
     }
     
     
@@ -74,7 +74,14 @@ extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
 extension LMHomeFeedViewController: LMHomFeedListViewDelegate {
     
     public func didTapOnCell(indexPath: IndexPath) {
-        print("Chatroom clicked")
+        switch feedListView.tableSections[indexPath.section].sectionType {
+        case .exploreTab:
+            NavigationScreen.shared.perform(.exploreFeed, from: self, params: nil)
+        case .chatrooms:
+            guard let viewModel else { return }
+            let chatroom = viewModel.chatrooms[indexPath.row]
+            NavigationScreen.shared.perform(.chatroom(chatroomId: chatroom.id), from: self, params: nil)
+        }
     }
     
     public func fetchMoreData() {

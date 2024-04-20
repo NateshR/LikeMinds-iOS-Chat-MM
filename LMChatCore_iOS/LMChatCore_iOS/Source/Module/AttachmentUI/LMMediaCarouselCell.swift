@@ -13,10 +13,12 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
     public struct ContentModel {
         public let image: UIImage?
         public let fileUrl: URL?
+        public let fileType: String?
         
-        public init(image: UIImage?, fileUrl: URL?) {
+        public init(image: UIImage?, fileUrl: URL?, fileType: String) {
             self.image = image
             self.fileUrl = fileUrl
+            self.fileType = fileType
         }
     }
     
@@ -84,12 +86,15 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
     // MARK: setData
     open func setData(with data: ContentModel) {
         imageView.borderColor(withBorderWidth: 2, with: .clear)
-        if let url = data.fileUrl {
-            imageView.image = nil
-            playIconImage.isHidden = false
-        } else {
+        guard let url = data.fileUrl else { return }
+        switch data.fileType {
+        case "photo", "image":
+            imageView.kf.setImage(with: url)
             playIconImage.isHidden = true
-            imageView.image = data.image
+        case "video":
+            playIconImage.isHidden = false
+        default:
+            break
         }
     }
     

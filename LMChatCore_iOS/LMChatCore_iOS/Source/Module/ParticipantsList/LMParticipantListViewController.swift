@@ -25,6 +25,7 @@ open class LMParticipantListViewController: LMViewController {
         // Do any additional setup after loading the view.
         setupViews()
         setupLayouts()
+        self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
         self.setupSearchBar()
         viewModel?.getParticipants()
     }
@@ -33,7 +34,6 @@ open class LMParticipantListViewController: LMViewController {
         navigationItem.searchController = searchController
         navigationController?.navigationBar.prefersLargeTitles = false
         searchController.obscuresBackgroundDuringPresentation = false
-        self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil)
     }
     
     // MARK: setupViews

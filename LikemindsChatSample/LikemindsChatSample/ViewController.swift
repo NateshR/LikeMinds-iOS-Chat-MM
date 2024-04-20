@@ -55,6 +55,7 @@ class ViewController: UIViewController {
 //        setupLayouts()
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard let homefeedvc =
+//                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
 //              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }

@@ -35,7 +35,7 @@ open class LMChatReportViewController: LMViewController {
         return stack
     }()
     
-    open private(set) lazy var titleLabel: LMLabel = {
+    open private(set) lazy var reportTitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Please specify the problem to continue"
         label.font = Appearance.shared.fonts.headingFont1
@@ -43,7 +43,7 @@ open class LMChatReportViewController: LMViewController {
         return label
     }()
     
-    open private(set) lazy var subtitleLabel: LMLabel = {
+    open private(set) lazy var reportSubtitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "You would be able to report this content after selecting a problem."
         label.numberOfLines = 0
@@ -78,6 +78,7 @@ open class LMChatReportViewController: LMViewController {
     
     open private(set) lazy var submitButton: LMButton = {
         let button = LMButton.createButton(with: "REPORT", image: nil, textColor: .white, textFont: Appearance.shared.fonts.buttonFont3, contentSpacing: .init(top: 16, left: 60, bottom: 16, right: 60))
+        button.setFont(Appearance.shared.fonts.headingFont1)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.clipsToBounds = true
         button.backgroundColor = Appearance.shared.colors.red
@@ -104,7 +105,7 @@ open class LMChatReportViewController: LMViewController {
         
         containerScrollView.addSubview(stackView)
         
-        [titleLabel, subtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
+        [reportTitleLabel, reportSubtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
             stackView.addArrangedSubview(subview)
         }
     }
@@ -138,7 +139,7 @@ open class LMChatReportViewController: LMViewController {
                                    bottom: (containerView.bottomAnchor, -16),
                                    centerX: (containerView.centerXAnchor, 0))
         
-        [titleLabel, subtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
+        [reportTitleLabel, reportSubtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
             subview.addConstraint(leading: (stackView.leadingAnchor, 16),
                                   trailing: (stackView.trailingAnchor, -16))
         }

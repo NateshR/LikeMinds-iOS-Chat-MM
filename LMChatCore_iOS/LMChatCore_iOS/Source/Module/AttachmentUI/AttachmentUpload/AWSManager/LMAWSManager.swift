@@ -26,7 +26,11 @@ final class LMAWSManager {
                                                 attachmentType: String,
                                                   fileExtension: String,
                                                 isThumbnail: Bool = false) -> String {
-        "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+        if isThumbnail {
+            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+        } else {
+          return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+        }
     }
     
     typealias progressBlock = (_ progress: Double) -> Void
@@ -45,7 +49,7 @@ final class LMAWSManager {
     ///   - contenType: Type of Content, can be anything
     ///   - progress: Tells us about the progress rate of uploading
     ///   - completion: What to do after file is done uploading
-    func uploadfile(fileUrl: URL, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
+    func uploadfile(fileUrl: URL, awsPath: String, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
         do {
             _ = fileUrl.startAccessingSecurityScopedResource()
             let data = try Data(contentsOf: fileUrl)
@@ -100,7 +104,7 @@ final class LMAWSManager {
         }
     }
     
-    func uploadfile(fileData: Data, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
+    func uploadfile(fileData: Data, awsPath: String, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
         let expression = AWSS3TransferUtilityUploadExpression()
         expression.progressBlock = {(task, awsProgress) in
             guard let uploadProgress = progress else { return }

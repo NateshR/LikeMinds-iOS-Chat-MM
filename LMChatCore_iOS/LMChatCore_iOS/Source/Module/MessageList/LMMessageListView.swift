@@ -17,6 +17,7 @@ public enum ScrollDirection : Int {
 public protocol LMMessageListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
     func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
+    func didTappedOnReaction(reaction: String, indexPath: IndexPath)
 }
 
 @IBDesignable
@@ -35,6 +36,7 @@ open class LMMessageListView: LMView {
         
         public struct Message {
             public let messageId: String
+            public let memberTitle: String?
             public let message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
@@ -196,6 +198,8 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
                 cell.setData(with: .init(message: item))
+                cell.currentIndexPath = indexPath
+                cell.delegate = self
                 return cell
             }
         default:
@@ -359,4 +363,9 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-
+extension LMMessageListView: LMChatMessageCellDelegate {
+    public func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnReaction(reaction: reaction, indexPath: indexPath)
+    }
+}

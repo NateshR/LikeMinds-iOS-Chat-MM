@@ -45,6 +45,8 @@ open class LMMessageReaction: LMView {
         return label
     }()
     
+    open var clickedOnReaction: (() -> Void)?
+    
     override open func layoutSubviews() {
         super.layoutSubviews()
     }
@@ -61,6 +63,10 @@ open class LMMessageReaction: LMView {
         addSubview(previewsContainerView)
         previewsContainerView.addArrangedSubview(emojiLabel)
         previewsContainerView.addArrangedSubview(countLabel)
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(reactionTapped))
+        tapGuesture.numberOfTapsRequired = 1
+        isUserInteractionEnabled = true
+        addGestureRecognizer(tapGuesture)
     }
     
     // MARK: setupLayouts
@@ -72,5 +78,9 @@ open class LMMessageReaction: LMView {
     func setData(_ data: ContentModel) {
         emojiLabel.text = data.reaction
         countLabel.text = data.reactionCount
+    }
+    
+    @objc func reactionTapped(_ guesture: UITapGestureRecognizer) {
+        self.clickedOnReaction?()
     }
 }

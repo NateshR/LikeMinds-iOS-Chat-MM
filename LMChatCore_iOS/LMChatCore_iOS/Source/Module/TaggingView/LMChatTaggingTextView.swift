@@ -13,10 +13,12 @@ public protocol LMFeedTaggingTextViewProtocol: AnyObject {
     func mentionStopped()
     func contentHeightChanged()
     func textViewDidChange(_ textView: UITextView)
+    func textViewOnCharacterChange(_ textView: UITextView)
 }
 
 extension LMFeedTaggingTextViewProtocol {
     public func textViewDidChange(_ textView: UITextView) {}
+    public func textViewOnCharacterChange(_ textView: UITextView) {}
 }
 
 public extension LMFeedTaggingTextViewProtocol {

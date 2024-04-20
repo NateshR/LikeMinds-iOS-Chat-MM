@@ -8,9 +8,14 @@
 import Foundation
 import LMChatUI_iOS
 
+public protocol LMChatAttachmentViewDelegate: AnyObject {
+    func postConversationWithAttchments(message: String?, attachments: [MediaPickerModel])
+}
+
 open class LMChatAttachmentViewController: LMViewController {
     
     let backgroundColor: UIColor = .black
+    weak var delegate: LMChatAttachmentViewDelegate?
     
     open private(set) lazy var bottomMessageBoxView: LMAttachmentBottomMessageView = {
         let view = LMAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
@@ -31,8 +36,8 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
-    open private(set) lazy var zoomableImageViewContainer: ZoomImageViewContainer = {
-        let view = ZoomImageViewContainer()
+    open private(set) lazy var zoomableImageViewContainer: LMZoomImageViewContainer = {
+        let view = LMZoomImageViewContainer()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = backgroundColor
         return view
@@ -156,14 +161,7 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let data = mediaCellData[indexPath.row]
         if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
-            cell.setData(with: .init(image: data.photo, fileUrl: data.url))
-            cell.onCellClick = { [weak self] in
-                collectionView.reloadData()
-                cell.imageView.borderColor(withBorderWidth: 2, with: .green)
-                self?.zoomableImageViewContainer.zoomScale = 1
-                self?.selectedMedia = data
-                self?.zoomableImageViewContainer.image = data.photo
-            }
+            cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue))
             return cell
         }
         return UICollectionViewCell()
@@ -171,6 +169,19 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
 
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         .init(width: 64, height: 64)
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let data = mediaCellData[indexPath.row]
+        if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+            collectionView.reloadData()
+            cell.imageView.borderColor(withBorderWidth: 2, with: .green)
+            self.selectedMedia = data
+            if data.mediaType == .image {
+                self.zoomableImageViewContainer.zoomScale = 1
+                self.zoomableImageViewContainer.image = data.photo
+            }
+        }
     }
 }
 
@@ -184,8 +195,8 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
         MediaPickerManager.shared.presentPicker(viewController: self, delegate: self)
     }
     
-    public func sendAttachment() {
-        
+    public func sendAttachment(message: String?) {
+        delegate?.postConversationWithAttchments(message: message, attachments: mediaCellData)
     }
 }
 

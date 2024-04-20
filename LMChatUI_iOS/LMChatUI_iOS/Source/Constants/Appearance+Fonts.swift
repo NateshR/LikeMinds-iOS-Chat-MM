@@ -29,5 +29,6 @@ public extension Appearance {
         public var navigationSubtitleFont: UIFont = .systemFont(ofSize: 14)
         
         public var emojiTrayFont: UIFont = .systemFont(ofSize: 30)
+        public var headingLabel: UIFont = .systemFont(ofSize: 16, weight: .bold)
     }
 }

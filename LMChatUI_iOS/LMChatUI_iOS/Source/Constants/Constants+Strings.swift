@@ -22,5 +22,6 @@ public extension Constants {
         public var comments = "Comments"
         public var allTopics = "All Topics"
         public var communityHood = "CommunityHood"
+        public var dot = "•"
     }
 }

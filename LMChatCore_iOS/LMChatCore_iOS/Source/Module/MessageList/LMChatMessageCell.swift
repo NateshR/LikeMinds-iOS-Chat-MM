@@ -10,6 +10,10 @@ import Kingfisher
 import LMChatUI_iOS
 import LikeMindsChat
 
+public protocol LMChatMessageCellDelegate: AnyObject {
+    func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
+}
+
 @IBDesignable
 open class LMChatMessageCell: LMTableViewCell {
     
@@ -28,7 +32,8 @@ open class LMChatMessageCell: LMTableViewCell {
         super.prepareForReuse()
         chatMessageView.prepareToResuse()
     }
-    
+    weak var delegate: LMChatMessageCellDelegate?
+    var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
     
@@ -101,6 +106,9 @@ open class LMChatMessageCell: LMTableViewCell {
     // MARK: configure
     open func setData(with data: ContentModel) {
         chatMessageView.setDataView(data)
+        chatMessageView.clickedOnReaction = {[weak self] reaction in
+            self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
+        }
     }
 }
 

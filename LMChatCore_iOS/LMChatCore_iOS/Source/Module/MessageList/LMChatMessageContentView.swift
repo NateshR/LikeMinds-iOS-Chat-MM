@@ -132,9 +132,22 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
+    open private(set) lazy var usernameLabel: LMLabel = {
+        let label =  LMLabel()
+            .translatesAutoresizingMaskIntoConstraints()
+        label.numberOfLines = 0
+        label.font = Appearance.shared.fonts.headingLabel
+        label.textColor = Appearance.shared.colors.red
+        label.paddingLeft = 2
+        label.paddingTop = 2
+        label.paddingBottom = 2
+        label.text = ""
+        return label
+    }()
+    
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
-
+    var clickedOnReaction: ((String) -> Void)?
     
     // MARK: setupViews
     open override func setupViews() {
@@ -144,6 +157,7 @@ open class LMChatMessageContentView: LMView {
         addSubview(bubble)
         addSubview(chatProfileImageContainerStackView)
         addSubview(reactionContainerStackView)
+        bubble.addArrangeSubview(usernameLabel)
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(galleryView)
         bubble.addArrangeSubview(linkPreview)
@@ -162,6 +176,10 @@ open class LMChatMessageContentView: LMView {
         audioPreviewContainerStackView.isHidden = true
         docPreviewContainerStackView.removeAllArrangedSubviews()
         docPreviewContainerStackView.isHidden = true
+        
+        reactionsView.clickedOnReaction = {[weak self] reactionString in
+            self?.clickedOnReaction?(reactionString)
+        }
     }
     
     // MARK: setupLayouts
@@ -229,16 +247,18 @@ open class LMChatMessageContentView: LMView {
             chatProfileImageView.isHidden = true
             bubbleLeadingConstraint?.constant = 40
             bubbleTrailingConstraint?.constant = 0
+            usernameLabel.isHidden = true
         } else {
             chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""))
             chatProfileImageView.isHidden = false
             bubbleLeadingConstraint?.constant = 00
             bubbleTrailingConstraint?.constant = -40
+            usernameLabel.text = data.message?.createdBy
+            usernameLabel.isHidden = false
         }
         bubbleLeadingConstraint?.isActive = true
         bubbleTrailingConstraint?.isActive = true
         
-        print("Image attachment: \(data.message?.attachments?.count ?? 0)")
         replyView(data)
         linkPreview(data)
         attachmentView(data)

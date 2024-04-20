@@ -39,6 +39,7 @@ public extension Constants {
         public var xmarkIcon = loadSystemImage(with: "xmark")
         public var crossIcon = loadSystemImage(with: "xmark.circle")
         public var ellipsisIcon = loadSystemImage(with: "ellipsis")
+        public var ellipsisCircleIcon = loadSystemImage(with: "ellipsis.circle")
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
         public var micIcon = loadSystemImage(with: "mic")
@@ -71,5 +72,8 @@ public extension Constants {
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")
         public var linkIcon = loadSystemImage(with: "link.circle.fill")
+        public var messageIcon = loadSystemImage(with: "message")
+        public var person2Icon = loadSystemImage(with: "person.2")
+        
     }
 }
