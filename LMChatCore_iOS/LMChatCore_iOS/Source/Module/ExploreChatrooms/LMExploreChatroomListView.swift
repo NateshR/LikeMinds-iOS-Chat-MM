@@ -10,6 +10,7 @@ import LMChatUI_iOS
 
 public protocol LMExploreChatroomListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
+    func followUnfollowStatusUpdate(_ value: Bool, _ chatroomId: String)
     func fetchMoreData()
 }
 
@@ -93,7 +94,7 @@ open class LMExploreChatroomListView: LMView {
     }
     
     public func updateChatroomsData(chatroomData: [LMExploreChatroomCell.ContentModel]) {
-        tableSections.append(.init(data: chatroomData, sectionOrder: 1))
+        tableSections = [.init(data: chatroomData, sectionOrder: 1)]
         reloadData()
     }
     
@@ -117,7 +118,10 @@ extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate 
         if let item = items[indexPath.row] as? LMExploreChatroomCell.ContentModel,
            let cell = tableView.dequeueReusableCell(LMUIComponents.shared.exploreChatroomCell) {
             cell.configure(with: item)
-            if indexPath.row >= (items.count - 4) {
+            cell.onJoinButtonClick = {[weak self] (value, chatroomId) in
+                self?.delegate?.followUnfollowStatusUpdate(value, chatroomId)
+            }
+            if indexPath.row >= (items.count - 2) {
                 self.delegate?.fetchMoreData()
             }
             return cell
@@ -132,4 +136,6 @@ extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate 
         self.delegate?.didTapOnCell(indexPath: indexPath)
     }
 }
+
+
 

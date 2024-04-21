@@ -74,6 +74,8 @@ public extension Constants {
         public var linkIcon = loadSystemImage(with: "link.circle.fill")
         public var messageIcon = loadSystemImage(with: "message")
         public var person2Icon = loadSystemImage(with: "person.2")
+        public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
+        public var downArrowIcon = loadSystemImage(with: "arrow.down")
         
     }
 }

@@ -32,6 +32,7 @@ open class LMParticipantListViewController: LMViewController {
     
     open func setupSearchBar() {
         navigationItem.searchController = searchController
+        searchController.searchResultsUpdater = self
         navigationController?.navigationBar.prefersLargeTitles = false
         searchController.obscuresBackgroundDuringPresentation = false
     }
@@ -62,6 +63,7 @@ extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
 }
 
 extension LMParticipantListViewController: LMParticipantListViewDelegate {
+    
     public func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
     }
@@ -69,5 +71,13 @@ extension LMParticipantListViewController: LMParticipantListViewDelegate {
     public func loadMoreData() {
         viewModel?.getParticipants()
     }
+}
+
+extension LMParticipantListViewController: UISearchResultsUpdating {
+    
+    public func updateSearchResults(for searchController: UISearchController) {
+        viewModel?.searchParticipants(searchController.searchBar.text )
+    }
+    
 }
 

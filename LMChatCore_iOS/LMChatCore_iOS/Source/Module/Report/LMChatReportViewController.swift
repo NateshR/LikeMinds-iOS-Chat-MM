@@ -117,7 +117,7 @@ open class LMChatReportViewController: LMViewController {
         
         view.pinSubView(subView: containerView, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
         
-        containerScrollView.addConstraint(top: (containerView.topAnchor, 0),
+        containerScrollView.addConstraint(top: (containerView.topAnchor, 20),
                                           leading: (containerView.leadingAnchor, 0),
                                           trailing: (containerView.trailingAnchor, 0))
         

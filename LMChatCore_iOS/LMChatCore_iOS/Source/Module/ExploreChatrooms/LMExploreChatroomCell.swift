@@ -17,6 +17,8 @@ open class LMExploreChatroomCell: LMTableViewCell {
         public let chatroom: Chatroom?
     }
     
+    var onJoinButtonClick: ((_ value: Bool, _ chatroomId: String) -> Void)?
+    
     // MARK: UI Elements
     open private(set) lazy var chatroomView: LMExploreChatroomView = {
         let view = LMCoreComponents.shared.exploreChatroomView.init().translatesAutoresizingMaskIntoConstraints()
@@ -79,7 +81,11 @@ open class LMExploreChatroomCell: LMTableViewCell {
         var lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
         
-        chatroomView.setData(LMExploreChatroomView.ContentModel(userName: data.chatroom?.member?.name, title: data.chatroom?.title, chatroomName: data.chatroom?.header, chatroomImageUrl: data.chatroom?.chatroomImageUrl, isSecret: data.chatroom?.isSecret, isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue, participantsCount: data.chatroom?.participantsCount, messageCount: data.chatroom?.totalResponseCount, isFollowed: data.chatroom?.followStatus))
+        chatroomView.setData(LMExploreChatroomView.ContentModel(userName: data.chatroom?.member?.name, title: data.chatroom?.title, chatroomName: data.chatroom?.header, chatroomImageUrl: data.chatroom?.chatroomImageUrl, isSecret: data.chatroom?.isSecret, isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue, participantsCount: data.chatroom?.participantsCount, messageCount: data.chatroom?.totalResponseCount, isFollowed: data.chatroom?.followStatus, chatroomId: data.chatroom?.id ?? "", externalSeen: data.chatroom?.externalSeen, isPinned: data.chatroom?.isPinned))
+        chatroomView.onJoinButtonClick = {[weak self] (value, chatroomId) in
+            data.chatroom?.followStatus = value
+            self?.onJoinButtonClick?(value, chatroomId)
+        }
     }
 
 }

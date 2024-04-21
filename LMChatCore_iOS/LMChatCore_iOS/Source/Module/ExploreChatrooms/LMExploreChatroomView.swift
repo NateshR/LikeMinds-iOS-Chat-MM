@@ -22,8 +22,11 @@ open class LMExploreChatroomView: LMView {
         public let participantsCount: Int?
         public let messageCount: Int?
         public let isFollowed: Bool?
+        public let chatroomId: String
+        public let externalSeen: Bool?
+        public let isPinned: Bool?
         
-        public init(userName: String?, title: String?, chatroomName: String?, chatroomImageUrl: String?, isSecret: Bool?, isAnnouncementRoom: Bool?, participantsCount: Int?, messageCount: Int?, isFollowed: Bool?) {
+        public init(userName: String?, title: String?, chatroomName: String?, chatroomImageUrl: String?, isSecret: Bool?, isAnnouncementRoom: Bool?, participantsCount: Int?, messageCount: Int?, isFollowed: Bool?, chatroomId: String, externalSeen: Bool?, isPinned: Bool?) {
             self.userName = userName
             self.title = title
             self.chatroomName = chatroomName
@@ -33,6 +36,9 @@ open class LMExploreChatroomView: LMView {
             self.isAnnouncementRoom = isAnnouncementRoom
             self.participantsCount = participantsCount
             self.messageCount = messageCount
+            self.chatroomId = chatroomId
+            self.externalSeen = externalSeen
+            self.isPinned = isPinned
         }
         
     }
@@ -87,6 +93,18 @@ open class LMExploreChatroomView: LMView {
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.textColor
         label.numberOfLines = 1
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        return label
+    }()
+    
+    open private(set) lazy var newLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = "NEW"
+        label.font = Appearance.shared.fonts.textFont2
+        label.textColor = Appearance.shared.colors.white
+        label.backgroundColor = Appearance.shared.colors.red
+        label.numberOfLines = 1
+        label.setPadding(with: UIEdgeInsets(top: 2, left: 6, bottom: 2, right: 6))
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
     }()
@@ -151,6 +169,18 @@ open class LMExploreChatroomView: LMView {
         return image
     }()
     
+    open private(set) lazy var pinnedIconImageView: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.clipsToBounds = true
+        image.setWidthConstraint(with: 22)
+        image.setHeightConstraint(with: 22)
+        image.backgroundColor = .white
+        image.cornerRadius(with: 11)
+        image.image = Constants.shared.images.pinCircleFillIcon.withSystemImageConfig(pointSize: 22)
+        image.tintColor = Appearance.shared.colors.linkColor
+        return image
+    }()
+    
     open private(set) lazy var joinButton: LMButton = {
         let button = LMButton.createButton(with: "Join", image: UIImage(systemName: "bell.fill"), textColor: Appearance.shared.colors.linkColor, textFont: Appearance.shared.fonts.headingFont1, contentSpacing: .init(top: 10, left: 10, bottom: 10, right: 10))
         button.setFont(Appearance.shared.fonts.headingFont1)
@@ -170,6 +200,9 @@ open class LMExploreChatroomView: LMView {
         return view
     }()
     
+    var viewData: ContentModel?
+    var onJoinButtonClick: ((_ value: Bool, _ chatroomId: String) -> Void)?
+    
     open override func setupAppearance() {
         super.setupAppearance()
     }
@@ -180,6 +213,8 @@ open class LMExploreChatroomView: LMView {
         addSubview(containerView)
         containerView.addSubview(chatroomContainerStackView)
         containerView.addSubview(chatroomTitleLabel)
+        containerView.addSubview(pinnedIconImageView)
+        containerView.addSubview(newLabel)
     }
     
     // MARK: setupLayouts
@@ -200,20 +235,22 @@ open class LMExploreChatroomView: LMView {
             chatroomTitleLabel.topAnchor.constraint(equalTo: chatroomContainerStackView.bottomAnchor, constant: -4),
             chatroomTitleLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
             
+            newLabel.centerXAnchor.constraint(equalTo: chatroomImageView.centerXAnchor),
+            newLabel.topAnchor.constraint(equalTo: chatroomImageView.bottomAnchor, constant: -12),
+            pinnedIconImageView.trailingAnchor.constraint(equalTo: chatroomImageView.trailingAnchor, constant: 6),
+            pinnedIconImageView.bottomAnchor.constraint(equalTo: chatroomImageView.bottomAnchor, constant: -6),
         ])
     }
     
     open func setData(_ data: ContentModel) {
+        self.viewData = data
         chatroomNameLabel.text = data.chatroomName
         chatroomTitleLabel.text = data.title
         getAttachmentText(participantCount: data.participantsCount ?? 0, messageCount: data.messageCount ?? 0)
-//        muteIconImageView.isHidden = !data.isMuted
+        newLabel.isHidden = data.externalSeen ?? true
+        pinnedIconImageView.isHidden = !(data.isPinned ?? false)
         announcementIconImageView.isHidden = !(data.isAnnouncementRoom ?? false)
         lockIconImageView.isHidden = !(data.isSecret ?? false)
-//        tagIconImageView.isHidden = true
-//        chatroomCountBadgeLabel.isHidden = data.unreadCount <= 0
-//        chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "+99" : "\(data.unreadCount)"
-//        timestampLabel.text = data.timestamp
         joinButtonTitle(data.isFollowed ?? false)
         let placeholder = Constants.Images.shared.placeholderImage
         if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
@@ -240,7 +277,10 @@ open class LMExploreChatroomView: LMView {
     }
     
     @objc func joinButtonClicked(_ sender: UIButton) {
-        
+        guard let viewData else { return }
+        let updatedStatus = !(viewData.isFollowed ?? false)
+        joinButtonTitle(updatedStatus)
+        onJoinButtonClick?(updatedStatus, viewData.chatroomId)
     }
     
     func joinButtonTitle(_ isFollowed: Bool) {
