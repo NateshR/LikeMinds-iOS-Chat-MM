@@ -10,6 +10,7 @@ import LMChatUI_iOS
 import LikeMindsChat
 import UIKit
 import SafariServices
+//import GiphyUISDK
 
 enum NavigationActions {
     case homeFeed
@@ -20,6 +21,7 @@ enum NavigationActions {
     case reactionSheet(reactions: [Reaction])
     case exploreFeed
     case browser(url: URL)
+//    case giphy
     
 }
 
@@ -61,6 +63,14 @@ class NavigationScreen: NavigationScreenProtocol {
             config.entersReaderIfAvailable = true
             let vc = SFSafariViewController(url: url, configuration: config)
             source.present(vc, animated: true)
+//        case .giphy:
+//            let giphy = GiphyViewController()
+//            giphy.mediaTypeConfig = [.gifs]
+//            giphy.theme = GPHTheme(type: .lightBlur)
+//            giphy.showConfirmationScreen = false
+//            giphy.rating = .ratedPG
+//            giphy.delegate = self as? LMMessageListViewController
+//            self.window?.rootViewController?.present(giphy, animated: true, completion: nil)
         }
     }
 }

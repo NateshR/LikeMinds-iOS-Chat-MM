@@ -160,6 +160,7 @@ public final class LMMessageListViewModel {
     }
     
     func fetchConversationsOnScroll(indexPath: IndexPath, type: GetConversationType) {
+        return
         var conversation:Conversation?
         if type == .above {
             let message = messagesList[indexPath.section].data.first
@@ -261,13 +262,13 @@ public final class LMMessageListViewModel {
         if let replyConversation = conversation.replyConversation {
             replies =
             [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                   message: replyConversation.answer,
+                   message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
                    attachments: replyConversation.attachments?.compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getLMUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags))]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                     message: conversation.answer,
+                     message: ignoreGiphyUnsupportedMessage(conversation.answer),
                      timestamp: conversation.createdEpoch,
                      reactions: reactionGrouping(conversation.reactions ?? []),
                      attachments: conversation.attachments?.map({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
@@ -277,6 +278,14 @@ public final class LMMessageListViewModel {
                      createdByImageUrl: conversation.member?.imageUrl,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getLMUUID(),
                      messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags))
+    }
+    
+    func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
+        print("\(message)")
+        if message.trimmingCharacters(in: .whitespacesAndNewlines) == GiphyAPIConfiguration.gifMessage {
+            return ""
+        }
+        return message
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMMessageListView.ContentModel.OgTags? {

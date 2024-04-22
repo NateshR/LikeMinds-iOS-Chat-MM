@@ -309,7 +309,7 @@ open class LMChatMessageContentView: LMView {
             return
         }
         switch type {
-        case "image", "video":
+        case "image", "video", "gif":
             galleryPreview(attachments)
         case "pdf", "document", "doc":
             docPreview(attachments)

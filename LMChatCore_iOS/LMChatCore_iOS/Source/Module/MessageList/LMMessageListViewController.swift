@@ -7,6 +7,7 @@
 
 import Foundation
 import LMChatUI_iOS
+import GiphyUISDK
 
 protocol LMMessageListControllerDelegate: AnyObject {
     func postMessage(message: String?,
@@ -244,7 +245,14 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func composeGif() {
-        delegate?.postMessageWithGifAttachment()
+//        delegate?.postMessageWithGifAttachment()
+        let giphy = GiphyViewController()
+        giphy.mediaTypeConfig = [.gifs]
+        giphy.theme = GPHTheme(type: .lightBlur)
+        giphy.showConfirmationScreen = false
+        giphy.rating = .ratedPG
+        giphy.delegate = self
+        self.present(giphy, animated: true, completion: nil)
     }
     
     public func linkDetected(_ link: String) {

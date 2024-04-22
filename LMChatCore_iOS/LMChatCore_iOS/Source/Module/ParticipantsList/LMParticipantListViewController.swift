@@ -59,6 +59,7 @@ extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
     public func reloadData() {
         containerView.data = viewModel?.participantsContentModels ?? []
         containerView.reloadList()
+        setNavigationTitleAndSubtitle(with: "Participants", subtitle: "\(viewModel?.totalParticipantCount ?? 0) participants")
     }
 }
 
