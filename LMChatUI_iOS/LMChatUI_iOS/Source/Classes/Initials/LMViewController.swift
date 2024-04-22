@@ -46,6 +46,40 @@ open class LMViewController: UIViewController {
         return view
     }()
     
+    open private(set) lazy var navigationTitleView: LMView = {
+        let view = LMView(frame: view.bounds).translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .clear
+        return view
+    }()
+    
+    open private(set) lazy var titleStackView: LMStackView =  {
+        let stackView = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        stackView.spacing = 0
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.distribution = .fillProportionally
+        navigationTitleView.addSubview(stackView)
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: navigationTitleView.leadingAnchor),
+            stackView.topAnchor.constraint(equalTo: navigationTitleView.topAnchor),
+            stackView.bottomAnchor.constraint(equalTo: navigationTitleView.bottomAnchor),
+            stackView.trailingAnchor.constraint(equalTo: navigationTitleView.trailingAnchor)
+        ])
+        return stackView
+    }()
+    
+    open private(set) lazy var navigationHeaderTitleLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.white
+        return label
+    }()
+    
+    open private(set) lazy var navigationHeaderSubtitleLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.white
+        return label
+    }()
+    
     open private(set) lazy var loaderView: UIActivityIndicatorView = {
         let loader = UIActivityIndicatorView(style: .large)
         loader.translatesAutoresizingMaskIntoConstraints = false
@@ -71,7 +105,7 @@ open class LMViewController: UIViewController {
         super.viewDidLoad()
         setupActions()
         setupNavigationBar()
-        initializeHideKeyboard()
+//        initializeHideKeyboard()
     }
     
     open override func viewDidLayoutSubviews() {
@@ -106,11 +140,11 @@ open class LMViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    open func initializeHideKeyboard(){
+    open func initializeHideKeyboard(_ givenView: UIView){
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(
             target: self,
             action: #selector(dismissMyKeyboard))
-        view.addGestureRecognizer(tap)
+        givenView.addGestureRecognizer(tap)
     }
     
     @objc open func dismissMyKeyboard(){
@@ -137,9 +171,18 @@ open class LMViewController: UIViewController {
         let backImage = Constants.shared.images.leftArrowIcon
         self.navigationController?.navigationBar.backIndicatorImage = backImage
         self.navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
-        let backItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
+        let backItem = UIBarButtonItem(image: backImage, style: .plain, target: nil, action: nil)
         backItem.tintColor = Appearance.shared.colors.linkColor
         self.navigationItem.backBarButtonItem = backItem
+    }
+    
+    open func setRightNavigationWithAction(title: String?, image: UIImage?, style: UIBarButtonItem.Style, target: Any?, action: Selector?) {
+        let rightItem = title != nil ? UIBarButtonItem(title: title, style: style, target: target, action: action) : UIBarButtonItem(image: image, style: style, target: target, action: action)
+        rightItem.tintColor = Appearance.shared.colors.linkColor
+        var rightItems = self.navigationItem.rightBarButtonItems ?? []
+        rightItems.append(rightItem)
+        
+        self.navigationItem.rightBarButtonItems = rightItems
     }
     
     open func showErrorAlert(_ title: String? = "Error", message: String?) {
@@ -158,8 +201,7 @@ open class LMViewController: UIViewController {
     }
     
     open func setupNavigationBar() {
-        navigationController?.navigationBar.isTranslucent = false
-        
+        navigationController?.navigationBar.isTranslucent = true
         if #available(iOS 15, *) {
             let appearance = UINavigationBarAppearance()
             appearance.backgroundColor = Appearance.shared.colors.navigationBackgroundColor
@@ -167,46 +209,36 @@ open class LMViewController: UIViewController {
         }
     }
     
-    open func setNavigationTitleAndSubtitle(with title: String?, subtitle: String?, alignment: UIStackView.Alignment = .leading) {
-        let titleView = LMView().translatesAutoresizingMaskIntoConstraints()
-        let widthConstraint = NSLayoutConstraint.init(item: titleView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width)
+    open func dismissViewController() {
+        guard let _ = self.navigationController?.popViewController(animated: true) else {
+            self.dismiss(animated: true)
+            return
+        }
+    }
+    
+    public func setNavigationTitleAndSubtitle(with title: String?, subtitle: String?, alignment: UIStackView.Alignment = .center) {
+        let widthConstraint = NSLayoutConstraint.init(item: navigationTitleView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width)
         widthConstraint.priority = .defaultLow
         widthConstraint.isActive = true
         
-        let stackView = LMStackView().translatesAutoresizingMaskIntoConstraints()
-        stackView.spacing = 4
-        stackView.axis = .vertical
-        stackView.alignment = alignment
-        stackView.distribution = .fillProportionally
-        
-        titleView.addSubview(stackView)
-        
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
-            stackView.topAnchor.constraint(equalTo: titleView.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: titleView.bottomAnchor),
-            stackView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor)
-        ])
+        titleStackView.alignment = alignment
         
         if let title,
            !title.isEmpty {
-            let titleLabel = LMLabel().translatesAutoresizingMaskIntoConstraints()
-            titleLabel.text = title
-            titleLabel.textColor = Appearance.shared.colors.gray51
-            titleLabel.font = Appearance.shared.fonts.navigationTitleFont
-            stackView.addArrangedSubview(titleLabel)
+            navigationHeaderTitleLabel.text = title
+            navigationHeaderTitleLabel.textColor = Appearance.shared.colors.gray51
+            navigationHeaderTitleLabel.font = Appearance.shared.fonts.navigationTitleFont
+            titleStackView.addArrangedSubview(navigationHeaderTitleLabel)
         }
-        
         if let subtitle,
            !subtitle.isEmpty {
-            let subtitleLabel = LMLabel().translatesAutoresizingMaskIntoConstraints()
-            subtitleLabel.text = subtitle
-            subtitleLabel.textColor = Appearance.shared.colors.gray51
-            subtitleLabel.font = Appearance.shared.fonts.navigationSubtitleFont
-            stackView.addArrangedSubview(subtitleLabel)
+            navigationHeaderSubtitleLabel.text = subtitle
+            navigationHeaderSubtitleLabel.textColor = Appearance.shared.colors.gray51
+            navigationHeaderSubtitleLabel.font = Appearance.shared.fonts.navigationSubtitleFont
+            titleStackView.addArrangedSubview(navigationHeaderSubtitleLabel)
         }
         
-        navigationItem.titleView = titleView
+        navigationItem.titleView = navigationTitleView
     }
     
     open func showHideLoaderView(isShow: Bool) {

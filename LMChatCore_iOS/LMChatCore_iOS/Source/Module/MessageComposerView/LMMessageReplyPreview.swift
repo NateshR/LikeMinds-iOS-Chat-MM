@@ -53,8 +53,10 @@ open class LMMessageReplyPreview: LMView {
     open private(set) lazy var userNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Username"
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.headingFont3
         label.textColor = Appearance.shared.colors.red
+        label.numberOfLines = 1
+        label.paddingTop = 2
         label.setContentHuggingPriority(.required, for: .vertical)
         return label
     }()
@@ -99,6 +101,8 @@ open class LMMessageReplyPreview: LMView {
         return view
     }()
     
+    var viewData: ContentModel?
+    var onClickReplyPreview: (() -> Void)?
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
@@ -110,6 +114,10 @@ open class LMMessageReplyPreview: LMView {
         horizontalReplyStackView.addArrangedSubview(closeReplyButton)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(userNameLabel)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(messageLabel)
+        isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onReplyPreviewClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        addGestureRecognizer(tapGuesture)
     }
     
     // MARK: setupLayouts
@@ -138,6 +146,7 @@ open class LMMessageReplyPreview: LMView {
     }
     
     public func setData(_ data: ContentModel) {
+        viewData = data
         self.userNameLabel.text = data.username
         let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
         self.messageLabel.attributedText = createAttributedString(for: data.attachmentsUrls?.first?.fileType, with: attributedText.string)
@@ -158,17 +167,23 @@ open class LMMessageReplyPreview: LMView {
         var image: UIImage = UIImage()
         var initalType = ""
         switch fileType.lowercased() {
-        case "image", "video":
-            image = Constants.shared.images.galleryIcon
+        case "image":
+            image = Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Photo"
+        case "video":
+            image = Constants.shared.images.videoSystemIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Video"
         case "audio":
-            image = Constants.shared.images.micIcon
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Audio"
+        case "voice_note":
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Voice note"
         case "pdf", "doc":
-            image = Constants.shared.images.documentsIcon
+            image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Document"
         case "link":
-            image = Constants.shared.images.linkIcon
+            image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
         default:
             break
         }
@@ -192,5 +207,9 @@ open class LMMessageReplyPreview: LMView {
     
     @objc func clearButtonClicked(_ sender:UIButton) {
         delegate?.clearReplyPreview()
+    }
+    
+    @objc func onReplyPreviewClicked(_ gesture: UITapGestureRecognizer) {
+        onClickReplyPreview?()
     }
 }

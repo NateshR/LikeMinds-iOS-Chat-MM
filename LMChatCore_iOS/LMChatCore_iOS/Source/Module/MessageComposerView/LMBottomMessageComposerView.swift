@@ -32,7 +32,7 @@ open class LMBottomMessageComposerView: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = Appearance.shared.colors.backgroundColor
+//        view.backgroundColor = Appearance.shared.colors.backgroundColor
         return view
     }()
     
@@ -62,7 +62,7 @@ open class LMBottomMessageComposerView: LMView {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.cornerRadius(with: 18)
         view.backgroundColor = .white
-        //        view.borderColor(withBorderWidth: 1, with: .lightGray)
+        view.borderColor(withBorderWidth: 1, with: Appearance.shared.colors.gray155)
         return view
     }()
     
@@ -339,8 +339,8 @@ open class LMBottomMessageComposerView: LMView {
 
 extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
     
-    public func mentionStarted(with text: String) {
-        taggingListView.fetchUsers(for: text)
+    public func mentionStarted(with text: String, chatroomId: String) {
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
     
     public func mentionStopped() {
@@ -371,8 +371,10 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
         if !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+            print("detected first link: \(link)")
+            linkPreviewView.isHidden = false
             linkDetectorTimer?.invalidate()
-            linkDetectorTimer = Timer(timeInterval: 0.5, repeats: false, block: {[weak self] timer in
+            linkDetectorTimer = Timer(timeInterval: 1, repeats: false, block: {[weak self] timer in
                 print("detected first link: \(link)")
                 self?.delegate?.linkDetected(link)
             })
@@ -380,6 +382,7 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             linkPreviewView.isHidden = true
         }
     }
+    
 }
 
 extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {

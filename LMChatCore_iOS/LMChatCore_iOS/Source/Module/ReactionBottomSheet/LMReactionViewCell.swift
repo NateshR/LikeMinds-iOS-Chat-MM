@@ -1,5 +1,5 @@
 //
-//  ReactionViewCell.swift
+//  LMReactionViewCell.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ReactionViewCell: UITableViewCell {
+class LMReactionViewCell: UITableViewCell {
     struct ContentModel {
         let image: String?
         let username: String
@@ -110,5 +110,6 @@ class ReactionViewCell: UITableViewCell {
         userName.text = data.username
         removeLabel.isHidden = !data.isSelfReaction
         reactionImage.text = data.reaction
+        userImageView.kf.setImage(with: URL(string: data.image ?? ""))
     }
 }

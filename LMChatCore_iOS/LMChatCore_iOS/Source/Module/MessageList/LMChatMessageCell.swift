@@ -10,6 +10,13 @@ import Kingfisher
 import LMChatUI_iOS
 import LikeMindsChat
 
+public protocol LMChatMessageCellDelegate: AnyObject {
+    func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
+    func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?)
+    func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
+    func onClickReplyOfMessage(indexPath: IndexPath?)
+}
+
 @IBDesignable
 open class LMChatMessageCell: LMTableViewCell {
     
@@ -28,7 +35,8 @@ open class LMChatMessageCell: LMTableViewCell {
         super.prepareForReuse()
         chatMessageView.prepareToResuse()
     }
-    
+    weak var delegate: LMChatMessageCellDelegate?
+    var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
     
@@ -101,13 +109,33 @@ open class LMChatMessageCell: LMTableViewCell {
     // MARK: configure
     open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         chatMessageView.setDataView(data, delegate: delegate, index: index)
+
+        chatMessageView.clickedOnReaction = {[weak self] reaction in
+            self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.galleryView.onClickAttachment = {[weak self] index in
+            self?.delegate?.onClickGalleryOfMessage(attachmentIndex: index, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.clickedOnAttachment = {[weak self] url in
+            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.replyMessageView.onClickReplyPreview = { [weak self] in
+            self?.delegate?.onClickReplyOfMessage(indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
+            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+        }
     }
     
-    public func resetAudio() {
+    open func resetAudio() {
         chatMessageView.resetAudio()
     }
     
-    public func seekSlider(to position: Float, url: String) {
+    open func seekSlider(to position: Float, url: String) {
         chatMessageView.seekSlider(to: position, url: url)
     }
 }

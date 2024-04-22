@@ -50,11 +50,21 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-//        setupViews()
-//        setupLayouts()
+        
+        // MEDIA PREVIEW
+//         var data: [LMChatMediaPreviewViewModel.DataModel] = []
+//         data.append(.init(type: .video, url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"))
+//         data.append(.init(type: .image, url: "https://farm2.staticflickr.com/1533/26541536141_41abe98db3_z_d.jpg"))
+//         data.append(.init(type: .image, url: "https://farm3.staticflickr.com/2220/1572613671_7311098b76_z_d.jpg"))
+//         data.append(.init(type: .video, url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"))
+//         data.append(.init(type: .video, url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"))
+//        
+//         let vc = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: 3)
+//         navigationController?.pushViewController(vc, animated: true)
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard let homefeedvc =
+//                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
               try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }

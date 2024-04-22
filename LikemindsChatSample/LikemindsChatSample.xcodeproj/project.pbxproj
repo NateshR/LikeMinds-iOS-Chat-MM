@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4EF8537DFE5843167231E0F5 /* Pods_LikemindsChatSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0F457BBAEA83A3C34A0162 /* Pods_LikemindsChatSample.framework */; };
+		1078B50CEF0C09CE974D966E /* Pods_LikemindsChatSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0F457BBAEA83A3C34A0162 /* Pods_LikemindsChatSample.framework */; };
 		F45B8AAE2B999F4900AB95E4 /* CustomChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */; };
 		F4C790D92B296EA90084823E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790D82B296EA90084823E /* AppDelegate.swift */; };
 		F4C790DB2B296EA90084823E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790DA2B296EA90084823E /* SceneDelegate.swift */; };
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4EF8537DFE5843167231E0F5 /* Pods_LikemindsChatSample.framework in Frameworks */,
+				1078B50CEF0C09CE974D966E /* Pods_LikemindsChatSample.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

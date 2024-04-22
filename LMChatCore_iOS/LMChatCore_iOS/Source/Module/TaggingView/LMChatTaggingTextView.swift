@@ -9,14 +9,16 @@ import UIKit
 import LMChatUI_iOS
 
 public protocol LMFeedTaggingTextViewProtocol: AnyObject {
-    func mentionStarted(with text: String)
+    func mentionStarted(with text: String, chatroomId: String)
     func mentionStopped()
     func contentHeightChanged()
     func textViewDidChange(_ textView: UITextView)
+    func textViewOnCharacterChange(_ textView: UITextView)
 }
 
 extension LMFeedTaggingTextViewProtocol {
     public func textViewDidChange(_ textView: UITextView) {}
+    public func textViewOnCharacterChange(_ textView: UITextView) {}
 }
 
 public extension LMFeedTaggingTextViewProtocol {
@@ -38,6 +40,7 @@ open class LMChatTaggingTextView: LMTextView {
     public var isSpaceAdded: Bool = false
     public var startIndex: Int?
     public var characters: [Character] = []
+    public var chatroomId: String = ""
     
     public weak var mentionDelegate: LMFeedTaggingTextViewProtocol?
     
@@ -97,7 +100,7 @@ open class LMChatTaggingTextView: LMTextView {
         
         guard isMentioning else { return }
         
-        mentionDelegate?.mentionStarted(with: String(characters))
+        mentionDelegate?.mentionStarted(with: String(characters), chatroomId: chatroomId)
     }
     
     public func addTaggedUser(with username: String, route: String) {

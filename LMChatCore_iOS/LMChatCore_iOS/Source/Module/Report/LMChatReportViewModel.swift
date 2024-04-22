@@ -32,7 +32,7 @@ public final class LMChatReportViewModel {
         self.otherTagID = 11
         
         self.chatroomId = reportContentId.chatroomId
-        self.messageId = reportContentId.memberId
+        self.messageId = reportContentId.messageId
         self.memberId = reportContentId.memberId
         
         if self.chatroomId != nil {
@@ -48,7 +48,7 @@ public final class LMChatReportViewModel {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.reportScreen.init()
-        let viewmodel = Self.init(delegate: viewcontroller, reportContentId: (nil,nil,nil))
+        let viewmodel = Self.init(delegate: viewcontroller, reportContentId: reportContentId)
         
         viewcontroller.viewmodel = viewmodel
         return viewcontroller
@@ -88,8 +88,8 @@ public final class LMChatReportViewModel {
         let reasonName = reason ?? tagName.0
         
         delegate?.showHideLoaderView(isShow: true)
-        let request = PostReportRequest.builder(tagId: selectedTag)
-            .reason(reason)
+        let request = PostReportRequest.builder(tagId: tagName.1)
+            .reason(reasonName)
             .reportedLink(nil)
             .reportedChatroomId(chatroomId)
             .reportedConversationId(messageId)
@@ -105,12 +105,15 @@ public final class LMChatReportViewModel {
             
             let title = "\(contentType.rawValue) is reported for review"
             let message = "Our team will look into your feedback and will take appropriate action on this \(contentType.rawValue)"
+            DispatchQueue.main.async {
+                let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+                
+                alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                    self?.delegate?.popViewController(animated: true)
+                })
+                (self.delegate as? UIViewController)?.present(alert, animated: true)
+            }
             
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                self?.delegate?.popViewController(animated: true)
-            })
         }
     }
 

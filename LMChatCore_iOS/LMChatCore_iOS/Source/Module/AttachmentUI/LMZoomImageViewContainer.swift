@@ -1,5 +1,5 @@
 //
-//  ZoomImageViewContainer.swift
+//  LMZoomImageViewContainer.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 13/04/24.
@@ -8,7 +8,7 @@
 import Foundation
 import LMChatUI_iOS
 
-open class ZoomImageViewContainer: UIScrollView {
+open class LMZoomImageViewContainer: UIScrollView {
     
     @IBInspectable
     public var imageName: String? {
@@ -17,15 +17,6 @@ open class ZoomImageViewContainer: UIScrollView {
                 return
             }
             imageView.image = UIImage(named: imageName)
-        }
-    }
-    
-    public var image: UIImage? {
-        didSet {
-            guard let image = image else {
-                return
-            }
-            imageView.image = image
         }
     }
     
@@ -53,7 +44,7 @@ open class ZoomImageViewContainer: UIScrollView {
     
     convenience init(image: UIImage) {
         self.init(frame: .zero)
-        self.image = image
+//        self.image = image
     }
     
     private func commonInit() {
@@ -81,7 +72,8 @@ open class ZoomImageViewContainer: UIScrollView {
         addGestureRecognizer(doubleTapRecognizer)
     }
     
-    @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+    @objc 
+    private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
         if zoomScale == 1 {
             setZoomScale(2, animated: true)
         } else {
@@ -89,12 +81,19 @@ open class ZoomImageViewContainer: UIScrollView {
         }
     }
     
+    
+    public func configure(with image: URL?) {
+        guard let image else { return }
+        imageView.kf.setImage(with: image)
+    }
+    
+    public func configure(with image: UIImage?) {
+        imageView.image = image
+    }
 }
 
-extension ZoomImageViewContainer: UIScrollViewDelegate {
-    
+extension LMZoomImageViewContainer: UIScrollViewDelegate {
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
-    
 }

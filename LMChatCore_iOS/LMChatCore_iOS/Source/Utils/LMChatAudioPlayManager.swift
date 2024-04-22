@@ -107,6 +107,12 @@ public final class LMChatAudioPlayManager {
         updater = nil
     }
     
+    public func resetAudioPlayer() {
+        pause()
+        url = nil
+        deactivateSession()
+    }
+    
     @objc
     private func trackAudio() {
         guard let currenTime = player?.currentTime() else { return }
