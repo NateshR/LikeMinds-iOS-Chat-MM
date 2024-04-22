@@ -170,6 +170,7 @@ open class LMView: UIView {
         self.setupViews()
         self.setupLayouts()
         self.setupActions()
+        self.setupObservers()
     }
     
     @available(*, unavailable, renamed: "init(frame:)")
@@ -187,13 +188,17 @@ open class LMView: UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         return self
     }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }
 
 // MARK: LMViewLifeCycle
 // Default Implementation is empty
 extension LMView: LMViewLifeCycle {
-    open func setupObservers() {
-    }
+    open func setupObservers() { }
+    
     open func setupViews() { }
     
     open func setupLayouts() { }

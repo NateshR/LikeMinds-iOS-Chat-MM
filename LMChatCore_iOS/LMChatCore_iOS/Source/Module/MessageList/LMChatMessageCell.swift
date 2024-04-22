@@ -107,8 +107,9 @@ open class LMChatMessageCell: LMTableViewCell {
     
     
     // MARK: configure
-    open func setData(with data: ContentModel) {
-        chatMessageView.setDataView(data)
+    open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+        chatMessageView.setDataView(data, delegate: delegate, index: index)
+
         chatMessageView.clickedOnReaction = {[weak self] reaction in
             self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
         }
@@ -128,6 +129,14 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
             self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
         }
+    }
+    
+    open func resetAudio() {
+        chatMessageView.resetAudio()
+    }
+    
+    open func seekSlider(to position: Float, url: String) {
+        chatMessageView.seekSlider(to: position, url: url)
     }
 }
 
