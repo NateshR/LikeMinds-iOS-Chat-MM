@@ -277,9 +277,13 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func playRecording() {
         guard let url = AudioRecordManager.shared.audioURL else { return }
-        LMChatAudioPlayManager.shared.startAudio(url: url.absoluteString) { [weak self] progress in
-            self?.bottomMessageBoxView.updateRecordTime(with: progress)
+        LMChatAudioPlayManager.shared.startAudio(fileURL: url.absoluteString) { [weak self] progress in
+            self?.bottomMessageBoxView.updateRecordTime(with: progress, isPlayback: true)
         }
+    }
+    
+    public func stopRecording(_ onStop: (() -> Void)) {
+        LMChatAudioPlayManager.shared.stopAudio(stopCallback: onStop)
     }
     
     public func deleteRecording() {
@@ -355,4 +359,8 @@ extension LMMessageListViewController: LMChatAttachmentViewDelegate {
     }
 }
 
-extension LMMessageListViewController: AVAudioRecorderDelegate { }
+
+// MARK: Audio Recording
+extension LMMessageListViewController: AVAudioRecorderDelegate {
+    
+}

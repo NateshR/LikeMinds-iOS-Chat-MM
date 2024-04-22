@@ -19,6 +19,7 @@ public protocol LMBottomMessageComposerDelegate: AnyObject {
     func audioRecordingStarted()
     func audioRecordingEnded()
     func playRecording()
+    func stopRecording(_ onStop: (() -> Void))
     func deleteRecording()
 }
 
@@ -76,6 +77,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var inputTextView: LMChatTaggingTextView = {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
         //        view.textContainerInset = .zero
+        view.backgroundColor = Appearance.shared.colors.white
         view.placeHolderText = "Write somthing"
         view.mentionDelegate = self
         view.isScrollEnabled = false
@@ -152,7 +154,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var micFlickerButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle(nil, for: .normal)
-        button.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        button.setImage(Constants.shared.images.micIcon, for: .normal)
         return button
     }()
     
@@ -193,6 +195,7 @@ open class LMBottomMessageComposerView: LMView {
     var sendButtonTrailingConstraint: NSLayoutConstraint?
     var sendButtonLongPressGesture: UILongPressGestureRecognizer!
     var sendButtonPanPressGesture: UIPanGestureRecognizer!
+    var isPlayingAudio = false
     
     // MARK: setupViews
     open override func setupViews() {
@@ -301,11 +304,14 @@ open class LMBottomMessageComposerView: LMView {
         
         deleteAudioRecord.addTarget(self, action: #selector(deleteRecording), for: .touchUpInside)
         micFlickerButton.addTarget(self, action: #selector(didTapPlayRecording), for: .touchUpInside)
+        
+        sendButton.tag = audioButtonTag
     }
     
     @objc func sendMessageButtonClicked(_ sender: UIButton) {
         if sender.tag == audioButtonTag {
             audioButtonClicked(sender)
+            hideRecordingView()
             return
         }
         let message = inputTextView.getText()
@@ -356,6 +362,8 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
         
+        checkSendButtonActions()
+        
         if inputTextView.text.isEmpty || inputTextView.placeHolderText == inputTextView.text {
             sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
             sendButton.tag = audioButtonTag
@@ -366,11 +374,10 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
     }
     
     public func textViewDidChange(_ textView: UITextView) {
-        checkSendButtonActions()
-        
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
-        if !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+        if !links.isEmpty,
+            let link = links.first(where: {!$0.isEmail()}) {
             print("detected first link: \(link)")
             linkPreviewView.isHidden = false
             linkDetectorTimer?.invalidate()
@@ -382,11 +389,9 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             linkPreviewView.isHidden = true
         }
     }
-    
 }
 
 extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
-    
     public func userSelected(with route: String, and userName: String) {
         inputTextView.addTaggedUser(with: userName, route: route)
         mentionStopped()
@@ -395,7 +400,6 @@ extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
     public func updateHeight(with height: CGFloat) {
         taggingViewHeightConstraints?.constant = height
     }
-    
 }
 
 
@@ -436,6 +440,8 @@ extension LMBottomMessageComposerView {
     }
     
     public func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+        inputTextView.resignFirstResponder()
+        
         switch sender.state {
         case .began:
             // Start Recording
@@ -467,7 +473,15 @@ extension LMBottomMessageComposerView {
     
     @objc
     open func didTapPlayRecording() {
-        delegate?.playRecording()
+        if !isPlayingAudio {
+            micFlickerButton.setImage(Constants.shared.images.pauseIcon, for: .normal)
+            delegate?.playRecording()
+        } else {
+            micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
+            delegate?.stopRecording {
+                isPlayingAudio = false
+            }
+        }
     }
     
     @objc
@@ -483,7 +497,7 @@ extension LMBottomMessageComposerView {
         deleteAudioRecord.isHidden = true
         slideToCancel.isHidden = false
         
-        micFlickerButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        micFlickerButton.setImage(Constants.shared.images.micIcon, for: .normal)
         micFlickerButton.tintColor = .red
         micFlickerButton.isEnabled = false
     }
@@ -495,6 +509,11 @@ extension LMBottomMessageComposerView {
         recordDuration.text = "00:00"
         
         checkSendButtonActions()
+        sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
+        sendButtonPanPressGesture.isEnabled = true
+        sendButtonLongPressGesture.isEnabled = true
+        
+        isPlayingAudio = false
     }
     
     func showRecordedView() {
@@ -502,19 +521,30 @@ extension LMBottomMessageComposerView {
         deleteAudioRecord.isHidden = false
         
         micFlickerButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        micFlickerButton.tintColor = .gray
+        micFlickerButton.tintColor = Appearance.shared.colors.gray51
         micFlickerButton.isEnabled = true
         
         sendButtonTrailingConstraint?.constant = -8
+        sendButton.setImage(UIImage(systemName: "paperplane.circle.fill"), for: .normal)
+        
+        isPlayingAudio = false
     }
     
     func checkSendButtonActions() {
-        sendButtonLongPressGesture.isEnabled = !inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        sendButtonPanPressGesture.isEnabled = !inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        sendButtonLongPressGesture.isEnabled = !(inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inputTextView.text == inputTextView.placeHolderText)
+        sendButtonPanPressGesture.isEnabled = !(inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inputTextView.text == inputTextView.placeHolderText)
     }
     
-    func updateRecordTime(with seconds: Int) {
+    func updateRecordTime(with seconds: Int, isPlayback: Bool = false) {
         recordDuration.text = convertSecondsToFormattedTime(seconds: seconds)
+        isPlayingAudio = isPlayback
+        
+        if !isPlayback {
+            UIView.animate(withDuration: 0.3, delay: 0.1) { [weak self] in
+                guard let self else { return }
+                self.micFlickerButton.alpha = self.micFlickerButton.alpha == 1 ? 0.5 : 1
+            }
+        }
     }
     
     // TODO: Remove this, when moving it to UI Library, same function exists in `LMChatAudioPreview`

@@ -13,7 +13,6 @@ public final class AudioRecordManager {
     private var session = AVAudioSession.sharedInstance()
     private var recorder: AVAudioRecorder?
     private var updater: Timer?
-    private var audioFileName = "recording.m4a"
     private var url: URL?
     private var audioDuration = 0
     
@@ -41,13 +40,13 @@ public final class AudioRecordManager {
     public func recordAudio(audioDelegate: AVAudioRecorderDelegate) throws -> Bool {
         activateSession()
         
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let documentDirectory = paths[0]
-        url = documentDirectory.appendingPathComponent(audioFileName)
+        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+        let recordingName = "voiceRecording.aac"
+        let pathArray = [dirPath, recordingName]
+        print(pathArray)
+        url = URL(string: pathArray.joined(separator: "/"))
         
         guard let url else { return false }
-        
-        FileManager.default.createFile(atPath: url.absoluteString, contents: nil)
         
         let settings = [AVFormatIDKey: Int(kAudioFormatMPEG4AAC), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue]
         
