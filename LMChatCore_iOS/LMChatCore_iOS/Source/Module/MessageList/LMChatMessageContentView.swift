@@ -161,6 +161,7 @@ open class LMChatMessageContentView: LMView {
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(galleryView)
         bubble.addArrangeSubview(linkPreview)
+        bubble.addArrangeSubview(audioPreviewContainerStackView)
         bubble.addArrangeSubview(docPreviewContainerStackView)
         bubble.addArrangeSubview(textLabel)
         bubble.addSubview(timestampLabel)
@@ -231,17 +232,17 @@ open class LMChatMessageContentView: LMView {
         return preview
     }
 
-  /*
-    func createAudioPreview(_ data: LMChatMessageAudioPreview.ContentModel) -> LMChatMessageAudioPreview {
-        let preview = LMChatMessageAudioPreview().translatesAutoresizingMaskIntoConstraints()
+    func createAudioPreview(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol, index: IndexPath) -> LMChatVoiceNotePreview {
+        let preview = LMChatVoiceNotePreview().translatesAutoresizingMaskIntoConstraints()
+        preview.translatesAutoresizingMaskIntoConstraints = false
         preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
         preview.backgroundColor = .clear
         preview.cornerRadius(with: 12)
-        preview.setData(data)
+        preview.configure(with: data, delegate: delegate, index: index)
         return preview
     }
-    */
-    open func setDataView(_ data: LMChatMessageCell.ContentModel) {
+    
+    open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         self.textLabel.isUserInteractionEnabled = true
         self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont1, withTextColor: Appearance.Colors.shared.black)
         self.timestampLabel.text = data.message?.createdTime
@@ -268,7 +269,7 @@ open class LMChatMessageContentView: LMView {
         } else {
             replyView(data)
             linkPreview(data)
-            attachmentView(data)
+            attachmentView(data, delegate: delegate, index: index)
             reactionsView(data)
         }
     }
@@ -301,8 +302,10 @@ open class LMChatMessageContentView: LMView {
         linkPreview.isHidden = false
     }
     
-    func attachmentView(_ data: LMChatMessageCell.ContentModel) {
-        guard let attachments = data.message?.attachments, attachments.count > 0, let type = attachments.first?.fileType else {
+    func attachmentView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+        guard let attachments = data.message?.attachments,
+                !attachments.isEmpty,
+              let type = attachments.first?.fileType else {
             galleryView.isHidden = true
             docPreviewContainerStackView.isHidden = true
             audioPreviewContainerStackView.isHidden = true
@@ -314,7 +317,9 @@ open class LMChatMessageContentView: LMView {
         case "pdf", "document", "doc":
             docPreview(attachments)
         case "audio":
-            audioPreview(attachments)
+            audioPreview(attachments, delegate: delegate, index: index)
+        case "voice_note":
+            voiceNotePreview(attachments, delegate: delegate, index: index)
         default:
             break
         }
@@ -348,15 +353,33 @@ open class LMChatMessageContentView: LMView {
         docPreviewContainerStackView.isHidden = false
     }
     
-    func audioPreview(_ attachments: [LMMessageListView.ContentModel.Attachment]) {
+    func voiceNotePreview(_ attachments: [LMMessageListView.ContentModel.Attachment], delegate: LMChatAudioProtocol, index: IndexPath) {
         guard !attachments.isEmpty else {
             audioPreviewContainerStackView.isHidden = true
             return
         }
         
-//        attachments.forEach { attachment in
-//            audioPreviewContainerStackView.addArrangedSubview(createAudioPreview(.init(fileUrl: attachment.fileUrl, thumbnailUrl: attachment.thumbnailUrl, fileSize: attachment.fileSize, numberOfPages: attachment.numberOfPages, fileType: attachment.fileType, fileName: attachment.fileName)))
-//        }
+        attachments.forEach { attachment in
+            audioPreviewContainerStackView.addArrangedSubview(createAudioPreview(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index))
+        }
+        
+        audioPreviewContainerStackView.isHidden = false
+    }
+    
+    func audioPreview(_ attachments: [LMMessageListView.ContentModel.Attachment], delegate: LMChatAudioProtocol, index: IndexPath) {
+        guard !attachments.isEmpty else {
+            audioPreviewContainerStackView.isHidden = true
+            return
+        }
+        
+        attachments.forEach { attachment in
+            let preview = LMChatAudioPreview()
+            preview.translatesAutoresizingMaskIntoConstraints = false
+            preview.configure(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index)
+            preview.setHeightConstraint(with: 72)
+            audioPreviewContainerStackView.addArrangedSubview(preview)
+        }
+        
         audioPreviewContainerStackView.isHidden = false
     }
     
@@ -451,6 +474,21 @@ extension LMChatMessageContentView: UIContextMenuInteractionDelegate {
             
             return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
         })
+    }
+    
+    
+    public func resetAudio() {
+        audioPreviewContainerStackView.subviews.forEach { sub in
+            (sub as? LMChatVoiceNotePreview)?.resetView()
+            (sub as? LMChatAudioPreview)?.resetView()
+        }
+    }
+    
+    public func seekSlider(to position: Float, url: String) {
+        audioPreviewContainerStackView.subviews.forEach { sub in
+            (sub as? LMChatVoiceNotePreview)?.updateSeekerValue(with: position, for: url)
+            (sub as? LMChatAudioPreview)?.updateSeekerValue(with: position, for: url)
+        }
     }
 }
 

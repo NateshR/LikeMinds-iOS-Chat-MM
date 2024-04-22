@@ -103,6 +103,7 @@ open class LMMessageListView: LMView {
     private var data: [BaseContentModel] = []
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
+    public var audioIndex: IndexPath?
     
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
@@ -140,6 +141,19 @@ open class LMMessageListView: LMView {
         backgroundColor = Appearance.shared.colors.backgroundColor
         containerView.backgroundColor = Appearance.shared.colors.backgroundColor
         tableView.backgroundColor = Appearance.shared.colors.backgroundColor
+    }
+    
+    
+    // MARK: setupObservers
+    open override func setupObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
+    }
+    
+    @objc 
+    open func audioEnded(notification: Notification) {
+        if let url = notification.object as? URL {
+            
+        }
     }
     
     open func reloadData() {
@@ -185,8 +199,6 @@ open class LMMessageListView: LMView {
 
 // MARK: UITableView
 extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
-    
-    
     open func numberOfSections(in tableView: UITableView) -> Int {
         tableSections.count
     }
@@ -200,7 +212,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         switch item.messageType {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.setData(with: .init(message: item))
+                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
                 cell.delegate = self
                 return cell
@@ -214,14 +226,13 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         return UITableViewCell()
     }
     
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    }
+    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
     }
     
-    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
             cell.infoLabel.text = tableSections[section].section
             cell.containerView.backgroundColor = Appearance.shared.colors.clear
@@ -230,11 +241,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         return LMView()
     }
     
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-        let offsetY = tableView.contentOffset.y
-        let contentHeight = tableView.contentSize.height
-
+    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview)
         if translation.y > 0 {
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
@@ -254,6 +261,13 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
             return self.createContextMenu()
+        }
+    }
+    
+    open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        (cell as? LMChatMessageCell)?.resetAudio()
+        if indexPath == audioIndex {
+            LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
     }
   /*
@@ -364,6 +378,26 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
                                     attributes: .destructive) { action in
         }
         return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
+    }
+}
+
+
+// MARK: LMChatAudioProtocol
+extension LMMessageListView: LMChatAudioProtocol {
+    public func didTapPlayPauseButton(for url: String, index: IndexPath) {
+        if let audioIndex {
+            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+        }
+        
+        audioIndex = index
+        
+        LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
+            (self?.tableView.cellForRow(at: index) as? LMChatMessageCell)?.seekSlider(to: Float(progress), url: url)
+        }
+    }
+    
+    public func didSeekTo(_ position: Float, _ url: String, index: IndexPath) {
+        LMChatAudioPlayManager.shared.seekAt(position, url: url)
     }
 }
 
