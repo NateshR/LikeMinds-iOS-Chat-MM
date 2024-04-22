@@ -78,6 +78,8 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
         let creatorName = data.chatroom?.member?.name ?? "NA"
         var lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
+        let lastConversation = data.chatroom?.lastConversation
+        let fileType = lastConversation?.attachments?.first?.type
         
         chatroomView.setData(LMHomeFeedChatroomView.ContentModel(userName: data.chatroom?.member?.name ?? "NA",
                                                                  lastMessage: lastMessage,
@@ -87,7 +89,7 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
                                                                  isSecret: data.chatroom?.isSecret ?? false,
                                                                  isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue,
                                                                  unreadCount: data.chatroom?.unseenCount ?? 0,
-                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA"))
+                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA", fileType: fileType))
     }
     
     func timestampConverted(createdAtInEpoch: Int) -> String? {

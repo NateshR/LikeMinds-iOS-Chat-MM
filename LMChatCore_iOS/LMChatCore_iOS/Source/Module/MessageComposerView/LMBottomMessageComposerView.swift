@@ -56,7 +56,7 @@ open class LMBottomMessageComposerView: LMView {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.cornerRadius(with: 18)
         view.backgroundColor = .white
-        view.borderColor(withBorderWidth: 1, with: .lightGray)
+        view.borderColor(withBorderWidth: 1, with: Appearance.shared.colors.gray155)
         return view
     }()
     
@@ -211,8 +211,8 @@ open class LMBottomMessageComposerView: LMView {
 
 extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
     
-    public func mentionStarted(with text: String) {
-        taggingListView.fetchUsers(for: text)
+    public func mentionStarted(with text: String, chatroomId: String) {
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
     
     public func mentionStopped() {

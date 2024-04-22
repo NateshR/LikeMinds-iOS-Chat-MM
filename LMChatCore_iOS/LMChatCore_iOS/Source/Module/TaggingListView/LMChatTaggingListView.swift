@@ -14,7 +14,7 @@ public protocol LMChatTaggedUserFoundProtocol: AnyObject {
 }
 
 public protocol LMChatTaggingProtocol: AnyObject {
-    func fetchUsers(for searchString: String)
+    func fetchUsers(for searchString: String, chatroomId: String)
 }
 
 @IBDesignable
@@ -83,8 +83,8 @@ open class LMChatTaggingListView: LMView {
     
     
     // MARK: Get Users
-    public func getUsers(for searchString: String) {
-        viewModel?.fetchUsers(with: searchString)
+    public func getUsers(for searchString: String, chatroomId: String) {
+        viewModel?.fetchUsers(with: searchString, chatroomId: chatroomId)
     }
     
     public func stopFetchingUsers() {
@@ -137,7 +137,7 @@ extension LMChatTaggingListView: LMChatTaggingListViewModelProtocol {
 
 // MARK: LMChatTaggingProtocol
 extension LMChatTaggingListView: LMChatTaggingProtocol {
-    public func fetchUsers(for searchString: String) {
-        viewModel?.fetchUsers(with: searchString)
+    public func fetchUsers(for searchString: String, chatroomId: String) {
+        viewModel?.fetchUsers(with: searchString, chatroomId: chatroomId)
     }
 }

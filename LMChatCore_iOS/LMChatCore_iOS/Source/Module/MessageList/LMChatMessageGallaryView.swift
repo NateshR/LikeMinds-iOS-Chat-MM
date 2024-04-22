@@ -71,6 +71,11 @@ open class LMChatMessageGallaryView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
         imagePreview.cornerRadius(with: 12)
+        imagePreview.tag = 0
+        imagePreview.isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        imagePreview.addGestureRecognizer(tapGuesture)
         return imagePreview
     }()
     
@@ -79,6 +84,11 @@ open class LMChatMessageGallaryView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
         imagePreview.cornerRadius(with: 12)
+        imagePreview.tag = 1
+        imagePreview.isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        imagePreview.addGestureRecognizer(tapGuesture)
         return imagePreview
     }()
     
@@ -87,6 +97,11 @@ open class LMChatMessageGallaryView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
         imagePreview.cornerRadius(with: 12)
+        imagePreview.tag = 2
+        imagePreview.isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        imagePreview.addGestureRecognizer(tapGuesture)
         return imagePreview
     }()
     
@@ -96,6 +111,11 @@ open class LMChatMessageGallaryView: LMView {
         imagePreview.backgroundColor = .black
         imagePreview.addSubviewWithDefaultConstraints(moreItemsOverlay)
         imagePreview.cornerRadius(with: 12)
+        imagePreview.tag = 3
+        imagePreview.isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        imagePreview.addGestureRecognizer(tapGuesture)
         return imagePreview
     }()
     
@@ -142,6 +162,9 @@ open class LMChatMessageGallaryView: LMView {
         return view
     }()
     
+    var viewData: [ContentModel]?
+    var onClickAttachment: ((Int) -> Void)?
+    
     // MARK: - Overrides
     
     open override func setupLayouts() {
@@ -169,24 +192,34 @@ open class LMChatMessageGallaryView: LMView {
         
     override open func setupAppearance() {
         super.setupAppearance()
-        
-//        moreItemsOverlay.font = appearance.fonts.title
-//        moreItemsOverlay.adjustsFontForContentSizeCategory = true
-//        moreItemsOverlay.textAlignment = .center
-//        moreItemsOverlay.textColor = appearance.colorPalette.staticColorText
-//        moreItemsOverlay.backgroundColor = appearance.colorPalette.background5
     }
     func setData(_ data: [ContentModel]) {
+        viewData = data
         itemSpots.forEach({$0.isHidden = true})
         bottomPreviewsContainerView.isHidden = data.count < 2
         for (index, item) in data.enumerated() {
-            if index > 3 { break }
+            if index > 3 {
+                moreItemsOverlay.isHidden = false
+                moreItemsOverlay.text =  "+\(data.count - 3)"
+                break
+            }
+            moreItemsOverlay.isHidden = true
             guard let imageUrl = item.thumbnailUrl ?? item.fileUrl else {
                 return
             }
             itemSpots[index].isHidden = false
             itemSpots[index].setData(imageUrl)
+            if item.fileType == "video" {
+                itemSpots[index].playIconImage.isHidden = false
+            } else {
+                itemSpots[index].playIconImage.isHidden = true
+            }
         }
+    }
+    
+    @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
+        guard let tag = gesture.view?.tag else { return }
+        onClickAttachment?(tag)
     }
     
 }
@@ -205,6 +238,20 @@ extension LMChatMessageGallaryView {
             imageView.backgroundColor = .black
             return imageView
                 .translatesAutoresizingMaskIntoConstraints()
+        }()
+        
+        open private(set) lazy var playIconImage: LMImageView = {
+            let image = LMImageView()
+            image.translatesAutoresizingMaskIntoConstraints = false
+            image.contentMode = .scaleAspectFill
+            image.clipsToBounds = true
+            image.backgroundColor = .clear
+            image.isUserInteractionEnabled = false
+            image.image = Constants.shared.images.playIcon
+            image.setWidthConstraint(with: 40)
+            image.setHeightConstraint(with: 40)
+            image.tintColor = .white
+            return image
         }()
         
 //        public private(set) lazy var loadingIndicator = components
@@ -229,6 +276,7 @@ extension LMChatMessageGallaryView {
         override open func setupViews() {
             super.setupViews()
             addSubview(imageView)
+            addSubview(playIconImage)
 //            let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnAttachment(_:)))
 //            addGestureRecognizer(tapRecognizer)
 //            
@@ -242,6 +290,8 @@ extension LMChatMessageGallaryView {
         override open func setupLayouts() {
             super.setupLayouts()
             pinSubView(subView: imageView)
+            playIconImage.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            playIconImage.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         }
         
         func setData(_ url: String) {

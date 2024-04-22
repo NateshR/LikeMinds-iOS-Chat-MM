@@ -43,6 +43,7 @@ public extension Constants {
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
         public var micIcon = loadSystemImage(with: "mic")
+        public var audioIcon = loadSystemImage(with: "headphones")
         public var pencilIcon = loadSystemImage(with: "pencil")
         public var downArrow = loadSystemImage(with: "arrow.down")
         public var menuIcon = loadSystemImage(with: "line.3.horizontal")
@@ -52,6 +53,7 @@ public extension Constants {
         public var notificationBell = loadSystemImage(with: "bell.fill")
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
+        public var videoSystemIcon = loadSystemImage(with: "video.fill")
         
         public var pdfIcon = loadImage(with: "pdfIcon")
         public var placeholderImage = loadImage(with: "placeholderImage")

@@ -110,9 +110,8 @@ open class LMChatMessageContentView: LMView {
     var textLabel: LMTextView = {
         let label =  LMTextView()
             .translatesAutoresizingMaskIntoConstraints()
-//        label.numberOfLines = 0
         label.isScrollEnabled = false
-        label.font = UIFont.systemFont(ofSize: 16)
+        label.font = Appearance.shared.fonts.textFont1
         label.backgroundColor = .clear
         label.textColor = .black
         label.textAlignment = .left
@@ -126,8 +125,8 @@ open class LMChatMessageContentView: LMView {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
         label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 11)
-        label.textColor = .black
+        label.font = Appearance.shared.fonts.normalFontSize11
+        label.textColor = Appearance.shared.colors.textColor
         label.text = ""
         return label
     }()
@@ -135,7 +134,7 @@ open class LMChatMessageContentView: LMView {
     open private(set) lazy var usernameLabel: LMLabel = {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
-        label.numberOfLines = 0
+        label.numberOfLines = 1
         label.font = Appearance.shared.fonts.headingLabel
         label.textColor = Appearance.shared.colors.red
         label.paddingLeft = 2
@@ -148,6 +147,7 @@ open class LMChatMessageContentView: LMView {
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
     var clickedOnReaction: ((String) -> Void)?
+    var clickedOnAttachment: ((String) -> Void)?
     
     // MARK: setupViews
     open override func setupViews() {
@@ -196,7 +196,7 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -5),
-            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -5),
+            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -2),
             timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -15),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
@@ -225,6 +225,9 @@ open class LMChatMessageContentView: LMView {
         preview.setHeightConstraint(with: 80)
         preview.cornerRadius(with: 12)
         preview.setData(data)
+        preview.onClickAttachment = {[weak self] url in
+            self?.clickedOnAttachment?(url)
+        }
         return preview
     }
 
@@ -239,7 +242,8 @@ open class LMChatMessageContentView: LMView {
     }
     */
     open func setDataView(_ data: LMChatMessageCell.ContentModel) {
-        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines))
+        self.textLabel.isUserInteractionEnabled = true
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont1, withTextColor: Appearance.Colors.shared.black)
         self.timestampLabel.text = data.message?.createdTime
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
@@ -253,16 +257,38 @@ open class LMChatMessageContentView: LMView {
             chatProfileImageView.isHidden = false
             bubbleLeadingConstraint?.constant = 00
             bubbleTrailingConstraint?.constant = -40
-            usernameLabel.text = data.message?.createdBy
+            messageByName(data)
             usernameLabel.isHidden = false
         }
         bubbleLeadingConstraint?.isActive = true
         bubbleTrailingConstraint?.isActive = true
         
-        replyView(data)
-        linkPreview(data)
-        attachmentView(data)
-        reactionsView(data)
+        if data.message?.isDeleted == true {
+            deletedConversationView(data)
+        } else {
+            replyView(data)
+            linkPreview(data)
+            attachmentView(data)
+            reactionsView(data)
+        }
+    }
+    
+    func messageByName(_ data: LMChatMessageCell.ContentModel) {
+        
+        let myAttribute = [ NSAttributedString.Key.font: Appearance.shared.fonts.headingLabel, .foregroundColor: Appearance.shared.colors.red]
+        let myString = NSMutableAttributedString(string: "\(data.message?.createdBy ?? "")", attributes: myAttribute )
+        if let memberTitle = data.message?.memberTitle {
+            let myAttribute2 = [ NSAttributedString.Key.font: Appearance.shared.fonts.buttonFont1, .foregroundColor: Appearance.shared.colors.textColor]
+            myString.append(NSAttributedString(string: " \(Constants.shared.strings.dot) \(memberTitle)", attributes: myAttribute2))
+        }
+        usernameLabel.attributedText = myString
+    }
+    
+    func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
+        self.textLabel.font = UIFont.italicSystemFont(ofSize: 16)
+        self.textLabel.textColor = Appearance.Colors.shared.textColor
+        self.textLabel.text = "This message was deleted!"
+        self.textLabel.isUserInteractionEnabled = false
     }
     
     func linkPreview(_ data: LMChatMessageCell.ContentModel) {
@@ -285,7 +311,7 @@ open class LMChatMessageContentView: LMView {
         switch type {
         case "image", "video":
             galleryPreview(attachments)
-        case "pdf", "doc":
+        case "pdf", "document", "doc":
             docPreview(attachments)
         case "audio":
             audioPreview(attachments)
@@ -357,6 +383,7 @@ open class LMChatMessageContentView: LMView {
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
         linkPreview.isHidden = true
+        galleryView.isHidden = true
         galleryContainerStackView.removeAllArrangedSubviews()
         galleryContainerStackView.isHidden = true
         docPreviewContainerStackView.removeAllArrangedSubviews()

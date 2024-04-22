@@ -11,6 +11,7 @@ import LikeMindsChat
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
+    func scrollToBottom()
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -48,7 +49,18 @@ public final class LMMessageListViewModel {
         return viewcontroller
     }
     
+    @objc func attachmentPostCompleted(_ notification: Notification) {
+        guard let userInfo = notification.userInfo, let conversationId = userInfo[LMUploadConversationsAttachmentOperation.postedId] else {
+            return
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     func getInitialData() {
+        NotificationCenter.default.addObserver(self, selector: #selector(attachmentPostCompleted), name: LMUploadConversationsAttachmentOperation.attachmentPostCompleted, object: nil)
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
         LMChatClient.shared.getChatroom(request: chatroomRequest) {[weak self] response in
             //1st case -> chatroom is not present, if yes return
@@ -139,7 +151,7 @@ public final class LMMessageListViewModel {
                 insertConversationIntoList(message)
             }
         }
-        delegate?.reloadChatMessageList()
+        delegate?.scrollToBottom()
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
@@ -397,15 +409,17 @@ public final class LMMessageListViewModel {
         guard let fromViewController = delegate as? LMViewController else { return }
         switch action.id {
         case .viewParticipants:
-            NavigationScreen.shared.perform(.participants(chatroomId: chatroomViewData?.id ?? ""), from: fromViewController, params: nil)
+            NavigationScreen.shared.perform(.participants(chatroomId: chatroomViewData?.id ?? "", isSecret: chatroomViewData?.isSecret ?? false), from: fromViewController, params: nil)
         case .invite:
             break
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: chatroomViewData?.id ?? "", conversationId: nil, memberId: nil), from: fromViewController, params: nil)
         case .leaveChatRoom:
-            break
-        case .mute, .unMute:
-            muteUnmuteChatroom(value: action.id != .mute)
+            leaveChatroom()
+        case .mute:
+            muteUnmuteChatroom(value: true)
+        case .unMute:
+            muteUnmuteChatroom(value: false)
         default:
             break
         }
@@ -476,7 +490,7 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
+        delegate?.scrollToBottom()
     }
     
     public func getChangedConversations(conversations: [Conversation]?) {
@@ -485,7 +499,7 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             updateConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
+        delegate?.scrollToBottom()
     }
     
     public func getNewConversations(conversations: [Conversation]?) {
@@ -494,7 +508,7 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
+        delegate?.scrollToBottom()
     }
     
 }
@@ -525,14 +539,13 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         
         let tempConversation = saveTemporaryConversation(uuid: UserPreferences.shared.getLMUUID() ?? "", communityId: communityId, request: postConversationRequest, fileUrls: filesUrls)
         insertConversationIntoList(tempConversation)
-        delegate?.reloadChatMessageList()
+        delegate?.scrollToBottom()
         
-//        LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
-//            guard let self, let conversation = response.data?.conversation else { return }
-//            insertConversationIntoList(conversation)
-//            delegate?.reloadChatMessageList()
-//            print(response)
-//        }
+        LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
+            guard let self, let conversation = response.data else { return }
+            onConversationPosted(response: conversation, updatedFileUrls: filesUrls, tempConversation: tempConversation, replyConversationId: replyConversationId, replyChatRoomId: replyChatRoomId)
+            print(response)
+        }
     }
     private func saveTemporaryConversation(uuid: String,
                                            communityId: String,

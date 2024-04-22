@@ -81,6 +81,7 @@ open class LMChatAttachmentViewController: LMViewController {
     public var viewmodel: LMChatAttachmentViewModel?
     public var mediaCellData: [MediaPickerModel] = []
     private var selectedMedia: MediaPickerModel?
+    var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -108,6 +109,8 @@ open class LMChatAttachmentViewController: LMViewController {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: imageViewCarouselContainer.topAnchor)
+        bottomTextViewContainerBottomConstraints?.isActive = true
         NSLayoutConstraint.activate([
             imageActionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageActionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -127,9 +130,30 @@ open class LMChatAttachmentViewController: LMViewController {
             imageViewCarouselContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomMessageBoxView.bottomAnchor.constraint(equalTo: imageViewCarouselContainer.topAnchor),
         ])
         imageViewCarouselContainer.pinSubView(subView: mediaCollectionView)
+    }
+    
+    @objc
+    open override func keyboardWillShow(_ sender: Notification) {
+        guard let userInfo = sender.userInfo,
+              let frame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
+            return
+        }
+        self.bottomTextViewContainerBottomConstraints?.isActive = false
+        self.bottomTextViewContainerBottomConstraints?.constant = -((frame.size.height - self.view.safeAreaInsets.bottom) - 70)
+        self.bottomTextViewContainerBottomConstraints?.isActive = true
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc
+    open override func keyboardWillHide(_ sender: Notification) {
+        self.bottomTextViewContainerBottomConstraints?.isActive = false
+        self.bottomTextViewContainerBottomConstraints?.constant = 0
+        self.bottomTextViewContainerBottomConstraints?.isActive = true
+        self.view.layoutIfNeeded()
     }
     
     @objc open func editingImage(_ sender: UIButton?) {
@@ -197,6 +221,7 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     
     public func sendAttachment(message: String?) {
         delegate?.postConversationWithAttchments(message: message, attachments: mediaCellData)
+        self.dismissViewController()
     }
 }
 

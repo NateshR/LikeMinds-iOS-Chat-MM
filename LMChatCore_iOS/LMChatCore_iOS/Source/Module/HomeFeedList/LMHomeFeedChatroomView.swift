@@ -22,8 +22,9 @@ open class LMHomeFeedChatroomView: LMView {
         public let isAnnouncementRoom: Bool
         public let unreadCount: Int
         public let timestamp: String
+        public let fileType: String?
         
-       public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String) {
+        public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String, fileType: String?) {
             self.userName = userName
             self.lastMessage = lastMessage
             self.chatroomName = chatroomName
@@ -33,6 +34,7 @@ open class LMHomeFeedChatroomView: LMView {
             self.isAnnouncementRoom = isAnnouncementRoom
             self.unreadCount = unreadCount
             self.timestamp = timestamp
+            self.fileType = fileType
         }
         
     }
@@ -247,7 +249,8 @@ open class LMHomeFeedChatroomView: LMView {
     
     open func setData(_ data: ContentModel) {
         chatroomNameLabel.text = data.chatroomName
-        lastMessageLabel.text = data.lastMessage
+//        lastMessageLabel.text = data.lastMessage
+        lastMessageLabelSet(data)
         muteIconImageView.isHidden = !data.isMuted
         announcementIconImageView.isHidden = !data.isAnnouncementRoom
         lockIconImageView.isHidden = !data.isSecret
@@ -261,5 +264,46 @@ open class LMHomeFeedChatroomView: LMView {
         } else {
             chatroomImageView.image = placeholder
         }
+    }
+    
+    func lastMessageLabelSet(_ data: ContentModel) {
+        let fileType = data.fileType ?? ""
+        var initalType = ""
+        var image = UIImage()
+        switch fileType.lowercased() {
+        case "image", "video":
+            image = Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Photo"
+        case "audio":
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Audio"
+        case "voice_note":
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Voice note"
+        case "pdf", "doc":
+            image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Document"
+        case "link":
+            image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+        default:
+            break
+        }
+        
+        // Create Attachment
+        let imageAttachment = NSTextAttachment()
+        imageAttachment.image = image
+        // Set bound to reposition
+        //        let imageOffsetY: CGFloat = -5.0
+        //        imageAttachment.bounds = CGRect(x: 0, y: imageOffsetY, width: imageAttachment.image!.size.width, height: imageAttachment.image!.size.height)
+        // Create string with attachment
+        let attachmentString = NSAttributedString(attachment: imageAttachment)
+        // Initialize mutable string
+        let completeText = NSMutableAttributedString(string: "")
+        // Add image to mutable string
+        completeText.append(attachmentString)
+        // Add your text to mutable string
+        let textAfterIcon = NSAttributedString(string: initalType + " " + (data.lastMessage))
+        completeText.append(textAfterIcon)
+        lastMessageLabel.attributedText = textAfterIcon
     }
 }

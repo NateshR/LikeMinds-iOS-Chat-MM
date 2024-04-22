@@ -80,7 +80,6 @@ open class LMMessageListViewController: LMViewController {
             
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)
         ])
     }
     
@@ -129,11 +128,34 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomViewData?.participantsCount ?? 0) participants")
         messageListView.tableSections = viewModel?.messagesList ?? []
         messageListView.reloadData()
-        
+    }
+    
+    public func scrollToBottom() {
+        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomViewData?.participantsCount ?? 0) participants")
+        messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.reloadData()
+        messageListView.scrollToBottom()
+        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
     }
 }
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
+    
+    public func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath) {
+        print("tapped on \(indexPath.section), \(indexPath.row) Reply")
+    }
+    
+    public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
+        guard let fileUrl = URL(string: url) else {
+            print("attachment URL: \(url)")
+            return
+        }
+        NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
+    }
+    
+    public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
+        print("tapped on \(attachmentIndex) image")
+    }
     
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
         guard let message = viewModel?.messagesList[indexPath.section].data[indexPath.row],
@@ -187,7 +209,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         audio.setValue(audioImage, forKey: "image")
         
         let document = UIAlertAction(title: "Document", style: UIAlertAction.Style.default) { (UIAlertAction) in
-            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .audio)
+            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .pdf)
         }
         
         let documentImage = Constants.shared.images.documentsIcon
@@ -233,7 +255,19 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
 extension LMMessageListViewController: MediaPickerDelegate {
     
     func filePicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel], fileType: MediaType) {
-        
+        postConversationWithAttchments(message: nil, attachments: results)
+    }
+}
+
+extension LMMessageListViewController: UIDocumentPickerDelegate {
+    
+    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        var results: [MediaPickerModel] = []
+        for item in urls {
+            guard let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: item) else { continue }
+            results.append(.init(with: localPath, type: MediaPickerManager.shared.fileTypeForDocument))
+        }
+        postConversationWithAttchments(message: nil, attachments: results)
     }
 }
 

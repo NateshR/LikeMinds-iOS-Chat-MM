@@ -210,8 +210,10 @@ open class LMViewController: UIViewController {
     }
     
     open func dismissViewController() {
-        guard let _ = self.navigationController?.popViewController(animated: true) else { return }
-        self.dismiss(animated: true)
+        guard let _ = self.navigationController?.popViewController(animated: true) else {
+            self.dismiss(animated: true)
+            return
+        }
     }
     
     public func setNavigationTitleAndSubtitle(with title: String?, subtitle: String?, alignment: UIStackView.Alignment = .center) {

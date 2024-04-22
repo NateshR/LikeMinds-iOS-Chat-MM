@@ -115,7 +115,7 @@ class MediaPickerManager: NSObject {
         self.delegate = delegate
         let docTypes = fileType == .pdf ? ["com.adobe.pdf"] : ["public.audiovisual-​content", "public.audio"]
         let docVc = UIDocumentPickerViewController(documentTypes: docTypes, in: .import)
-        docVc.delegate = self
+        docVc.delegate = (delegate as? LMMessageListViewController)
         docVc.allowsMultipleSelection = true
         docVc.isModalInPresentation = true
         viewController.present(docVc, animated: true)
@@ -285,10 +285,6 @@ extension MediaPickerManager: UIImagePickerControllerDelegate, UINavigationContr
 }
 
 extension MediaPickerManager: UIDocumentPickerDelegate {
-    
-    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        controller.dismiss(animated: true)
-    }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         for item in urls {
