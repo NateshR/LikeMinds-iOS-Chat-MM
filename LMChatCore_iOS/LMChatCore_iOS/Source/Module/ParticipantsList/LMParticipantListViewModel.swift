@@ -24,6 +24,7 @@ public class LMParticipantListViewModel {
     var totalParticipantCount: Int = 0
     var isParticipantLoading: Bool = false
     var isAllParticipantLoaded: Bool = false
+    var searchedText: String?
     
     init(_ viewController: LMParticipantListViewModelProtocol, chatroomId: String, isSecret: Bool) {
         self.delegate = viewController
@@ -44,13 +45,46 @@ public class LMParticipantListViewModel {
             .chatroomId(chatroomId)
             .page(pageNo)
             .pageSize(pageSize)
+            .participantName(searchedText)
             .isChatroomSecret(isSecretChatroom)
             .build()
         isParticipantLoading = true
         LMChatClient.shared.getParticipants(request: request) {[weak self] response in
-            guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else { return }
+            guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else {
+                self?.isParticipantLoading = false
+                return }
             totalParticipantCount = response.data?.totalParticipantsCount ?? 0
             pageNo += 1
+            participants.append(contentsOf: participantsData)
+            participantsContentModels.append(contentsOf: participantsData.compactMap({
+                .init(name: $0.name ?? "", designationDetail: nil, profileImageUrl: $0.imageUrl, customTitle: $0.customTitle)
+            }))
+            delegate?.reloadData()
+            isAllParticipantLoaded = (totalParticipantCount == participants.count)
+            isParticipantLoading = false
+        }
+    }
+    
+    func searchParticipants(_ searchText: String?) {
+        guard !isParticipantLoading else { return }
+        pageNo = 1
+        self.searchedText = searchText
+        let request = GetParticipantsRequest.builder()
+            .chatroomId(chatroomId)
+            .page(pageNo)
+            .pageSize(pageSize)
+            .participantName(searchedText)
+            .isChatroomSecret(isSecretChatroom)
+            .build()
+        isParticipantLoading = true
+        LMChatClient.shared.getParticipants(request: request) {[weak self] response in
+            guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else {
+                self?.isParticipantLoading = false
+                return }
+            totalParticipantCount = response.data?.totalParticipantsCount ?? 0
+            pageNo += 1
+            participants.removeAll()
+            participantsContentModels.removeAll()
             participants.append(contentsOf: participantsData)
             participantsContentModels.append(contentsOf: participantsData.compactMap({
                 .init(name: $0.name ?? "", designationDetail: nil, profileImageUrl: $0.imageUrl, customTitle: $0.customTitle)

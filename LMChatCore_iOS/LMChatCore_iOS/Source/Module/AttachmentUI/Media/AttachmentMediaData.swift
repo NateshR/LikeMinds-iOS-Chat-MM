@@ -9,20 +9,12 @@ import Foundation
 import PhotosUI
 
 public struct AttachmentMediaData {
-    
-    enum MediaType: String {
-        case image
-        case gif
-        case video
-        case livePhoto
-    }
-    
-    let url: URL
+    let url: URL?
     let fileType: MediaType
     let width: Int?
     let height: Int?
     let thumbnailurl: URL?
-    let size: Int64
+    let size: Int64?
     let mediaName: String?
     let pdfPageCount: Int?
     let duration: Int?
@@ -31,12 +23,12 @@ public struct AttachmentMediaData {
     let image: UIImage?
     let livePhoto: PHLivePhoto?
     
-    init(url: URL,
+    init(url: URL?,
          fileType: MediaType,
          width: Int?,
          height: Int?,
          thumbnailurl: URL?,
-         size: Int64,
+         size: Int64?,
          mediaName: String?,
          pdfPageCount: Int?,
          duration: Int?,
@@ -69,7 +61,7 @@ public struct AttachmentMediaData {
         private var width: Int?
         private var height: Int?
         private var thumbnailurl: URL?
-        private var size: Int64 = 0
+        private var size: Int64?
         private var mediaName: String?
         private var pdfPageCount: Int?
         private var duration: Int?
@@ -78,7 +70,7 @@ public struct AttachmentMediaData {
         private var image: UIImage?
         private var livePhoto: PHLivePhoto?
         
-        func url(_ url: URL) -> Builder {
+        func url(_ url: URL?) -> Builder {
             self.url = url
             return self
         }
@@ -103,7 +95,7 @@ public struct AttachmentMediaData {
             return self
         }
         
-        func size(_ size: Int64) -> Builder {
+        func size(_ size: Int64?) -> Builder {
             self.size = size
             return self
         }

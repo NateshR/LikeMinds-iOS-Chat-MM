@@ -1,5 +1,5 @@
 //
-//  ReactionTitleCell.swift
+//  LMReactionTitleCell.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
@@ -7,11 +7,11 @@
 
 import UIKit
 
-class ReactionTitleCell: UICollectionViewCell {
+class LMReactionTitleCell: UICollectionViewCell {
     struct ContentModel {
         let title: String
         let count: Int
-        let isSelected: Bool
+        var isSelected: Bool
     }
     
     lazy var containerView: UIView = {

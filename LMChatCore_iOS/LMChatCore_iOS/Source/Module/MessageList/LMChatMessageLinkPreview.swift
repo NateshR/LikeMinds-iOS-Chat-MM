@@ -38,6 +38,7 @@ open class LMChatMessageLinkPreview: LMView {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
+        image.tintColor = Appearance.shared.colors.textColor
         image.layer.masksToBounds = true
         return image
     }()
@@ -75,6 +76,8 @@ open class LMChatMessageLinkPreview: LMView {
         return label
     }()
         
+    var onClickLinkPriview: ((String) -> Void)?
+    var viewData: ContentModel?
 
     // MARK: setupViews
     open override func setupViews() {
@@ -87,6 +90,11 @@ open class LMChatMessageLinkPreview: LMView {
         
         metaDataStackView.addArrangedSubview(titleLabel)
         metaDataStackView.addArrangedSubview(descriptionLabel)
+        
+        isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onLinkClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        addGestureRecognizer(tapGuesture)
     }
     
     // MARK: setupLayouts
@@ -117,8 +125,15 @@ open class LMChatMessageLinkPreview: LMView {
     }
     
     func setData(_ data: ContentModel) {
+        viewData = data
         titleLabel.text = data.title
         descriptionLabel.text = data.subtitle
-        imageView.kf.setImage(with: URL(string: data.thumbnailUrl ?? ""))
+        let placeholder = UIImage(systemName: "link.icloud")
+        imageView.kf.setImage(with: URL(string: data.thumbnailUrl ?? ""), placeholder: placeholder)
+    }
+    
+    @objc func onLinkClicked(_ gesture: UITapGestureRecognizer) {
+        guard let url = viewData?.linkUrl else { return }
+        onClickLinkPriview?(url)
     }
 }

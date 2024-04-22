@@ -18,6 +18,7 @@ public final class LMChatTaggingListViewModel {
     public var isFetching: Bool
     public var isLastPage: Bool
     public var searchString: String
+    public var chatroomId: String
     public var taggedUsers: [TagUser]
     public var debounerTimer: Timer?
     public let debounceTime: TimeInterval
@@ -28,7 +29,7 @@ public final class LMChatTaggingListViewModel {
     // MARK: Init
     init(delegate: LMChatTaggingListViewModelProtocol?) {
         self.currentPage = 1
-        self.pageSize = 10
+        self.pageSize = 20
         self.isFetching = false
         self.isLastPage = false
         self.searchString = ""
@@ -36,6 +37,7 @@ public final class LMChatTaggingListViewModel {
         self.debounceTime = 0.5
         self.shouldFetchNames = true
         self.delegate = delegate
+        self.chatroomId = ""
     }
   /*
     public static func createModule(delegate: LMChatTaggedUserFoundProtocol?) -> LMChatTaggingListView {
@@ -56,8 +58,9 @@ public final class LMChatTaggingListViewModel {
         delegate?.updateList(with: [])
     }
     
-    func fetchUsers(with searchString: String) {
+    func fetchUsers(with searchString: String, chatroomId: String) {
         self.searchString = searchString
+        self.chatroomId = chatroomId
         shouldFetchNames = true
         debounerTimer?.invalidate()
         debounerTimer = Timer.scheduledTimer(withTimeInterval: debounceTime, repeats: false) { [weak self] _ in
@@ -65,30 +68,29 @@ public final class LMChatTaggingListViewModel {
             currentPage = 1
             isLastPage = false
             taggedUsers.removeAll()
-            fetchTaggingList(searchString)
+            fetchTaggingList(searchString, chatroomId)
         }
     }
     
     func fetchMoreUsers() {
         guard !isFetching,
               !isLastPage else { return }
-        currentPage += 1
-        fetchTaggingList(searchString)
+        fetchTaggingList(searchString, chatroomId)
     }
     
-    private func fetchTaggingList(_ searchString: String) {
+    private func fetchTaggingList(_ searchString: String, _ chatroomId: String) {
         isFetching = true
-        taggedUsers.append(contentsOf: TagUser.getUsers(search: searchString))
-        convertToViewModel()
-        return 
+//        taggedUsers.append(contentsOf: TagUser.getUsers(search: searchString))
+//        convertToViewModel()
+//        return 
         let request = GetTaggingListRequest.Builder()
             .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
+            .chatroomId(chatroomId)
             .page(currentPage)
             .pageSize(pageSize)
             .build()
         LMChatClient.shared.getTaggingList(request: request) { [weak self] response in
             guard let self else { return }
-            isFetching = false
             guard let users = response.data?.communityMembers else { return }
             isLastPage = users.isEmpty
             
@@ -98,6 +100,8 @@ public final class LMChatTaggingListViewModel {
             
             taggedUsers.append(contentsOf: tempUsers)
             convertToViewModel()
+            currentPage += 1
+            isFetching = false
         }
       /*
         let request = GetTaggingListRequest.builder()

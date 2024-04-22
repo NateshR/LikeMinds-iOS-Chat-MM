@@ -22,6 +22,8 @@ open class LMChatMessageReactionsView: LMView {
         return view
     }()
     
+    open var clickedOnReaction: ((String) -> Void)?
+    
     override open func layoutSubviews() {
         super.layoutSubviews()
     }
@@ -54,7 +56,11 @@ open class LMChatMessageReactionsView: LMView {
         previewsContainerView.arrangedSubviews.forEach({$0.isHidden = true})
         for (index, item) in data.enumerated() {
             if index > 1 { return }
-            (previewsContainerView.arrangedSubviews[index] as? LMMessageReaction)?.setData(.init(reaction: item.reaction, reactionCount: "\(item.count)"))
+            let preview = (previewsContainerView.arrangedSubviews[index] as? LMMessageReaction)
+            preview?.setData(.init(reaction: item.reaction, reactionCount: "\(item.count)"))
+            preview?.clickedOnReaction = {[weak self] in
+                self?.clickedOnReaction?(item.reaction)
+            }
             previewsContainerView.arrangedSubviews[index].isHidden = false
         }
     }

@@ -24,6 +24,8 @@ open class LMChatMessageDocumentPreview: LMView {
         }
     }
     
+    var onClickAttachment: ((String) -> Void)?
+    
     public var outerStackView: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
@@ -77,6 +79,8 @@ open class LMChatMessageDocumentPreview: LMView {
         return label
     }()
     
+    var viewData: ContentModel?
+    
     open override func setupViews() {
         addSubview(outerStackView)
         outerStackView.addArrangedSubview(previewImage)
@@ -91,6 +95,10 @@ open class LMChatMessageDocumentPreview: LMView {
         
         containerView.backgroundColor = Appearance.shared.colors.previewBackgroundColor
         previewImage.isHidden = true
+        isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        addGestureRecognizer(tapGuesture)
     }
     
     open override func setupLayouts() {
@@ -119,7 +127,13 @@ open class LMChatMessageDocumentPreview: LMView {
     }
     
     func setData(_ data: ContentModel) {
+        viewData = data
         titleLabel.text = data.fileName
         subtitleLabel.text = "\(data.numberOfPages ?? 0) Pages • \(data.fileSizeInMb) • \(data.fileType?.uppercased() ?? "PDF")"
+    }
+    
+    @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
+        guard let url = viewData?.fileUrl else { return }
+        onClickAttachment?(url)
     }
 }

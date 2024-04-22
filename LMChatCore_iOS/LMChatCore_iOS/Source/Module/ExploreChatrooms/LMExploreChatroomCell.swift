@@ -1,8 +1,8 @@
 //
-//  LMHomeFeedChatroomCell.swift
+//  LMExploreChatroomCell.swift
 //  LMChatCore_iOS
 //
-//  Created by Pushpendra Singh on 09/02/24.
+//  Created by Pushpendra Singh on 19/04/24.
 //
 
 import Foundation
@@ -11,15 +11,17 @@ import LMChatUI_iOS
 import LikeMindsChat
 
 @IBDesignable
-open class LMHomeFeedChatroomCell: LMTableViewCell {
+open class LMExploreChatroomCell: LMTableViewCell {
     
     public struct ContentModel {
         public let chatroom: Chatroom?
     }
     
+    var onJoinButtonClick: ((_ value: Bool, _ chatroomId: String) -> Void)?
+    
     // MARK: UI Elements
-    open private(set) lazy var chatroomView: LMHomeFeedChatroomView = {
-        let view = LMCoreComponents.shared.homeFeedChatroomView.init().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var chatroomView: LMExploreChatroomView = {
+        let view = LMCoreComponents.shared.exploreChatroomView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -54,7 +56,7 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
             chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             chatroomView.bottomAnchor.constraint(equalTo: sepratorView.topAnchor),
-
+            
             sepratorView.leadingAnchor.constraint(equalTo: chatroomView.chatroomImageView.leadingAnchor, constant: 5),
             sepratorView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             sepratorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
@@ -78,42 +80,13 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
         let creatorName = data.chatroom?.member?.name ?? "NA"
         var lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
-        let lastConversation = data.chatroom?.lastConversation
-        let fileType = lastConversation?.attachments?.first?.type
         
-        chatroomView.setData(LMHomeFeedChatroomView.ContentModel(userName: data.chatroom?.member?.name ?? "NA",
-                                                                 lastMessage: lastMessage,
-                                                                 chatroomName: data.chatroom?.header ?? "NA",
-                                                                 chatroomImageUrl: data.chatroom?.chatroomImageUrl,
-                                                                 isMuted: data.chatroom?.muteStatus ?? false,
-                                                                 isSecret: data.chatroom?.isSecret ?? false,
-                                                                 isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue,
-                                                                 unreadCount: data.chatroom?.unseenCount ?? 0,
-                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA", fileType: fileType))
-    }
-    
-    func timestampConverted(createdAtInEpoch: Int) -> String? {
-        guard createdAtInEpoch > .zero else { return nil }
-        var epochTime = Double(createdAtInEpoch)
-        
-        if epochTime > Date().timeIntervalSince1970 {
-            epochTime = epochTime / 1000
-        }
-        
-        let date = Date(timeIntervalSince1970: epochTime)
-        let dateFormatter = DateFormatter()
-        
-        if Calendar.current.isDateInToday(date) {
-            dateFormatter.dateFormat = "hh:mm a"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
-            return dateFormatter.string(from: date)
-        } else if Calendar.current.isDateInYesterday(date) {
-            return "Yesterday"
-        } else {
-            dateFormatter.dateFormat = "dd/MM/yy"
-            return dateFormatter.string(from: date)
+        chatroomView.setData(LMExploreChatroomView.ContentModel(userName: data.chatroom?.member?.name, title: data.chatroom?.title, chatroomName: data.chatroom?.header, chatroomImageUrl: data.chatroom?.chatroomImageUrl, isSecret: data.chatroom?.isSecret, isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue, participantsCount: data.chatroom?.participantsCount, messageCount: data.chatroom?.totalResponseCount, isFollowed: data.chatroom?.followStatus, chatroomId: data.chatroom?.id ?? "", externalSeen: data.chatroom?.externalSeen, isPinned: data.chatroom?.isPinned))
+        chatroomView.onJoinButtonClick = {[weak self] (value, chatroomId) in
+            data.chatroom?.followStatus = value
+            self?.onJoinButtonClick?(value, chatroomId)
         }
     }
+
 }
 

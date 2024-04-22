@@ -17,6 +17,10 @@ public enum ScrollDirection : Int {
 public protocol LMMessageListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
     func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
+    func didTappedOnReaction(reaction: String, indexPath: IndexPath)
+    func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath)
+    func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath)
+    func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
 }
 
 @IBDesignable
@@ -35,6 +39,7 @@ open class LMMessageListView: LMView {
         
         public struct Message {
             public let messageId: String
+            public let memberTitle: String?
             public let message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
@@ -143,7 +148,7 @@ open class LMMessageListView: LMView {
     }
     
     func scrollToBottom() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
@@ -196,6 +201,8 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
                 cell.setData(with: .init(message: item))
+                cell.currentIndexPath = indexPath
+                cell.delegate = self
                 return cell
             }
         default:
@@ -217,6 +224,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
             cell.infoLabel.text = tableSections[section].section
+            cell.containerView.backgroundColor = Appearance.shared.colors.clear
             return cell
         }
         return LMView()
@@ -359,4 +367,24 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-
+extension LMMessageListView: LMChatMessageCellDelegate {
+    public func onClickReplyOfMessage(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnReplyPreviewOfMessage(indexPath: indexPath)
+    }
+    
+    public func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnAttachmentOfMessage(url: url, indexPath: indexPath)
+    }
+    
+    public func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnGalleryOfMessage(attachmentIndex: attachmentIndex, indexPath: indexPath)
+    }
+    
+    public func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnReaction(reaction: reaction, indexPath: indexPath)
+    }
+}

@@ -10,7 +10,7 @@ import LMChatUI_iOS
 
 public protocol LMAttachmentBottomMessageDelegate: AnyObject {
     func addMoreAttachment()
-    func sendAttachment()
+    func sendAttachment(message: String?)
 }
 
 @IBDesignable
@@ -177,7 +177,7 @@ open class LMAttachmentBottomMessageView: LMView {
         }
         inputTextView.text = ""
         contentHeightChanged()
-        delegate?.sendAttachment()
+        delegate?.sendAttachment(message: message)
     }
     
     @objc func addMoreAttachmentButtonClicked(_ sender: UIButton) {
@@ -187,8 +187,8 @@ open class LMAttachmentBottomMessageView: LMView {
 
 extension LMAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
     
-    public func mentionStarted(with text: String) {
-        taggingListView.fetchUsers(for: text)
+    public func mentionStarted(with text: String, chatroomId: String) {
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
     
     public func mentionStopped() {

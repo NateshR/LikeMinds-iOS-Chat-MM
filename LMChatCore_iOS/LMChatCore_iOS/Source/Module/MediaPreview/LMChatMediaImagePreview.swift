@@ -11,8 +11,8 @@ import UIKit
 
 
 open class LMChatMediaImagePreview: LMCollectionViewCell {
-    open private(set) lazy var previewImageView: ZoomImageViewContainer = {
-        let image = ZoomImageViewContainer()
+    open private(set) lazy var previewImageView: LMZoomImageViewContainer = {
+        let image = LMZoomImageViewContainer()
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()

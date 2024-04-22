@@ -1,5 +1,5 @@
 //
-//  ReactionViewController.swift
+//  LMReactionViewController.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-open class ReactionViewController: UIViewController {
+open class LMReactionViewController: UIViewController {
     lazy var containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -37,7 +37,7 @@ open class ReactionViewController: UIViewController {
         table.translatesAutoresizingMaskIntoConstraints = false
         table.dataSource = self
         table.delegate = self
-        table.register(ReactionViewCell.self, forCellReuseIdentifier: "reactionView")
+        table.register(LMReactionViewCell.self, forCellReuseIdentifier: "reactionView")
         return table
     }()
     
@@ -46,7 +46,7 @@ open class ReactionViewController: UIViewController {
         collection.dataSource = self
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.register(ReactionTitleCell.self, forCellWithReuseIdentifier: "reactionTitle")
+        collection.register(LMReactionTitleCell.self, forCellWithReuseIdentifier: "reactionTitle")
         return collection
     }()
     
@@ -65,9 +65,9 @@ open class ReactionViewController: UIViewController {
     }()
     
     var bottomConstraint: NSLayoutConstraint?
-    var viewModel: ReactionViewModel?
-    var titleData: [ReactionTitleCell.ContentModel] = []
-    var emojiData: [ReactionViewCell.ContentModel] = []
+    var viewModel: LMReactionViewModel?
+    var titleData: [LMReactionTitleCell.ContentModel] = []
+    var emojiData: [LMReactionViewCell.ContentModel] = []
     
     open override func loadView() {
         super.loadView()
@@ -126,6 +126,8 @@ open class ReactionViewController: UIViewController {
         
         dimmedView.isUserInteractionEnabled = true
         dimmedView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDimmedView)))
+        viewModel?.getData()
+
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -133,7 +135,6 @@ open class ReactionViewController: UIViewController {
         animateShowDimmedView()
         animatePresentContainer()
         
-        viewModel?.getData()
     }
     
     func animatePresentContainer() {
@@ -159,8 +160,8 @@ open class ReactionViewController: UIViewController {
 }
 
 
-extension ReactionViewController: ReactionViewModelProtocol {
-    func showData(with collection: [ReactionTitleCell.ContentModel], cells: [ReactionViewCell.ContentModel]) {
+extension LMReactionViewController: ReactionViewModelProtocol {
+    func showData(with collection: [LMReactionTitleCell.ContentModel], cells: [LMReactionViewCell.ContentModel]) {
         self.titleData = collection
         self.emojiData = cells
         
@@ -170,13 +171,13 @@ extension ReactionViewController: ReactionViewModelProtocol {
 }
 
 
-extension ReactionViewController: UITableViewDataSource, UITableViewDelegate {
+extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         emojiData.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! ReactionViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! LMReactionViewCell
         cell.configure(with: emojiData[indexPath.row])
         return cell
     }
@@ -186,14 +187,18 @@ extension ReactionViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension ReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension LMReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         titleData.count
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! ReactionTitleCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! LMReactionTitleCell
         cell.configure(data: titleData[indexPath.row])
         return cell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        viewModel?.fetchReactionBy(reaction: titleData[indexPath.row].title)
     }
 }
