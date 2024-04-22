@@ -20,15 +20,6 @@ open class LMZoomImageViewContainer: UIScrollView {
         }
     }
     
-    public var image: UIImage? {
-        didSet {
-            guard let image = image else {
-                return
-            }
-            imageView.image = image
-        }
-    }
-    
     open private(set) var imageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
@@ -53,7 +44,7 @@ open class LMZoomImageViewContainer: UIScrollView {
     
     convenience init(image: UIImage) {
         self.init(frame: .zero)
-        self.image = image
+//        self.image = image
     }
     
     private func commonInit() {
@@ -81,7 +72,8 @@ open class LMZoomImageViewContainer: UIScrollView {
         addGestureRecognizer(doubleTapRecognizer)
     }
     
-    @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+    @objc 
+    private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
         if zoomScale == 1 {
             setZoomScale(2, animated: true)
         } else {
@@ -89,12 +81,19 @@ open class LMZoomImageViewContainer: UIScrollView {
         }
     }
     
+    
+    public func configure(with image: URL?) {
+        guard let image else { return }
+        imageView.kf.setImage(with: image)
+    }
+    
+    public func configure(with image: UIImage?) {
+        imageView.image = image
+    }
 }
 
 extension LMZoomImageViewContainer: UIScrollViewDelegate {
-    
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
-    
 }
