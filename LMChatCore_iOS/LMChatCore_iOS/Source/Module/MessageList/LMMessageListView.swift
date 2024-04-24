@@ -165,9 +165,7 @@ open class LMMessageListView: LMView {
     
     @objc 
     open func audioEnded(notification: Notification) {
-        if let url = notification.object as? URL {
-            
-        }
+        resetAudio()
     }
     
     open func reloadData() {
@@ -396,10 +394,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
 // MARK: LMChatAudioProtocol
 extension LMMessageListView: LMChatAudioProtocol {
     public func didTapPlayPauseButton(for url: String, index: IndexPath) {
-        if let audioIndex {
-            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
-        }
-        
+        resetAudio()
         audioIndex = index
         
         LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
@@ -409,6 +404,13 @@ extension LMMessageListView: LMChatAudioProtocol {
     
     public func didSeekTo(_ position: Float, _ url: String, index: IndexPath) {
         LMChatAudioPlayManager.shared.seekAt(position, url: url)
+    }
+    
+    public func resetAudio() {
+        if let audioIndex {
+            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+        }
+        audioIndex = nil
     }
 }
 

@@ -22,7 +22,7 @@ public final class AudioRecordManager {
     
     private func activateSession() {
         do {
-            try session.setCategory(.playAndRecord, mode: .spokenAudio, options: .allowBluetooth)
+            try session.setCategory(.record, mode: .spokenAudio, options: .allowBluetooth)
             try session.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print(error.localizedDescription)
@@ -41,14 +41,15 @@ public final class AudioRecordManager {
         activateSession()
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-        let recordingName = "voiceRecording.aac"
+        let timeVariable = String(Int(Date().timeIntervalSince1970))
+        let recordingName = "\(timeVariable)_voiceRecording.aac"
         let pathArray = [dirPath, recordingName]
         print(pathArray)
         url = URL(string: pathArray.joined(separator: "/"))
         
         guard let url else { return false }
         
-        let settings = [AVFormatIDKey: Int(kAudioFormatMPEG4AAC), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue]
+        let settings = [AVFormatIDKey: Int(kAudioFormatMPEG4AAC), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue]
         
         recorder = try AVAudioRecorder(url: url, settings: settings)
         recorder?.isMeteringEnabled = true
@@ -76,7 +77,7 @@ public final class AudioRecordManager {
         NotificationCenter.default.post(name: .audioDurationUpdate, object: audioDuration)
     }
     
-    
+    @discardableResult
     func recordingStopped() -> URL? {
         if audioDuration > 1 {
             endAudioRecording()
@@ -95,8 +96,8 @@ public final class AudioRecordManager {
     
     public func deleteAudioRecording() {
         audioDuration = .zero
-        recorder = nil
         endAudioRecording()
+        recorder = nil
         
         do {
             guard let url else { return }
@@ -107,6 +108,10 @@ public final class AudioRecordManager {
         }
         
         url = nil
+    }
+    
+    func resetAudioRecording() {
+        
     }
 }
 

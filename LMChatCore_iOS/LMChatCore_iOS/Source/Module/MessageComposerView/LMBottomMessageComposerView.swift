@@ -557,7 +557,7 @@ extension LMBottomMessageComposerView {
         slideToCancel.isHidden = true
         deleteAudioRecord.isHidden = false
         
-        micFlickerButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
         micFlickerButton.tintColor = Appearance.shared.colors.gray51
         micFlickerButton.isEnabled = true
         
@@ -565,6 +565,12 @@ extension LMBottomMessageComposerView {
         sendButton.setImage(UIImage(systemName: "paperplane.circle.fill"), for: .normal)
         
         isPlayingAudio = false
+    }
+    
+    func resetRecordedAudioDuration() {
+        isPlayingAudio = false
+        micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
+        recordDuration.text = convertSecondsToFormattedTime(seconds: 0)
     }
     
     func checkSendButtonActions() {

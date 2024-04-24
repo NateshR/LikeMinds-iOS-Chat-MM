@@ -22,7 +22,7 @@ protocol LMMessageListControllerDelegate: AnyObject {
 }
 
 open class LMMessageListViewController: LMViewController {
-    
+    // MARK: UI Elements
     open private(set) lazy var bottomMessageBoxView: LMBottomMessageComposerView = {
         let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
         view.delegate = self
@@ -43,23 +43,14 @@ open class LMMessageListViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
-        self.setNavigationTitleAndSubtitle(with: "Chatroom", subtitle: nil, alignment: .center)
-
-//        setBackButtonWithAction()
+        
+        setNavigationTitleAndSubtitle(with: "Chatroom", subtitle: nil, alignment: .center)
         setupNavigationBar()
         
-//        viewModel?.fetchBottomConversations()
         viewModel?.getInitialData()
         viewModel?.syncConversation()
-        setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
         
-    }
-    
-    open override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
     }
     
     // MARK: setupViews
@@ -74,15 +65,14 @@ open class LMMessageListViewController: LMViewController {
         super.setupLayouts()
         bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         bottomTextViewContainerBottomConstraints?.isActive = true
-        NSLayoutConstraint.activate([
-            messageListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            messageListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
-            messageListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            
-            bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
+        
+        messageListView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 0), 
+                                      bottom: (bottomMessageBoxView.topAnchor, -8),
+                                      leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
+                                      trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
+        
+        bottomMessageBoxView.addConstraint(leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
+                                           trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
     }
     
     @objc
@@ -123,6 +113,17 @@ open class LMMessageListViewController: LMViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
+    open override func setupObservers() {
+        super.setupObservers()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AudioRecordManager.shared.deleteAudioRecording()
+        LMChatAudioPlayManager.shared.resetAudioPlayer()
+    }
 }
 
 extension LMMessageListViewController: LMMessageListViewModelProtocol {
@@ -331,6 +332,10 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func audioRecordingStarted() {
+        LMChatAudioPlayManager.shared.stopAudio { }
+        // If Any Audio is playing, stop audio and reset audio view
+        messageListView.resetAudio()
+        
         do {
             let canRecord = try AudioRecordManager.shared.recordAudio(audioDelegate: self)
             if canRecord {
@@ -379,14 +384,12 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
 }
 
 extension LMMessageListViewController: MediaPickerDelegate {
-    
     func filePicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel], fileType: MediaType) {
         postConversationWithAttchments(message: nil, attachments: results)
     }
 }
 
 extension LMMessageListViewController: UIDocumentPickerDelegate {
-    
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         var results: [MediaPickerModel] = []
         for item in urls {
@@ -398,7 +401,6 @@ extension LMMessageListViewController: UIDocumentPickerDelegate {
 }
 
 extension LMMessageListViewController: LMChatAttachmentViewDelegate {
-    
     public func postConversationWithAttchments(message: String?, attachments: [MediaPickerModel]) {
         let attachmentMedia: [AttachmentMediaData] = attachments.compactMap { media in
             var mediaData = AttachmentMediaData.builder()
@@ -440,4 +442,9 @@ extension LMMessageListViewController: LMChatAttachmentViewDelegate {
 
 
 // MARK: Audio Recording
-extension LMMessageListViewController: AVAudioRecorderDelegate { }
+extension LMMessageListViewController: AVAudioRecorderDelegate { 
+    @objc
+    open func audioEnded() {
+        bottomMessageBoxView.resetRecordedAudioDuration()
+    }
+}
