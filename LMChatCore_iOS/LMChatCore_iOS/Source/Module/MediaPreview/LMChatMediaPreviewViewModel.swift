@@ -8,11 +8,6 @@
 
 public final class LMChatMediaPreviewViewModel {
     public struct DataModel {
-        public enum MediaType {
-            case image,
-                 video
-        }
-        
         var type: MediaType
         var url: String
         

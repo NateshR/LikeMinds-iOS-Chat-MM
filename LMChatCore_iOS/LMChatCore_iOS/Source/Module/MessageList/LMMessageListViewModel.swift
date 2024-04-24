@@ -12,6 +12,7 @@ import LikeMindsChat
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
     func scrollToBottom()
+    func updateChatroomSubtitles()
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -30,6 +31,9 @@ public final class LMMessageListViewModel {
     var memberState: GetMemberStateResponse?
     var contentDownloadSettings: [ContentDownloadSetting]?
     var currentDetectedOgTags: LinkOGTags?
+    var replyChatMessage: Conversation?
+    var editChatMessage: Conversation?
+    var linkDetectorTimer: Timer?
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -265,7 +269,7 @@ public final class LMMessageListViewModel {
                    message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
-                   attachments: replyConversation.attachments?.compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getLMUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags))]
+                   attachments: replyConversation.attachments?.compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getLMUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags), isEdited: replyConversation.isEdited)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
@@ -277,7 +281,7 @@ public final class LMMessageListViewModel {
                      createdBy: conversation.member?.name,
                      createdByImageUrl: conversation.member?.imageUrl,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getLMUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags))
+                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited)
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
@@ -356,7 +360,6 @@ public final class LMMessageListViewModel {
             .id(chatroomId)
             .build()
         return conversation
-//        return .init(messageId: chatroom.id, message: chatroom.header, timestamp: chatroom.dateEpoch, reactions: nil, attachments: nil, replied: nil, isDeleted: nil, createdBy: chatroom.member?.name, createdByImageUrl: chatroom.member?.imageUrl, isIncoming: true, messageType: ConversationState.chatRoomHeader.rawValue, createdTime: chatroom.date, ogTags: nil)
     }
     
     func fetchMemberState() {
@@ -382,6 +385,7 @@ public final class LMMessageListViewModel {
         LMChatClient.shared.getChatroomActions(request: request) {[weak self] response in
             guard let actionsData = response.data else { return }
             self?.chatroomActionData = actionsData
+            self?.delegate?.updateChatroomSubtitles()
         }
     }
     
@@ -433,10 +437,6 @@ public final class LMMessageListViewModel {
             break
         }
     }
-    
-    func postEditedConversation() {
-        
-    }
 }
 
 extension LMMessageListViewModel: ConversationClientObserver {
@@ -473,13 +473,17 @@ extension LMMessageListViewModel: ConversationClientObserver {
     }
     
     func decodeUrl(url: String) {
-        let request = DecodeUrlRequest.builder()
-            .url(url)
-            .build()
-        LMChatClient.shared.decodeUrl(request: request) {[weak self] response in
-            guard let ogTags = response.data?.ogTags else { return }
-            self?.currentDetectedOgTags = ogTags
-        }
+        linkDetectorTimer?.invalidate()
+        linkDetectorTimer = Timer(timeInterval: 1, repeats: false, block: {[weak self] timer in
+            print("detected first link: \(url)")
+            let request = DecodeUrlRequest.builder()
+                .url(url)
+                .build()
+            LMChatClient.shared.decodeUrl(request: request) {[weak self] response in
+                guard let ogTags = response.data?.ogTags else { return }
+                self?.currentDetectedOgTags = ogTags
+            }
+        })
     }
 }
 
@@ -599,6 +603,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         }
         guard let response else { return }
         savePostedConversation(requestList: requestFiles, response: response)
+        followUnfollow()
     }
     
     func getUploadFileRequestList(fileUrls: [AttachmentMediaData], conversationId: String, chatroomId: String) -> [AttachmentUploadRequest] {
@@ -660,30 +665,68 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         LMChatClient.shared.savePostedConversation(request: request)
     }
     
-    func postEditedConversation(text: String, shareLink: String?, conversation: Conversation) {
-        guard !text.isEmpty, let conversationId = conversation.id else { return }
+    func postEditedConversation(text: String, shareLink: String?, conversation: Conversation?) {
+        guard !text.isEmpty, let conversationId = conversation?.id else { return }
         let request = EditConversationRequest.builder()
             .conversationId(conversationId)
             .text(text)
             .shareLink(shareLink)
             .build()
-        LMChatClient.shared.editConversation(request: request) { resposne in
+        LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
             guard resposne.success, let conversation = resposne.data?.conversation else { return}
-            // Update
+            self?.updateConversationIntoList(conversation)
+            self?.delegate?.reloadChatMessageList()
+        }
+    }
+    
+    func followUnfollow(status: Bool = true) {
+        guard chatroomViewData?.followStatus == false, let chatroomId = chatroomViewData?.id else { return }
+        let request = FollowChatroomRequest.builder()
+            .chatroomId(chatroomId)
+            .uuid(UserPreferences.shared.getLMUUID() ?? "")
+            .value(status)
+            .build()
+        LMChatClient.shared.followChatroom(request: request) { response in
+            guard response.success else {
+                return
+            }
         }
     }
     
     func putConversationReaction(conversationId: String, reaction: String) {
+        updateReactionsForUI(reaction: reaction, conversationId: conversationId)
         let request = PutReactionRequest.builder()
             .conversationId(conversationId)
             .reaction(reaction)
             .build()
-        LMChatClient.shared.putReaction(request: request) { response in
+        LMChatClient.shared.putReaction(request: request) {[weak self] response in
             guard response.success else {
-                print(response.errorMessage)
                 return
             }
+            self?.followUnfollow()
         }
+    }
+    
+    private func updateReactionsForUI(reaction: String, conversationId: String) {
+        guard let conIndex = chatMessages.firstIndex(where: {$0.id == conversationId})
+               else {
+            return
+        }
+        let conversation = chatMessages[conIndex]
+        var reactions = conversation.reactions ?? []
+        if let index = reactions.firstIndex(where: {$0.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()}) {  
+            reactions.remove(at: index)
+        }
+        let member = LMChatClient.shared.getMember(request: GetMemberRequest.builder().uuid(UserPreferences.shared.getClientUUID() ?? "").build())?.data?.member
+        let reactionData = Reaction.builder()
+            .reaction(reaction)
+            .member(member)
+            .build()
+        reactions.append(reactionData)
+        let conv = conversation.toBuilder().reactions(reactions).build()
+        chatMessages[conIndex] = conv
+        updateConversationIntoList(conv)
+        delegate?.reloadChatMessageList()
     }
     
     func putChatroomReaction(chatroomId: String, reaction: String) {
@@ -703,13 +746,60 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         let request = DeleteConversationsRequest.builder()
             .conversationIds(conversationIds)
             .build()
-        LMChatClient.shared.deleteConversations(request: request) { response in
-            
+        LMChatClient.shared.deleteConversations(request: request) {[weak self] response in
+            guard response.success else {
+                return
+            }
+            self?.onDeleteConversation(ids: conversationIds)
         }
     }
     
-    func fetchReplyConversationOnClick(conversation: Conversation, repliedConversationId: String) {
+    private func onDeleteConversation(ids: [String]) {
+        for conId in ids {
+            if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
+                let conversation = chatMessages[index]
+                let request = GetMemberRequest.builder()
+                    .uuid(memberState?.member?.uuid ?? "")
+                    .build()
+                let builder = conversation.toBuilder()
+                                .deletedBy(conId)
+                                .deletedByMember(LMChatClient.shared.getMember(request: request)?.data?.member)
+                let updatedConversation = builder.build()
+                chatMessages[index] = updatedConversation
+                updateConversationIntoList(updatedConversation)
+            }
+        }
+        delegate?.reloadChatMessageList()
+    }
+    
+    func editConversation(conversationId: String) {
+        self.editChatMessage = chatMessages.first(where: {$0.id == conversationId})
+    }
+    
+    func replyConversation(conversationId: String) {
+        self.replyChatMessage = chatMessages.first(where: {$0.id == conversationId})
+    }
+    
+    func copyConversation(conversationId: String) {
+        guard let chatMessage = self.chatMessages.first(where: {$0.id == conversationId}), !chatMessage.answer.isEmpty else {return}
+        var copiedString: String?
+        let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer)
+        copiedString = "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) "
+//        else if let chatRoom = chatMessage.chatRoom {
+//            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
+//            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
+//        }
         
+        let pasteBoard = UIPasteboard.general
+        pasteBoard.string = copiedString
+    }
+    
+    func fetchReplyConversationOnClick(repliedConversationId: String) {
+        if let conversation = chatMessages.first(where: {$0.id == repliedConversationId}) {
+            messagesList
+        } else if let chatroomViewData {
+            fetchIntermediateConversations(chatroom: chatroomViewData, conversationId: repliedConversationId)
+        }
     }
     
     func postMessageWithAttachment() {

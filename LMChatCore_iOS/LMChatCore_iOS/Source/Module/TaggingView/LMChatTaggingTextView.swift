@@ -157,7 +157,7 @@ open class LMChatTaggingTextView: LMTextView {
     
     public func setAttributedText(from content: String, prefix: String? = nil) {
         if !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-//            attributedText = GetAttributedTextWithRoutes.getAttributedText(from: content, andPrefix: prefix)
+            attributedText = GetAttributedTextWithRoutes.getAttributedText(from: content)
         } else {
             text = placeHolderText
             textColor = textAttributes[.foregroundColor] as? UIColor

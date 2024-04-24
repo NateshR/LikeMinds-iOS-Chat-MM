@@ -20,16 +20,20 @@ final public  class LMReactionViewModel {
     var reactions: [LMReactionTitleCell.ContentModel] = []
     
     var reactionList: [LMReactionViewCell.ContentModel] = []
+    var conversationId: String?
+    var chatroomId: String?
     
     init(delegate: ReactionViewModelProtocol?) {
         self.delegate = delegate
     }
     
-    public static func createModule(reactions: [Reaction]) throws -> LMReactionViewController? {
+    public static func createModule(reactions: [Reaction], conversationId: String?, chatroomId: String?) throws -> LMReactionViewController? {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         let vc = LMReactionViewController()
         let viewmodel = Self.init(delegate: vc)
         viewmodel.reactionsData = reactions
+        viewmodel.conversationId = conversationId
+        viewmodel.chatroomId = chatroomId
         vc.viewModel = viewmodel
         return vc
     }
@@ -44,7 +48,7 @@ final public  class LMReactionViewModel {
         for react in reactionsByGroup.keys {
             reactions.append(.init(title: react, count: reactionsByGroup[react]?.count ?? 0, isSelected: false))
         }
-        reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.uuid ?? "") == UserPreferences.shared.getLMUUID()), reaction: $0.reaction)})
+        reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.sdkClientInfo?.uuid ?? "") == UserPreferences.shared.getClientUUID()), reaction: $0.reaction)})
         delegate?.showData(with: reactions, cells: reactionList)
     }
     
@@ -66,7 +70,8 @@ final public  class LMReactionViewModel {
         delegate?.showData(with: reactions, cells: reactionList)
     }
     
-    func deleteConversationReaction(conversationId: String) {
+    func deleteConversationReaction() {
+        guard let conversationId else { return }
         let request = DeleteReactionRequest.builder()
             .conversationId(conversationId)
             .build()
@@ -78,7 +83,8 @@ final public  class LMReactionViewModel {
         }
     }
     
-    func deleteChatroomReaction(chatroomId: String) {
+    func deleteChatroomReaction() {
+        guard let chatroomId else { return }
         let request = DeleteReactionRequest.builder()
             .chatroomId(chatroomId)
             .build()

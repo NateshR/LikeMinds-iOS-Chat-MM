@@ -9,7 +9,7 @@ import Foundation
 import PhotosUI
 import MobileCoreServices
 
-enum MediaType: String {
+public enum MediaType: String {
     case image
     case gif
     case video

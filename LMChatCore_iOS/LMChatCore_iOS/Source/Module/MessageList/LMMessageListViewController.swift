@@ -127,24 +127,72 @@ open class LMMessageListViewController: LMViewController {
 
 extension LMMessageListViewController: LMMessageListViewModelProtocol {
     public func reloadChatMessageList() {
-        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomViewData?.participantsCount ?? 0) participants")
         messageListView.tableSections = viewModel?.messagesList ?? []
         messageListView.reloadData()
     }
     
     public func scrollToBottom() {
-        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomViewData?.participantsCount ?? 0) participants")
+        messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.reloadData()
+        messageListView.scrollToBottom()
+        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
+        updateChatroomSubtitles()
+    }
+    
+    public func scrollAtIndex(index: IndexPath) {
         messageListView.tableSections = viewModel?.messagesList ?? []
         messageListView.reloadData()
         messageListView.scrollToBottom()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
     }
+    
+    public func updateChatroomSubtitles() {
+        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
+        let message = "Restricted to message in this chatroom by community manager"
+        if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: false)
+        } else {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: (viewModel?.chatroomViewData?.memberCanMessage ?? true))
+        }
+        
+    }
 }
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
+    public func didReactOnMessage(reaction: String, indexPath: IndexPath) {
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        if reaction == "more" {
+            
+        } else {
+            viewModel?.putConversationReaction(conversationId: message.messageId, reaction: reaction)
+        }
+    }
     
+    public func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message) {
+        switch type {
+        case .delete:
+            viewModel?.deleteConversations(conversationIds: [message.messageId])
+        case .edit:
+            viewModel?.editConversation(conversationId: message.messageId)
+            bottomMessageBoxView.inputTextView.setAttributedText(from: viewModel?.editChatMessage?.answer ?? "")
+            break
+        case .reply:
+            viewModel?.replyConversation(conversationId: message.messageId)
+            bottomMessageBoxView.showReplyView(withData: .init(username: message.createdBy, replyMessage: message.message, attachmentsUrls: message.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
+            break
+        case .copy:
+            viewModel?.copyConversation(conversationId: message.messageId)
+            break
+        case .report:
+            NavigationScreen.shared.perform(.report(chatroomId: nil, conversationId: message.messageId, memberId: nil), from: self, params: nil)
+        default:
+            break
+        }
+    }
+
     public func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath) {
         print("tapped on \(indexPath.section), \(indexPath.row) Reply")
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
@@ -157,13 +205,18 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     
     public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
         print("tapped on \(attachmentIndex) image")
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        guard let attachments = message.attachments, !attachments.isEmpty else { return }
+        let data: [LMChatMediaPreviewViewModel.DataModel] = attachments.compactMap({.init(type: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, url: $0.fileUrl ?? "")})
+        
+        NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: attachmentIndex), from: self, params: nil)
     }
     
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
-        guard let message = viewModel?.messagesList[indexPath.section].data[indexPath.row],
-        let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
         let reactions = conversation.reactions else { return }
-        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions), from: self, params: nil)
+        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
     
@@ -179,9 +232,27 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
 }
 
 extension LMMessageListViewController: LMBottomMessageComposerDelegate {
+    
+    public func cancelReply() {
+        viewModel?.replyChatMessage = nil
+        bottomMessageBoxView.replyMessageViewContainer.isHidden = true
+    }
+    
+    public func cancelLinkPreview() {
+        viewModel?.currentDetectedOgTags = nil
+        bottomMessageBoxView.linkPreviewView.isHidden = true
+    }
+    
     public func composeMessage(message: String) {
         print("\(message)")
-        delegate?.postMessage(message: message, filesUrls: nil, shareLink: nil, replyConversationId: nil, replyChatRoomId: nil)
+        
+        if let chatMessage = viewModel?.editChatMessage {
+            viewModel?.editChatMessage = nil
+            viewModel?.postEditedConversation(text: message, shareLink: viewModel?.currentDetectedOgTags?.url, conversation: chatMessage)
+        } else {
+            delegate?.postMessage(message: message, filesUrls: nil, shareLink: viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
+            cancelReply()
+        }
     }
     
     public func composeAttachment() {

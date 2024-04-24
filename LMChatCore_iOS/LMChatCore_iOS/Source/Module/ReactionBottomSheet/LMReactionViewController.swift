@@ -6,11 +6,12 @@
 //
 
 import UIKit
+import LMChatUI_iOS
 
-open class LMReactionViewController: UIViewController {
-    lazy var containerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
+open class LMReactionViewController: LMViewController {
+    
+    lazy var containerView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .white
         view.layer.cornerRadius = 16
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -20,10 +21,9 @@ open class LMReactionViewController: UIViewController {
     
     let maxDimmedAlpha: CGFloat = 0.6
     
-    lazy var dimmedView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .black
+    lazy var dimmedView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .clear
         view.alpha = maxDimmedAlpha
         return view
     }()
@@ -32,17 +32,16 @@ open class LMReactionViewController: UIViewController {
         view.frame.height * 0.3
     }()
     
-    lazy var tableView: UITableView = {
-        let table = UITableView()
-        table.translatesAutoresizingMaskIntoConstraints = false
+    lazy var tableView: LMTableView = {
+        let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
         table.register(LMReactionViewCell.self, forCellReuseIdentifier: "reactionView")
         return table
     }()
     
-    lazy var collectionView: UICollectionView = {
-        let collection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    lazy var collectionView: LMCollectionView = {
+        let collection = LMCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         collection.dataSource = self
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
@@ -50,17 +49,16 @@ open class LMReactionViewController: UIViewController {
         return collection
     }()
     
-    lazy var titleLabel: UILabel = {
-        let label = UILabel()
+    lazy var titleLabel: LMLabel = {
+        let label = LMLabel()
         label.text = "Reactions"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    lazy var bottomLine: UIView = {
-        let view = UIView()
+    lazy var bottomLine: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .lightGray
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -75,7 +73,8 @@ open class LMReactionViewController: UIViewController {
         setupLayouts()
     }
     
-    func setupViews() {
+    open override func setupViews() {
+        super.setupViews()
         view.addSubview(dimmedView)
         view.addSubview(containerView)
         
@@ -85,7 +84,8 @@ open class LMReactionViewController: UIViewController {
         containerView.addSubview(tableView)
     }
     
-    func setupLayouts() {
+    open override func setupLayouts() {
+        super.setupLayouts()
         NSLayoutConstraint.activate([
             dimmedView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             dimmedView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -184,6 +184,13 @@ extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         64
+    }
+    
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = emojiData[indexPath.row]
+        if item.isSelfReaction {
+            viewModel?.deleteConversationReaction()
+        }
     }
 }
 

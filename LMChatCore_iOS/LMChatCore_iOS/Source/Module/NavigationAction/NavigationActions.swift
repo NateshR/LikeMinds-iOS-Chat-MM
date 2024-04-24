@@ -18,9 +18,10 @@ enum NavigationActions {
     case messageAttachment(delegat: LMChatAttachmentViewDelegate?)
     case participants(chatroomId: String, isSecret: Bool)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
-    case reactionSheet(reactions: [Reaction])
+    case reactionSheet(reactions: [Reaction], conversation: String?, chatroomId: String?)
     case exploreFeed
     case browser(url: URL)
+    case mediaPreview(data: [LMChatMediaPreviewViewModel.DataModel], startIndex: Int)
 //    case giphy
     
 }
@@ -52,8 +53,8 @@ class NavigationScreen: NavigationScreenProtocol {
         case .report(let chatroomId, let conversationId, let memberId):
             guard let report = try? LMChatReportViewModel.createModule(reportContentId: (chatroomId, conversationId, memberId)) else { return }
             source.navigationController?.pushViewController(report, animated: true)
-        case .reactionSheet(let reactions):
-            guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions) else { return }
+        case .reactionSheet(let reactions, let conversationId, let chatroomId):
+            guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, conversationId: conversationId, chatroomId: chatroomId) else { return }
             source.present(reactions, animated: true)
         case .exploreFeed:
             guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }
@@ -63,6 +64,9 @@ class NavigationScreen: NavigationScreenProtocol {
             config.entersReaderIfAvailable = true
             let vc = SFSafariViewController(url: url, configuration: config)
             source.present(vc, animated: true)
+        case .mediaPreview(let data, let startIndex):
+            let mediaPreview = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: startIndex)
+            source.navigationController?.pushViewController(mediaPreview, animated: true)
 //        case .giphy:
 //            let giphy = GiphyViewController()
 //            giphy.mediaTypeConfig = [.gifs]
