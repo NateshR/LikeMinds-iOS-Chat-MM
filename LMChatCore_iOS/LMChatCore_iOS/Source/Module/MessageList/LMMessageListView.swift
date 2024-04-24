@@ -21,7 +21,20 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath)
     func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath)
     func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
+    func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message)
+    func didReactOnMessage(reaction: String, indexPath: IndexPath)
 }
+
+public enum LMMessageActionType: String {
+    case delete
+    case reply
+    case copy
+    case edit
+    case select
+    case invite
+    case report
+}
+
 
 @IBDesignable
 open class LMMessageListView: LMView {
@@ -52,6 +65,7 @@ open class LMMessageListView: LMView {
             public let messageType: Int
             public let createdTime: String?
             public let ogTags: OgTags?
+            public let isEdited: Bool?
         }
         
         public struct Reaction {
@@ -177,20 +191,10 @@ open class LMMessageListView: LMView {
     }
     
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {
-//        if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
-//            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
-//        } else {
-//            tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
-//        }
         reloadData()
     }
     
     public func updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel) {
-//        if let index = tableSections.firstIndex(where: {$0.sectionType == .exploreTab}) {
-//            tableSections[index] = .init(data: [exploreTabCount], sectionType: .exploreTab, sectionOrder: 1)
-//        } else {
-//            tableSections.append(.init(data: [exploreTabCount], sectionType: .exploreTab, sectionOrder: 1))
-//        }
         reloadData()
     }
     
@@ -257,10 +261,12 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
 
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard item.messageType == 0 && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
-            return self.createContextMenu()
+            return self.createContextMenu(indexPath, item: item)
         }
     }
     
@@ -270,7 +276,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
     }
-  /*
+
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         makeTargetedPreview(for: configuration)
@@ -285,14 +291,15 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionCommitAnimating) {
         animator.preferredCommitStyle = .pop
     }
-    */
+
     @available(iOS 13.0, *)
     func makeTargetedPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         guard let identifier = configuration.identifier as? String else { return nil }
         let values = identifier.components(separatedBy: ",")
         guard let row = Int(values.first ?? "0") else { return nil }
         guard let section = Int(values.last ?? "0") else { return nil }
-        guard let cell = tableView.cellForRow(at: .init(row: row, section: section)) as? LMChatMessageCell else { return nil }
+        let indexPath = IndexPath(row: row, section: section)
+        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,
@@ -301,7 +308,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let reactionView = LMReactionPopupView()
         reactionView.onReaction = { [weak self] reactionType in
             guard let self = self else { return }
-            print(reactionType.rawValue)
+            delegate?.didReactOnMessage(reaction: reactionType.rawValue, indexPath: indexPath)
             (delegate as? UIViewController)?.dismiss(animated: true)
         }
         reactionView.layer.cornerRadius = 10
@@ -360,22 +367,26 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     @available(iOS 13.0, *)
-    func createContextMenu() -> UIMenu {
+    func createContextMenu(_ indexPath: IndexPath, item: ContentModel.Message) -> UIMenu {
         let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
-                                   image: UIImage(systemName: "arrow.down.square")) { action in
+                                   image: UIImage(systemName: "arrow.down.square")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         
         let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                  image: UIImage(systemName: "pencil")) { action in
+                                  image: UIImage(systemName: "pencil")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
         }
         
         let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
-                                  image: UIImage(systemName: "doc.on.doc")) { action in
+                                  image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
         }
         
         let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
                                     image: UIImage(systemName: "trash"),
-                                    attributes: .destructive) { action in
+                                    attributes: .destructive) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
         }
         return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
     }

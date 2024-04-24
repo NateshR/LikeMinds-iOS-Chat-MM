@@ -87,6 +87,8 @@ extension LMChatMediaPreviewScreen: UICollectionViewDataSource, UICollectionView
                 cell.configure(with: viewModel.data[indexPath.row].url)
                 return cell
             }
+        default:
+            break
         }
         return UICollectionViewCell()
     }

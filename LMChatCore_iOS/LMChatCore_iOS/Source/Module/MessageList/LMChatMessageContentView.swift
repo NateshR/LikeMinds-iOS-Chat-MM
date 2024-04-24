@@ -192,7 +192,7 @@ open class LMChatMessageContentView: LMView {
             reactionContainerStackView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
             reactionContainerStackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
             chatProfileImageContainerStackView.topAnchor.constraint(equalTo: topAnchor),
-            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionContainerStackView.topAnchor),
+            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionContainerStackView.topAnchor, constant: 4),
             chatProfileImageContainerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             bubbleView.topAnchor.constraint(equalTo: topAnchor),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
@@ -245,7 +245,8 @@ open class LMChatMessageContentView: LMView {
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         self.textLabel.isUserInteractionEnabled = true
         self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont1, withTextColor: Appearance.Colors.shared.black)
-        self.timestampLabel.text = data.message?.createdTime
+        let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
+        self.timestampLabel.text = edited + (data.message?.createdTime ?? "")
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
         if !isIncoming {
@@ -312,7 +313,7 @@ open class LMChatMessageContentView: LMView {
             return
         }
         switch type {
-        case "image", "video":
+        case "image", "video", "gif":
             galleryPreview(attachments)
         case "pdf", "document", "doc":
             docPreview(attachments)

@@ -81,6 +81,8 @@ open class LMMessageReplyPreview: LMView {
     open private(set) lazy var closeReplyButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.xmarkIcon, for: .normal)
+        button.addTarget(self, action: #selector(cancelReply), for: .touchUpInside)
+        button.setWidthConstraint(with: 40)
         return button
     }()
     
@@ -103,6 +105,9 @@ open class LMMessageReplyPreview: LMView {
     
     var viewData: ContentModel?
     var onClickReplyPreview: (() -> Void)?
+    
+    var onClickCancelReplyPreview: (() -> Void)?
+    
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
@@ -205,8 +210,8 @@ open class LMMessageReplyPreview: LMView {
         return textAfterIcon
     }
     
-    @objc func clearButtonClicked(_ sender:UIButton) {
-        delegate?.clearReplyPreview()
+    @objc func cancelReply(_ sender:UIButton) {
+        onClickCancelReplyPreview?()
     }
     
     @objc func onReplyPreviewClicked(_ gesture: UITapGestureRecognizer) {

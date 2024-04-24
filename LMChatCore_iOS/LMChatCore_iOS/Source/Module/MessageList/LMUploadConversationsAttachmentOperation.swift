@@ -100,6 +100,13 @@ class LMUploadConversationsAttachmentOperation: Operation {
                 .build()
             )
             .build()
+        do {
+            if let localFilePath = attachment.fileUrl {
+                try FileManager.default.removeItem(at: localFilePath)
+            }
+        } catch {
+            print("Error deleting file: \(error)")
+        }
         LMChatClient.shared.putMultimedia(request: request) {[weak self] resposne in
             self?.groupQueue.leave()
         }

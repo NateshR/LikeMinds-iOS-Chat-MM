@@ -21,6 +21,9 @@ public protocol LMBottomMessageComposerDelegate: AnyObject {
     func playRecording()
     func stopRecording(_ onStop: (() -> Void))
     func deleteRecording()
+    
+    func cancelReply()
+    func cancelLinkPreview()
 }
 
 @IBDesignable
@@ -87,8 +90,6 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) var inputTextViewHeightConstraint: NSLayoutConstraint?
     open private(set) var taggingViewHeightConstraints: NSLayoutConstraint?
     
-    var linkDetectorTimer: Timer?
-    
     open private(set) lazy var gifButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
@@ -108,11 +109,23 @@ open class LMBottomMessageComposerView: LMView {
     
     open private(set) lazy var replyMessageView: LMMessageReplyPreview = {
         let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+        view.onClickCancelReplyPreview = { [weak self] in
+            self?.delegate?.cancelReply()
+        }
+        return view
+    }()
+    
+    open private(set) lazy var replyMessageViewContainer: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.addSubview(replyMessageView)
+        view.pinSubView(subView: replyMessageView, padding: .init(top: 6, left: 16, bottom: -4, right: -16))
+        view.isHidden = true
         return view
     }()
     
     open private(set) lazy var linkPreviewView: LMBottomMessageLinkPreview = {
         let view = LMBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+        view.delegate = self
         return view
     }()
     
@@ -190,6 +203,19 @@ open class LMBottomMessageComposerView: LMView {
         return button
     }()
     
+    open private(set) lazy var restrictionLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = "Restricted to reply in this chatroom!"
+        label.backgroundColor = Appearance.shared.colors.white
+        label.paddingRight = 20
+        label.paddingLeft = 20
+        label.textAlignment = .center
+        label.numberOfLines = 2
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = Appearance.shared.colors.textColor
+        return label
+    }()
+    
     let maxHeightOfTextView: CGFloat = 120
     let minHeightOfTextView: CGFloat = 44
     var sendButtonTrailingConstraint: NSLayoutConstraint?
@@ -217,7 +243,7 @@ open class LMBottomMessageComposerView: LMView {
         horizontalStackView.addArrangedSubview(inputTextContainerView)
         
         addOnVerticleStackView.addArrangedSubview(linkPreviewView)
-        addOnVerticleStackView.addArrangedSubview(replyMessageView)
+        addOnVerticleStackView.addArrangedSubview(replyMessageViewContainer)
         addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
         
         audioContainerView.addSubview(micFlickerButton)
@@ -228,7 +254,9 @@ open class LMBottomMessageComposerView: LMView {
         audioStack.addArrangedSubview(deleteAudioRecord)
         
         linkPreviewView.isHidden = true
-        replyMessageView.isHidden = true
+        replyMessageViewContainer.isHidden = true
+        
+        containerView.addSubview(restrictionLabel)
     }
     
     // MARK: setupLayouts
@@ -236,7 +264,7 @@ open class LMBottomMessageComposerView: LMView {
         super.setupLayouts()
         
         pinSubView(subView: containerView)
-        addOnVerticleStackView.addConstraint(top: (containerView.topAnchor, 0),
+        addOnVerticleStackView.addConstraint(top: (containerView.topAnchor, 4),
                                              leading: (containerView.leadingAnchor, 0),
                                              trailing: (containerView.trailingAnchor, 0))
         
@@ -281,6 +309,8 @@ open class LMBottomMessageComposerView: LMView {
         ])
         inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
         taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
+        
+        containerView.pinSubView(subView: restrictionLabel)
     }
     
     open override func setupActions() {
@@ -300,12 +330,18 @@ open class LMBottomMessageComposerView: LMView {
         sendButton.addGestureRecognizer(sendButtonPanPressGesture)
         
         audioContainerView.isHidden = true
-        
+        restrictionLabel.isHidden = true
         
         deleteAudioRecord.addTarget(self, action: #selector(deleteRecording), for: .touchUpInside)
         micFlickerButton.addTarget(self, action: #selector(didTapPlayRecording), for: .touchUpInside)
         
         sendButton.tag = audioButtonTag
+    }
+    
+    func enableOrDisableMessageBox(withMessage message: String?, isEnable: Bool) {
+        restrictionLabel.text = message
+        restrictionLabel.isHidden = isEnable
+        containerView.isUserInteractionEnabled = isEnable
     }
     
     @objc func sendMessageButtonClicked(_ sender: UIButton) {
@@ -340,6 +376,11 @@ open class LMBottomMessageComposerView: LMView {
         super.setupAppearance()
         audioContainerView.backgroundColor = .white
         audioContainerView.layer.cornerRadius = 8
+    }
+    
+    func showReplyView(withData data: LMMessageReplyPreview.ContentModel) {
+        replyMessageView.setData(data)
+        replyMessageViewContainer.isHidden = false
     }
 }
 
@@ -380,11 +421,7 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             let link = links.first(where: {!$0.isEmail()}) {
             print("detected first link: \(link)")
             linkPreviewView.isHidden = false
-            linkDetectorTimer?.invalidate()
-            linkDetectorTimer = Timer(timeInterval: 1, repeats: false, block: {[weak self] timer in
-                print("detected first link: \(link)")
-                self?.delegate?.linkDetected(link)
-            })
+            self.delegate?.linkDetected(link)
         } else {
             linkPreviewView.isHidden = true
         }
@@ -558,5 +595,12 @@ extension LMBottomMessageComposerView {
         } else {
             return String(format: "%02i:%02i", minutes, seconds)
         }
+    }
+}
+
+extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
+    
+    public func closeLinkPreview() {
+        delegate?.cancelLinkPreview()
     }
 }
