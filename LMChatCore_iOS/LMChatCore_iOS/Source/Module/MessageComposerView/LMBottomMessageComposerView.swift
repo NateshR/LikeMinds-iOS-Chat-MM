@@ -94,7 +94,6 @@ open class LMBottomMessageComposerView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
-        //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(gifButtonClicked), for: .touchUpInside)
         return button
     }()
@@ -152,7 +151,6 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.micIcon, for: .normal)
-        button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
         return button
     }()
     
@@ -216,12 +214,46 @@ open class LMBottomMessageComposerView: LMView {
         return label
     }()
     
+    open private(set) lazy var lockContainerView: LMView = {
+        let container = LMView().translatesAutoresizingMaskIntoConstraints()
+        container.backgroundColor = .white
+        return container
+    }()
+    
+    open private(set) lazy var lockIcon: LMImageView = {
+        let image = LMImageView(image: Constants.shared.images.lockFillIcon)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
     let maxHeightOfTextView: CGFloat = 120
     let minHeightOfTextView: CGFloat = 44
     var sendButtonTrailingConstraint: NSLayoutConstraint?
+    var sendButtonCenterYConstraint: NSLayoutConstraint?
     var sendButtonLongPressGesture: UILongPressGestureRecognizer!
     var sendButtonPanPressGesture: UIPanGestureRecognizer!
+    
+    
+    /*
+     Purpose of isTranslationX - It will define the movement of send button at any current point.
+        if value is nil it means, sendButton is not translating in any direction
+        if value is true it means, sendButton is translating in X direction
+        if value is false it means, sendButton is translating in Y direction
+     
+        Default is nil means, it is stationary in the beginning
+    */
+    var isTranslationX: Bool? = nil
     var isPlayingAudio = false
+    
+    
+    let sendButtonHeightConstant: CGFloat = 40
+    var lockContainerViewHeight: CGFloat = 100
+    var lockContainerViewHeightConstraint: NSLayoutConstraint?
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        lockContainerView.isHidden = true
+    }
     
     // MARK: setupViews
     open override func setupViews() {
@@ -230,6 +262,8 @@ open class LMBottomMessageComposerView: LMView {
         containerView.addSubview(addOnVerticleStackView)
         
         containerView.addSubview(audioMessageContainerStack)
+        containerView.addSubview(lockContainerView)
+        lockContainerView.addSubview(lockIcon)
         containerView.addSubview(sendButton)
         
         audioMessageContainerStack.addArrangedSubview(horizontalStackView)
@@ -287,29 +321,37 @@ open class LMBottomMessageComposerView: LMView {
         audioStack.leadingAnchor.constraint(greaterThanOrEqualTo: recordDuration.trailingAnchor, constant: 8).isActive = true
         
         
-        sendButton.addConstraint(leading: (audioMessageContainerStack.trailingAnchor, 8),
-                                 centerY: (containerView.centerYAnchor, 0))
+        sendButton.addConstraint(leading: (audioMessageContainerStack.trailingAnchor, 8))
+        
+        sendButtonCenterYConstraint = sendButton.centerYAnchor.constraint(equalTo: audioMessageContainerStack.centerYAnchor)
+        sendButtonCenterYConstraint?.isActive = true
         
         sendButtonTrailingConstraint = sendButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8)
         sendButtonTrailingConstraint?.isActive = true
         
-        sendButton.setHeightConstraint(with: 40)
+        lockContainerView.addConstraint(bottom: (audioMessageContainerStack.bottomAnchor, 0),
+                                        leading: (sendButton.leadingAnchor, 0),
+                                        trailing: (sendButton.trailingAnchor, 0))
+        lockContainerViewHeightConstraint = lockContainerView.setHeightConstraint(with: lockContainerViewHeight)
+        
+        lockIcon.addConstraint(top: (lockContainerView.topAnchor, 8),
+                               leading: (lockContainerView.leadingAnchor, 8),
+                               trailing: (lockContainerView.trailingAnchor, -8))
+        lockIcon.setHeightConstraint(with: lockIcon.widthAnchor)
+        
+        sendButton.setHeightConstraint(with: sendButtonHeightConstant)
         sendButton.setWidthConstraint(with: sendButton.heightAnchor)
         
         
-        NSLayoutConstraint.activate([
-            containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeightOfTextView),
-//            containerView.heightAnchor.constraint(lessThanOrEqualToConstant: maxHeightOfTextView),
-            
-            inputTextAndGifHorizontalStackView.leadingAnchor.constraint(equalTo: inputTextContainerView.leadingAnchor, constant: 8),
-            inputTextAndGifHorizontalStackView.trailingAnchor.constraint(equalTo: inputTextContainerView.trailingAnchor, constant: -10),
-            inputTextAndGifHorizontalStackView.topAnchor.constraint(equalTo: inputTextContainerView.topAnchor),
-            inputTextAndGifHorizontalStackView.bottomAnchor.constraint(equalTo: inputTextContainerView.bottomAnchor),
-            inputTextContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
-        ])
-        inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
-        taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
+        containerView.setHeightConstraint(with: minHeightOfTextView, relatedBy: .greaterThanOrEqual)
         
+        inputTextAndGifHorizontalStackView.addConstraint(top: (inputTextContainerView.topAnchor, 0),
+                                                         bottom: (inputTextContainerView.bottomAnchor, 0),
+                                                         leading: (inputTextContainerView.leadingAnchor, 8),
+                                                         trailing: (inputTextContainerView.trailingAnchor, -8))
+        inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
+        
+        taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
         containerView.pinSubView(subView: restrictionLabel)
     }
     
@@ -376,6 +418,15 @@ open class LMBottomMessageComposerView: LMView {
         super.setupAppearance()
         audioContainerView.backgroundColor = .white
         audioContainerView.layer.cornerRadius = 8
+        
+        let frameHeight = self.frame.width * 0.3
+        
+        if frameHeight > 0 {
+            lockContainerViewHeight = frameHeight
+            lockContainerViewHeightConstraint?.constant = lockContainerViewHeight
+        }
+        
+        lockContainerView.roundCorners([.layerMinXMinYCorner, .layerMaxXMinYCorner], with: sendButtonHeightConstant / 2)
     }
     
     func showReplyView(withData data: LMMessageReplyPreview.ContentModel) {
@@ -385,7 +436,6 @@ open class LMBottomMessageComposerView: LMView {
 }
 
 extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
-    
     public func mentionStarted(with text: String, chatroomId: String) {
         taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
@@ -481,7 +531,7 @@ extension LMBottomMessageComposerView {
         
         switch sender.state {
         case .began:
-            // Start Recording
+            lockContainerView.isHidden = false
             delegate?.audioRecordingStarted()
         case .ended:
             delegate?.audioRecordingEnded()
@@ -499,14 +549,41 @@ extension LMBottomMessageComposerView {
         
         let translation = sender.translation(in: self)
         
-        if translation.x < -8 {
-            if abs(translation.x) < UIScreen.main.bounds.width * 0.3 {
-                sendButtonTrailingConstraint?.constant = translation.x
+        // It means send Button has already a motion of X translation
+        // Cases: 
+        //  1. It is still going deeper into X translation
+        //  2. It is going back towards zero
+        if isTranslationX == true {
+            if translation.x < -8 {
+                if abs(translation.x) < UIScreen.main.bounds.width * 0.3 {
+                    sendButtonTrailingConstraint?.constant = translation.x
+                } else {
+                    delegate?.deleteRecording()
+                }
             } else {
-                delegate?.deleteRecording()
+                sendButtonTrailingConstraint?.constant = -8
+                isTranslationX = nil
             }
+        } else if isTranslationX == false {
+            if translation.y < 0 {
+                if abs(translation.y) < lockContainerViewHeight * 0.7 {
+                    sendButtonCenterYConstraint?.constant = translation.y
+                } else {
+                    // TODO: Create a Method for lock
+                    // delegate.lockRecording()
+                }
+            } else {
+                sendButtonCenterYConstraint?.constant = 0
+                isTranslationX = nil
+            }
+        } else {
+            isTranslationX = abs(translation.x) > abs(translation.y)
         }
+        
+        // In Case if it is translating X, hide the container view
+        lockContainerView.isHidden = isTranslationX == true
     }
+    
     
     @objc
     open func didTapPlayRecording() {
