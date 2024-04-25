@@ -66,4 +66,5 @@ public struct LMUIComponents {
     
     public var chatMessageCell: LMChatMessageCell.Type = LMChatMessageCell.self
     public var chatNotificationCell: LMChatNotificationCell.Type = LMChatNotificationCell.self
+    public var chatroomHeaderMessageCell: LMChatroomHeaderMessageCell.Type = LMChatroomHeaderMessageCell.self
 }

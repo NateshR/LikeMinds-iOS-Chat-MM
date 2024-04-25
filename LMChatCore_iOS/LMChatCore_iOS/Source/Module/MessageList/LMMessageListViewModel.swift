@@ -13,6 +13,8 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
     func scrollToBottom()
     func updateChatroomSubtitles()
+    func updateTopicBar()
+    func scrollToSpecificConversation(indexPath: IndexPath)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -33,7 +35,7 @@ public final class LMMessageListViewModel {
     var currentDetectedOgTags: LinkOGTags?
     var replyChatMessage: Conversation?
     var editChatMessage: Conversation?
-    var linkDetectorTimer: Timer?
+    var chatroomTopic: Conversation?
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -77,8 +79,12 @@ public final class LMMessageListViewModel {
                 // Back from this screen
                 return
             }
-            self.chatroomViewData = chatroom
-            
+            chatroomViewData = chatroom
+            chatroomTopic = chatroom.topic
+            if chatroomTopic == nil, let topicId = chatroom.topicId {
+                chatroomTopic = LMChatClient.shared.getConversation(request: GetConversationRequest.builder().conversationId(topicId).build())?.data?.conversation
+            }
+            delegate?.updateTopicBar()
             var medianConversationId: String?
             if let conId = self.chatroomDetailsExtra.conversationId {
                 medianConversationId = conId
@@ -148,6 +154,7 @@ public final class LMMessageListViewModel {
         guard let conversations = response?.data?.conversations else { return }
         print("conversations ------> \(conversations)")
         chatMessages = conversations
+        messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
         if conversations.count <= conversationFetchLimit {
             if  let chatroom = chatroomViewData {
@@ -156,6 +163,25 @@ public final class LMMessageListViewModel {
             }
         }
         delegate?.scrollToBottom()
+    }
+    
+    func fetchTopConversations() {
+        let request = GetConversationsRequest.Builder()
+            .chatroomId(chatroomId)
+            .limit(conversationFetchLimit)
+            .type(.top)
+            .build()
+        let response = LMChatClient.shared.getConversations(withRequest: request)
+        guard let conversations = response?.data?.conversations else { return }
+        print("conversations ------> \(conversations)")
+        chatMessages = conversations
+        messagesList.removeAll()
+        messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
+        if  let chatroom = chatroomViewData {
+            let message = chatroomDataToConversation(chatroom)
+            insertConversationIntoList(message)
+        }
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0))
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
@@ -224,7 +250,12 @@ public final class LMMessageListViewModel {
         let getConversationRequest = GetConversationRequest.builder()
             .conversationId(conversationId)
             .build()
-        guard let mediumConversation = LMChatClient.shared.getConversation(request: getConversationRequest)?.data?.conversation else { return }
+        guard let mediumConversation = LMChatClient.shared.getConversation(request: getConversationRequest)?.data?.conversation else {
+            if conversationId == self.chatroomViewData?.id {
+                fetchTopConversations()
+            }
+            return
+        }
         
         let getAboveConversationRequest = GetConversationsRequest.builder()
             .conversation(mediumConversation)
@@ -241,12 +272,18 @@ public final class LMMessageListViewModel {
             .limit(conversationFetchLimit)
             .build()
         let belowConversations = LMChatClient.shared.getConversations(withRequest: getBelowConversationRequest)?.data?.conversations ?? []
-        let allConversations = aboveConversations + [mediumConversation] + belowConversations
+        var allConversations = aboveConversations + [mediumConversation] + belowConversations
+        
+        if aboveConversations.count < conversationFetchLimit {
+            allConversations.append(chatroomDataToConversation(chatroom))
+        }
         
         chatMessages = allConversations
-        messagesList = []
-        messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: allConversations))
-        delegate?.reloadChatMessageList()
+        messagesList = convertConversationsIntoGroupedArray(conversations: allConversations)
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        guard let section = messagesList.firstIndex(where: {$0.section == mediumConversation.date}),
+              let index = messagesList[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
     }
     
     func syncConversation() {
@@ -472,18 +509,15 @@ extension LMMessageListViewModel: ConversationClientObserver {
         return Int(dateFormatter.date(from: strDate)?.timeIntervalSince1970 ?? 0)
     }
     
-    func decodeUrl(url: String) {
-        linkDetectorTimer?.invalidate()
-        linkDetectorTimer = Timer(timeInterval: 1, repeats: false, block: {[weak self] timer in
-            print("detected first link: \(url)")
-            let request = DecodeUrlRequest.builder()
-                .url(url)
-                .build()
-            LMChatClient.shared.decodeUrl(request: request) {[weak self] response in
-                guard let ogTags = response.data?.ogTags else { return }
-                self?.currentDetectedOgTags = ogTags
-            }
-        })
+    func decodeUrl(url: String, decodeResponse: ((LinkOGTags?) -> Void)?) {
+        let request = DecodeUrlRequest.builder()
+            .url(url)
+            .build()
+        LMChatClient.shared.decodeUrl(request: request) {[weak self] response in
+            guard let ogTags = response.data?.ogTags else { return }
+            self?.currentDetectedOgTags = ogTags
+            decodeResponse?(ogTags)
+        }
     }
 }
 

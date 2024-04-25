@@ -57,7 +57,6 @@ open class LMBottomMessageComposerView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.spacing = 12
-        //        view.alignment = .bottom
         return view
     }()
     
@@ -108,6 +107,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var replyMessageView: LMMessageReplyPreview = {
         let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
         view.onClickCancelReplyPreview = { [weak self] in
+            self?.replyMessageViewContainer.isHidden = true
             self?.delegate?.cancelReply()
         }
         return view
@@ -219,6 +219,7 @@ open class LMBottomMessageComposerView: LMView {
     var sendButtonTrailingConstraint: NSLayoutConstraint?
     var sendButtonLongPressGesture: UILongPressGestureRecognizer!
     var sendButtonPanPressGesture: UIPanGestureRecognizer!
+    var isLinkPreviewCancel: Bool = false
     
     // MARK: setupViews
     open override func setupViews() {
@@ -350,6 +351,8 @@ open class LMBottomMessageComposerView: LMView {
             return
         }
         inputTextView.text = ""
+        isLinkPreviewCancel = false
+        replyMessageView.isHidden = true
         contentHeightChanged()
         delegate?.composeMessage(message: message)
     }
@@ -411,9 +414,7 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
-        if !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
-            print("detected first link: \(link)")
-            linkPreviewView.isHidden = false
+        if !isLinkPreviewCancel, !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
             self.delegate?.linkDetected(link)
         } else {
             linkPreviewView.isHidden = true
@@ -571,6 +572,8 @@ extension LMBottomMessageComposerView {
 extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
     
     public func closeLinkPreview() {
+        linkPreviewView.isHidden = true
+        isLinkPreviewCancel = true
         delegate?.cancelLinkPreview()
     }
 }

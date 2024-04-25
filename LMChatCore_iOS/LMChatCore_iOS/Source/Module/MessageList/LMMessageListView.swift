@@ -33,6 +33,7 @@ public enum LMMessageActionType: String {
     case select
     case invite
     case report
+    case setTopic
 }
 
 
@@ -102,6 +103,7 @@ open class LMMessageListView: LMView {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
+        table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -190,6 +192,12 @@ open class LMMessageListView: LMView {
         }
     }
     
+    func scrollAtIndexPath(indexPath: IndexPath) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+        }
+    }
+    
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {
         reloadData()
     }
@@ -219,6 +227,12 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
                 cell.delegate = self
+                return cell
+            }
+        case 1:
+            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
+                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
+                cell.currentIndexPath = indexPath
                 return cell
             }
         default:
