@@ -80,6 +80,7 @@ public extension Constants {
         public var person2Icon = loadSystemImage(with: "person.2")
         public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
         public var downArrowIcon = loadSystemImage(with: "arrow.down")
-        
+        public var sendButton = loadSystemImage(with: "paperplane.circle.fill")
+        public var stopRecordButton = loadSystemImage(with: "stop.circle")
     }
 }

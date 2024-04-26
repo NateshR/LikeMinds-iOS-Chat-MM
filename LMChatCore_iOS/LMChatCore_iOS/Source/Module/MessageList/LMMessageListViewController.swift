@@ -353,9 +353,9 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     public func audioRecordingEnded() {
         if let url = AudioRecordManager.shared.recordingStopped() {
             print(url)
-            bottomMessageBoxView.showRecordedView()
+            bottomMessageBoxView.showPlayableRecordView()
         } else {
-            bottomMessageBoxView.hideRecordingView()
+            bottomMessageBoxView.resetRecordingView()
         }
     }
     
@@ -372,7 +372,6 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func deleteRecording() {
         AudioRecordManager.shared.deleteAudioRecording()
-        bottomMessageBoxView.hideRecordingView()
     }
     
     @objc
@@ -445,6 +444,6 @@ extension LMMessageListViewController: LMChatAttachmentViewDelegate {
 extension LMMessageListViewController: AVAudioRecorderDelegate { 
     @objc
     open func audioEnded() {
-        bottomMessageBoxView.resetRecordedAudioDuration()
+        bottomMessageBoxView.resetAudioDuration()
     }
 }
