@@ -84,7 +84,7 @@ class FileUtils {
         let asset: AVAsset = AVAsset(url: url)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         do {
-            let thumbnailImage = try imageGenerator.copyCGImage(at: CMTimeMake(value: 1, timescale: 60), actualTime: nil)
+            let thumbnailImage = try imageGenerator.copyCGImage(at: CMTimeMake(value: 2, timescale: 1), actualTime: nil)
             let image = UIImage(cgImage: thumbnailImage)
             return (image,
                     saveImageToLocalDirectory(image: image, imageName: "thumbnail_\(fileNameWithoutExtension(url.lastPathComponent)).jpeg"),

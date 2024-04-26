@@ -19,7 +19,7 @@ open class LMAttachmentBottomMessageView: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .black//Appearance.shared.colors.backgroundColor
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -47,8 +47,8 @@ open class LMAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var inputTextContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 18)
-        view.backgroundColor = .white
+//        view.cornerRadius(with: 18)
+        view.backgroundColor = Appearance.shared.colors.white
         //        view.borderColor(withBorderWidth: 1, with: .lightGray)
         return view
     }()

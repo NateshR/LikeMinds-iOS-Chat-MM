@@ -15,7 +15,7 @@ import SafariServices
 enum NavigationActions {
     case homeFeed
     case chatroom(chatroomId: String)
-    case messageAttachment(delegat: LMChatAttachmentViewDelegate?)
+    case messageAttachment(delegat: LMChatAttachmentViewDelegate?, chatroomId: String?)
     case participants(chatroomId: String, isSecret: Bool)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
     case reactionSheet(reactions: [Reaction], conversation: String?, chatroomId: String?)
@@ -44,8 +44,8 @@ class NavigationScreen: NavigationScreenProtocol {
         case .chatroom(let chatroomId):
             guard let chatroom = try? LMMessageListViewModel.createModule(withChatroomId: chatroomId) else { return }
             source.navigationController?.pushViewController(chatroom, animated: true)
-        case .messageAttachment(let delegate):
-            guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate) else { return }
+        case .messageAttachment(let delegate, let chatroomId):
+            guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate, chatroomId: chatroomId) else { return }
             source.navigationController?.pushViewController(attachment, animated: true)
         case .participants(let chatroomId, let isSecret):
             guard let participants = try? LMParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }

@@ -17,18 +17,19 @@ public protocol LMChatAttachmentViewModelProtocol: LMBaseViewControllerProtocol 
 public final class LMChatAttachmentViewModel {
     
     weak var delegate: LMChatAttachmentViewModelProtocol?
+    var chatroomId: String?
     
     init(delegate: LMChatAttachmentViewModelProtocol?) {
         self.delegate = delegate
     }
     
-    public static func createModule(delegate: LMChatAttachmentViewDelegate?) throws -> LMChatAttachmentViewController {
+    public static func createModule(delegate: LMChatAttachmentViewDelegate?, chatroomId: String?) throws -> LMChatAttachmentViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.attachmentMessageScreen.init()
         viewcontroller.delegate = delegate
         let viewmodel = Self.init(delegate: viewcontroller)
-        
+        viewmodel.chatroomId = chatroomId
         viewcontroller.viewmodel = viewmodel
         return viewcontroller
     }

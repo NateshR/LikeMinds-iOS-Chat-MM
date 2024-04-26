@@ -290,7 +290,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         camera.setValue(cameraImage, forKey: "image")
         
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
-           guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self) else { return }
+            guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self, chatroomId: self?.viewModel?.chatroomId) else { return }
             self?.present(viewController, animated: true)
         }
         
