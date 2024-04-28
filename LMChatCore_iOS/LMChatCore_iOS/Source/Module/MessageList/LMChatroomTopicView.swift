@@ -66,6 +66,12 @@ open class LMChatroomTopicView: LMView {
         return image
     }()
     
+    lazy var bottomLine: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
+        return view
+    }()
+    
     var onTopicViewClick: ((String) -> Void)?
     var topicData: ContentModel?
     
@@ -82,6 +88,7 @@ open class LMChatroomTopicView: LMView {
     open override func setupViews() {
         super.setupViews()
         addSubview(topicContainerView)
+        addSubview(bottomLine)
         topicContainerView.addArrangedSubview(chatProfileImageView)
         topicContainerView.addArrangedSubview(nameAndTopicContainerView)
         nameAndTopicContainerView.addArrangedSubview(nameLabel)
@@ -101,7 +108,11 @@ open class LMChatroomTopicView: LMView {
             topicContainerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
             topicContainerView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             topicContainerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            topicContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 60)
+            topicContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 60),
+            bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor),
+            bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor),
+            bottomLine.topAnchor.constraint(equalTo: bottomAnchor),
+            bottomLine.heightAnchor.constraint(equalToConstant: 1),
         ])
     }
 

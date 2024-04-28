@@ -55,7 +55,15 @@ open class LMChatMessageReactionsView: LMView {
     func setData(_ data: [LMMessageListView.ContentModel.Reaction]) {
         previewsContainerView.arrangedSubviews.forEach({$0.isHidden = true})
         for (index, item) in data.enumerated() {
-            if index > 1 { return }
+            if index > 1 {
+                let preview = (previewsContainerView.arrangedSubviews[index] as? LMMessageReaction)
+                preview?.setMoreData()
+                preview?.clickedOnReaction = {[weak self] in
+                    self?.clickedOnReaction?("")
+                }
+                previewsContainerView.arrangedSubviews[index].isHidden = false
+                return
+            }
             let preview = (previewsContainerView.arrangedSubviews[index] as? LMMessageReaction)
             preview?.setData(.init(reaction: item.reaction, reactionCount: "\(item.count)"))
             preview?.clickedOnReaction = {[weak self] in

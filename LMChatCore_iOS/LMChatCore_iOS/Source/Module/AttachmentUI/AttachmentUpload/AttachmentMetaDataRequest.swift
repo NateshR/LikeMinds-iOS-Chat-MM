@@ -11,11 +11,11 @@ import Foundation
 
 class AttachmentMetaDataRequest: NSObject, NSCoding {
     let numberOfPage: Int?
-    let size: Int64?
+    let size: Int?
     let duration: Int?
     
     init(numberOfPage: Int?,
-         size: Int64?,
+         size: Int?,
          duration: Int?) {
         self.numberOfPage = numberOfPage
         self.size = size
@@ -28,7 +28,7 @@ class AttachmentMetaDataRequest: NSObject, NSCoding {
     
     required convenience init?(coder aDecoder: NSCoder) {
         let numberOfPage = aDecoder.decodeObject(forKey: "numberOfPage") as? Int
-        let size = aDecoder.decodeObject(forKey: "size") as? Int64
+        let size = aDecoder.decodeObject(forKey: "size") as? Int
         let duration = aDecoder.decodeObject(forKey: "duration") as? Int
         self.init(numberOfPage: numberOfPage, size: size, duration: duration)
     }
@@ -41,7 +41,7 @@ class AttachmentMetaDataRequest: NSObject, NSCoding {
     
     class Builder {
         private var numberOfPage: Int?
-        private var size: Int64?
+        private var size: Int?
         private var duration: Int?
         
         func numberOfPage(_ numberOfPage: Int?) -> Builder {
@@ -49,7 +49,7 @@ class AttachmentMetaDataRequest: NSObject, NSCoding {
             return self
         }
         
-        func size(_ size: Int64?) -> Builder {
+        func size(_ size: Int?) -> Builder {
             self.size = size
             return self
         }

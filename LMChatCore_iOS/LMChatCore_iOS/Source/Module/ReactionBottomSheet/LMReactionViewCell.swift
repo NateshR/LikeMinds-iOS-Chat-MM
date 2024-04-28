@@ -19,38 +19,40 @@ open class LMReactionViewCell: LMTableViewCell {
     lazy var userImageView: LMImageView = {
         let imageV = LMImageView().translatesAutoresizingMaskIntoConstraints()
         imageV.image = Constants.shared.images.placeholderImage
-        imageV.setWidthConstraint(with: 34)
-        imageV.setHeightConstraint(with: 34)
-        imageV.cornerRadius(with: 17)
+        imageV.setWidthConstraint(with: 40)
+        imageV.setHeightConstraint(with: 40)
+        imageV.cornerRadius(with: 20)
         return imageV
     }()
     
     lazy var userStackView: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
-        stack.alignment = .center
+        stack.alignment = .leading
         stack.distribution = .equalSpacing
-        stack.spacing = 8
+        stack.spacing = 4
         return stack
     }()
     
     lazy var userName: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = ""
-        label.font = .systemFont(ofSize: 14)
+        label.font = Appearance.shared.fonts.textFont1
         return label
     }()
     
     lazy var removeLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Tap To Remove"
-        label.font = .systemFont(ofSize: 10)
+        label.font = Appearance.shared.fonts.textFont2
+        label.textColor = Appearance.shared.colors.previewSubtitleTextColor
         return label
     }()
     
     lazy var reactionImage: LMLabel = {
-        let image = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        return image
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.font = Appearance.shared.fonts.emojiTrayFont
+        return label
     }()
     
     
@@ -87,8 +89,7 @@ open class LMReactionViewCell: LMTableViewCell {
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             userImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            userImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-            userImageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
+            userImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             userStackView.leadingAnchor.constraint(equalTo: userImageView.trailingAnchor, constant: 16),
             userStackView.topAnchor.constraint(equalTo: userImageView.topAnchor),
@@ -105,6 +106,6 @@ open class LMReactionViewCell: LMTableViewCell {
         userName.text = data.username
         removeLabel.isHidden = !data.isSelfReaction
         reactionImage.text = data.reaction
-        userImageView.kf.setImage(with: URL(string: data.image ?? ""), placeholder: Constants.shared.images.placeholderImage)
+        userImageView.kf.setImage(with: URL(string: data.image ?? ""), placeholder: UIImage.generateLetterImage(name: data.username))
     }
 }

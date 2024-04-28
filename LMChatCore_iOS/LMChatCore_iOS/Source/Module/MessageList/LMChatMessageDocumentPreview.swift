@@ -13,7 +13,7 @@ open class LMChatMessageDocumentPreview: LMView {
     public struct ContentModel {
         public let fileUrl: String?
         public let thumbnailUrl: String?
-        public let fileSize: Int64?
+        public let fileSize: Int?
         public let numberOfPages: Int?
         public let fileType: String?
         public let fileName: String?

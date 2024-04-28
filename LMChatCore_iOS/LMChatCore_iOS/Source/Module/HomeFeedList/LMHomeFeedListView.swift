@@ -97,8 +97,11 @@ open class LMHomeFeedListView: LMView {
     }
     
     open func reloadData() {
-        tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
-        tableView.reloadData()
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
+            tableView.reloadData()
+        }
     }
     
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {

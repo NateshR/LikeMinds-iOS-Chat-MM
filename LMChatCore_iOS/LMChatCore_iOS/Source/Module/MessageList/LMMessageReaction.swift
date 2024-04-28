@@ -35,6 +35,14 @@ open class LMMessageReaction: LMView {
         return label
     }()
     
+    open private(set) var moreImageView: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.clipsToBounds = true
+        image.image = Constants.shared.images.ellipsisIcon
+        image.tintColor = Appearance.shared.colors.previewSubtitleTextColor
+        return image
+    }()
+    
     open private(set) lazy var countLabel: LMLabel = {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
@@ -63,6 +71,7 @@ open class LMMessageReaction: LMView {
         addSubview(previewsContainerView)
         previewsContainerView.addArrangedSubview(emojiLabel)
         previewsContainerView.addArrangedSubview(countLabel)
+        previewsContainerView.addArrangedSubview(moreImageView)
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(reactionTapped))
         tapGuesture.numberOfTapsRequired = 1
         isUserInteractionEnabled = true
@@ -78,6 +87,13 @@ open class LMMessageReaction: LMView {
     func setData(_ data: ContentModel) {
         emojiLabel.text = data.reaction
         countLabel.text = data.reactionCount
+        moreImageView.isHidden = true
+    }
+    
+    func setMoreData() {
+        emojiLabel.isHidden = true
+        countLabel.isHidden = true
+        moreImageView.isHidden = false
     }
     
     @objc func reactionTapped(_ guesture: UITapGestureRecognizer) {

@@ -53,20 +53,21 @@ final public  class LMReactionViewModel {
     }
     
     func fetchReactionBy(reaction: String) {
-        if reaction == "All" {
-            reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.uuid ?? "") == UserPreferences.shared.getLMUUID()), reaction: $0.reaction)})
-            delegate?.showData(with: reactions, cells: reactionList)
-            return
-        }
-        reactionList = (reactionsByGroup[reaction] ?? []).compactMap({
-            return LMReactionViewCell.ContentModel(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.uuid ?? "") == UserPreferences.shared.getLMUUID()), reaction: $0.reaction)
-        })
+        for i in 0..<reactions.count { reactions[i].isSelected = false }
         guard let selectedReactionIndex = reactions.firstIndex(where: { $0.title == reaction }) else {
             return
         }
         var selectedReaction = reactions[selectedReactionIndex]
         selectedReaction.isSelected = true
         reactions[selectedReactionIndex] = selectedReaction
+        if reaction == "All" {
+            reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.sdkClientInfo?.uuid ?? "") == UserPreferences.shared.getClientUUID()), reaction: $0.reaction)})
+            delegate?.showData(with: reactions, cells: reactionList)
+            return
+        }
+        reactionList = (reactionsByGroup[reaction] ?? []).compactMap({
+            return LMReactionViewCell.ContentModel(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.sdkClientInfo?.uuid ?? "") == UserPreferences.shared.getClientUUID()), reaction: $0.reaction)
+        })
         delegate?.showData(with: reactions, cells: reactionList)
     }
     
@@ -75,11 +76,13 @@ final public  class LMReactionViewModel {
         let request = DeleteReactionRequest.builder()
             .conversationId(conversationId)
             .build()
-        LMChatClient.shared.deleteReaction(request: request) { response in
+        LMChatClient.shared.deleteReaction(request: request) {[weak self] response in
             guard response.success else {
                 print(response.errorMessage)
                 return
             }
+            
+            (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
         }
     }
     

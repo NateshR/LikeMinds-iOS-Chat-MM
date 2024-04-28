@@ -152,11 +152,10 @@ public final class LMMessageListViewModel {
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
         guard let conversations = response?.data?.conversations else { return }
-        print("conversations ------> \(conversations)")
         chatMessages = conversations
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
-        if conversations.count <= conversationFetchLimit {
+        if conversations.count < conversationFetchLimit {
             if  let chatroom = chatroomViewData {
                 let message = chatroomDataToConversation(chatroom)
                 insertConversationIntoList(message)
@@ -189,16 +188,8 @@ public final class LMMessageListViewModel {
         insertConversationIntoList(message)
     }
     
-    func fetchConversationsOnScroll(indexPath: IndexPath, type: GetConversationType) {
-        return
-        var conversation:Conversation?
-        if type == .above {
-            let message = messagesList[indexPath.section].data.first
-            conversation = chatMessages.first(where: {($0.id ?? "") == (message?.messageId ?? " ")})
-        } else {
-            let message = messagesList[indexPath.section].data.last
-            conversation = chatMessages.first(where: {($0.id ?? "") == (message?.messageId ?? " ")})
-        }
+    func fetchConversationsOnScroll(conversationId: String, type: GetConversationType) {
+        let conversation:Conversation? = chatMessages.first(where: {($0.id ?? "") == conversationId })
         let request = GetConversationsRequest.Builder()
             .chatroomId(chatroomId)
             .limit(conversationFetchLimit)
@@ -225,21 +216,15 @@ public final class LMMessageListViewModel {
         delegate?.reloadChatMessageList()
     }
     
-    func getMoreConversations(indexPath: IndexPath, direction: ScrollDirection) {
-        let messageSectionData = messagesList[indexPath.section]
+    func getMoreConversations(conversationId: String, direction: ScrollDirection) {
         
         switch direction {
         case .scroll_UP:
-            if indexPath.section == 0 && indexPath.row < (messageSectionData.data.count - 2 ) {
                 print("fetch more data above data ....")
-                fetchConversationsOnScroll(indexPath: indexPath,type: .above)
-            }
+                fetchConversationsOnScroll(conversationId: conversationId, type: .above)
         case .scroll_DOWN:
-            let lastSection = messagesList.count - 1
-            if indexPath.section == lastSection && indexPath.row >= 5  {
                 print("fetch more data below data ....")
-                fetchConversationsOnScroll(indexPath: indexPath,type: .below)
-            }
+                fetchConversationsOnScroll(conversationId: conversationId, type: .below)
         default:
             break
         }
@@ -646,7 +631,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             let attachmentMetaDataRequest = AttachmentMetaDataRequest.builder()
                 .duration(attachment.duration)
                 .numberOfPage(attachment.pdfPageCount)
-                .size(attachment.size)
+                .size(Int(attachment.size ?? 0))
                 .build()
             let attachmentDataRequest = AttachmentUploadRequest.builder()
                 .name(attachment.mediaName)

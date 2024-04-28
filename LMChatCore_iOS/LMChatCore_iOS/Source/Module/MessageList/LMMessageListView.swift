@@ -78,7 +78,7 @@ open class LMMessageListView: LMView {
         public struct Attachment {
             public let fileUrl: String?
             public let thumbnailUrl: String?
-            public let fileSize: Int64?
+            public let fileSize: Int?
             public let numberOfPages: Int?
             public let duration: Int?
             public let fileType: String?
@@ -194,7 +194,12 @@ open class LMMessageListView: LMView {
     
     func scrollAtIndexPath(indexPath: IndexPath) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+            guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
+            cell.containerView.backgroundColor = Appearance.shared.colors.linkColor.withAlphaComponent(0.4)
+            UIView.animate(withDuration: 2, delay: 1, usingSpringWithDamping: 1,
+                           initialSpringVelocity: 1, options: .allowUserInteraction,
+                           animations: { cell.containerView.backgroundColor = .clear }) {_ in}
         }
     }
     
@@ -206,6 +211,8 @@ open class LMMessageListView: LMView {
         reloadData()
     }
     
+    // we set a variable to hold the contentOffSet before scroll view scrolls
+    open var lastContentOffset: CGFloat = 0
 }
 
 
@@ -221,6 +228,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = tableSections[indexPath.section].data[indexPath.row]
+        
         switch item.messageType {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
@@ -259,17 +267,31 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         return LMView()
     }
     
+    // this delegate is called when the scrollView (i.e your UITableView) will start scrolling
+    open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.lastContentOffset = scrollView.contentOffset.y
+    }
+    
+    // while scrolling this delegate is being called so you may now check which direction your scrollView is being scrolled to
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview)
-        if translation.y > 0 {
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_UP)
-            
-        } else {
+
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        
+        if scrollView.contentOffset.y <= 20 {
+            print("end dragged top!$!$")
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_DOWN)
+            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
+        } else  if tableView.contentOffset.y >= (tableView.contentSize.height - tableView.frame.size.height) {
+            print("end dragged bottom!$!$")
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let lastIndexPath = visibleIndexPaths.last else {return}
+            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
         }
     }
 

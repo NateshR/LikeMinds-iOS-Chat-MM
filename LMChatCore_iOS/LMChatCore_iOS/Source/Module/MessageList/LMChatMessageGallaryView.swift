@@ -16,7 +16,7 @@ open class LMChatMessageGallaryView: LMView {
     struct ContentModel {
         public let fileUrl: String?
         public let thumbnailUrl: String?
-        public let fileSize: Int64?
+        public let fileSize: Int?
         public let duration: Int?
         public let fileType: String?
         public let fileName: String?
@@ -125,7 +125,8 @@ open class LMChatMessageGallaryView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
-        label.backgroundColor = .gray.withAlphaComponent(0.6)
+        label.font = Appearance.shared.fonts.headingFont1
+        label.backgroundColor = .gray.withAlphaComponent(0.8)
         label.text = "+2"
         return label
     }()

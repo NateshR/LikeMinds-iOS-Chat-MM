@@ -215,6 +215,8 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
             break
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: nil, conversationId: message.messageId, memberId: nil), from: self, params: nil)
+        case .select:
+            break
         default:
             break
         }
@@ -222,6 +224,19 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
 
     public func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        guard let chatroom = viewModel?.chatroomViewData,
+            let repliedId = message.replied?.first?.messageId else {
+            return
+        }
+        
+        if let mediumConversation = viewModel?.chatMessages.first(where: {$0.id == repliedId}) {
+            guard let section = messageListView.tableSections.firstIndex(where: {$0.section == mediumConversation.date}),
+                  let index = messageListView.tableSections[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
+            scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
+            return
+        }
+        
+        viewModel?.fetchIntermediateConversations(chatroom: chatroom, conversationId: repliedId)
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
@@ -248,12 +263,12 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     
     
     public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
-        viewModel?.getMoreConversations(indexPath: indexPath, direction: direction)
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
     }
     
     
     public func didTapOnCell(indexPath: IndexPath) {
-        
     }
 
 }
@@ -340,7 +355,6 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func composeGif() {
-//        delegate?.postMessageWithGifAttachment()
         let giphy = GiphyViewController()
         giphy.mediaTypeConfig = [.gifs]
         giphy.theme = GPHTheme(type: .lightBlur)

@@ -128,6 +128,7 @@ open class LMHomeFeedChatroomView: LMView {
     open private(set) lazy var chatroomImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
+        image.contentMode = .scaleAspectFill
         image.setWidthConstraint(with: 54)
         image.setHeightConstraint(with: 54)
         image.image = Constants.shared.images.personCircleFillIcon
@@ -258,9 +259,9 @@ open class LMHomeFeedChatroomView: LMView {
         chatroomCountBadgeLabel.isHidden = data.unreadCount <= 0
         chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "+99" : "\(data.unreadCount)"
         timestampLabel.text = data.timestamp
-        let placeholder = Constants.Images.shared.placeholderImage
+        let placeholder = UIImage.generateLetterImage(name: data.chatroomName.components(separatedBy: " ").first ?? "")
         if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
-            chatroomImageView.kf.setImage(with: url)
+            chatroomImageView.kf.setImage(with: url, placeholder: placeholder)
         } else {
             chatroomImageView.image = placeholder
         }
