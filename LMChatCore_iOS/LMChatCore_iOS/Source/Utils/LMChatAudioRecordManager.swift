@@ -1,5 +1,5 @@
 //
-//  AudioRecordManager.swift
+//  LMChatAudioRecordManager.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 19/04/24.
@@ -7,8 +7,8 @@
 
 import AVFoundation
 
-public final class AudioRecordManager {
-    static let shared = AudioRecordManager()
+public final class LMChatAudioRecordManager {
+    static let shared = LMChatAudioRecordManager()
     
     private var session = AVAudioSession.sharedInstance()
     private var recorder: AVAudioRecorder?
@@ -49,10 +49,18 @@ public final class AudioRecordManager {
         
         guard let url else { return false }
         
-        let settings = [AVFormatIDKey: Int(kAudioFormatMPEG4AAC), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue]
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVLinearPCMIsNonInterleaved: false,
+            AVSampleRateKey: 44_100.0,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 16,
+            AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue
+        ]
+        
+        FileManager.default.createFile(atPath: url.absoluteString, contents: nil)
         
         recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder?.isMeteringEnabled = true
         recorder?.delegate = audioDelegate
         
         if recorder?.prepareToRecord() == true {
@@ -94,10 +102,14 @@ public final class AudioRecordManager {
         recorder?.pause()
     }
     
-    public func deleteAudioRecording() {
+    public func resetAudioParameters() {
         audioDuration = .zero
-        endAudioRecording()
         recorder = nil
+    }
+    
+    public func deleteAudioRecording() {
+        endAudioRecording()
+        resetAudioParameters()
         
         do {
             guard let url else { return }
@@ -108,10 +120,6 @@ public final class AudioRecordManager {
         }
         
         url = nil
-    }
-    
-    func resetAudioRecording() {
-        
     }
 }
 

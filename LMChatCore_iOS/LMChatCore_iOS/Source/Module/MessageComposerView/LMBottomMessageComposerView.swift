@@ -58,7 +58,6 @@ open class LMBottomMessageComposerView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.spacing = 12
-        //        view.alignment = .bottom
         return view
     }()
     
@@ -136,7 +135,7 @@ open class LMBottomMessageComposerView: LMView {
         return view
     }()
     
-    // MARK:
+    
     open private(set) lazy var audioMessageContainerStack: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
@@ -151,6 +150,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.micIcon, for: .normal)
+        button.contentMode = .scaleToFill
         return button
     }()
     
@@ -198,6 +198,8 @@ open class LMBottomMessageComposerView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle(nil, for: .normal)
         button.setImage(UIImage(systemName: "x.circle"), for: .normal)
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
         return button
     }()
     
@@ -206,6 +208,8 @@ open class LMBottomMessageComposerView: LMView {
         button.setTitle(nil, for: .normal)
         button.setImage(Constants.shared.images.stopRecordButton, for: .normal)
         button.tintColor = Appearance.shared.colors.red
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
         return button
     }()
     
@@ -264,6 +268,7 @@ open class LMBottomMessageComposerView: LMView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         showHideLockContainer(isShow: false)
+        sendButton.tag = messageButtonTag
     }
     
     // MARK: setupViews
@@ -332,6 +337,8 @@ open class LMBottomMessageComposerView: LMView {
         
         audioStack.leadingAnchor.constraint(greaterThanOrEqualTo: recordDuration.trailingAnchor, constant: 8).isActive = true
         
+        deleteAudioRecord.setWidthConstraint(with: deleteAudioRecord.heightAnchor)
+        stopAudioRecord.setWidthConstraint(with: stopAudioRecord.heightAnchor)
         
         sendButton.addConstraint(leading: (audioMessageContainerStack.trailingAnchor, 8))
         
@@ -391,8 +398,6 @@ open class LMBottomMessageComposerView: LMView {
         deleteAudioRecord.addTarget(self, action: #selector(onTapDeleteRecording), for: .touchUpInside)
         micFlickerButton.addTarget(self, action: #selector(onTapPlayPauseRecording), for: .touchUpInside)
         stopAudioRecord.addTarget(self, action: #selector(onTapStopAudioRecording), for: .touchUpInside)
-        
-        sendButton.tag = audioButtonTag
     }
     
     func enableOrDisableMessageBox(withMessage message: String?, isEnable: Bool) {
@@ -404,7 +409,6 @@ open class LMBottomMessageComposerView: LMView {
     @objc func sendMessageButtonClicked(_ sender: UIButton) {
         if sender.tag == audioButtonTag {
             audioButtonClicked(sender)
-            resetRecordingView()
             return
         }
         let message = inputTextView.getText()
@@ -413,8 +417,11 @@ open class LMBottomMessageComposerView: LMView {
             return
         }
         inputTextView.text = inputTextView.placeHolderText
+        inputTextView.resignFirstResponder()
         contentHeightChanged()
         delegate?.composeMessage(message: message)
+        
+        checkSendButtonGestures()
     }
     
     @objc func attachmentButtonClicked(_ sender: UIButton) {
@@ -427,6 +434,7 @@ open class LMBottomMessageComposerView: LMView {
     
     @objc func audioButtonClicked(_ sender: UIButton) {
         delegate?.composeAudio()
+        resetRecordingView()
     }
     
     open override func setupAppearance() {
@@ -467,19 +475,11 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
-        
-        checkSendButtonGestures()
-        
-        if inputTextView.text.isEmpty || inputTextView.placeHolderText == inputTextView.text {
-            sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
-            sendButton.tag = audioButtonTag
-        } else {
-            sendButton.tag = messageButtonTag
-            sendButton.setImage(Constants.shared.images.paperplaneFilled, for: .normal)
-        }
     }
     
     public func textViewDidChange(_ textView: UITextView) {
+        checkSendButtonGestures()
+        
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
         if !links.isEmpty,
@@ -644,6 +644,7 @@ extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
 extension LMBottomMessageComposerView {
     // Resets Recording View and shows Text Input View
     func resetRecordingView() {
+        sendButton.tag = messageButtonTag
         resetSendButtonConstraints()
         
         recordDuration.text = "00:00"
@@ -666,6 +667,8 @@ extension LMBottomMessageComposerView {
     
     // Shows Initial Recording View
     func showRecordingView() {
+        sendButton.tag = audioButtonTag
+        
         isLockedIn = false
         horizontalStackView.isHidden = true
         audioContainerView.isHidden = false
@@ -689,12 +692,13 @@ extension LMBottomMessageComposerView {
     
     // Checks if Long and Pan Gestures should be enabled or not
     func checkSendButtonGestures() {
-        let isText = (inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inputTextView.text == inputTextView.placeHolderText)
+        let isText = (inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines) == inputTextView.placeHolderText)
         
-        sendButtonLongPressGesture.isEnabled = !isText
-        sendButtonPanPressGesture.isEnabled = !isText
+        // Making sure that the text field is empty and the user isn't locked in
+        sendButtonLongPressGesture.isEnabled = isText && !isLockedIn
+        sendButtonPanPressGesture.isEnabled = isText && !isLockedIn
         
-        sendButton.setImage(isText ? Constants.shared.images.sendButton : Constants.shared.images.micIcon, for: .normal)
+        sendButton.setImage(isText ? Constants.shared.images.micIcon : Constants.shared.images.sendButton, for: .normal)
     }
     
     // Sets the visibility of Slide To Cancel, Stop Audio Recording, Delete Audio Recording
@@ -719,27 +723,26 @@ extension LMBottomMessageComposerView {
         showHideLockContainer(isShow: false)
         
         isPlayingAudio = false
-        sendButton.tag = audioButtonTag
     }
     
 
     // When User locks in 🤫🧏‍♂️
     func setupLockedAudioView() {
+        checkSendButtonGestures()
         resetSendButtonConstraints()
         setVisibilityOfAudioElements(slideCancel: false, stopAudio: true, deleteAudio: true)
         
         showHideLockContainer(isShow: false)
         
         sendButton.setImage(Constants.shared.images.sendButton, for: .normal)
-        sendButton.tag = audioButtonTag
     }
     
     func showHideLockContainer(isShow: Bool) {
         lockContainerView.isHidden = !isShow
     }
     
-    func resetAudioDuration() {
-        recordDuration.text = "00:00"
+    func resetAudioDuration(with totalDuration: Int) {
+        recordDuration.text = convertSecondsToFormattedTime(seconds: totalDuration)
         micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
         isPlayingAudio = false
     }
@@ -749,7 +752,7 @@ extension LMBottomMessageComposerView {
 @objc
 extension LMBottomMessageComposerView {
     open func onTapStopAudioRecording() {
-        showPlayableRecordView()
+        delegate?.audioRecordingEnded()
     }
     
     open func onTapPlayPauseRecording() {

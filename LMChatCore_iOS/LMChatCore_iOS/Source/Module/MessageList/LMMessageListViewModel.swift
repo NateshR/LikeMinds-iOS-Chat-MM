@@ -810,8 +810,9 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         
     }
     
-    func postMessageWithAudioAttachment() {
-        
+    func postMessageWithAudioAttachment(with url: URL) {
+        print(">>>Audio URL<<<")
+        print(url)
+        print(">>>Audio URL<<<")
     }
-    
 }

@@ -158,7 +158,8 @@ public final class LMChatAudioPlayManager {
     @objc
     private func audioEnded() {
         // Add Trigger for updating UI
+        let audioDuration = Int(player?.currentItem?.duration.seconds ?? .zero)
+        NotificationCenter.default.post(name: .LMChatAudioEnded, object: audioDuration)
         resetAudioPlayer()
-        NotificationCenter.default.post(name: .LMChatAudioEnded, object: url)
     }
 }
