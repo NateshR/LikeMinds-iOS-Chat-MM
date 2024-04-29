@@ -36,9 +36,16 @@ open class LMMessageListViewController: LMViewController {
         return view
     }()
     
+    open private(set) lazy var chatroomTopicBar: LMChatroomTopicView = {
+        let view = LMChatroomTopicView().translatesAutoresizingMaskIntoConstraints()
+//        view.backgroundColor = .systemGroupedBackground
+//        view.delegate = self
+        return view
+    }()
+    
     public var viewModel: LMMessageListViewModel?
     weak var delegate: LMMessageListControllerDelegate?
-    
+    var linkDetectorTimer: Timer?
     var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
     open override func viewDidLoad() {
@@ -58,6 +65,12 @@ open class LMMessageListViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(messageListView)
         self.view.addSubview(bottomMessageBoxView)
+        self.view.addSubview(chatroomTopicBar)
+        
+        chatroomTopicBar.onTopicViewClick = {[weak self] topicId in
+            print("Topic \(topicId) bar clicked")
+            self?.topicBarClicked(topicId: topicId)
+        }
     }
     
     // MARK: setupLayouts
@@ -65,14 +78,20 @@ open class LMMessageListViewController: LMViewController {
         super.setupLayouts()
         bottomTextViewContainerBottomConstraints = bottomMessageBoxView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         bottomTextViewContainerBottomConstraints?.isActive = true
-        
-        messageListView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 0), 
-                                      bottom: (bottomMessageBoxView.topAnchor, -8),
-                                      leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
-                                      trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
-        
-        bottomMessageBoxView.addConstraint(leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
-                                           trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
+                                   
+        NSLayoutConstraint.activate([
+            chatroomTopicBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            chatroomTopicBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            chatroomTopicBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            
+            messageListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            messageListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            messageListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            
+            bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
     }
     
     @objc
@@ -97,6 +116,18 @@ open class LMMessageListViewController: LMViewController {
         self.view.layoutIfNeeded()
     }
     
+    open override func setupObservers() {
+        super.setupObservers()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        LMChatAudioRecordManager.shared.deleteAudioRecording()
+        LMChatAudioPlayManager.shared.resetAudioPlayer()
+    }
+    
     @objc
     open func chatroomActions() {
         guard let actions = viewModel?.chatroomActionData?.chatroomActions else { return }
@@ -113,40 +144,6 @@ open class LMMessageListViewController: LMViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    open override func setupObservers() {
-        super.setupObservers()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
-    }
-    
-    open override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        LMChatAudioRecordManager.shared.deleteAudioRecording()
-        LMChatAudioPlayManager.shared.resetAudioPlayer()
-    }
-}
-
-extension LMMessageListViewController: LMMessageListViewModelProtocol {
-    public func reloadChatMessageList() {
-        messageListView.tableSections = viewModel?.messagesList ?? []
-        messageListView.reloadData()
-    }
-    
-    public func scrollToBottom() {
-        messageListView.tableSections = viewModel?.messagesList ?? []
-        messageListView.reloadData()
-        messageListView.scrollToBottom()
-        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
-        updateChatroomSubtitles()
-    }
-    
-    public func scrollAtIndex(index: IndexPath) {
-        messageListView.tableSections = viewModel?.messagesList ?? []
-        messageListView.reloadData()
-        messageListView.scrollToBottom()
-        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
-    }
-    
     public func updateChatroomSubtitles() {
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
         let message = "Restricted to message in this chatroom by community manager"
@@ -155,7 +152,43 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         } else {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: (viewModel?.chatroomViewData?.memberCanMessage ?? true))
         }
-        
+    }
+    
+    func topicBarClicked(topicId: String) {
+        guard let chatroom = viewModel?.chatroomViewData else {
+            return
+        }
+        viewModel?.fetchIntermediateConversations(chatroom: chatroom, conversationId: topicId)
+    }
+    
+}
+
+extension LMMessageListViewController: LMMessageListViewModelProtocol {
+    
+    public func scrollToSpecificConversation(indexPath: IndexPath) {
+        reloadChatMessageList()
+        self.messageListView.scrollAtIndexPath(indexPath: indexPath)
+    }
+    
+    public func reloadChatMessageList() {
+        messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.reloadData()
+        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
+    }
+    
+    public func scrollToBottom() {
+        reloadChatMessageList()
+        messageListView.scrollToBottom()
+        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
+        updateChatroomSubtitles()
+    }
+    
+    public func updateTopicBar() {
+        if let topic = viewModel?.chatroomTopic {
+            chatroomTopicBar.setData(.init(title: GetAttributedTextWithRoutes.getAttributedText(from: topic.answer).string, createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: topic.id ?? ""))
+        } else {
+            chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? ""))
+        }
     }
 }
 
@@ -186,26 +219,38 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
             break
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: nil, conversationId: message.messageId, memberId: nil), from: self, params: nil)
+        case .select:
+            break
         default:
             break
         }
     }
 
     public func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath) {
-        print("tapped on \(indexPath.section), \(indexPath.row) Reply")
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        guard let chatroom = viewModel?.chatroomViewData,
+            let repliedId = message.replied?.first?.messageId else {
+            return
+        }
+        
+        if let mediumConversation = viewModel?.chatMessages.first(where: {$0.id == repliedId}) {
+            guard let section = messageListView.tableSections.firstIndex(where: {$0.section == mediumConversation.date}),
+                  let index = messageListView.tableSections[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
+            scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
+            return
+        }
+        
+        viewModel?.fetchIntermediateConversations(chatroom: chatroom, conversationId: repliedId)
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
         guard let fileUrl = URL(string: url) else {
-            print("attachment URL: \(url)")
             return
         }
         NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
     }
     
     public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
-        print("tapped on \(attachmentIndex) image")
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let attachments = message.attachments, !attachments.isEmpty else { return }
         let data: [LMChatMediaPreviewViewModel.DataModel] = attachments.compactMap({.init(type: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, url: $0.fileUrl ?? "")})
@@ -222,12 +267,12 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     
     
     public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
-        viewModel?.getMoreConversations(indexPath: indexPath, direction: direction)
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
     }
     
     
     public func didTapOnCell(indexPath: IndexPath) {
-        
     }
 
 }
@@ -236,17 +281,14 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
-        bottomMessageBoxView.replyMessageViewContainer.isHidden = true
     }
     
     public func cancelLinkPreview() {
         viewModel?.currentDetectedOgTags = nil
-        bottomMessageBoxView.linkPreviewView.isHidden = true
     }
     
     public func composeMessage(message: String) {
         print("\(message)")
-        
         if let chatMessage = viewModel?.editChatMessage {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: viewModel?.currentDetectedOgTags?.url, conversation: chatMessage)
@@ -267,7 +309,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         camera.setValue(cameraImage, forKey: "image")
         
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
-           guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self) else { return }
+            guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self, chatroomId: self?.viewModel?.chatroomId) else { return }
             self?.present(viewController, animated: true)
         }
         
@@ -322,7 +364,6 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func composeGif() {
-//        delegate?.postMessageWithGifAttachment()
         let giphy = GiphyViewController()
         giphy.mediaTypeConfig = [.gifs]
         giphy.theme = GPHTheme(type: .lightBlur)
@@ -333,7 +374,15 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func linkDetected(_ link: String) { 
-        viewModel?.decodeUrl(url: link)
+        linkDetectorTimer?.invalidate()
+        linkDetectorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: {[weak self] timer in
+            print("detected first link: \(link)")
+            self?.viewModel?.decodeUrl(url: link) {[weak self] ogTags in
+                guard let ogTags else { return }
+                self?.bottomMessageBoxView.linkPreviewView.isHidden = false
+                self?.bottomMessageBoxView.linkPreviewView.setData(.init(title: ogTags.title, description: ogTags.description, link: ogTags.url, imageUrl: ogTags.image))
+            }
+        })
     }
     
     public func audioRecordingStarted() {

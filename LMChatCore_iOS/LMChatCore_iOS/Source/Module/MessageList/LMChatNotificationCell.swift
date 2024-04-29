@@ -87,31 +87,7 @@ open class LMChatNotificationCell: LMTableViewCell {
     
     // MARK: configure
     open func setData(with data: ContentModel) {
-        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.shared.fonts.subHeadingFont2, withTextColor: Appearance.shared.colors.white)
-    }
-    
-    func timestampConverted(createdAtInEpoch: Int) -> String? {
-        guard createdAtInEpoch > .zero else { return nil }
-        var epochTime = Double(createdAtInEpoch)
-        
-        if epochTime > Date().timeIntervalSince1970 {
-            epochTime = epochTime / 1000
-        }
-        
-        let date = Date(timeIntervalSince1970: epochTime)
-        let dateFormatter = DateFormatter()
-        
-        if Calendar.current.isDateInToday(date) {
-            dateFormatter.dateFormat = "hh:mm a"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
-            return dateFormatter.string(from: date)
-        } else if Calendar.current.isDateInYesterday(date) {
-            return "Yesterday"
-        } else {
-            dateFormatter.dateFormat = "dd/MM/yy"
-            return dateFormatter.string(from: date)
-        }
+        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.shared.fonts.subHeadingFont2, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
     }
 }
 

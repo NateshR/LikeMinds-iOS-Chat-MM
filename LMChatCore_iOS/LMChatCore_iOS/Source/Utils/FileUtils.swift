@@ -83,8 +83,10 @@ class FileUtils {
     static func getDetail(forVideoUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, fileSize: Double?, duration: Int?)? {
         let asset: AVAsset = AVAsset(url: url)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.maximumSize = .init(width: 240, height: 240)
         do {
-            let thumbnailImage = try imageGenerator.copyCGImage(at: CMTimeMake(value: 1, timescale: 60), actualTime: nil)
+            let thumbnailImage = try imageGenerator.copyCGImage(at: CMTimeMakeWithSeconds(1.0, preferredTimescale: 600), actualTime: nil)
             let image = UIImage(cgImage: thumbnailImage)
             return (image,
                     saveImageToLocalDirectory(image: image, imageName: "thumbnail_\(fileNameWithoutExtension(url.lastPathComponent)).jpeg"),

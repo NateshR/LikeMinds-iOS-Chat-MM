@@ -37,6 +37,7 @@ public class MediaPickerModel {
     var livePhoto: PHLivePhoto?
     var mediaType: MediaType = .image
     var localPath: URL?
+    var thumnbailLocalPath: URL?
     
     init(with photo: UIImage) {
         id = UUID().uuidString
@@ -45,14 +46,16 @@ public class MediaPickerModel {
         mediaType = .image
     }
     
-    init(with localPath: URL, type: MediaType) {
+    init(with localPath: URL, type: MediaType, thumbnailPath: URL? = nil) {
         self.id = UUID().uuidString
         self.localPath = localPath
         self.url = localPath
+        self.thumnbailLocalPath = thumbnailPath
         self.mediaType = type
         if [MediaType.image, .gif].contains(type) {
-            self.photo = UIImage(contentsOfFile: localPath.absoluteString)
-            self.originalPhoto = UIImage(contentsOfFile: localPath.absoluteString)
+            guard let data = try? Data(contentsOf: localPath) else { return }
+            self.photo = UIImage(data: data)
+            self.originalPhoto = self.photo
         }
     }
     
@@ -240,7 +243,8 @@ extension MediaPickerManager: PHPickerViewControllerDelegate  {
             }
             DispatchQueue.main.async {[weak self] in
                 guard let self else { return }
-                mediaPickerItems.append(.init(with: targetURL, type: .video))
+                let videoDetails = FileUtils.getDetail(forVideoUrl: targetURL)
+                mediaPickerItems.append(.init(with: targetURL, type: .video, thumbnailPath: videoDetails?.thumbnailUrl))
                 group.leave()
             }
         }

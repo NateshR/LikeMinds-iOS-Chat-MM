@@ -52,7 +52,9 @@ public class LMHomeFeedViewModel {
 extension LMHomeFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
+        print("Chatrooms data Intial")
         self.chatrooms = chatrooms
+        self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
         self.delegate?.updateHomeFeedChatroomsData()
     }
     
@@ -67,6 +69,7 @@ extension LMHomeFeedViewModel: HomeFeedClientObserver {
         inserted.forEach { data in
             chatrooms.insert(data.1, at: data.0)
         }
+        chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
         self.delegate?.updateHomeFeedChatroomsData()
     }
 }

@@ -252,9 +252,9 @@ open class LMExploreChatroomView: LMView {
         announcementIconImageView.isHidden = !(data.isAnnouncementRoom ?? false)
         lockIconImageView.isHidden = !(data.isSecret ?? false)
         joinButtonTitle(data.isFollowed ?? false)
-        let placeholder = Constants.Images.shared.placeholderImage
+        let placeholder = UIImage.generateLetterImage(name: data.chatroomName?.components(separatedBy: " ").first)
         if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
-            chatroomImageView.kf.setImage(with: url)
+            chatroomImageView.kf.setImage(with: url, placeholder: placeholder)
         } else {
             chatroomImageView.image = placeholder
         }

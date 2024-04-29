@@ -12,7 +12,7 @@ open class LMReactionTitleCell: LMCollectionViewCell {
     struct ContentModel {
         let title: String
         let count: Int
-        var isSelected: Bool
+        var isSelected: Bool = false
     }
  
     lazy var titleLabel: LMLabel = {

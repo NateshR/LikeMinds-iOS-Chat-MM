@@ -64,4 +64,5 @@ public struct LMCoreComponents {
     public var messageListScreen: LMMessageListViewController.Type = LMMessageListViewController.self
     public var messageContentView: LMChatMessageContentView.Type = LMChatMessageContentView.self
     public var messageBubbleView: LMChatMessageBubbleView.Type = LMChatMessageBubbleView.self
+    public var chatroomHeaderMessageView: LMChatroomHeaderMessageView.Type = LMChatroomHeaderMessageView.self
 }

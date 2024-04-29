@@ -58,7 +58,7 @@ open class LMReactionViewController: LMViewController {
     
     lazy var bottomLine: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
         return view
     }()
     
@@ -106,7 +106,7 @@ open class LMReactionViewController: LMViewController {
             
             bottomLine.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             bottomLine.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            bottomLine.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
+            bottomLine.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
             bottomLine.heightAnchor.constraint(equalToConstant: 1),
             
             tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -116,7 +116,7 @@ open class LMReactionViewController: LMViewController {
             tableView.topAnchor.constraint(equalTo: bottomLine.bottomAnchor, constant: 8)
         ])
         
-        bottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        bottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         bottomConstraint?.isActive = true
     }
     
@@ -155,7 +155,7 @@ open class LMReactionViewController: LMViewController {
     
     @objc
     func didTapDimmedView() {
-        dismiss(animated: false)
+        dismiss(animated: true)
     }
 }
 

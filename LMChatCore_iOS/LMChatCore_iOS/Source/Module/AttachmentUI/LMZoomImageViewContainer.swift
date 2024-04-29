@@ -10,7 +10,6 @@ import LMChatUI_iOS
 
 open class LMZoomImageViewContainer: UIScrollView {
     
-    @IBInspectable
     public var imageName: String? {
         didSet {
             guard let imageName = imageName else {

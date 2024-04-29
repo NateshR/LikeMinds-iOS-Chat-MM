@@ -60,7 +60,7 @@ class DataModelConverter {
                 AttachmentMeta.builder()
                     .numberOfPage(mediaData.pdfPageCount)
                     .duration(mediaData.duration)
-                    .size(mediaData.size)
+                    .size(Int(mediaData.size ?? 0))
                     .build()
             )
             .build()

@@ -196,9 +196,9 @@ open class LMChatMessageContentView: LMView {
             chatProfileImageContainerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             bubbleView.topAnchor.constraint(equalTo: topAnchor),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
-            bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -5),
-            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -2),
-            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -15),
+            bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -4),
+            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
+            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
         
@@ -244,7 +244,7 @@ open class LMChatMessageContentView: LMView {
     
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         self.textLabel.isUserInteractionEnabled = true
-        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont1, withTextColor: Appearance.Colors.shared.black)
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withTextColor: Appearance.Colors.shared.black)
         let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
         self.timestampLabel.text = edited + (data.message?.createdTime ?? "")
         let isIncoming = data.message?.isIncoming ?? true
