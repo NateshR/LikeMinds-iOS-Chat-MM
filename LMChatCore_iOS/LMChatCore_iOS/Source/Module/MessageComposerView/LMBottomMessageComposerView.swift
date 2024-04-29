@@ -19,6 +19,7 @@ public protocol LMBottomMessageComposerDelegate: AnyObject {
     func audioRecordingStarted()
     func audioRecordingEnded()
     func playRecording()
+    func stopRecording(_ onStop: (() -> Void))
     func deleteRecording()
     
     func cancelReply()
@@ -78,6 +79,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var inputTextView: LMChatTaggingTextView = {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
         //        view.textContainerInset = .zero
+        view.backgroundColor = Appearance.shared.colors.white
         view.placeHolderText = "Write somthing"
         view.mentionDelegate = self
         view.isScrollEnabled = false
@@ -91,7 +93,6 @@ open class LMBottomMessageComposerView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
-        //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(gifButtonClicked), for: .touchUpInside)
         return button
     }()
@@ -135,7 +136,7 @@ open class LMBottomMessageComposerView: LMView {
         return view
     }()
     
-    // MARK:
+    
     open private(set) lazy var audioMessageContainerStack: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
@@ -149,8 +150,8 @@ open class LMBottomMessageComposerView: LMView {
     // MARK: Send Button
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.micIcon, for: .normal)
-        button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.setImage(micButtonIcon, for: .normal)
+        button.contentMode = .scaleToFill
         return button
     }()
     
@@ -165,7 +166,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var micFlickerButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle(nil, for: .normal)
-        button.setImage(UIImage(systemName: "mic.fill"), for: .normal)
+        button.setImage(Constants.shared.images.micIcon, for: .normal)
         return button
     }()
     
@@ -198,6 +199,18 @@ open class LMBottomMessageComposerView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle(nil, for: .normal)
         button.setImage(UIImage(systemName: "x.circle"), for: .normal)
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
+        return button
+    }()
+    
+    open private(set) lazy var stopAudioRecord: LMButton = {
+        let button = LMButton().translatesAutoresizingMaskIntoConstraints()
+        button.setTitle(nil, for: .normal)
+        button.setImage(Constants.shared.images.stopRecordButton, for: .normal)
+        button.tintColor = Appearance.shared.colors.red
+        button.contentHorizontalAlignment = .fill
+        button.contentVerticalAlignment = .fill
         return button
     }()
     
@@ -214,12 +227,54 @@ open class LMBottomMessageComposerView: LMView {
         return label
     }()
     
+    open private(set) lazy var lockContainerView: LMView = {
+        let container = LMView().translatesAutoresizingMaskIntoConstraints()
+        container.backgroundColor = .white
+        return container
+    }()
+    
+    open private(set) lazy var lockIcon: LMImageView = {
+        let image = LMImageView(image: Constants.shared.images.lockFillIcon)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
     let maxHeightOfTextView: CGFloat = 120
     let minHeightOfTextView: CGFloat = 44
+    
+    var sendButtonTrailingConstant: CGFloat = -8
+    var sendButtonCenterYConstant: CGFloat = 0
     var sendButtonTrailingConstraint: NSLayoutConstraint?
+    var sendButtonCenterYConstraint: NSLayoutConstraint?
     var sendButtonLongPressGesture: UILongPressGestureRecognizer!
     var sendButtonPanPressGesture: UIPanGestureRecognizer!
     var isLinkPreviewCancel: Bool = false
+    
+    
+    /*
+     Purpose of isTranslationX - It will define the movement of send button at any current point.
+        if value is nil it means, sendButton is not translating in any direction
+        if value is true it means, sendButton is translating in X direction
+        if value is false it means, sendButton is translating in Y direction
+     
+        Default is nil means, it is stationary in the beginning
+    */
+    var isTranslationX: Bool? = nil
+    var isPlayingAudio = false
+    var isLockedIn = false
+    
+    let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
+    let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
+    
+    let sendButtonHeightConstant: CGFloat = 40
+    var lockContainerViewHeight: CGFloat = 100
+    var lockContainerViewHeightConstraint: NSLayoutConstraint?
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        showHideLockContainer(isShow: false)
+        sendButton.tag = messageButtonTag
+    }
     
     // MARK: setupViews
     open override func setupViews() {
@@ -228,6 +283,8 @@ open class LMBottomMessageComposerView: LMView {
         containerView.addSubview(addOnVerticleStackView)
         
         containerView.addSubview(audioMessageContainerStack)
+        containerView.addSubview(lockContainerView)
+        lockContainerView.addSubview(lockIcon)
         containerView.addSubview(sendButton)
         
         audioMessageContainerStack.addArrangedSubview(horizontalStackView)
@@ -249,6 +306,7 @@ open class LMBottomMessageComposerView: LMView {
         audioContainerView.addSubview(audioStack)
         
         audioStack.addArrangedSubview(slideToCancel)
+        audioStack.addArrangedSubview(stopAudioRecord)
         audioStack.addArrangedSubview(deleteAudioRecord)
         
         linkPreviewView.isHidden = true
@@ -284,33 +342,45 @@ open class LMBottomMessageComposerView: LMView {
         
         audioStack.leadingAnchor.constraint(greaterThanOrEqualTo: recordDuration.trailingAnchor, constant: 8).isActive = true
         
+        deleteAudioRecord.setWidthConstraint(with: deleteAudioRecord.heightAnchor)
+        stopAudioRecord.setWidthConstraint(with: stopAudioRecord.heightAnchor)
         
-        sendButton.addConstraint(leading: (audioMessageContainerStack.trailingAnchor, 8),
-                                 centerY: (containerView.centerYAnchor, 0))
+        sendButton.addConstraint(leading: (audioMessageContainerStack.trailingAnchor, 8))
         
-        sendButtonTrailingConstraint = sendButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8)
+        sendButtonCenterYConstraint = sendButton.centerYAnchor.constraint(equalTo: audioMessageContainerStack.centerYAnchor, constant: sendButtonCenterYConstant)
+        sendButtonCenterYConstraint?.isActive = true
+        
+        sendButtonTrailingConstraint = sendButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: sendButtonTrailingConstant)
         sendButtonTrailingConstraint?.isActive = true
         
-        sendButton.setHeightConstraint(with: 40)
+        lockContainerView.addConstraint(bottom: (audioMessageContainerStack.bottomAnchor, 0),
+                                        leading: (audioMessageContainerStack.trailingAnchor, 8),
+                                        trailing: (containerView.trailingAnchor, sendButtonTrailingConstant))
+        lockContainerViewHeightConstraint = lockContainerView.setHeightConstraint(with: lockContainerViewHeight)
+        
+        lockIcon.addConstraint(top: (lockContainerView.topAnchor, 8),
+                               leading: (lockContainerView.leadingAnchor, 8),
+                               trailing: (lockContainerView.trailingAnchor, -8))
+        lockIcon.setHeightConstraint(with: lockIcon.widthAnchor)
+        
+        sendButton.setHeightConstraint(with: sendButtonHeightConstant)
         sendButton.setWidthConstraint(with: sendButton.heightAnchor)
         
         
-        NSLayoutConstraint.activate([
-            containerView.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeightOfTextView),
-//            containerView.heightAnchor.constraint(lessThanOrEqualToConstant: maxHeightOfTextView),
-            
-            inputTextAndGifHorizontalStackView.leadingAnchor.constraint(equalTo: inputTextContainerView.leadingAnchor, constant: 8),
-            inputTextAndGifHorizontalStackView.trailingAnchor.constraint(equalTo: inputTextContainerView.trailingAnchor, constant: -10),
-            inputTextAndGifHorizontalStackView.topAnchor.constraint(equalTo: inputTextContainerView.topAnchor),
-            inputTextAndGifHorizontalStackView.bottomAnchor.constraint(equalTo: inputTextContainerView.bottomAnchor),
-            inputTextContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 36)
-        ])
-        inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
-        taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
+        containerView.setHeightConstraint(with: minHeightOfTextView, relatedBy: .greaterThanOrEqual)
         
+        inputTextAndGifHorizontalStackView.addConstraint(top: (inputTextContainerView.topAnchor, 0),
+                                                         bottom: (inputTextContainerView.bottomAnchor, 0),
+                                                         leading: (inputTextContainerView.leadingAnchor, 8),
+                                                         trailing: (inputTextContainerView.trailingAnchor, -8))
+        inputTextViewHeightConstraint = inputTextView.setHeightConstraint(with: 36)
+        
+        taggingViewHeightConstraints = taggingListView.setHeightConstraint(with: 0)
         containerView.pinSubView(subView: restrictionLabel)
     }
     
+    
+    // MARK: setupActions
     open override func setupActions() {
         super.setupActions()
         sendButton.addTarget(self, action: #selector(sendMessageButtonClicked), for: .touchUpInside)
@@ -330,8 +400,9 @@ open class LMBottomMessageComposerView: LMView {
         audioContainerView.isHidden = true
         restrictionLabel.isHidden = true
         
-        deleteAudioRecord.addTarget(self, action: #selector(deleteRecording), for: .touchUpInside)
-        micFlickerButton.addTarget(self, action: #selector(didTapPlayRecording), for: .touchUpInside)
+        deleteAudioRecord.addTarget(self, action: #selector(onTapDeleteRecording), for: .touchUpInside)
+        micFlickerButton.addTarget(self, action: #selector(onTapPlayPauseRecording), for: .touchUpInside)
+        stopAudioRecord.addTarget(self, action: #selector(onTapStopAudioRecording), for: .touchUpInside)
     }
     
     func enableOrDisableMessageBox(withMessage message: String?, isEnable: Bool) {
@@ -350,11 +421,15 @@ open class LMBottomMessageComposerView: LMView {
               message != inputTextView.placeHolderText else {
             return
         }
-        inputTextView.text = ""
+        inputTextView.text = inputTextView.placeHolderText
+        inputTextView.resignFirstResponder()
         isLinkPreviewCancel = false
         replyMessageView.isHidden = true
+        
         contentHeightChanged()
         delegate?.composeMessage(message: message)
+        
+        checkSendButtonGestures()
     }
     
     @objc func attachmentButtonClicked(_ sender: UIButton) {
@@ -367,12 +442,22 @@ open class LMBottomMessageComposerView: LMView {
     
     @objc func audioButtonClicked(_ sender: UIButton) {
         delegate?.composeAudio()
+        resetRecordingView()
     }
     
     open override func setupAppearance() {
         super.setupAppearance()
         audioContainerView.backgroundColor = .white
         audioContainerView.layer.cornerRadius = 8
+        
+        let frameHeight = self.frame.width * 0.3
+        
+        if frameHeight > 0 {
+            lockContainerViewHeight = frameHeight
+            lockContainerViewHeightConstraint?.constant = lockContainerViewHeight
+        }
+        
+        lockContainerView.roundCorners([.layerMinXMinYCorner, .layerMaxXMinYCorner], with: sendButtonHeightConstant / 2)
     }
     
     func showReplyView(withData data: LMMessageReplyPreview.ContentModel) {
@@ -382,7 +467,6 @@ open class LMBottomMessageComposerView: LMView {
 }
 
 extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
-    
     public func mentionStarted(with text: String, chatroomId: String) {
         taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
@@ -399,18 +483,10 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
         
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
         inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
-        
-        if inputTextView.text.isEmpty || inputTextView.placeHolderText == inputTextView.text {
-            sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
-            sendButton.tag = audioButtonTag
-        } else {
-            sendButton.tag = messageButtonTag
-            sendButton.setImage(Constants.shared.images.paperplaneFilled, for: .normal)
-        }
     }
     
     public func textViewDidChange(_ textView: UITextView) {
-        checkSendButtonActions()
+        checkSendButtonGestures()
         
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
@@ -420,11 +496,9 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             linkPreviewView.isHidden = true
         }
     }
-    
 }
 
 extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
-    
     public func userSelected(with route: String, and userName: String) {
         inputTextView.addTaggedUser(with: userName, route: route)
         mentionStopped()
@@ -433,7 +507,6 @@ extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
     public func updateHeight(with height: CGFloat) {
         taggingViewHeightConstraints?.constant = height
     }
-    
 }
 
 
@@ -474,14 +547,16 @@ extension LMBottomMessageComposerView {
     }
     
     public func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+        inputTextView.resignFirstResponder()
+        
         switch sender.state {
         case .began:
-            // Start Recording
             delegate?.audioRecordingStarted()
-        case .ended:
-            delegate?.audioRecordingEnded()
-        case .cancelled:
-            delegate?.audioRecordingEnded()
+        case .ended,
+                .cancelled:
+            if !isLockedIn {
+                delegate?.audioRecordingEnded()
+            }
             break
         default:
             break
@@ -494,65 +569,57 @@ extension LMBottomMessageComposerView {
         
         let translation = sender.translation(in: self)
         
-        if translation.x < -8 {
-            if abs(translation.x) < UIScreen.main.bounds.width * 0.3 {
-                sendButtonTrailingConstraint?.constant = translation.x
+        // It means send Button has already a motion of X translation
+        // Cases: 
+        //  1. It is still going deeper into X translation
+        //  2. It is going back towards zero
+        if isTranslationX == true {
+            if translation.x < sendButtonTrailingConstant {
+                if abs(translation.x) < UIScreen.main.bounds.width * 0.3 {
+                    sendButtonTrailingConstraint?.constant = translation.x
+                } else {
+                    delegate?.deleteRecording()
+                    resetRecordingView()
+                }
             } else {
-                delegate?.deleteRecording()
+                sendButtonTrailingConstraint?.constant = sendButtonTrailingConstant
+                isTranslationX = nil
+            }
+        } else if isTranslationX == false {
+            if translation.y < 0 {
+                if abs(translation.y) < lockContainerViewHeight * 0.7 {
+                    sendButtonCenterYConstraint?.constant = translation.y
+                } else {
+                    isLockedIn = true
+                    setupLockedAudioView()
+                }
+            } else {
+                sendButtonCenterYConstraint?.constant = sendButtonCenterYConstant
+                isTranslationX = nil
+            }
+        } else {
+            if translation.x < sendButtonTrailingConstant || translation.y < sendButtonCenterYConstant {
+                isTranslationX = abs(translation.x) > abs(translation.y)
             }
         }
-    }
-    
-    @objc
-    open func didTapPlayRecording() {
-        delegate?.playRecording()
-    }
-    
-    @objc
-    open func deleteRecording() {
-        delegate?.deleteRecording()
-    }
-    
-    func showRecordingView() {
-        horizontalStackView.isHidden = true
-        audioContainerView.isHidden = false
-        sendButtonTrailingConstraint?.constant = -8
         
-        deleteAudioRecord.isHidden = true
-        slideToCancel.isHidden = false
-        
-        micFlickerButton.setImage(UIImage(systemName: "mic.fill"), for: .normal)
-        micFlickerButton.tintColor = .red
-        micFlickerButton.isEnabled = false
+        // In Case if it is translating X, hide the container view
+        if isTranslationX == true {
+            showHideLockContainer(isShow: translation.x > -16)
+        }
     }
-    
-    func hideRecordingView() {
-        sendButtonTrailingConstraint?.constant = -8
-        horizontalStackView.isHidden = false
-        audioContainerView.isHidden = true
-        recordDuration.text = "00:00"
         
-        checkSendButtonActions()
-    }
     
-    func showRecordedView() {
-        slideToCancel.isHidden = true
-        deleteAudioRecord.isHidden = false
-        
-        micFlickerButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        micFlickerButton.tintColor = .gray
-        micFlickerButton.isEnabled = true
-        
-        sendButtonTrailingConstraint?.constant = -8
-    }
-    
-    func checkSendButtonActions() {
-        sendButtonLongPressGesture.isEnabled = !inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        sendButtonPanPressGesture.isEnabled = !inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
-    func updateRecordTime(with seconds: Int) {
+    func updateRecordTime(with seconds: Int, isPlayback: Bool = false) {
         recordDuration.text = convertSecondsToFormattedTime(seconds: seconds)
+        isPlayingAudio = isPlayback
+        
+        if !isPlayback {
+            UIView.animate(withDuration: 0.3, delay: 0.1) { [weak self] in
+                guard let self else { return }
+                self.micFlickerButton.alpha = self.micFlickerButton.alpha == 1 ? 0.5 : 1
+            }
+        }
     }
     
     // TODO: Remove this, when moving it to UI Library, same function exists in `LMChatAudioPreview`
@@ -575,5 +642,140 @@ extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
         linkPreviewView.isHidden = true
         isLinkPreviewCancel = true
         delegate?.cancelLinkPreview()
+    }
+}
+
+
+
+// Audio Logic
+extension LMBottomMessageComposerView {
+    // Resets Recording View and shows Text Input View
+    func resetRecordingView() {
+        sendButton.tag = messageButtonTag
+        resetSendButtonConstraints()
+        
+        recordDuration.text = "00:00"
+        
+        horizontalStackView.isHidden = false
+        audioContainerView.isHidden = true
+        
+        resetSendButtonConstraints()
+        checkSendButtonGestures()
+        
+        sendButton.setImage(micButtonIcon, for: .normal)
+        sendButtonPanPressGesture.isEnabled = true
+        sendButtonLongPressGesture.isEnabled = true
+        
+        isPlayingAudio = false
+        isLockedIn = false
+        showHideLockContainer(isShow: false)
+    }
+    
+    
+    // Shows Initial Recording View
+    func showRecordingView() {
+        sendButton.tag = audioButtonTag
+        
+        isLockedIn = false
+        horizontalStackView.isHidden = true
+        audioContainerView.isHidden = false
+        
+        resetSendButtonConstraints()
+        setVisibilityOfAudioElements(slideCancel: true, stopAudio: false, deleteAudio: false)
+        showHideLockContainer(isShow: true)
+        
+        micFlickerButton.setImage(Constants.shared.images.micIcon, for: .normal)
+        micFlickerButton.tintColor = Appearance.shared.colors.red
+        micFlickerButton.isEnabled = false
+    }
+    
+    
+    // Resets Send Button Constraints
+    func resetSendButtonConstraints() {
+        sendButtonTrailingConstraint?.constant = sendButtonTrailingConstant
+        sendButtonCenterYConstraint?.constant = sendButtonCenterYConstant
+    }
+    
+    
+    // Checks if Long and Pan Gestures should be enabled or not
+    func checkSendButtonGestures() {
+        let isText = (inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines) == inputTextView.placeHolderText)
+        
+        // Making sure that the text field is empty and the user isn't locked in
+        sendButtonLongPressGesture.isEnabled = isText && !isLockedIn
+        sendButtonPanPressGesture.isEnabled = isText && !isLockedIn
+        
+        sendButton.setImage(isText ? micButtonIcon : sendButtonIcon, for: .normal)
+    }
+    
+    // Sets the visibility of Slide To Cancel, Stop Audio Recording, Delete Audio Recording
+    func setVisibilityOfAudioElements(slideCancel: Bool, stopAudio: Bool, deleteAudio: Bool) {
+        deleteAudioRecord.isHidden = !deleteAudio
+        stopAudioRecord.isHidden = !stopAudio
+        slideToCancel.isHidden = !slideCancel
+    }
+    
+    
+    // When user stops recording, showing user the view of recorded view!
+    func showPlayableRecordView() {
+        resetSendButtonConstraints()
+        setVisibilityOfAudioElements(slideCancel: false, stopAudio: false, deleteAudio: true)
+        
+        micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
+        micFlickerButton.tintColor = Appearance.shared.colors.gray155
+        micFlickerButton.isEnabled = true
+        
+        sendButton.setImage(sendButtonIcon, for: .normal)
+        
+        showHideLockContainer(isShow: false)
+        
+        isPlayingAudio = false
+    }
+    
+
+    // When User locks in 🤫🧏‍♂️
+    func setupLockedAudioView() {
+        checkSendButtonGestures()
+        resetSendButtonConstraints()
+        setVisibilityOfAudioElements(slideCancel: false, stopAudio: true, deleteAudio: true)
+        
+        showHideLockContainer(isShow: false)
+        
+        sendButton.setImage(sendButtonIcon, for: .normal)
+    }
+    
+    func showHideLockContainer(isShow: Bool) {
+        lockContainerView.isHidden = !isShow
+    }
+    
+    func resetAudioDuration(with totalDuration: Int) {
+        recordDuration.text = convertSecondsToFormattedTime(seconds: totalDuration)
+        micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
+        isPlayingAudio = false
+    }
+}
+
+
+@objc
+extension LMBottomMessageComposerView {
+    open func onTapStopAudioRecording() {
+        delegate?.audioRecordingEnded()
+    }
+    
+    open func onTapPlayPauseRecording() {
+        if !isPlayingAudio {
+            micFlickerButton.setImage(Constants.shared.images.pauseIcon, for: .normal)
+            delegate?.playRecording()
+        } else {
+            micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
+            delegate?.stopRecording {
+                isPlayingAudio = false
+            }
+        }
+    }
+    
+    open func onTapDeleteRecording() {
+        resetRecordingView()
+        delegate?.deleteRecording()
     }
 }

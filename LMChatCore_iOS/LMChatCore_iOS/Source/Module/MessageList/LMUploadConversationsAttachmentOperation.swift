@@ -95,7 +95,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
             .type(attachment.fileType)
             .meta(.builder()
                 .duration(attachment.meta?.duration)
-                .size(Int(attachment.meta?.size ?? 0))
+                .size(attachment.meta?.size)
                 .numberOfPage(attachment.meta?.numberOfPage)
                 .build()
             )

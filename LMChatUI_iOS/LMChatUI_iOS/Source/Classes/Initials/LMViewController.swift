@@ -104,8 +104,8 @@ open class LMViewController: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         setupActions()
+        setupObservers()
         setupNavigationBar()
-//        initializeHideKeyboard()
     }
     
     open override func viewDidLayoutSubviews() {
