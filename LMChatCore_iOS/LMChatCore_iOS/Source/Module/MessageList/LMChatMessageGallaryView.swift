@@ -209,17 +209,19 @@ open class LMChatMessageGallaryView: LMView {
                 return
             }
             itemSpots[index].isHidden = false
-            itemSpots[index].setData(imageUrl)
+            
             if item.fileType == "video" {
+                itemSpots[index].setData(imageUrl, withPlaceholder: nil)
                 itemSpots[index].playIconImage.isHidden = false
             } else {
+                itemSpots[index].setData(imageUrl)
                 itemSpots[index].playIconImage.isHidden = true
             }
         }
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
-        guard let tag = gesture.view?.tag else { return }
+        guard viewData?.first?.fileType?.lowercased() != "gif", let tag = gesture.view?.tag else { return }
         onClickAttachment?(tag)
     }
     
@@ -235,8 +237,9 @@ extension LMChatMessageGallaryView {
             let imageView = LMImageView()
             imageView.contentMode = .scaleAspectFill
             imageView.layer.masksToBounds = true
-            imageView.image = UIImage(systemName: "photo")
-            imageView.backgroundColor = .black
+            imageView.image = Constants.shared.images.galleryIcon
+            imageView.tintColor = Appearance.shared.colors.gray51
+            imageView.backgroundColor = Appearance.shared.colors.black
             return imageView
                 .translatesAutoresizingMaskIntoConstraints()
         }()
@@ -295,8 +298,8 @@ extension LMChatMessageGallaryView {
             playIconImage.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         }
         
-        func setData(_ url: String) {
-            imageView.kf.setImage(with: URL(string: url), placeholder: Constants.shared.images.placeholderImage)
+        func setData(_ url: String, withPlaceholder placeholder: UIImage? = Constants.shared.images.galleryIcon) {
+            imageView.kf.setImage(with: URL(string: url), placeholder: placeholder)
         }
         
 //        override open func updateContent() {

@@ -8,6 +8,7 @@
 import Foundation
 import LMChatUI_iOS
 import LikeMindsChat
+import FirebaseDatabase
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
@@ -36,6 +37,7 @@ public final class LMMessageListViewModel {
     var replyChatMessage: Conversation?
     var editChatMessage: Conversation?
     var chatroomTopic: Conversation?
+    var fireBaseRealTimeQueryRegister: DatabaseReference?
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -67,6 +69,8 @@ public final class LMMessageListViewModel {
     
     func getInitialData() {
         NotificationCenter.default.addObserver(self, selector: #selector(attachmentPostCompleted), name: LMUploadConversationsAttachmentOperation.attachmentPostCompleted, object: nil)
+        self.fireBaseRealTimeQueryRegister = self.getDatabaseReference(chatroomId)
+        fetchChatRoomLatestConversations(forChatRoomID: chatroomId, fireBaseRealTimeQueryRegister: fireBaseRealTimeQueryRegister)
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
         LMChatClient.shared.getChatroom(request: chatroomRequest) {[weak self] response in
             //1st case -> chatroom is not present, if yes return
@@ -131,6 +135,32 @@ public final class LMMessageListViewModel {
             fetchMemberState()
             observeConversations(chatroomId: chatroom.id)
         }
+    }
+    
+    func getDatabaseReference(_ chatRoomID: String) -> DatabaseReference? {
+        return nil
+        let ref = FirebaseServiceConfiguration.firebaseDatabase.reference().child("collabcards").child(chatRoomID)
+        ref.keepSynced(true)
+        return ref
+    }
+    
+    func fetchChatRoomLatestConversations(forChatRoomID chatRoomID: String, fireBaseRealTimeQueryRegister: DatabaseReference?) {
+        FireBaseFactoryClass.shared.getDataForquery(fireBaseRealTimeQueryRegister) { entity in
+            guard let data = entity else {return}
+            //print("========== received response =============== ")
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
+                      let answerId = json["answer_id"] as? String else {return}
+                self.syncLatestConversations(withConversationId: answerId)
+            } catch let error {
+                print("json error parsing - \(#function) \(error)")
+            }
+            //print("========== end =============== ")
+        }
+    }
+    
+    func syncLatestConversations(withConversationId conversationId: String) {
+        LMChatClient.shared.loadLatestConversations(withConversationId: conversationId, chatroomId: chatroomId)
     }
     
     func convertConversationsIntoGroupedArray(conversations: [Conversation]?) -> [LMMessageListView.ContentModel] {
@@ -307,11 +337,10 @@ public final class LMMessageListViewModel {
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-        print("\(message)")
-        if message.trimmingCharacters(in: .whitespacesAndNewlines) == GiphyAPIConfiguration.gifMessage {
-            return ""
-        }
-        return message
+//        if message.trimmingCharacters(in: .whitespacesAndNewlines) == GiphyAPIConfiguration.gifMessage {
+//            return ""
+//        }
+        return message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMMessageListView.ContentModel.OgTags? {

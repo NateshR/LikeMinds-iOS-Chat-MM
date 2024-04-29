@@ -50,7 +50,7 @@ open class LMHomeFeedListView: LMView {
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
-        table.backgroundColor = .gray
+        table.backgroundColor = .red
         return table
     }()
     
@@ -93,15 +93,13 @@ open class LMHomeFeedListView: LMView {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         containerView.backgroundColor = Appearance.shared.colors.white
-        tableView.backgroundColor = Appearance.shared.colors.clear
+//        tableView.backgroundColor = Appearance.shared.colors.clear
     }
     
     open func reloadData() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
-            tableView.reloadData()
-        }
+        tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
+        print("chatroom data $#$#$: \(tableSections.first(where: {$0.sectionType == .chatrooms})?.data.count)")
+        self.tableView.reloadData()
     }
     
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {

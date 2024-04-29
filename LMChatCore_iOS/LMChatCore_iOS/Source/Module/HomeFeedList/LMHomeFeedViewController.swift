@@ -56,13 +56,11 @@ extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
             LMHomeFeedChatroomCell.ContentModel(chatroom: chatroom)
         })
         feedListView.updateChatroomsData(chatroomData: chatrooms)
-        feedListView.reloadData()
     }
     
     public func updateHomeFeedExploreCountData() {
         guard let countData = viewModel?.exploreTabCountData else { return }
         feedListView.updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
-        feedListView.reloadData()
     }
     
     

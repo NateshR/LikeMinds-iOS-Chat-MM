@@ -38,7 +38,10 @@ open class LMChatNotificationCell: LMTableViewCell {
         label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
+        label.textContainer.maximumNumberOfLines = 2
+        label.textContainer.lineBreakMode = .byTruncatingTail
         label.isEditable = false
+        label.tintColor = Appearance.shared.colors.white
         label.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         label.cornerRadius(with: 12)
         label.text = ""
