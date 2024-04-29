@@ -21,7 +21,7 @@ enum NavigationActions {
     case reactionSheet(reactions: [Reaction], conversation: String?, chatroomId: String?)
     case exploreFeed
     case browser(url: URL)
-    case mediaPreview(data: [LMChatMediaPreviewViewModel.DataModel], startIndex: Int)
+    case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
 //    case giphy
     
 }

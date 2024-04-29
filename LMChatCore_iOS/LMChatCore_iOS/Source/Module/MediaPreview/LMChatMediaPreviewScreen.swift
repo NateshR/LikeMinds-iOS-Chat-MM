@@ -5,6 +5,7 @@
 //  Created by Devansh Mohata on 19/04/24.
 //
 
+import AVKit
 import LMChatUI_iOS
 import UIKit
 
@@ -23,7 +24,7 @@ open class LMChatMediaPreviewScreen: LMViewController {
         return collectionView
     }()
     
-    let layout = UICollectionViewCompositionalLayout { (sectionIndex, environment) -> NSCollectionLayoutSection? in
+    lazy var layout = UICollectionViewCompositionalLayout { (sectionIndex, environment) -> NSCollectionLayoutSection? in
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
@@ -32,10 +33,18 @@ open class LMChatMediaPreviewScreen: LMViewController {
         
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .groupPagingCentered
+        
+        section.visibleItemsInvalidationHandler = { [weak self] visibleItems, _, _ in
+            self?.setNavigationData(index: visibleItems.last?.indexPath.row ?? 0)
+        }
+        
         return section
     }
     
     var viewModel: LMChatMediaPreviewViewModel!
+    var mediaData: [LMChatMediaPreviewContentModel] = []
+    var userName = ""
+    var date = ""
     
     open override func setupViews() {
         super.setupViews()
@@ -53,48 +62,76 @@ open class LMChatMediaPreviewScreen: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        mediaCollectionView.reloadData()
+        viewModel.showMediaPreview()
     }
-    
-    open override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
         
-        let index = viewModel.startIndex
-        if viewModel.data.indices.contains(index) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                self?.mediaCollectionView.isPagingEnabled = false
-                self?.mediaCollectionView.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
-                self?.mediaCollectionView.isPagingEnabled = true
-            }
+    open func navigateToVideoPlayer(with url: String) {
+        guard let videoURL = URL(string: url) else {
+            showErrorAlert(message: "Unable to play video")
+            return
+        }
+        
+        let player = AVPlayer(url: videoURL)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        playerViewController.allowsPictureInPicturePlayback = false
+        playerViewController.showsPlaybackControls = true
+        
+        present(playerViewController, animated: false) {
+            player.play()
         }
     }
 }
 
-extension LMChatMediaPreviewScreen: UICollectionViewDataSource, UICollectionViewDelegate {
+extension LMChatMediaPreviewScreen: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel.data.count
+        mediaData.count
     }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch viewModel.data[indexPath.row].type {
-        case .image:
-            if let cell = collectionView.dequeueReusableCell(with: LMChatMediaImagePreview.self, for: indexPath) {
-                cell.configure(with: viewModel.data[indexPath.row].url)
-                return cell
+        if mediaData[indexPath.row].isVideo,
+           let cell = collectionView.dequeueReusableCell(with: LMChatMediaVideoPreview.self, for: indexPath) {
+            cell.configure(with: mediaData[indexPath.row]) { [weak self] in
+                guard let self else { return }
+                navigateToVideoPlayer(with: mediaData[indexPath.row].mediaURL)
             }
-        case .video:
-            if let cell = collectionView.dequeueReusableCell(with: LMChatMediaVideoPreview.self, for: indexPath) {
-                cell.configure(with: viewModel.data[indexPath.row].url)
-                return cell
-            }
-        default:
-            break
+            return cell
+        } else if let cell = collectionView.dequeueReusableCell(with: LMChatMediaImagePreview.self, for: indexPath) {
+            cell.configure(with: mediaData[indexPath.row])
+            return cell
         }
+        
         return UICollectionViewCell()
     }
+}
+
+
+// MARK: LMMediaViewModelDelegate
+extension LMChatMediaPreviewScreen: LMMediaViewModelDelegate {
+    public func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String, scrollIndex: Int) {
+        self.mediaData = media
+        mediaCollectionView.reloadData()
         
-    open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        (cell as? LMChatMediaVideoPreview)?.stopVideo()
-        (cell as? LMChatMediaImagePreview)?.resetZoomScale()
+        self.userName = userName
+        self.date = date
+        
+        setNavigationData(index: 0)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.mediaCollectionView.isPagingEnabled = false
+            self?.mediaCollectionView.scrollToItem(at: .init(row: scrollIndex - 1, section: 0), at: .centeredHorizontally, animated: false)
+            self?.mediaCollectionView.isPagingEnabled = true
+        }
+    }
+    
+    public func setNavigationData(index: Int) {
+        var subtitle = date
+        
+        
+        if mediaData.count > 1 {
+            subtitle = "\(index + 1) of \(mediaData.count) •" + subtitle
+        }
+        
+        setNavigationTitleAndSubtitle(with: userName, subtitle: subtitle, alignment: .leading)
     }
 }

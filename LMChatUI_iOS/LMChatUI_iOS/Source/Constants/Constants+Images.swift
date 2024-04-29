@@ -79,6 +79,6 @@ public extension Constants {
         public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
         public var downArrowIcon = loadSystemImage(with: "arrow.down")
         public var deleteIcon = loadSystemImage(with: "trash.fill")
-        
+        public var playFilled = loadSystemImage(with: "play.fill")
     }
 }

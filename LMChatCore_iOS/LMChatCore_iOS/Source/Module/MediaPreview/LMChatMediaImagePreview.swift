@@ -9,11 +9,11 @@ import Kingfisher
 import LMChatUI_iOS
 import UIKit
 
-
 open class LMChatMediaImagePreview: LMCollectionViewCell {
     open private(set) lazy var previewImageView: LMZoomImageViewContainer = {
         let image = LMZoomImageViewContainer()
         image.translatesAutoresizingMaskIntoConstraints = false
+        image.backgroundColor = .black
         return image
     }()
     
@@ -27,8 +27,8 @@ open class LMChatMediaImagePreview: LMCollectionViewCell {
         contentView.addSubviewWithDefaultConstraints(previewImageView)
     }
     
-    open func configure(with urlString: String) {
-        guard let url = URL(string: urlString) else { return }
+    open func configure(with data: LMChatMediaPreviewContentModel) {
+        guard let url = URL(string: data.mediaURL) else { return }
         previewImageView.configure(with: url)
     }
     

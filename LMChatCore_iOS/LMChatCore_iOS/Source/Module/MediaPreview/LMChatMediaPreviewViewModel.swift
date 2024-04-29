@@ -6,30 +6,58 @@
 //
 
 
+public protocol LMMediaViewModelDelegate: AnyObject {
+    func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String, scrollIndex: Int)
+}
+
 public final class LMChatMediaPreviewViewModel {
     public struct DataModel {
-        var type: MediaType
-        var url: String
+        let userName: String
+        let senDate: String
+        let media: [MediaModel]
+
+        public init(userName: String, senDate: String, media: [MediaModel]) {
+            self.userName = userName
+            self.senDate = senDate
+            self.media = media
+        }
         
-        public init(type: MediaType, url: String) {
-            self.type = type
-            self.url = url
+        public struct MediaModel {
+            let mediaType: MediaType
+            let thumbnailURL: String?
+            let mediaURL: String
+            
+            public init(mediaType: MediaType, thumbnailURL: String?, mediaURL: String) {
+                self.mediaType = mediaType
+                self.thumbnailURL = thumbnailURL
+                self.mediaURL = mediaURL
+            }
         }
     }
     
-    let data: [DataModel]
+    let data: DataModel
     let startIndex: Int
+    weak var delegate: LMMediaViewModelDelegate?
     
-    init(data: [DataModel], startIndex: Int) {
+    init(data: DataModel, startIndex: Int, delegate: LMMediaViewModelDelegate?) {
         self.data = data
         self.startIndex = startIndex
+        self.delegate = delegate
     }
     
-    public static func createModule(with data: [DataModel], startIndex: Int = 0) -> LMChatMediaPreviewScreen {
+    public static func createModule(with data: DataModel, startIndex: Int = 0) -> LMChatMediaPreviewScreen {
         let viewController = LMChatMediaPreviewScreen()
-        let viewModel = Self.init(data: data, startIndex: startIndex)
+        let viewModel = Self.init(data: data, startIndex: startIndex, delegate: viewController)
         
         viewController.viewModel = viewModel
         return viewController
+    }
+    
+    public func showMediaPreview() {
+        let viewData: [LMChatMediaPreviewContentModel] = data.media.map {
+            .init(mediaURL: $0.mediaURL, thumbnailURL: $0.thumbnailURL, isVideo: $0.mediaType == .video)
+        }
+        
+        delegate?.showImages(with: viewData, userName: data.userName, date: data.senDate, scrollIndex: startIndex)
     }
 }
