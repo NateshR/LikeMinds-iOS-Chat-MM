@@ -1,5 +1,5 @@
 //
-//  AudioRecordManager.swift
+//  LMChatAudioRecordManager.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 19/04/24.
@@ -7,13 +7,12 @@
 
 import AVFoundation
 
-public final class AudioRecordManager {
-    static let shared = AudioRecordManager()
+public final class LMChatAudioRecordManager {
+    static let shared = LMChatAudioRecordManager()
     
     private var session = AVAudioSession.sharedInstance()
     private var recorder: AVAudioRecorder?
     private var updater: Timer?
-    private var audioFileName = "recording.m4a"
     private var url: URL?
     private var audioDuration = 0
     
@@ -23,7 +22,7 @@ public final class AudioRecordManager {
     
     private func activateSession() {
         do {
-            try session.setCategory(.playAndRecord, mode: .spokenAudio, options: .allowBluetooth)
+            try session.setCategory(.record, mode: .spokenAudio, options: .allowBluetooth)
             try session.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print(error.localizedDescription)
@@ -41,18 +40,27 @@ public final class AudioRecordManager {
     public func recordAudio(audioDelegate: AVAudioRecorderDelegate) throws -> Bool {
         activateSession()
         
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let documentDirectory = paths[0]
-        url = documentDirectory.appendingPathComponent(audioFileName)
+        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+        let timeVariable = String(Int(Date().timeIntervalSince1970))
+        let recordingName = "\(timeVariable)_voiceRecording.aac"
+        let pathArray = [dirPath, recordingName]
+        print(pathArray)
+        url = URL(string: pathArray.joined(separator: "/"))
         
         guard let url else { return false }
         
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVLinearPCMIsNonInterleaved: false,
+            AVSampleRateKey: 44_100.0,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 16,
+            AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue
+        ]
+        
         FileManager.default.createFile(atPath: url.absoluteString, contents: nil)
         
-        let settings = [AVFormatIDKey: Int(kAudioFormatMPEG4AAC), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue]
-        
         recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder?.isMeteringEnabled = true
         recorder?.delegate = audioDelegate
         
         if recorder?.prepareToRecord() == true {
@@ -77,7 +85,7 @@ public final class AudioRecordManager {
         NotificationCenter.default.post(name: .audioDurationUpdate, object: audioDuration)
     }
     
-    
+    @discardableResult
     func recordingStopped() -> URL? {
         if audioDuration > 1 {
             endAudioRecording()
@@ -94,10 +102,14 @@ public final class AudioRecordManager {
         recorder?.pause()
     }
     
-    public func deleteAudioRecording() {
+    public func resetAudioParameters() {
         audioDuration = .zero
         recorder = nil
+    }
+    
+    public func deleteAudioRecording() {
         endAudioRecording()
+        resetAudioParameters()
         
         do {
             guard let url else { return }

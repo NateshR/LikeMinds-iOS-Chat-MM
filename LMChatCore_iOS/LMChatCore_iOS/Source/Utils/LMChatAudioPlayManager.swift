@@ -79,6 +79,42 @@ public final class LMChatAudioPlayManager {
         play()
     }
     
+    func startAudio(fileURL: String, progressCallback: ((Int) -> Void)?) {
+        let url = URL(fileURLWithPath: fileURL)
+        
+        if self.url == url {
+            if player?.rate == 0 {
+                play()
+            } else {
+                pause()
+            }
+            
+            return
+        }
+        
+        self.url = url
+        self.progressCallback = progressCallback
+        
+        activateSession()
+        
+        let playerItem = AVPlayerItem(url: url)
+        
+        if let player {
+            player.replaceCurrentItem(with: playerItem)
+        } else {
+            player = AVPlayer(playerItem: playerItem)
+        }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: AVPlayerItem.didPlayToEndTimeNotification, object: nil)
+        
+        play()
+    }
+    
+    func stopAudio(stopCallback: (() -> Void)) {
+        pause()
+        stopCallback()
+    }
+    
     func seekAt(_ percentage: Float, url: String) {
         guard self.url == URL(string: url),
         let totalDuration = player?.currentItem?.duration else { return }
@@ -122,8 +158,8 @@ public final class LMChatAudioPlayManager {
     @objc
     private func audioEnded() {
         // Add Trigger for updating UI
-        NotificationCenter.default.post(name: .LMChatAudioEnded, object: url)
-        url = nil
-        deactivateSession()
+        let audioDuration = Int(player?.currentItem?.duration.seconds ?? .zero)
+        NotificationCenter.default.post(name: .LMChatAudioEnded, object: audioDuration)
+        resetAudioPlayer()
     }
 }
