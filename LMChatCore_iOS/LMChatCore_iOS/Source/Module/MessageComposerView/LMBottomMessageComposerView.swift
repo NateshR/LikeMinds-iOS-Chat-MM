@@ -149,7 +149,7 @@ open class LMBottomMessageComposerView: LMView {
     // MARK: Send Button
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.micIcon, for: .normal)
+        button.setImage(micButtonIcon, for: .normal)
         button.contentMode = .scaleToFill
         return button
     }()
@@ -260,6 +260,9 @@ open class LMBottomMessageComposerView: LMView {
     var isTranslationX: Bool? = nil
     var isPlayingAudio = false
     var isLockedIn = false
+    
+    let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
+    let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
     
     let sendButtonHeightConstant: CGFloat = 40
     var lockContainerViewHeight: CGFloat = 100
@@ -655,7 +658,7 @@ extension LMBottomMessageComposerView {
         resetSendButtonConstraints()
         checkSendButtonGestures()
         
-        sendButton.setImage(Constants.shared.images.micIcon, for: .normal)
+        sendButton.setImage(micButtonIcon, for: .normal)
         sendButtonPanPressGesture.isEnabled = true
         sendButtonLongPressGesture.isEnabled = true
         
@@ -698,7 +701,7 @@ extension LMBottomMessageComposerView {
         sendButtonLongPressGesture.isEnabled = isText && !isLockedIn
         sendButtonPanPressGesture.isEnabled = isText && !isLockedIn
         
-        sendButton.setImage(isText ? Constants.shared.images.micIcon : Constants.shared.images.sendButton, for: .normal)
+        sendButton.setImage(isText ? micButtonIcon : sendButtonIcon, for: .normal)
     }
     
     // Sets the visibility of Slide To Cancel, Stop Audio Recording, Delete Audio Recording
@@ -718,7 +721,7 @@ extension LMBottomMessageComposerView {
         micFlickerButton.tintColor = Appearance.shared.colors.gray155
         micFlickerButton.isEnabled = true
         
-        sendButton.setImage(UIImage(systemName: "paperplane.circle.fill"), for: .normal)
+        sendButton.setImage(sendButtonIcon, for: .normal)
         
         showHideLockContainer(isShow: false)
         
@@ -734,7 +737,7 @@ extension LMBottomMessageComposerView {
         
         showHideLockContainer(isShow: false)
         
-        sendButton.setImage(Constants.shared.images.sendButton, for: .normal)
+        sendButton.setImage(sendButtonIcon, for: .normal)
     }
     
     func showHideLockContainer(isShow: Bool) {

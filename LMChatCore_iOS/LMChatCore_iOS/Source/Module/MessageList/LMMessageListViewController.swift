@@ -314,7 +314,9 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func composeAudio() {
         if let audioURL = LMChatAudioRecordManager.shared.recordingStopped() {
-            delegate?.postMessageWithAudioAttachment(with: audioURL)
+            let mediaModel = MediaPickerModel(with: audioURL, type: .voice_note)
+            postConversationWithAttchments(message: nil, attachments: [mediaModel])
+//            delegate?.postMessageWithAudioAttachment(with: audioURL)
         }
         LMChatAudioRecordManager.shared.resetAudioParameters()
     }
@@ -413,7 +415,7 @@ extension LMMessageListViewController: LMChatAttachmentViewDelegate {
                 .image(media.photo)
         
             switch media.mediaType {
-            case .video, .audio:
+            case .video, .audio, .voice_note:
                 if let url = media.url, let videoDeatil = FileUtils.getDetail(forVideoUrl: url) {
                     mediaData = mediaData.duration(videoDeatil.duration)
                         .size(Int64(videoDeatil.fileSize ?? 0))
