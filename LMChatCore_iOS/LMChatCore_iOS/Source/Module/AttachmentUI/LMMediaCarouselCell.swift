@@ -13,10 +13,16 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
     public struct ContentModel {
         public let image: UIImage?
         public let fileUrl: URL?
+        public let fileType: String?
+        public let thumbnailUrl: URL?
+        public var isSelected: Bool
         
-        public init(image: UIImage?, fileUrl: URL?) {
+        public init(image: UIImage?, fileUrl: URL?, fileType: String, thumbnailUrl: URL?, isSelected: Bool) {
             self.image = image
             self.fileUrl = fileUrl
+            self.fileType = fileType
+            self.thumbnailUrl = thumbnailUrl
+            self.isSelected = isSelected
         }
     }
     
@@ -55,9 +61,9 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
         contentView.addSubview(containerView)
         containerView.addSubview(imageView)
         containerView.addSubview(playIconImage)
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageClicked))
-        tapGesture.numberOfTapsRequired = 1
-        imageView.addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageClicked))
+//        tapGesture.numberOfTapsRequired = 1
+//        imageView.addGestureRecognizer(tapGesture)
     }
     
     
@@ -78,18 +84,26 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
     // MARK: setupAppearance
     open override func setupAppearance() {
         super.setupAppearance()
-        self.containerView.backgroundColor = .black
+        self.containerView.backgroundColor = .clear
     }
     
     // MARK: setData
     open func setData(with data: ContentModel) {
-        imageView.borderColor(withBorderWidth: 2, with: .clear)
-        if let url = data.fileUrl {
-            imageView.image = nil
-            playIconImage.isHidden = false
+        if self.isSelected {
+            imageView.borderColor(withBorderWidth: 2, with: .green)
         } else {
+            imageView.borderColor(withBorderWidth: 2, with: .clear)
+        }
+        guard let url = data.fileUrl else { return }
+        switch data.fileType {
+        case "photo", "image", "gif":
+            imageView.kf.setImage(with: url)
             playIconImage.isHidden = true
-            imageView.image = data.image
+        case "video":
+            imageView.kf.setImage(with: data.thumbnailUrl)
+            playIconImage.isHidden = false
+        default:
+            break
         }
     }
     

@@ -10,7 +10,7 @@ import LMChatUI_iOS
 
 public protocol LMAttachmentBottomMessageDelegate: AnyObject {
     func addMoreAttachment()
-    func sendAttachment()
+    func sendAttachment(message: String?)
 }
 
 @IBDesignable
@@ -19,7 +19,7 @@ open class LMAttachmentBottomMessageView: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .black//Appearance.shared.colors.backgroundColor
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -47,8 +47,8 @@ open class LMAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var inputTextContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 18)
-        view.backgroundColor = .white
+//        view.cornerRadius(with: 18)
+        view.backgroundColor = Appearance.shared.colors.white
         //        view.borderColor(withBorderWidth: 1, with: .lightGray)
         return view
     }()
@@ -98,8 +98,8 @@ open class LMAttachmentBottomMessageView: LMView {
         return button
     }()
     
-    open private(set) lazy var replyMessageView: LMBottomMessageReplyPreview = {
-        let view = LMBottomMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var replyMessageView: LMMessageReplyPreview = {
+        let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
@@ -177,7 +177,7 @@ open class LMAttachmentBottomMessageView: LMView {
         }
         inputTextView.text = ""
         contentHeightChanged()
-        delegate?.sendAttachment()
+        delegate?.sendAttachment(message: message)
     }
     
     @objc func addMoreAttachmentButtonClicked(_ sender: UIButton) {
@@ -187,8 +187,8 @@ open class LMAttachmentBottomMessageView: LMView {
 
 extension LMAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
     
-    public func mentionStarted(with text: String) {
-        taggingListView.fetchUsers(for: text)
+    public func mentionStarted(with text: String, chatroomId: String) {
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
     
     public func mentionStopped() {

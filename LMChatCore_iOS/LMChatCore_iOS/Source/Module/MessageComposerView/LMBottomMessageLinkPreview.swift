@@ -17,12 +17,12 @@ public protocol LMBottomMessageLinkPreviewDelete: AnyObject {
 open class LMBottomMessageLinkPreview: LMView {
     
     public struct ContentModel {
-        public let link: String
-        public let title: String
-        public let description: String
+        public let link: String?
+        public let title: String?
+        public let description: String?
         public let imageUrl: String?
         
-        public init(title: String, description: String, link: String, imageUrl: String?) {
+        public init(title: String?, description: String?, link: String?, imageUrl: String?) {
             self.title = title
             self.description = description
             self.link = link
@@ -48,7 +48,7 @@ open class LMBottomMessageLinkPreview: LMView {
     
     open private(set) lazy var linkTitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "fabook new wil "
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.textColor
         label.numberOfLines = 1
@@ -57,7 +57,7 @@ open class LMBottomMessageLinkPreview: LMView {
     
     open private(set) lazy var linkSubtitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "test the facebook.com data present"
+        label.text = ""
         label.font = Appearance.shared.fonts.textFont2
         label.numberOfLines = 1
         label.textColor = Appearance.shared.colors.textColor
@@ -66,7 +66,7 @@ open class LMBottomMessageLinkPreview: LMView {
     
     open private(set) lazy var linkLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "facebeook.com"
+        label.text = ""
         label.font = Appearance.shared.fonts.textFont2
         label.numberOfLines = 1
         label.textColor = Appearance.shared.colors.textColor
@@ -76,7 +76,6 @@ open class LMBottomMessageLinkPreview: LMView {
     open private(set) lazy var linkPreviewImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
-        image.backgroundColor = .green
         return image
     }()
     
@@ -84,6 +83,7 @@ open class LMBottomMessageLinkPreview: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.xmarkIcon, for: .normal)
         button.addTarget(self, action: #selector(closeButtonClicked), for: .touchUpInside)
+        button.setWidthConstraint(with: 40)
         return button
     }()
     
@@ -143,7 +143,7 @@ open class LMBottomMessageLinkPreview: LMView {
         linkSubtitleLabel.text = data.description
         let placeholder = Constants.Images.shared.brokenLink
         if let imageUrl = data.imageUrl, let url = URL(string: imageUrl) {
-            linkPreviewImageView.kf.setImage(with: url)
+            linkPreviewImageView.kf.setImage(with: url, placeholder: placeholder)
         } else {
             linkPreviewImageView.image = placeholder
         }

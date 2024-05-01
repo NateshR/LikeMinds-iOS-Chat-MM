@@ -46,22 +46,21 @@ class DataModelConverter {
     }
     
     func convertAttachment(mediaData: AttachmentMediaData, index: Int) -> Attachment {
-        
         return Attachment.builder()
             .name(mediaData.mediaName)
-            .url(mediaData.url.absoluteString)
+            .url(mediaData.url?.absoluteString ?? "")
             .type(mediaData.fileType.rawValue)
             .index(index)
             .width(mediaData.width)
             .height(mediaData.height)
-            .localFilePath(mediaData.url.absoluteString)
+            .localFilePath(mediaData.url?.absoluteString ?? "")
             .thumbnailUrl(mediaData.thumbnailurl?.absoluteString)
             .thumbnailLocalFilePath(mediaData.thumbnailurl?.absoluteString)
             .meta(
                 AttachmentMeta.builder()
                     .numberOfPage(mediaData.pdfPageCount)
                     .duration(mediaData.duration)
-                    .size(mediaData.size)
+                    .size(Int(mediaData.size ?? 0))
                     .build()
             )
             .build()

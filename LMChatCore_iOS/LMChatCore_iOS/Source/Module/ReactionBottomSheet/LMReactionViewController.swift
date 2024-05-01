@@ -1,16 +1,17 @@
 //
-//  ReactionViewController.swift
+//  LMReactionViewController.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
 //
 
 import UIKit
+import LMChatUI_iOS
 
-class ReactionViewController: UIViewController {
-    lazy var containerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
+open class LMReactionViewController: LMViewController {
+    
+    lazy var containerView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .white
         view.layer.cornerRadius = 16
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -20,10 +21,9 @@ class ReactionViewController: UIViewController {
     
     let maxDimmedAlpha: CGFloat = 0.6
     
-    lazy var dimmedView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .black
+    lazy var dimmedView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .clear
         view.alpha = maxDimmedAlpha
         return view
     }()
@@ -32,50 +32,49 @@ class ReactionViewController: UIViewController {
         view.frame.height * 0.3
     }()
     
-    lazy var tableView: UITableView = {
-        let table = UITableView()
-        table.translatesAutoresizingMaskIntoConstraints = false
+    lazy var tableView: LMTableView = {
+        let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
-        table.register(ReactionViewCell.self, forCellReuseIdentifier: "reactionView")
+        table.register(LMReactionViewCell.self, forCellReuseIdentifier: "reactionView")
         return table
     }()
     
-    lazy var collectionView: UICollectionView = {
-        let collection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    lazy var collectionView: LMCollectionView = {
+        let collection = LMCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         collection.dataSource = self
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.register(ReactionTitleCell.self, forCellWithReuseIdentifier: "reactionTitle")
+        collection.register(LMReactionTitleCell.self, forCellWithReuseIdentifier: "reactionTitle")
         return collection
     }()
     
-    lazy var titleLabel: UILabel = {
-        let label = UILabel()
+    lazy var titleLabel: LMLabel = {
+        let label = LMLabel()
         label.text = "Reactions"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    lazy var bottomLine: UIView = {
-        let view = UIView()
-        view.backgroundColor = .lightGray
-        view.translatesAutoresizingMaskIntoConstraints = false
+    lazy var bottomLine: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
         return view
     }()
     
     var bottomConstraint: NSLayoutConstraint?
-    var viewModel: ReactionViewModel?
-    var titleData: [ReactionTitleCell.ContentModel] = []
-    var emojiData: [ReactionViewCell.ContentModel] = []
+    var viewModel: LMReactionViewModel?
+    var titleData: [LMReactionTitleCell.ContentModel] = []
+    var emojiData: [LMReactionViewCell.ContentModel] = []
     
-    override func loadView() {
+    open override func loadView() {
         super.loadView()
         setupViews()
         setupLayouts()
     }
     
-    func setupViews() {
+    open override func setupViews() {
+        super.setupViews()
         view.addSubview(dimmedView)
         view.addSubview(containerView)
         
@@ -85,7 +84,8 @@ class ReactionViewController: UIViewController {
         containerView.addSubview(tableView)
     }
     
-    func setupLayouts() {
+    open override func setupLayouts() {
+        super.setupLayouts()
         NSLayoutConstraint.activate([
             dimmedView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             dimmedView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -106,7 +106,7 @@ class ReactionViewController: UIViewController {
             
             bottomLine.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             bottomLine.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            bottomLine.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
+            bottomLine.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
             bottomLine.heightAnchor.constraint(equalToConstant: 1),
             
             tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -116,24 +116,25 @@ class ReactionViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: bottomLine.bottomAnchor, constant: 8)
         ])
         
-        bottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        bottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         bottomConstraint?.isActive = true
     }
     
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         bottomConstraint?.constant = containerView.frame.height
         
         dimmedView.isUserInteractionEnabled = true
         dimmedView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDimmedView)))
+        viewModel?.getData()
+
     }
     
-    override func viewDidAppear(_ animated: Bool) {
+    open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         animateShowDimmedView()
         animatePresentContainer()
         
-        viewModel?.getData()
     }
     
     func animatePresentContainer() {
@@ -154,13 +155,13 @@ class ReactionViewController: UIViewController {
     
     @objc
     func didTapDimmedView() {
-        dismiss(animated: false)
+        dismiss(animated: true)
     }
 }
 
 
-extension ReactionViewController: ReactionViewModelProtocol {
-    func showData(with collection: [ReactionTitleCell.ContentModel], cells: [ReactionViewCell.ContentModel]) {
+extension LMReactionViewController: ReactionViewModelProtocol {
+    func showData(with collection: [LMReactionTitleCell.ContentModel], cells: [LMReactionViewCell.ContentModel]) {
         self.titleData = collection
         self.emojiData = cells
         
@@ -170,30 +171,41 @@ extension ReactionViewController: ReactionViewModelProtocol {
 }
 
 
-extension ReactionViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         emojiData.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! ReactionViewCell
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! LMReactionViewCell
         cell.configure(with: emojiData[indexPath.row])
         return cell
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         64
+    }
+    
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = emojiData[indexPath.row]
+        if item.isSelfReaction {
+            viewModel?.deleteConversationReaction()
+        }
     }
 }
 
-extension ReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+extension LMReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         titleData.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! ReactionTitleCell
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! LMReactionTitleCell
         cell.configure(data: titleData[indexPath.row])
         return cell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        viewModel?.fetchReactionBy(reaction: titleData[indexPath.row].title)
     }
 }

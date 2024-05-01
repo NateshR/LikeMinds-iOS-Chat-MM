@@ -17,7 +17,25 @@ public enum ScrollDirection : Int {
 public protocol LMMessageListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
     func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
+    func didTappedOnReaction(reaction: String, indexPath: IndexPath)
+    func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath)
+    func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath)
+    func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
+    func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message)
+    func didReactOnMessage(reaction: String, indexPath: IndexPath)
 }
+
+public enum LMMessageActionType: String {
+    case delete
+    case reply
+    case copy
+    case edit
+    case select
+    case invite
+    case report
+    case setTopic
+}
+
 
 @IBDesignable
 open class LMMessageListView: LMView {
@@ -35,10 +53,11 @@ open class LMMessageListView: LMView {
         
         public struct Message {
             public let messageId: String
+            public let memberTitle: String?
             public let message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
-            public let attachments: [String]?
+            public let attachments: [Attachment]?
             public let replied: [Message]?
             public let isDeleted: Bool?
             public let createdBy: String?
@@ -46,11 +65,31 @@ open class LMMessageListView: LMView {
             public let isIncoming: Bool?
             public let messageType: Int
             public let createdTime: String?
+            public let ogTags: OgTags?
+            public let isEdited: Bool?
         }
         
         public struct Reaction {
-            public let memberUUID: String
+            public let memberUUID: [String]
             public let reaction: String
+            public let count: Int
+        }
+        
+        public struct Attachment {
+            public let fileUrl: String?
+            public let thumbnailUrl: String?
+            public let fileSize: Int?
+            public let numberOfPages: Int?
+            public let duration: Int?
+            public let fileType: String?
+            public let fileName: String?
+        }
+        
+        public struct OgTags {
+            public let link: String?
+            public let thumbnailUrl: String?
+            public let title: String?
+            public let subtitle: String?
         }
     }
     
@@ -64,6 +103,7 @@ open class LMMessageListView: LMView {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
+        table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -79,6 +119,7 @@ open class LMMessageListView: LMView {
     private var data: [BaseContentModel] = []
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
+    public var audioIndex: IndexPath?
     
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
@@ -118,13 +159,24 @@ open class LMMessageListView: LMView {
         tableView.backgroundColor = Appearance.shared.colors.backgroundColor
     }
     
+    
+    // MARK: setupObservers
+    open override func setupObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
+    }
+    
+    @objc 
+    open func audioEnded(notification: Notification) {
+        resetAudio()
+    }
+    
     open func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         tableView.reloadData()
     }
     
     func scrollToBottom() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
@@ -138,31 +190,32 @@ open class LMMessageListView: LMView {
         }
     }
     
+    func scrollAtIndexPath(indexPath: IndexPath) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+            guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
+            cell.containerView.backgroundColor = Appearance.shared.colors.linkColor.withAlphaComponent(0.4)
+            UIView.animate(withDuration: 2, delay: 1, usingSpringWithDamping: 1,
+                           initialSpringVelocity: 1, options: .allowUserInteraction,
+                           animations: { cell.containerView.backgroundColor = .clear }) {_ in}
+        }
+    }
+    
     public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {
-//        if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
-//            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
-//        } else {
-//            tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
-//        }
         reloadData()
     }
     
     public func updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel) {
-//        if let index = tableSections.firstIndex(where: {$0.sectionType == .exploreTab}) {
-//            tableSections[index] = .init(data: [exploreTabCount], sectionType: .exploreTab, sectionOrder: 1)
-//        } else {
-//            tableSections.append(.init(data: [exploreTabCount], sectionType: .exploreTab, sectionOrder: 1))
-//        }
         reloadData()
     }
     
+    // we set a variable to hold the contentOffSet before scroll view scrolls
+    open var lastContentOffset: CGFloat = 0
 }
 
 
 // MARK: UITableView
 extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
-    
-    
     open func numberOfSections(in tableView: UITableView) -> Int {
         tableSections.count
     }
@@ -173,10 +226,19 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = tableSections[indexPath.section].data[indexPath.row]
+        
         switch item.messageType {
         case 0:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.setData(with: .init(message: item))
+                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
+                cell.currentIndexPath = indexPath
+                cell.delegate = self
+                return cell
+            }
+        case 1:
+            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
+                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
+                cell.currentIndexPath = indexPath
                 return cell
             }
         default:
@@ -188,48 +250,67 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         return UITableViewCell()
     }
     
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    }
+    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
     }
     
-    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
             cell.infoLabel.text = tableSections[section].section
+            cell.containerView.backgroundColor = Appearance.shared.colors.clear
             return cell
         }
         return LMView()
     }
     
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-        let offsetY = tableView.contentOffset.y
-        let contentHeight = tableView.contentSize.height
+    // this delegate is called when the scrollView (i.e your UITableView) will start scrolling
+    open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.lastContentOffset = scrollView.contentOffset.y
+    }
+    
+    // while scrolling this delegate is being called so you may now check which direction your scrollView is being scrolled to
+    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
-        let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview)
-        if translation.y > 0 {
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_UP)
-            
-        } else {
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        
+        if scrollView.contentOffset.y <= 20 {
+            print("end dragged top!$!$")
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_DOWN)
+            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
+        } else  if tableView.contentOffset.y >= (tableView.contentSize.height - tableView.frame.size.height) {
+            print("end dragged bottom!$!$")
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let lastIndexPath = visibleIndexPaths.last else {return}
+            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
         }
     }
 
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard item.messageType == 0 && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
-            return self.createContextMenu()
+            return self.createContextMenu(indexPath, item: item)
         }
     }
     
+    open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        (cell as? LMChatMessageCell)?.resetAudio()
+        if indexPath == audioIndex {
+            LMChatAudioPlayManager.shared.resetAudioPlayer()
+        }
+    }
+
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         makeTargetedPreview(for: configuration)
@@ -244,14 +325,15 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, willPerformPreviewActionForMenuWith configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionCommitAnimating) {
         animator.preferredCommitStyle = .pop
     }
-    
+
     @available(iOS 13.0, *)
     func makeTargetedPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         guard let identifier = configuration.identifier as? String else { return nil }
         let values = identifier.components(separatedBy: ",")
         guard let row = Int(values.first ?? "0") else { return nil }
         guard let section = Int(values.last ?? "0") else { return nil }
-        guard let cell = tableView.cellForRow(at: .init(row: row, section: section)) as? LMChatMessageCell else { return nil }
+        let indexPath = IndexPath(row: row, section: section)
+        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,
@@ -260,7 +342,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let reactionView = LMReactionPopupView()
         reactionView.onReaction = { [weak self] reactionType in
             guard let self = self else { return }
-            print(reactionType.rawValue)
+            delegate?.didReactOnMessage(reaction: reactionType.rawValue, indexPath: indexPath)
             (delegate as? UIViewController)?.dismiss(animated: true)
         }
         reactionView.layer.cornerRadius = 10
@@ -319,25 +401,73 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     @available(iOS 13.0, *)
-    func createContextMenu() -> UIMenu {
+    func createContextMenu(_ indexPath: IndexPath, item: ContentModel.Message) -> UIMenu {
         let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
-                                   image: UIImage(systemName: "arrow.down.square")) { action in
+                                   image: UIImage(systemName: "arrow.down.square")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         
         let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                  image: UIImage(systemName: "pencil")) { action in
+                                  image: UIImage(systemName: "pencil")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
         }
         
         let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
-                                  image: UIImage(systemName: "doc.on.doc")) { action in
+                                  image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
         }
         
         let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
                                     image: UIImage(systemName: "trash"),
-                                    attributes: .destructive) { action in
+                                    attributes: .destructive) { [weak self] action in
+            self?.delegate?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
         }
         return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
     }
 }
 
 
+// MARK: LMChatAudioProtocol
+extension LMMessageListView: LMChatAudioProtocol {
+    public func didTapPlayPauseButton(for url: String, index: IndexPath) {
+        resetAudio()
+        audioIndex = index
+        
+        LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
+            (self?.tableView.cellForRow(at: index) as? LMChatMessageCell)?.seekSlider(to: Float(progress), url: url)
+        }
+    }
+    
+    public func didSeekTo(_ position: Float, _ url: String, index: IndexPath) {
+        LMChatAudioPlayManager.shared.seekAt(position, url: url)
+    }
+    
+    public func resetAudio() {
+        if let audioIndex {
+            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+        }
+        audioIndex = nil
+    }
+}
+
+extension LMMessageListView: LMChatMessageCellDelegate {
+    public func onClickReplyOfMessage(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnReplyPreviewOfMessage(indexPath: indexPath)
+    }
+    
+    public func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnAttachmentOfMessage(url: url, indexPath: indexPath)
+    }
+    
+    public func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnGalleryOfMessage(attachmentIndex: attachmentIndex, indexPath: indexPath)
+    }
+    
+    public func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        delegate?.didTappedOnReaction(reaction: reaction, indexPath: indexPath)
+    }
+}

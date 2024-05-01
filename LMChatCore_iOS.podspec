@@ -21,7 +21,13 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '13.0'
   spec.swift_version = '5.0'
   spec.requires_arc = true
-  spec.dependency 'LMChatUI_iOS'
   spec.dependency 'Giphy'
+  spec.dependency "AWSCore"
+  spec.dependency "AWSCognito"
+  spec.dependency "AWSS3"
+  #spec.dependency 'BSImagePicker'
+  spec.dependency "FirebaseCore"
+  spec.dependency "FirebaseMessaging"
+  spec.dependency 'LMChatUI_iOS'
   spec.dependency 'LikeMindsChat'
 end

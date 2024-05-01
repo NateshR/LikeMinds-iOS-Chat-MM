@@ -13,9 +13,9 @@ class CustomChatroomView: LMHomeFeedChatroomView {
     
     override func setupAppearance() {
         super.setupAppearance()
-        self.containerView.backgroundColor = .systemYellow
+//        self.containerView.backgroundColor = .systemYellow
         self.chatroomCountBadgeLabel.backgroundColor = .red
-        self.chatroomCountBadgeLabel.cornerRadius(with: 2)
+//        self.chatroomCountBadgeLabel.cornerRadius(with: 2)
     }
     
     override func setupLayouts() {

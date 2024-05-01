@@ -39,9 +39,11 @@ public extension Constants {
         public var xmarkIcon = loadSystemImage(with: "xmark")
         public var crossIcon = loadSystemImage(with: "xmark.circle")
         public var ellipsisIcon = loadSystemImage(with: "ellipsis")
+        public var ellipsisCircleIcon = loadSystemImage(with: "ellipsis.circle")
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
         public var micIcon = loadSystemImage(with: "mic")
+        public var audioIcon = loadSystemImage(with: "headphones")
         public var pencilIcon = loadSystemImage(with: "pencil")
         public var downArrow = loadSystemImage(with: "arrow.down")
         public var menuIcon = loadSystemImage(with: "line.3.horizontal")
@@ -51,6 +53,7 @@ public extension Constants {
         public var notificationBell = loadSystemImage(with: "bell.fill")
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
+        public var videoSystemIcon = loadSystemImage(with: "video.fill")
         
         public var pdfIcon = loadImage(with: "pdfIcon")
         public var placeholderImage = loadImage(with: "placeholderImage")
@@ -70,5 +73,16 @@ public extension Constants {
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")
+        public var playFill = loadSystemImage(with: "play.fill")
+        public var pauseIcon = loadSystemImage(with: "pause.fill")
+        public var linkIcon = loadSystemImage(with: "link.circle.fill")
+        public var messageIcon = loadSystemImage(with: "message")
+        public var person2Icon = loadSystemImage(with: "person.2")
+        public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
+        public var downArrowIcon = loadSystemImage(with: "arrow.down")
+        public var sendButton = loadSystemImage(with: "paperplane.circle.fill")
+        public var stopRecordButton = loadSystemImage(with: "stop.circle")
+        public var deleteIcon = loadSystemImage(with: "trash.fill")
+        public var playFilled = loadSystemImage(with: "play.fill")
     }
 }

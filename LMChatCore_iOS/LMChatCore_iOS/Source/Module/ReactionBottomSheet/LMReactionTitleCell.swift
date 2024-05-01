@@ -1,34 +1,27 @@
 //
-//  ReactionTitleCell.swift
+//  LMReactionTitleCell.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
 //
 
 import UIKit
+import LMChatUI_iOS
 
-class ReactionTitleCell: UICollectionViewCell {
+open class LMReactionTitleCell: LMCollectionViewCell {
     struct ContentModel {
         let title: String
         let count: Int
-        let isSelected: Bool
+        var isSelected: Bool = false
     }
-    
-    lazy var containerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
+ 
+    lazy var titleLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         return label
     }()
     
-    lazy var selectedView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
+    lazy var selectedView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .blue
         return view
     }()
@@ -40,19 +33,21 @@ class ReactionTitleCell: UICollectionViewCell {
         setupLayouts()
     }
     
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
         setupLayouts()
     }
     
-    func setupViews() {
+    open override func setupViews() {
+        super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(titleLabel)
         containerView.addSubview(selectedView)
     }
     
-    func setupLayouts() {
+    open override func setupLayouts() {
+        super.setupLayouts()
         NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),

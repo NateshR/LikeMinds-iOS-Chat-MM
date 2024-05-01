@@ -87,8 +87,8 @@ open class LMChatMessageBubbleView: LMView {
     private func addContentContainerView() {
         addSubview(imageView)
         addSubview(contentContainer)
-        let leading: CGFloat = isIncoming ? 4 : 8
-        let trailing: CGFloat = isIncoming ? 8 : 4
+        let leading: CGFloat = isIncoming ? 6 : 12
+        let trailing: CGFloat = isIncoming ? 12 : 6
         containerViewLeadingConstraint = contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading)
         containerViewTrailingConstraint = contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -trailing)
         NSLayoutConstraint.activate([
@@ -96,7 +96,7 @@ open class LMChatMessageBubbleView: LMView {
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
         ])
         
@@ -121,13 +121,13 @@ open class LMChatMessageBubbleView: LMView {
         if isInComing {
             imageView.image = receivedBubble
             imageView.tintColor = incomingColor
-            containerViewLeadingConstraint?.constant = 8
-            containerViewTrailingConstraint?.constant = -2
+            containerViewLeadingConstraint?.constant = 12
+            containerViewTrailingConstraint?.constant = -6
         } else {
             imageView.image = sentBubble
             imageView.tintColor = outgoingColor
-            containerViewLeadingConstraint?.constant = 2
-            containerViewTrailingConstraint?.constant = -8
+            containerViewLeadingConstraint?.constant = 6
+            containerViewTrailingConstraint?.constant = -12
         }
         containerViewLeadingConstraint?.isActive = true
         containerViewTrailingConstraint?.isActive = true

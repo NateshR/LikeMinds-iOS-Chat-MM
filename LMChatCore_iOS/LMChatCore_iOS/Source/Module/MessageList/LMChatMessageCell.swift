@@ -10,6 +10,13 @@ import Kingfisher
 import LMChatUI_iOS
 import LikeMindsChat
 
+public protocol LMChatMessageCellDelegate: AnyObject {
+    func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
+    func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?)
+    func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
+    func onClickReplyOfMessage(indexPath: IndexPath?)
+}
+
 @IBDesignable
 open class LMChatMessageCell: LMTableViewCell {
     
@@ -28,13 +35,47 @@ open class LMChatMessageCell: LMTableViewCell {
         super.prepareForReuse()
         chatMessageView.prepareToResuse()
     }
+    weak var delegate: LMChatMessageCellDelegate?
+    var currentIndexPath: IndexPath?
+    var originalCenter = CGPoint()
+    var replyActionHandler: (() -> Void)?
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
+        // Add swipe gesture recognizer
+        // Add pan gesture recognizer
+//        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+//        addGestureRecognizer(panGesture)
     }
+    
+//    @objc func handlePanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
+//        switch gestureRecognizer.state {
+//        case .began:
+//            // Save original center position
+//            originalCenter = center
+//        case .changed:
+//            // Calculate translation
+//            let translation = gestureRecognizer.translation(in: self)
+//            center = CGPoint(x: originalCenter.x + translation.x, y: originalCenter.y)
+//        case .ended:
+//            // Check if the swipe distance meets the threshold for reply
+//            if frame.origin.x < -frame.size.width / 2 {
+//                // Perform reply action when swipe distance exceeds threshold
+//                replyActionHandler?()
+//                print("perform reply action...")
+//            } else {
+//                // Return the message view to its original position if swipe distance is not enough
+//                UIView.animate(withDuration: 0.2) {
+//                    self.center = self.originalCenter
+//                }
+//            }
+//        default:
+//            break
+//        }
+//    }
     
     
     // MARK: setupLayouts
@@ -66,8 +107,36 @@ open class LMChatMessageCell: LMTableViewCell {
     
     
     // MARK: configure
-    open func setData(with data: ContentModel) {
-        chatMessageView.setDataView(data)
+    open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
+        chatMessageView.setDataView(data, delegate: delegate, index: index)
+
+        chatMessageView.clickedOnReaction = {[weak self] reaction in
+            self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.galleryView.onClickAttachment = {[weak self] index in
+            self?.delegate?.onClickGalleryOfMessage(attachmentIndex: index, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.clickedOnAttachment = {[weak self] url in
+            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.replyMessageView.onClickReplyPreview = { [weak self] in
+            self?.delegate?.onClickReplyOfMessage(indexPath: self?.currentIndexPath)
+        }
+        
+        chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
+            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+        }
+    }
+    
+    open func resetAudio() {
+        chatMessageView.resetAudio()
+    }
+    
+    open func seekSlider(to position: Float, url: String) {
+        chatMessageView.seekSlider(to: position, url: url)
     }
 }
 

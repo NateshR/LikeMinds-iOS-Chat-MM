@@ -29,6 +29,9 @@ public extension Appearance {
         public var navigationBackgroundColor: UIColor = UIColor(r: 249, g: 249, b: 249, a: 0.94)
         public var notificationBackgroundColor: UIColor = UIColor(r: 172, g: 183, b: 192)
         
+        public var previewBackgroundColor: UIColor = UIColor(hex: 0xD0D8E2)
+        public var previewSubtitleTextColor: UIColor = UIColor(r: 60, g: 60, b: 67, a: 0.6)
+        
         // UIKit Colors
         public var appTintColor: UIColor = .purple
         public var white: UIColor = .white
@@ -36,7 +39,7 @@ public extension Appearance {
         public var clear: UIColor = .clear
         public var red: UIColor = .systemRed
         public var userProfileColor: UIColor = .blue
-        public var linkColor: UIColor = .red
+        public var linkColor: UIColor = .link
         public var hashtagColor: UIColor = .blue
     }
 }

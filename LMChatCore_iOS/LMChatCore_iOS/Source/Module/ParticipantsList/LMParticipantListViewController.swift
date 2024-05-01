@@ -25,15 +25,16 @@ open class LMParticipantListViewController: LMViewController {
         // Do any additional setup after loading the view.
         setupViews()
         setupLayouts()
+        self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
         self.setupSearchBar()
         viewModel?.getParticipants()
     }
     
     open func setupSearchBar() {
         navigationItem.searchController = searchController
+        searchController.searchResultsUpdater = self
         navigationController?.navigationBar.prefersLargeTitles = false
         searchController.obscuresBackgroundDuringPresentation = false
-        self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil)
     }
     
     // MARK: setupViews
@@ -58,10 +59,12 @@ extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
     public func reloadData() {
         containerView.data = viewModel?.participantsContentModels ?? []
         containerView.reloadList()
+        setNavigationTitleAndSubtitle(with: "Participants", subtitle: "\(viewModel?.totalParticipantCount ?? 0) participants")
     }
 }
 
 extension LMParticipantListViewController: LMParticipantListViewDelegate {
+    
     public func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
     }
@@ -69,5 +72,13 @@ extension LMParticipantListViewController: LMParticipantListViewDelegate {
     public func loadMoreData() {
         viewModel?.getParticipants()
     }
+}
+
+extension LMParticipantListViewController: UISearchResultsUpdating {
+    
+    public func updateSearchResults(for searchController: UISearchController) {
+        viewModel?.searchParticipants(searchController.searchBar.text )
+    }
+    
 }
 

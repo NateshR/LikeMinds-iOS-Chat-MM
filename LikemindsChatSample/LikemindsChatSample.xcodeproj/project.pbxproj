@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5168F35B0341A78DD64A0E4F /* Pods_LikemindsChatSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 040DB27E6B535E3E7E1C78FB /* Pods_LikemindsChatSample.framework */; };
+		15FC8C53798521FA7B05E675 /* Pods_LikemindsChatSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E393946E9251106F52D88D6 /* Pods_LikemindsChatSample.framework */; };
 		F45B8AAE2B999F4900AB95E4 /* CustomChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */; };
 		F4C790D92B296EA90084823E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790D82B296EA90084823E /* AppDelegate.swift */; };
 		F4C790DB2B296EA90084823E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790DA2B296EA90084823E /* SceneDelegate.swift */; };
@@ -18,8 +18,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		040DB27E6B535E3E7E1C78FB /* Pods_LikemindsChatSample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LikemindsChatSample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5804CB595206BA247D4828EB /* Pods-LikemindsChatSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.debug.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.debug.xcconfig"; sourceTree = "<group>"; };
+		1D2B43AAB41431B5F9796BA9 /* Pods-LikemindsChatSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.debug.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.debug.xcconfig"; sourceTree = "<group>"; };
+		7E393946E9251106F52D88D6 /* Pods_LikemindsChatSample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LikemindsChatSample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B3F318DB02FF98128B5A05E8 /* Pods-LikemindsChatSample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.release.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.release.xcconfig"; sourceTree = "<group>"; };
 		F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomChatroomView.swift; sourceTree = "<group>"; };
 		F4C790D52B296EA90084823E /* LikemindsChatSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LikemindsChatSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C790D82B296EA90084823E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -29,7 +30,6 @@
 		F4C790E12B296EAE0084823E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4C790E42B296EAE0084823E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F4C790E62B296EAE0084823E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F74DCBF5C64EC53280D7C00C /* Pods-LikemindsChatSample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.release.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5168F35B0341A78DD64A0E4F /* Pods_LikemindsChatSample.framework in Frameworks */,
+				15FC8C53798521FA7B05E675 /* Pods_LikemindsChatSample.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,16 +47,16 @@
 		3CB88653AE97EF038352749A /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				5804CB595206BA247D4828EB /* Pods-LikemindsChatSample.debug.xcconfig */,
-				F74DCBF5C64EC53280D7C00C /* Pods-LikemindsChatSample.release.xcconfig */,
+				1D2B43AAB41431B5F9796BA9 /* Pods-LikemindsChatSample.debug.xcconfig */,
+				B3F318DB02FF98128B5A05E8 /* Pods-LikemindsChatSample.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		F43861543D38BD3E6C2D6DE4 /* Frameworks */ = {
+		4B322B8EEB4EC735D495C3C2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				040DB27E6B535E3E7E1C78FB /* Pods_LikemindsChatSample.framework */,
+				7E393946E9251106F52D88D6 /* Pods_LikemindsChatSample.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -67,7 +67,7 @@
 				F4C790D72B296EA90084823E /* LikemindsChatSample */,
 				F4C790D62B296EA90084823E /* Products */,
 				3CB88653AE97EF038352749A /* Pods */,
-				F43861543D38BD3E6C2D6DE4 /* Frameworks */,
+				4B322B8EEB4EC735D495C3C2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,11 +101,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F4C790E92B296EAE0084823E /* Build configuration list for PBXNativeTarget "LikemindsChatSample" */;
 			buildPhases = (
-				1FCD1889A8D7235884282A1F /* [CP] Check Pods Manifest.lock */,
+				5E08C0E1275E965F4043EE46 /* [CP] Check Pods Manifest.lock */,
 				F4C790D12B296EA90084823E /* Sources */,
 				F4C790D22B296EA90084823E /* Frameworks */,
 				F4C790D32B296EA90084823E /* Resources */,
-				91F22843F251620B1202D207 /* [CP] Embed Pods Frameworks */,
+				1B574FFAD60F010129ECE0F6 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -163,7 +163,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1FCD1889A8D7235884282A1F /* [CP] Check Pods Manifest.lock */ = {
+		1B574FFAD60F010129ECE0F6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5E08C0E1275E965F4043EE46 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -183,23 +200,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		91F22843F251620B1202D207 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -359,7 +359,7 @@
 		};
 		F4C790EA2B296EAE0084823E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5804CB595206BA247D4828EB /* Pods-LikemindsChatSample.debug.xcconfig */;
+			baseConfigurationReference = 1D2B43AAB41431B5F9796BA9 /* Pods-LikemindsChatSample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -389,7 +389,7 @@
 		};
 		F4C790EB2B296EAE0084823E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F74DCBF5C64EC53280D7C00C /* Pods-LikemindsChatSample.release.xcconfig */;
+			baseConfigurationReference = B3F318DB02FF98128B5A05E8 /* Pods-LikemindsChatSample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
