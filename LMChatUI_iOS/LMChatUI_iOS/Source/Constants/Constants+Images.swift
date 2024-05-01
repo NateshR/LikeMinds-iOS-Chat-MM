@@ -83,5 +83,6 @@ public extension Constants {
         public var sendButton = loadSystemImage(with: "paperplane.circle.fill")
         public var stopRecordButton = loadSystemImage(with: "stop.circle")
         public var deleteIcon = loadSystemImage(with: "trash.fill")
+        public var playFilled = loadSystemImage(with: "play.fill")
     }
 }
