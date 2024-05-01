@@ -73,11 +73,15 @@ public extension Constants {
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")
+        public var playFill = loadSystemImage(with: "play.fill")
+        public var pauseIcon = loadSystemImage(with: "pause.fill")
         public var linkIcon = loadSystemImage(with: "link.circle.fill")
         public var messageIcon = loadSystemImage(with: "message")
         public var person2Icon = loadSystemImage(with: "person.2")
         public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
         public var downArrowIcon = loadSystemImage(with: "arrow.down")
+        public var sendButton = loadSystemImage(with: "paperplane.circle.fill")
+        public var stopRecordButton = loadSystemImage(with: "stop.circle")
         public var deleteIcon = loadSystemImage(with: "trash.fill")
         public var playFilled = loadSystemImage(with: "play.fill")
     }

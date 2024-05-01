@@ -7,7 +7,8 @@
 
 
 public protocol LMMediaViewModelDelegate: AnyObject {
-    func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String, scrollIndex: Int)
+    func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String)
+    func scrollToIndex(index: Int)
 }
 
 public final class LMChatMediaPreviewViewModel {
@@ -58,6 +59,10 @@ public final class LMChatMediaPreviewViewModel {
             .init(mediaURL: $0.mediaURL, thumbnailURL: $0.thumbnailURL, isVideo: $0.mediaType == .video)
         }
         
-        delegate?.showImages(with: viewData, userName: data.userName, date: data.senDate, scrollIndex: startIndex)
+        delegate?.showImages(with: viewData, userName: data.userName, date: data.senDate)
+    }
+    
+    public func scrollToMediaPreview() {
+        delegate?.scrollToIndex(index: startIndex)
     }
 }

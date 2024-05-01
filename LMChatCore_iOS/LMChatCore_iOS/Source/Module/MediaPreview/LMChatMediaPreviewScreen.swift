@@ -64,6 +64,11 @@ open class LMChatMediaPreviewScreen: LMViewController {
         super.viewDidLoad()
         viewModel.showMediaPreview()
     }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        viewModel.scrollToMediaPreview()
+    }
         
     open func navigateToVideoPlayer(with url: String) {
         guard let videoURL = URL(string: url) else {
@@ -108,25 +113,28 @@ extension LMChatMediaPreviewScreen: UICollectionViewDataSource, UICollectionView
 
 // MARK: LMMediaViewModelDelegate
 extension LMChatMediaPreviewScreen: LMMediaViewModelDelegate {
-    public func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String, scrollIndex: Int) {
+    public func showImages(with media: [LMChatMediaPreviewContentModel], userName: String, date: String) {
         self.mediaData = media
         mediaCollectionView.reloadData()
         
         self.userName = userName
         self.date = date
-        
-        setNavigationData(index: 0)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.mediaCollectionView.isPagingEnabled = false
-            self?.mediaCollectionView.scrollToItem(at: .init(row: scrollIndex - 1, section: 0), at: .centeredHorizontally, animated: false)
-            self?.mediaCollectionView.isPagingEnabled = true
+    }
+    
+    public func scrollToIndex(index: Int) {
+        if index < mediaCollectionView.numberOfItems(inSection: 0) {
+            DispatchQueue.main.async { [weak self] in
+                self?.mediaCollectionView.isPagingEnabled = false
+                self?.mediaCollectionView.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
+                self?.mediaCollectionView.isPagingEnabled = true
+            }
         }
+        
+        setNavigationData(index: index)
     }
     
     public func setNavigationData(index: Int) {
         var subtitle = date
-        
         
         if mediaData.count > 1 {
             subtitle = "\(index + 1) of \(mediaData.count) •" + subtitle
