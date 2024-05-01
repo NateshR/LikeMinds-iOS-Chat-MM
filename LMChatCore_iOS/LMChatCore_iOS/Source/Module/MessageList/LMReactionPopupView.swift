@@ -94,8 +94,10 @@ open class LMReactionPopupView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         button.setFont(Appearance.shared.fonts.emojiTrayFont)
         button.setTitleColor(.black, for: .normal)
-        button.setTitle(ReactionType.more.rawValue, for: .normal)
+        button.setBackgroundImage(UIImage(named: "addMoreEmoticons", in: LMChatCoreBundle, with: nil), for: .normal)
         button.addTarget(self, action: #selector(moreEmojiSelected), for: .touchUpInside)
+        button.setWidthConstraint(with: 40)
+        button.setHeightConstraint(with: 44)
         return button
     }()
     
@@ -128,7 +130,7 @@ open class LMReactionPopupView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        pinSubView(subView: previewsContainerView)
+        pinSubView(subView: previewsContainerView, padding: .init(top: 4, left: 8, bottom: -4, right: -8))
     }
     
     func doAnimation() {

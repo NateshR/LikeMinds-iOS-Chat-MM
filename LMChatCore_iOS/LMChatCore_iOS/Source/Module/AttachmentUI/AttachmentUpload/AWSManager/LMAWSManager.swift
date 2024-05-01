@@ -26,10 +26,11 @@ final class LMAWSManager {
                                                 attachmentType: String,
                                                   fileExtension: String,
                                                 isThumbnail: Bool = false) -> String {
+        let miliseconds = Int(Date().millisecondsSince1970)
         if isThumbnail {
-            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(miliseconds).\(fileExtension)"
         } else {
-          return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(Date().millisecondsSince1970).\(fileExtension)"
+          return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(miliseconds).\(fileExtension)"
         }
     }
     

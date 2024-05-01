@@ -61,6 +61,7 @@ public extension Constants {
         public var videoIcon = loadImage(with: "videoIcon")
         public var paperclipIcon = loadImage(with: "paperclip")
         public var createPostIcon = loadImage(with: "createPostIcon")
+        public var gifBadgeIcon = loadImage(with: "gifBadge")
         
         public var lockFillIcon = loadSystemImage(with: "lock.fill")
         public var annoucementIcon = loadSystemImage(with: "speaker.zzz.fill")

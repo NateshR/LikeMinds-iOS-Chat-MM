@@ -102,7 +102,7 @@ open class LMChatMessageCell: LMTableViewCell {
         backgroundColor = Appearance.shared.colors.clear
         contentView.backgroundColor = Appearance.shared.colors.clear
         chatMessageView.backgroundColor = Appearance.shared.colors.clear
-        containerView.backgroundColor = Appearance.shared.colors.backgroundColor
+        containerView.backgroundColor = Appearance.shared.colors.clear
     }
     
     

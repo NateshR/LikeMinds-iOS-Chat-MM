@@ -16,6 +16,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func updateChatroomSubtitles()
     func updateTopicBar()
     func scrollToSpecificConversation(indexPath: IndexPath)
+    func memberRightsCheck()
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -38,6 +39,8 @@ public final class LMMessageListViewModel {
     var editChatMessage: Conversation?
     var chatroomTopic: Conversation?
     var fireBaseRealTimeQueryRegister: DatabaseReference?
+    var loggedInUserTagValue: String = ""
+    var loggedInUserReplaceTagValue: String = ""
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -63,12 +66,28 @@ public final class LMMessageListViewModel {
         }
     }
     
+    func isAdmin() -> Bool {
+        memberState?.state == MemberState.admin.rawValue
+    }
+    
+    func checkMemberRight(_ rightState: MemberRightState) -> Bool {
+        guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  false }
+        return right.isSelected ?? false
+    }
+    
+    func loggedInUserTag() {
+        guard let user = LMChatClient.shared.getLoggedInUser() else { return }
+        loggedInUserTagValue = "<<\(user.name ?? "")|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
+        loggedInUserReplaceTagValue = "You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
+    }
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
     func getInitialData() {
         NotificationCenter.default.addObserver(self, selector: #selector(attachmentPostCompleted), name: LMUploadConversationsAttachmentOperation.attachmentPostCompleted, object: nil)
+        loggedInUserTag()
         self.fireBaseRealTimeQueryRegister = self.getDatabaseReference(chatroomId)
         fetchChatRoomLatestConversations(forChatRoomID: chatroomId, fireBaseRealTimeQueryRegister: fireBaseRealTimeQueryRegister)
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
@@ -417,6 +436,7 @@ public final class LMMessageListViewModel {
         LMChatClient.shared.getMemberState {[weak self] response in
             guard let memberState = response.data else { return }
             self?.memberState = memberState
+            self?.delegate?.memberRightsCheck()
         }
     }
     
@@ -666,7 +686,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
                 .name(attachment.mediaName)
                 .fileUrl(attachment.url)
                 .localFilePath(attachment.url?.absoluteString)
-                .fileType(attachment.fileType.rawValue)
+                .fileType("audio")
                 .width(attachment.width)
                 .height(attachment.height)
                 .awsFolderPath(LMAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? ""))
@@ -826,6 +846,20 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     
     func replyConversation(conversationId: String) {
         self.replyChatMessage = chatMessages.first(where: {$0.id == conversationId})
+    }
+    
+    func setAsCurrentTopic(conversationId: String) {
+        let request = SetChatroomTopicRequest.builder()
+            .chatroomId(chatroomId)
+            .conversationId(conversationId)
+            .build()
+        LMChatClient.shared.setChatroomTopic(request: request) {[weak self] response in
+            guard let self, response.success else {
+                return
+            }
+            chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
+            delegate?.updateTopicBar()
+        }
     }
     
     func copyConversation(conversationId: String) {

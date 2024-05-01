@@ -18,6 +18,7 @@ public protocol LMHomFeedListViewDelegate: AnyObject {
 public enum HomeFeedSection: String {
     case exploreTab = "Explore Tab"
     case chatrooms = "Chatrooms"
+    case shimmer
 }
 
 @IBDesignable
@@ -45,12 +46,12 @@ open class LMHomeFeedListView: LMView {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.homeFeedChatroomCell)
         table.register(LMUIComponents.shared.homeFeedExploreTabCell)
+        table.register(LMUIComponents.shared.homeFeedShimmerCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
-        table.backgroundColor = .red
         return table
     }()
     
@@ -93,7 +94,7 @@ open class LMHomeFeedListView: LMView {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         containerView.backgroundColor = Appearance.shared.colors.white
-//        tableView.backgroundColor = Appearance.shared.colors.clear
+        tableView.backgroundColor = Appearance.shared.colors.clear
     }
     
     open func reloadData() {
@@ -106,7 +107,11 @@ open class LMHomeFeedListView: LMView {
         if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
             tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
         } else {
-            tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
+            if !chatroomData.isEmpty {
+                tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
+            } else {
+                tableSections.append(.init(data: [1,2,3], sectionType: .shimmer, sectionOrder: 2))
+            }
         }
         reloadData()
     }
@@ -152,6 +157,11 @@ extension LMHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
                 if indexPath.row >= (items.count - 4) {
                     self.delegate?.fetchMoreData()
                 }
+                return cell
+            }
+        case .shimmer:
+            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.homeFeedShimmerCell) {
+                cell.profileView.startAnimating()
                 return cell
             }
         }

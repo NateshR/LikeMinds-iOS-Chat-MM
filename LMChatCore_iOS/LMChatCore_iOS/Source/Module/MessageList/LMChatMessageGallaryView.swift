@@ -249,11 +249,12 @@ extension LMChatMessageGallaryView {
             image.translatesAutoresizingMaskIntoConstraints = false
             image.contentMode = .scaleAspectFill
             image.clipsToBounds = true
-            image.backgroundColor = .clear
+            image.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
             image.isUserInteractionEnabled = false
             image.image = Constants.shared.images.playIcon
             image.setWidthConstraint(with: 40)
             image.setHeightConstraint(with: 40)
+            image.cornerRadius(with: 20)
             image.tintColor = .white
             return image
         }()

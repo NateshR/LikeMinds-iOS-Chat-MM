@@ -60,6 +60,10 @@ open class LMMessageListViewController: LMViewController {
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
     }
     
+    open override func setupAppearance() {
+        super.setupAppearance()
+    }
+    
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
@@ -146,7 +150,7 @@ open class LMMessageListViewController: LMViewController {
     
     public func updateChatroomSubtitles() {
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
-        let message = "Restricted to message in this chatroom by community manager"
+        let message = "Only community managers can respond here."
         if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: false)
         } else {
@@ -159,6 +163,13 @@ open class LMMessageListViewController: LMViewController {
             return
         }
         viewModel?.fetchIntermediateConversations(chatroom: chatroom, conversationId: topicId)
+    }
+    
+    public func memberRightsCheck() {
+        let message = "Restricted to respond in this chatroom by community manager"
+        if viewModel?.checkMemberRight(.respondsInChatRoom) == false {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: false)
+        }
     }
     
 }
@@ -193,6 +204,53 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
 }
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
+    
+    public func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu {
+        var actions: [UIAction] = []
+        let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
+                                   image: UIImage(systemName: "arrowshape.turn.up.backward.fill")) { [weak self] action in
+            self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
+        }
+        actions.append(replyAction)
+        if let message = item.message, !message.isEmpty {
+            let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
+                                      image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
+            }
+            actions.append(copyAction)
+        }
+        
+        if viewModel?.isAdmin() == true {
+            let copyAction = UIAction(title: NSLocalizedString("Set as current topic", comment: ""),
+                                      image: UIImage(systemName: "doc")) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .setTopic, atIndex: indexPath, message: item)
+            }
+            actions.append(copyAction)
+        }
+        
+        if item.isIncoming == false, viewModel?.checkMemberRight(.respondsInChatRoom) == true {
+            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                      image: UIImage(systemName: "pencil")) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
+            }
+            
+            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
+                                        image: UIImage(systemName: "trash"),
+                                        attributes: .destructive) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
+            }
+            actions.append(editAction)
+            actions.append(deleteAction)
+        } else {
+            let reportAction = UIAction(title: NSLocalizedString("Report message", comment: "")) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
+            }
+            actions.append(reportAction)
+        }
+        
+        return UIMenu(title: "", children: actions)
+    }
+    
     public func didReactOnMessage(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         if reaction == "more" {
@@ -221,6 +279,8 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
             NavigationScreen.shared.perform(.report(chatroomId: nil, conversationId: message.messageId, memberId: nil), from: self, params: nil)
         case .select:
             break
+        case .setTopic:
+            viewModel?.setAsCurrentTopic(conversationId: message.messageId)
         default:
             break
         }
@@ -262,7 +322,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
         let reactions = conversation.reactions else { return }
-        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
+        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions, selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
     

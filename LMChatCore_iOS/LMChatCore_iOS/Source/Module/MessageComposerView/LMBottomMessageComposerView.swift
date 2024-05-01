@@ -91,7 +91,7 @@ open class LMBottomMessageComposerView: LMView {
     
     open private(set) lazy var gifButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(UIImage(systemName: "giftcard"), for: .normal)
+        button.setImage(gifBadgeIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(gifButtonClicked), for: .touchUpInside)
         return button
@@ -99,7 +99,7 @@ open class LMBottomMessageComposerView: LMView {
     
     open private(set) lazy var attachmentButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.plusIcon, for: .normal)
+        button.setImage(attachmentButtonIcon, for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(attachmentButtonClicked), for: .touchUpInside)
         return button
@@ -265,6 +265,8 @@ open class LMBottomMessageComposerView: LMView {
     
     let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
     let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
+    let attachmentButtonIcon = Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 24)
+    let gifBadgeIcon = UIImage(named: "gifBadge", in: LMChatCoreBundle, with: nil)
     
     let sendButtonHeightConstant: CGFloat = 40
     var lockContainerViewHeight: CGFloat = 100

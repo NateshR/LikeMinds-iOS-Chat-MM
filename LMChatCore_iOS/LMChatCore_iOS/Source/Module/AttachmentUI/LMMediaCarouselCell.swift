@@ -97,7 +97,7 @@ open class LMMediaCarouselCell: LMCollectionViewCell {
         guard let url = data.fileUrl else { return }
         switch data.fileType {
         case "photo", "image", "gif":
-            imageView.kf.setImage(with: url)
+            imageView.kf.setImage(with: url, options: [.forceRefresh])
             playIconImage.isHidden = true
         case "video":
             imageView.kf.setImage(with: data.thumbnailUrl)
