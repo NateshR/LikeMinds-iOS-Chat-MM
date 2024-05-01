@@ -313,9 +313,14 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let attachments = message.attachments, !attachments.isEmpty else { return }
-        let data: [LMChatMediaPreviewViewModel.DataModel] = attachments.compactMap({.init(type: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, url: $0.fileUrl ?? "")})
         
-        NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: attachmentIndex), from: self, params: nil)
+        let mediaData: [LMChatMediaPreviewViewModel.DataModel.MediaModel] = attachments.compactMap {
+            .init(mediaType: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, thumbnailURL: $0.thumbnailUrl, mediaURL: $0.fileUrl ?? "")
+        }
+        
+        let data: LMChatMediaPreviewViewModel.DataModel = .init(userName: message.createdBy ?? "User", senDate: formatDate(message.timestamp ?? 0), media: mediaData)
+        
+        NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: indexPath.row), from: self, params: nil)
     }
     
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
@@ -335,6 +340,25 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func didTapOnCell(indexPath: IndexPath) {
     }
 
+    // TODO: Move to Date Extension Folder
+    func formatDate(_ epoch: Int, _ format: String = "dd MMM yyyy, HH:mm") -> String {
+        // Convert epoch to Date
+        var epoch = epoch
+        
+        if epoch > Int(Date().timeIntervalSince1970) {
+            epoch /= 1000
+        }
+        
+        let date = Date(timeIntervalSince1970: TimeInterval(epoch))
+        
+        // Create a DateFormatter to format the Date object
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone.current
+        
+        return dateFormatter.string(from: date)
+    }
 }
 
 extension LMMessageListViewController: LMBottomMessageComposerDelegate {
