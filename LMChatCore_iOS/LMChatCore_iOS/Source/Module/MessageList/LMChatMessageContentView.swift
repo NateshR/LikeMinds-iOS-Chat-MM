@@ -188,7 +188,7 @@ open class LMChatMessageContentView: LMView {
         super.setupLayouts()
         
         NSLayoutConstraint.activate([
-            reactionContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            reactionContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
             reactionContainerStackView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
             reactionContainerStackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
             chatProfileImageContainerStackView.topAnchor.constraint(equalTo: topAnchor),

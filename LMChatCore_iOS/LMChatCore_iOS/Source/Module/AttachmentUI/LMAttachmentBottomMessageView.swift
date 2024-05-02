@@ -11,6 +11,7 @@ import LMChatUI_iOS
 public protocol LMAttachmentBottomMessageDelegate: AnyObject {
     func addMoreAttachment()
     func sendAttachment(message: String?)
+    func addGifAttachment()
 }
 
 @IBDesignable
@@ -48,7 +49,7 @@ open class LMAttachmentBottomMessageView: LMView {
     open private(set) lazy var inputTextContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
 //        view.cornerRadius(with: 18)
-        view.backgroundColor = Appearance.shared.colors.white
+        view.backgroundColor = Appearance.shared.colors.clear
         //        view.borderColor(withBorderWidth: 1, with: .lightGray)
         return view
     }()
@@ -57,6 +58,7 @@ open class LMAttachmentBottomMessageView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.spacing = 8
+        view.backgroundColor = Appearance.shared.colors.clear
         return view
     }()
     
@@ -66,6 +68,9 @@ open class LMAttachmentBottomMessageView: LMView {
         view.placeHolderText = "Write somthing"
         view.mentionDelegate = self
         view.isScrollEnabled = false
+        view.textColor = Appearance.shared.colors.white
+        view.font = Appearance.shared.fonts.textFont1
+        view.backgroundColor = Appearance.shared.colors.clear
         return view
     }()
     
@@ -172,7 +177,7 @@ open class LMAttachmentBottomMessageView: LMView {
     @objc func sendAttachmentButtonClicked(_ sender: UIButton) {
         
         let message = inputTextView.getText()
-        guard message != inputTextView.placeHolderText else {
+        guard message != inputTextView.placeHolderText, !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
         }
         inputTextView.text = ""

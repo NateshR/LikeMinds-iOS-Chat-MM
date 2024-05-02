@@ -71,14 +71,14 @@ PODS:
     - libwebp/sharpyuv
   - LikeMindsChat (0.0.1):
     - Alamofire
+    - FirebaseCore
+    - FirebaseDatabase
+    - FirebaseMessaging
     - RealmSwift (~> 10)
   - LMChatCore_iOS (0.0.1):
     - AWSCognito
     - AWSCore
     - AWSS3
-    - FirebaseCore
-    - FirebaseDatabase
-    - FirebaseMessaging
     - Giphy
     - LikeMindsChat
     - LMChatUI_iOS
@@ -151,8 +151,8 @@ SPEC CHECKSUMS:
   Kingfisher: b9c985d864d43515f404f1ef4a8ce7d802ace3ac
   leveldb-library: e74c27d8fbd22854db7cb467968a0b8aa1db7126
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LikeMindsChat: 91d8bce86ad4c7335bec16de93aeea8ae7ae332c
-  LMChatCore_iOS: a56425f6957aa3c21966e7fe85fbcf9d5267a06c
+  LikeMindsChat: 2d35c5815205532d6b17d0c4493b3b31fea70a96
+  LMChatCore_iOS: 9eec3a2cd0697a59c1e879c5f90e76279fb319d7
   LMChatUI_iOS: 2b5a3f021d7c41af0c84a34c3bd099a23406b1e2
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4

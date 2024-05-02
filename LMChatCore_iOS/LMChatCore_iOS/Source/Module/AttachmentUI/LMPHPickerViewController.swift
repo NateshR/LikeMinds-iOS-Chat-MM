@@ -8,6 +8,7 @@
 import Foundation
 import PhotosUI
 import MobileCoreServices
+import GiphyUISDK
 
 public enum MediaType: String {
     case image
@@ -122,6 +123,19 @@ class MediaPickerManager: NSObject {
         docVc.allowsMultipleSelection = true
         docVc.isModalInPresentation = true
         viewController.present(docVc, animated: true)
+    }
+    
+    func presentGifPicker(viewController: UIViewController, delegate: MediaPickerDelegate?, fileType: MediaType) {
+        guard [MediaType.gif].contains(fileType) else { return }
+        self.fileTypeForDocument = fileType
+        self.delegate = delegate
+        let giphy = GiphyViewController()
+        giphy.mediaTypeConfig = [.gifs]
+        giphy.theme = GPHTheme(type: .lightBlur)
+        giphy.showConfirmationScreen = false
+        giphy.rating = .ratedPG
+        giphy.delegate = self
+        viewController.present(giphy, animated: true, completion: nil)
     }
     
     // get video dimensions
@@ -296,5 +310,46 @@ extension MediaPickerManager: UIDocumentPickerDelegate {
             mediaPickerItems.append(.init(with: localPath, type: fileTypeForDocument))
         }
         delegate?.mediaPicker(controller, didFinishPicking: mediaPickerItems)
+    }
+}
+
+extension MediaPickerManager: GiphyDelegate {
+    
+    public func didDismiss(controller: GiphyViewController?) {
+        
+    }
+    
+    public func didSelectMedia(giphyViewController: GiphyViewController, media: GPHMedia, contentType: GPHContentType) {
+        giphyViewController.dismiss(animated: true) {
+//            delegate?.showHideLoaderView(isShow: true, backgroundColor: .clear)
+            guard contentType == .gifs else {return}
+            DispatchQueue.main.async {
+                URLSession.shared.dataTask(with: URL(string: media.url(rendition: .fixedHeight, fileType: .gif)!)!) { data, response, error in
+                    guard let gifImageData = data, error == nil else {
+                        print(error)
+                        return
+                    }
+                    let fileName = (media.title?.components(separatedBy: " ").joined(separator: "_") ?? "\(Date().millisecondsSince1970)") + ".gif"
+                    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+                    guard let targetURL = documentsDirectory?.appendingPathComponent(fileName) else { return }
+                    do {
+                        if FileManager.default.fileExists(atPath: targetURL.path) {
+                            try FileManager.default.removeItem(at: targetURL)
+                        }
+                        try gifImageData.write(to: targetURL, options: .atomic)
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self, let giphyImage = GiphyYYImage(data: gifImageData) else {return}
+                        let size = giphyImage.size
+                        let gifImage = GIFImage(withGIFImageData: gifImageData, withSize: size, withTitle: media.title, url: targetURL)
+//                        weakSelf.showHideLoaderView(isShow: false)
+//                        weakSelf.postConversationWithAttchments(message: nil, attachments: [.init(with: targetURL, type: .gif)])
+                        self?.delegate?.mediaPicker(giphyViewController, didFinishPicking: [.init(with: targetURL, type: .gif)])
+                    }
+                }.resume()
+            }
+        }
     }
 }

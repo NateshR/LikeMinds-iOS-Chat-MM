@@ -45,9 +45,10 @@ final public  class LMReactionViewModel {
     }
     
     func fetchReactions() {
+        let reactionsOnly = reactionsData.map { $0.reaction }.unique()
         reactionsByGroup = Dictionary(grouping: reactionsData, by: ({$0.reaction}))
         reactions.append(.init(title: "All", count: reactionsData.count, isSelected: true))
-        for react in reactionsByGroup.keys {
+        for react in reactionsOnly {
             reactions.append(.init(title: react, count: reactionsByGroup[react]?.count ?? 0, isSelected: false))
         }
         reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.sdkClientInfo?.uuid ?? "") == UserPreferences.shared.getClientUUID()), reaction: $0.reaction)})

@@ -123,6 +123,8 @@ open class LMMessageListView: LMView {
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
     public var audioIndex: IndexPath?
+    public var currentLoggedInUserTagFormat: String = ""
+    public var currentLoggedInUserReplaceTagFormat: String = ""
     
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
@@ -231,7 +233,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let item = tableSections[indexPath.section].data[indexPath.row]
         
         switch item.messageType {
-        case 0:
+        case 0, 10:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
@@ -246,7 +248,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             }
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
-                cell.setData(with: .init(message: item))
+                cell.setData(with: .init(message: item, loggedInUserTag: currentLoggedInUserTagFormat, loggedInUserReplaceTag: currentLoggedInUserReplaceTagFormat))
                 return cell
             }
         }

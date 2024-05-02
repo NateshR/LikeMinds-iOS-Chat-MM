@@ -368,6 +368,7 @@
 				DEVELOPMENT_TEAM = HPC929F5X6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LikemindsChatSample/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "LM Chat";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -398,6 +399,7 @@
 				DEVELOPMENT_TEAM = HPC929F5X6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LikemindsChatSample/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "LM Chat";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

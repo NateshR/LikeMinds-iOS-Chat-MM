@@ -38,7 +38,6 @@ public final class LMMessageListViewModel {
     var replyChatMessage: Conversation?
     var editChatMessage: Conversation?
     var chatroomTopic: Conversation?
-    var fireBaseRealTimeQueryRegister: DatabaseReference?
     var loggedInUserTagValue: String = ""
     var loggedInUserReplaceTagValue: String = ""
     
@@ -78,7 +77,7 @@ public final class LMMessageListViewModel {
     func loggedInUserTag() {
         guard let user = LMChatClient.shared.getLoggedInUser() else { return }
         loggedInUserTagValue = "<<\(user.name ?? "")|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
-        loggedInUserReplaceTagValue = "You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
+        loggedInUserReplaceTagValue = "<<You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
     }
     
     deinit {
@@ -88,8 +87,7 @@ public final class LMMessageListViewModel {
     func getInitialData() {
         NotificationCenter.default.addObserver(self, selector: #selector(attachmentPostCompleted), name: LMUploadConversationsAttachmentOperation.attachmentPostCompleted, object: nil)
         loggedInUserTag()
-        self.fireBaseRealTimeQueryRegister = self.getDatabaseReference(chatroomId)
-        fetchChatRoomLatestConversations(forChatRoomID: chatroomId, fireBaseRealTimeQueryRegister: fireBaseRealTimeQueryRegister)
+        
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
         LMChatClient.shared.getChatroom(request: chatroomRequest) {[weak self] response in
             //1st case -> chatroom is not present, if yes return
@@ -156,28 +154,6 @@ public final class LMMessageListViewModel {
         }
     }
     
-    func getDatabaseReference(_ chatRoomID: String) -> DatabaseReference? {
-        return nil
-        let ref = FirebaseServiceConfiguration.firebaseDatabase.reference().child("collabcards").child(chatRoomID)
-        ref.keepSynced(true)
-        return ref
-    }
-    
-    func fetchChatRoomLatestConversations(forChatRoomID chatRoomID: String, fireBaseRealTimeQueryRegister: DatabaseReference?) {
-        FireBaseFactoryClass.shared.getDataForquery(fireBaseRealTimeQueryRegister) { entity in
-            guard let data = entity else {return}
-            //print("========== received response =============== ")
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
-                      let answerId = json["answer_id"] as? String else {return}
-                self.syncLatestConversations(withConversationId: answerId)
-            } catch let error {
-                print("json error parsing - \(#function) \(error)")
-            }
-            //print("========== end =============== ")
-        }
-    }
-    
     func syncLatestConversations(withConversationId conversationId: String) {
         LMChatClient.shared.loadLatestConversations(withConversationId: conversationId, chatroomId: chatroomId)
     }
@@ -210,6 +186,7 @@ public final class LMMessageListViewModel {
                 insertConversationIntoList(message)
             }
         }
+        LMChatClient.shared.observeLiveConversation(withChatroomId: chatroomId)
         delegate?.scrollToBottom()
     }
     
@@ -345,7 +322,7 @@ public final class LMMessageListViewModel {
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
                      timestamp: conversation.createdEpoch,
-                     reactions: reactionGrouping(conversation.reactions ?? []),
+                     reactions: reactionGrouping(conversation.reactions?.reversed() ?? []),
                      attachments: conversation.attachments?.map({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
                      replied: replies,
                      isDeleted: conversation.deletedByMember != nil,
@@ -371,9 +348,10 @@ public final class LMMessageListViewModel {
     
     func reactionGrouping(_ reactions: [Reaction]) -> [LMMessageListView.ContentModel.Reaction] {
         guard !reactions.isEmpty else { return []}
+        let reactionsOnly = reactions.map { $0.reaction }.unique()
         let grouped = Dictionary(grouping: reactions, by: {$0.reaction})
         var reactionsArray: [LMMessageListView.ContentModel.Reaction] = []
-        for item in grouped.keys {
+        for item in reactionsOnly {
             let membersIds = grouped[item]?.compactMap({$0.member?.uuid}) ?? []
             reactionsArray.append(.init(memberUUID: membersIds, reaction: item, count: membersIds.count))
         }
@@ -390,9 +368,9 @@ public final class LMMessageListViewModel {
         
         let date = Date(timeIntervalSince1970: epochTime)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "hh:mm a"
-        dateFormatter.amSymbol = "AM"
-        dateFormatter.pmSymbol = "PM"
+        dateFormatter.dateFormat = "HH:MM"
+//        dateFormatter.amSymbol = "AM"
+//        dateFormatter.pmSymbol = "PM"
         return dateFormatter.string(from: date)
     }
     
@@ -686,7 +664,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
                 .name(attachment.mediaName)
                 .fileUrl(attachment.url)
                 .localFilePath(attachment.url?.absoluteString)
-                .fileType("audio")
+                .fileType(attachment.fileType.rawValue)
                 .width(attachment.width)
                 .height(attachment.height)
                 .awsFolderPath(LMAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? ""))

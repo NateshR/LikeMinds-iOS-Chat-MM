@@ -183,6 +183,8 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
     
     public func reloadChatMessageList() {
         messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.currentLoggedInUserTagFormat = viewModel?.loggedInUserTagValue ?? ""
+        messageListView.currentLoggedInUserReplaceTagFormat = viewModel?.loggedInUserReplaceTagValue ?? ""
         messageListView.reloadData()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
     }
@@ -326,8 +328,8 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
-        let reactions = conversation.reactions else { return }
-        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions, selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
+              let reactions = conversation.reactions else { return }
+        NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
     
@@ -378,8 +380,9 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
             viewModel?.postEditedConversation(text: message, shareLink: viewModel?.currentDetectedOgTags?.url, conversation: chatMessage)
         } else {
             delegate?.postMessage(message: message, filesUrls: nil, shareLink: viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
-            cancelReply()
         }
+        cancelReply()
+        cancelLinkPreview()
     }
     
     public func composeAttachment() {

@@ -13,6 +13,7 @@ open class LMTextView: UITextView {
         didSet {
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 text = placeHolderText
+                textColor = .lightGray
             }
         }
     }

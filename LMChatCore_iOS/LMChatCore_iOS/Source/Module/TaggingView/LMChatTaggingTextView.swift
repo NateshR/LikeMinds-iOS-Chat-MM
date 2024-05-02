@@ -44,8 +44,12 @@ open class LMChatTaggingTextView: LMTextView {
     
     public weak var mentionDelegate: LMFeedTaggingTextViewProtocol?
     
-    public var textAttributes: [NSAttributedString.Key: Any] = [.font: Appearance.shared.fonts.textFont1,
-                                                                .foregroundColor: Appearance.shared.colors.textColor]
+    public var textAttributes: [NSAttributedString.Key: Any] { [.font: self.font ?? .systemFont(ofSize: 16),
+                                                                .foregroundColor: typingTextColor]
+    }
+    
+    public var placeholderColor: UIColor = Appearance.shared.colors.previewSubtitleTextColor
+    public var typingTextColor: UIColor = Appearance.shared.colors.black
     
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
@@ -160,7 +164,7 @@ open class LMChatTaggingTextView: LMTextView {
             attributedText = GetAttributedTextWithRoutes.getAttributedText(from: content)
         } else {
             text = placeHolderText
-            textColor = textAttributes[.foregroundColor] as? UIColor
+            textColor = placeholderColor
             font = textAttributes[.font] as? UIFont
         }
     }
@@ -258,12 +262,14 @@ extension LMChatTaggingTextView: UITextViewDelegate {
     open func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == placeHolderText {
             textView.text = nil
+            textView.textColor = typingTextColor
         }
     }
     
     open func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            textView.attributedText = NSAttributedString(string: placeHolderText, attributes: textAttributes)
+            textView.text = placeHolderText
+            textView.textColor = placeholderColor
         }
         mentionDelegate?.contentHeightChanged()
     }

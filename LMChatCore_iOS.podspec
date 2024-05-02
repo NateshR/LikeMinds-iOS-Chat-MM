@@ -26,9 +26,6 @@ Pod::Spec.new do |spec|
   spec.dependency "AWSCognito"
   spec.dependency "AWSS3"
   #spec.dependency 'BSImagePicker'
-  spec.dependency "FirebaseCore"
-  spec.dependency "FirebaseMessaging"
-  spec.dependency "FirebaseDatabase"
   spec.dependency 'LMChatUI_iOS'
   spec.dependency 'LikeMindsChat'
 end

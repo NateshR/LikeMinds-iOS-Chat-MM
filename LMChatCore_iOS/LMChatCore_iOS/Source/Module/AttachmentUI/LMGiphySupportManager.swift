@@ -31,8 +31,7 @@ class GIFImage {
     }
 }
 
-extension LMBottomMessageComposerView: UITextFieldDelegate {
-    
+extension LMBottomMessageComposerView {
     @objc func handleDidPressGIF(_ sender: UIButton) {
         let giphy = GiphyViewController()
         giphy.mediaTypeConfig = [.gifs]
@@ -75,7 +74,9 @@ extension LMMessageListViewController: GiphyDelegate {
                         let size = giphyImage.size
                         let gifImage = GIFImage(withGIFImageData: gifImageData, withSize: size, withTitle: media.title, url: targetURL)
                         weakSelf.showHideLoaderView(isShow: false)
-                        weakSelf.postConversationWithAttchments(message: nil, attachments: [.init(with: targetURL, type: .gif)])
+//                        weakSelf.postConversationWithAttchments(message: nil, attachments: [.init(with: targetURL, type: .gif)])
+                        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetURL, type: .gif)], delegate: weakSelf, chatroomId: weakSelf.viewModel?.chatroomId, mediaType: .gif) else { return }
+                        weakSelf.present(viewController, animated: true)
                     }
                 }.resume()
             }
