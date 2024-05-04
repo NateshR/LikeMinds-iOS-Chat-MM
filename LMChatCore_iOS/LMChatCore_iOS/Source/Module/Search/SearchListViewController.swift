@@ -9,22 +9,34 @@ import LMChatUI_iOS
 import UIKit
 
 public class SearchListViewController: LMViewController {
+    public struct ContentModel {
+        let title: String?
+        let data: [SearchCellProtocol]
+        
+        public init(title: String?, data: [SearchCellProtocol]) {
+            self.title = title
+            self.data = data
+        }
+    }
+    
     lazy var tableView: LMTableView = {
         let table = LMTableView(frame: .zero, style: .grouped).translatesAutoresizingMaskIntoConstraints()
         table.register(SearchMessageCell.self)
         table.register(SearchGroupCell.self)
         table.dataSource = self
         table.delegate = self
+        table.estimatedSectionHeaderHeight = .leastNonzeroMagnitude
         return table
     }()
     
     lazy var searchController: UISearchController = {
         let search = UISearchController()
-        search.searchResultsUpdater = self
+        search.searchBar.delegate = self
+        search.obscuresBackgroundDuringPresentation = false
         return search
     }()
     
-    var searchResults: [SearchCellProtocol] = []
+    var searchResults: [ContentModel] = []
     var timer: Timer?
     var viewmodel: SearchListViewModel?
     
@@ -35,45 +47,31 @@ public class SearchListViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        dummyData()
         
-        tableView.reloadData()
         navigationItem.searchController = searchController
-        searchController.obscuresBackgroundDuringPresentation = false
         navigationItem.hidesSearchBarWhenScrolling = false
-        
-        viewmodel?.searchList()
     }
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         searchController.searchBar.becomeFirstResponder()
     }
-    
-    func dummyData() {
-        searchResults.append(SearchGroupCell.ContentModel(chatroomID: "ABC", image: "https://img.freepik.com/free-photo/woman-scrolling-laptop_53876-167050.jpg", chatroomName: "Testing1"))
-        
-        searchResults.append(SearchGroupCell.ContentModel(chatroomID: "ABC", image: "https://img.freepik.com/free-photo/woman-scrolling-laptop_53876-167050.jpg", chatroomName: "Testing2"))
-        
-        searchResults.append(SearchMessageCell.ContentModel(chatroomID: "ABC", messageID: "XYZ", title: "Hello i'm underwater", subtitle: "Notification: T", date: Date(), isJoined: true))
-        searchResults.append(SearchMessageCell.ContentModel(chatroomID: "ABC", messageID: "XYZ", title: "Hogging my crank", subtitle: "Notification: T", date: Date(), isJoined: false))
-    }
 }
 
 // MARK: UITableView
 extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
-    open func numberOfSections(in tableView: UITableView) -> Int { 2 }
+    open func numberOfSections(in tableView: UITableView) -> Int { searchResults.count }
     
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        searchResults.count
+        searchResults[section].data.count
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let data = searchResults[indexPath.row] as? SearchMessageCell.ContentModel,
+        if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel,
            let cell = tableView.dequeueReusableCell(SearchMessageCell.self) {
             cell.configure(with: data)
             return cell
-        } else if let data = searchResults[indexPath.row] as? SearchGroupCell.ContentModel,
+        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel,
                   let cell = tableView.dequeueReusableCell(SearchGroupCell.self) {
             cell.configure(with: data)
             return cell
@@ -83,7 +81,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? { 
-        section == 1 ? "Messages" : nil
+        searchResults[section].title
     }
     
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -91,7 +89,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        section == 1 ? 24 : .leastNonzeroMagnitude
+        searchResults[section].title != nil ? 24 : 0.001
     }
     
     open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
@@ -101,25 +99,37 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
 
 
 // MARK: UISearchResultsUpdating
-extension SearchListViewController: UISearchResultsUpdating {
-    open func updateSearchResults(for searchController: UISearchController) {
-        guard let text = searchController.searchBar.text else {
-            timer?.invalidate()
-            // Shows No Results
-            searchResults.removeAll(keepingCapacity: true)
-            tableView.reloadData()
+extension SearchListViewController: UISearchBarDelegate {
+    open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard let text = searchBar.text,
+              !text.isEmpty else {
+            resetSearchData()
             return
         }
         
         timer?.invalidate()
-        timer = Timer(timeInterval: 0.5, repeats: false) { _ in
-            
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.viewmodel?.searchList(with: text)
         }
+    }
+    
+    open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        resetSearchData()
+    }
+    
+    public func resetSearchData() {
+        timer?.invalidate()
+        viewmodel?.searchList(with: "")
+        searchResults.removeAll(keepingCapacity: true)
+        tableView.reloadData()
     }
 }
 
 
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
-    
+    public func updateSearchList(with data: [ContentModel]) {
+        self.searchResults = data
+        tableView.reloadData()
+    }
 }

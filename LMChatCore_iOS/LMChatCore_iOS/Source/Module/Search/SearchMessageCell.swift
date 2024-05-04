@@ -14,16 +14,16 @@ public class SearchMessageCell: LMTableViewCell {
     public struct ContentModel: SearchCellProtocol {
         public var chatroomID: String
         public var messageID: String?
-        public let title: String
-        public let subtitle: String
+        public let chatroomName: String
+        public let message: String
         public let date: Date
         public let isJoined: Bool
         
-        public init(chatroomID: String, messageID: String, title: String, subtitle: String, date: Date, isJoined: Bool) {
+        public init(chatroomID: String, messageID: String, chatroomName: String, message: String, date: Date, isJoined: Bool) {
             self.chatroomID = chatroomID
             self.messageID = messageID
-            self.title = title
-            self.subtitle = subtitle
+            self.chatroomName = chatroomName
+            self.message = message
             self.date = date
             self.isJoined = isJoined
         }
@@ -32,6 +32,8 @@ public class SearchMessageCell: LMTableViewCell {
     lazy var titleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Testing"
+        label.font = Appearance.shared.fonts.headingFont1
+        label.textColor = Appearance.shared.colors.black
         return label
     }()
     
@@ -44,13 +46,17 @@ public class SearchMessageCell: LMTableViewCell {
     
     lazy var dateLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "23/08/24"
+        label.text = ""
+        label.font = Appearance.shared.fonts.headingFont2
+        label.textColor = Appearance.shared.colors.black
         return label
     }()
     
     lazy var isJoinedLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "chat room not joined yet"
+        label.font = Appearance.shared.fonts.headingFont2
+        label.textColor = Appearance.shared.colors.gray51
         return label
     }()
     
@@ -87,6 +93,7 @@ public class SearchMessageCell: LMTableViewCell {
         
         subtitleLabel.addConstraint(top: (titleLabel.bottomAnchor, 8),
                                     leading: (titleLabel.leadingAnchor, 0))
+        subtitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -8).isActive = true
         
         isJoinedLabel.addConstraint(top: (subtitleLabel.bottomAnchor, 8),
                                     leading: (subtitleLabel.leadingAnchor, 0))
@@ -106,8 +113,13 @@ public class SearchMessageCell: LMTableViewCell {
     }
     
     func configure(with data: ContentModel) {
-        titleLabel.text = data.title
-        subtitleLabel.text = data.subtitle
+        titleLabel.text = data.chatroomName
+        subtitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(
+            from: data.message,
+            andPrefix: "@",
+            allowLink: false,
+            allowHashtags: false
+        )
         isJoinedLabel.isHidden = data.isJoined
         dateLabel.text = data.date.inString(dateFormat: "dd/MM/yy")
     }
