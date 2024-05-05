@@ -68,7 +68,8 @@ open class LMAttachmentBottomMessageView: LMView {
         view.placeHolderText = "Write somthing"
         view.mentionDelegate = self
         view.isScrollEnabled = false
-        view.textColor = Appearance.shared.colors.white
+        view.typingTextColor = Appearance.shared.colors.white
+        view.placeholderColor = Appearance.shared.colors.textColor
         view.font = Appearance.shared.fonts.textFont1
         view.backgroundColor = Appearance.shared.colors.clear
         return view
@@ -88,16 +89,17 @@ open class LMAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.paperplaneIcon, for: .normal)
+        button.setImage(Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30), for: .normal)
+        button.tintColor = Appearance.shared.colors.white
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
-        //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(sendAttachmentButtonClicked), for: .touchUpInside)
         return button
     }()
     
     open private(set) lazy var attachmentButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.plusIcon, for: .normal)
+        button.setImage(Constants.shared.images.photoPlusIcon.withSystemImageConfig(pointSize: 30), for: .normal)
+        button.tintColor = Appearance.shared.colors.white
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
         button.addTarget(self, action: #selector(addMoreAttachmentButtonClicked), for: .touchUpInside)
         return button
@@ -176,9 +178,9 @@ open class LMAttachmentBottomMessageView: LMView {
     
     @objc func sendAttachmentButtonClicked(_ sender: UIButton) {
         
-        let message = inputTextView.getText()
-        guard message != inputTextView.placeHolderText, !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return
+        var message = inputTextView.getText()
+        if message != inputTextView.placeHolderText, !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            message = ""
         }
         inputTextView.text = ""
         contentHeightChanged()

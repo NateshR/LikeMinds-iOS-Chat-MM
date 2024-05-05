@@ -19,6 +19,7 @@ public class LMHomeFeedViewModel {
     weak var delegate: LMHomeFeedViewModelProtocol?
     var chatrooms: [Chatroom] = []
     var exploreTabCountData: GetExploreTabCountResponse?
+    var memberProfile: User?
     
     init(_ viewController: LMHomeFeedViewModelProtocol) {
         self.delegate = viewController
@@ -32,7 +33,12 @@ public class LMHomeFeedViewModel {
         return viewController
     }
     
+    func fetchUserProfile() {
+        memberProfile = LMChatClient.shared.getLoggedInUser()
+    }
+    
     func getChatrooms() {
+        fetchUserProfile()
         LMChatClient.shared.getChatrooms(withObserver: self)
 //        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }

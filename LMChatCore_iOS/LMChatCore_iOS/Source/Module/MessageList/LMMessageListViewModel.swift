@@ -411,7 +411,7 @@ public final class LMMessageListViewModel {
             .date(chatroom.date)
             .answer(chatroom.title)
             .member(chatroom.member)
-            .state(ConversationState.chatRoomHeader.rawValue)
+            .state(111)
             .createdEpoch(chatroom.dateEpoch)
             .id(chatroomId)
             .build()

@@ -166,6 +166,7 @@ open class LMChatMessageGallaryView: LMView {
     
     open private(set) lazy var loaderView: LMLoaderView = {
         let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+        view.isHidden = true
         return view
     }()
     
@@ -259,13 +260,13 @@ extension LMChatMessageGallaryView {
             image.translatesAutoresizingMaskIntoConstraints = false
             image.contentMode = .scaleAspectFill
             image.clipsToBounds = true
-            image.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
+            image.backgroundColor = Appearance.shared.colors.white
             image.isUserInteractionEnabled = false
-            image.image = Constants.shared.images.playIcon
+            image.image = Constants.shared.images.playCircleFilled
             image.setWidthConstraint(with: 40)
             image.setHeightConstraint(with: 40)
             image.cornerRadius(with: 20)
-            image.tintColor = .white
+            image.tintColor = Appearance.shared.colors.black.withAlphaComponent(0.8)
             return image
         }()
         

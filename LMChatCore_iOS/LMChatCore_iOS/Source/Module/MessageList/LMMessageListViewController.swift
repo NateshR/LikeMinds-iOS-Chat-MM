@@ -264,7 +264,7 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
 }
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
-    
+
     public func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu {
         var actions: [UIAction] = []
         let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
@@ -314,6 +314,20 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         }
         
         return UIMenu(title: "", children: actions)
+    }
+    
+    public func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction? {
+        let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        guard viewModel?.checkMemberRight(.respondsInChatRoom) == true, item.isDeleted == false else { return nil }
+        let action = UIContextualAction(style: .normal,
+                                        title: "") {[weak self] (contextAction: UIContextualAction, sourceView: UIView, completionHandler: (Bool) -> Void) in
+            self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
+            completionHandler(true)
+        }
+        let swipeReplyImage = Constants.shared.images.replyIcon
+        action.image = swipeReplyImage
+        action.backgroundColor = UIColor(red: 208.0 / 255.0, green: 216.0 / 255.0, blue: 226.0 / 255.0, alpha: 1.0)
+        return action
     }
     
     public func didReactOnMessage(reaction: String, indexPath: IndexPath) {

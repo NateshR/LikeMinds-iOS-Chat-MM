@@ -24,6 +24,7 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message)
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
     func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu
+    func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
 }
 
 public enum LMMessageActionType: String {
@@ -246,14 +247,14 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
                 cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
                 cell.delegate = self
-                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false) {
+                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
                     cell.selectedButton.isHidden = false
                 } else {
                     cell.selectedButton.isHidden = true
                 }
                 return cell
             }
-        case 1:
+        case 111:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
@@ -284,6 +285,48 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         }
         return LMView()
     }
+    
+    //Swipe to reply
+    public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false && !isMultipleSelectionEnable else { return nil }
+        guard let replyAction = delegate?.trailingSwipeAction(forRowAtIndexPath: indexPath) else { return nil }
+        let swipeConfig = UISwipeActionsConfiguration(actions: [replyAction])
+        swipeConfig.performsFirstActionWithFullSwipe = true
+        return swipeConfig
+    }
+    
+    public func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            tableView.isEditing = false
+        }
+    }
+    
+    public func tableView(_ tableView: UITableView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
+        
+        return true
+    }
+    
+    public func tableView(_ tableView: UITableView, didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
+//        self.setEditing(true, animated: true)
+    }
+    
+    public func tableViewDidEndMultipleSelectionInteraction(_ tableView: UITableView) {
+    }
+    
+    public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false else { return false }
+        
+//        if dataProvider?.currentChatRoom?.type == .introductions {
+            // To block left/right swipe gesture
+//            return false
+//        } else {
+            return true
+//        }
+    }
+    
     
     // this delegate is called when the scrollView (i.e your UITableView) will start scrolling
     open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

@@ -50,6 +50,7 @@ public extension Constants {
         public var personIcon = loadSystemImage(with: "person")
         public var checkmarkIconFilled = loadSystemImage(with: "checkmark.circle.fill")
         public var plusIcon = loadSystemImage(with: "plus")
+        public var photoPlusIcon = loadSystemImage(with: "photo.badge.plus")
         public var notificationBell = loadSystemImage(with: "bell.fill")
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
@@ -86,5 +87,8 @@ public extension Constants {
         public var stopRecordButton = loadSystemImage(with: "stop.circle")
         public var deleteIcon = loadSystemImage(with: "trash.fill")
         public var playFilled = loadSystemImage(with: "play.fill")
+        public var playCircleFilled = loadSystemImage(with: "play.circle.fill")
+        public var replyIcon = loadSystemImage(with: "arrowshape.turn.up.backward.fill")
+        public var searchIcon = loadSystemImage(with: "magnifyingglass")
     }
 }

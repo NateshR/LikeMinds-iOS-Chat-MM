@@ -117,7 +117,7 @@ open class LMChatroomHeaderMessageView: LMView {
         topicData = data
         nameLabel.text = data.createdBy
         timeLabel.text = data.createdTime
-        chatroomTitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.title ?? "")
+        chatroomTitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.title ?? "", withTextColor: Appearance.shared.colors.black)
         creatorProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.createdBy ?? ""))
     }
 }

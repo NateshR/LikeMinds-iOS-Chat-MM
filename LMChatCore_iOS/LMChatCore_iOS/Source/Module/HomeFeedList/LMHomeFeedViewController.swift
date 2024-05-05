@@ -23,10 +23,9 @@ open class LMHomeFeedViewController: LMViewController {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
         image.contentMode = .scaleAspectFill
-        image.setWidthConstraint(with: 44)
-        image.setHeightConstraint(with: 44)
-        image.image = Constants.shared.images.personCircleFillIcon
-        image.cornerRadius(with: 22)
+        image.setWidthConstraint(with: 36)
+        image.setHeightConstraint(with: 36)
+        image.cornerRadius(with: 18)
         return image
     }()
     
@@ -40,6 +39,10 @@ open class LMHomeFeedViewController: LMViewController {
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .leading)
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name ?? ""))
     }
     
     // MARK: setupViews
@@ -62,7 +65,9 @@ open class LMHomeFeedViewController: LMViewController {
     
     func setupRightItemBars() {
         let profileItem = UIBarButtonItem(customView: profileIcon)
-        navigationController?.navigationItem.rightBarButtonItems = [profileItem]
+        let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: nil)
+        searchItem.tintColor = Appearance.shared.colors.textColor
+        navigationItem.rightBarButtonItems = [profileItem, searchItem]
     }
 }
 

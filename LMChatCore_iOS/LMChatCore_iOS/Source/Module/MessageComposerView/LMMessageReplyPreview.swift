@@ -207,7 +207,7 @@ open class LMMessageReplyPreview: LMView {
         // Add your text to mutable string
         let textAfterIcon = NSAttributedString(string: initalType + " " + (message ?? ""))
         completeText.append(textAfterIcon)
-        return textAfterIcon
+        return completeText
     }
     
     @objc func cancelReply(_ sender:UIButton) {

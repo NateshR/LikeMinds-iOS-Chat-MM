@@ -7,6 +7,8 @@
 
 import Foundation
 import LMChatUI_iOS
+import AVFoundation
+import AVKit
 
 public protocol LMChatAttachmentViewDelegate: AnyObject {
     func postConversationWithAttchments(message: String?, attachments: [MediaPickerModel])
@@ -40,6 +42,14 @@ open class LMChatAttachmentViewController: LMViewController {
         let view = LMZoomImageViewContainer()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = backgroundColor
+        return view
+    }()
+    
+    open private(set) lazy var videoImageViewContainer: LMChatMediaVideoPreview = {
+        let view = LMChatMediaVideoPreview()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = backgroundColor
+        view.isHidden = true
         return view
     }()
     
@@ -132,6 +142,7 @@ open class LMChatAttachmentViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(imageActionsContainer)
         self.view.addSubview(zoomableImageViewContainer)
+        self.view.addSubview(videoImageViewContainer)
         self.view.addSubview(bottomMessageBoxView)
         self.view.addSubview(imageViewCarouselContainer)
         imageViewCarouselContainer.addSubview(mediaCollectionView)
@@ -157,6 +168,12 @@ open class LMChatAttachmentViewController: LMViewController {
             zoomableImageViewContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             zoomableImageViewContainer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
             zoomableImageViewContainer.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            
+            videoImageViewContainer.leadingAnchor.constraint(equalTo: zoomableImageViewContainer.leadingAnchor),
+            videoImageViewContainer.trailingAnchor.constraint(equalTo: zoomableImageViewContainer.trailingAnchor),
+            videoImageViewContainer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
+            videoImageViewContainer.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            
             imageViewCarouselContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageViewCarouselContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageViewCarouselContainer.heightAnchor.constraint(equalToConstant: 70),
@@ -267,7 +284,6 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         if let data = viewModel?.mediaCellData[indexPath.row],
            let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
             collectionView.reloadData()
-            cell.imageView.borderColor(withBorderWidth: 2, with: .green)
             setDataToView(data)
         }
     }
@@ -276,12 +292,35 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         viewModel?.selectedMedia = data
         switch data.mediaType {
         case .image, .gif:
+            editButton.isHidden = false
+            videoImageViewContainer.isHidden = true
+            zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
-            break
+            editButton.isHidden = true
+            videoImageViewContainer.isHidden = false
+            zoomableImageViewContainer.isHidden = true
+            videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
+                self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
+            }
         default:
-            break
+            editButton.isHidden = true
+        }
+    }
+    
+    func navigateToVideoPlayer(with url: String) {
+        guard let videoURL = URL(string: url) else {
+            showErrorAlert(message: "Unable to play video")
+            return
+        }
+        let player = AVPlayer(url: videoURL)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        playerViewController.allowsPictureInPicturePlayback = false
+        playerViewController.showsPlaybackControls = true
+        present(playerViewController, animated: false) {
+            player.play()
         }
     }
 }
@@ -318,9 +357,9 @@ extension LMChatAttachmentViewController: MediaPickerDelegate {
         mediaCollectionView.reloadData()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if self.zoomableImageViewContainer.imageView.image == nil {
-                self.viewModel?.selectedMedia = results[0]
-                self.zoomableImageViewContainer.configure(with: results[0].photo)
+            if self.zoomableImageViewContainer.imageView.image == nil, let item = results.first {
+                self.viewModel?.selectedMedia = item
+                self.setDataToView(item)
             }
         }
     }

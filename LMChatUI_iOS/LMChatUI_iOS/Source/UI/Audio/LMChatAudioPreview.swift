@@ -51,7 +51,7 @@ open class LMChatAudioPreview: LMView {
     var playPauseButton: LMImageView = {
         let button = LMImageView()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.image = UIImage(systemName: "play.circle.fill")
+        button.image = Constants.shared.images.playCircleFilled
         button.contentMode = .scaleAspectFill
         button.isUserInteractionEnabled = true
         return button
@@ -157,7 +157,7 @@ open class LMChatAudioPreview: LMView {
         let index else { return }
         
         if isPlaying {
-            playPauseButton.image = UIImage(systemName: "play.circle.fill")
+            playPauseButton.image = Constants.shared.images.playCircleFilled
             isPlaying.toggle()
         }
         
@@ -199,12 +199,12 @@ open class LMChatAudioPreview: LMView {
         isPlaying = true
         let percentage = (time / Float(duration)) * 100
         slider.value = self.url == url ? percentage : .zero
-        playPauseButton.image = UIImage(systemName: self.url == url ? "pause.circle.fill" : "play.circle.fill")
+        playPauseButton.image =  self.url == url ?  UIImage(systemName:  "pause.circle.fill") : Constants.shared.images.playCircleFilled
         durationLbl.text = convertSecondsToFormattedTime(seconds: Int(time))
     }
     
     open func resetView() {
-        playPauseButton.image = UIImage(systemName: "play.circle.fill")
+        playPauseButton.image = Constants.shared.images.playCircleFilled
         durationLbl.text = convertSecondsToFormattedTime(seconds: duration)
         isPlaying = false
         slider.value = 0
