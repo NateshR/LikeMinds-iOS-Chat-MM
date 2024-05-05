@@ -212,6 +212,7 @@ open class LMChatAttachmentViewController: LMViewController {
     }
     
     func deleteMedia(atIndex index: Int) {
+        guard (viewModel?.mediaCellData.count ?? 0) > index else { return }
         let attachment = viewModel?.mediaCellData.remove(at: index)
         do {
             if let localFilePath = attachment?.localPath {

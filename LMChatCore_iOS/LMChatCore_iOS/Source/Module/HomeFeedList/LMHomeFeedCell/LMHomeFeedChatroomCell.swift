@@ -76,12 +76,13 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
     // MARK: configure
     open func configure(with data: ContentModel) {
         let lastConversation = data.chatroom?.lastConversation
-        let creatorName = lastConversation?.member?.name ?? "NA"
-        var lastMessage = "\(creatorName.components(separatedBy: " ").first ?? "NA"): " + "\(data.chatroom?.lastConversation?.answer ?? "NA")"
+        let isLoggedInUser = lastConversation?.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()
+        let creatorName = isLoggedInUser ? "You" : lastConversation?.member?.name ?? "NA"
+        var lastMessage = data.chatroom?.lastConversation?.answer ?? "NA"
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
         let fileType = lastConversation?.attachments?.first?.type
         
-        chatroomView.setData(LMHomeFeedChatroomView.ContentModel(userName: data.chatroom?.member?.name ?? "NA",
+        chatroomView.setData(LMHomeFeedChatroomView.ContentModel(userName: creatorName,
                                                                  lastMessage: lastMessage,
                                                                  chatroomName: data.chatroom?.header ?? "NA",
                                                                  chatroomImageUrl: data.chatroom?.chatroomImageUrl,
@@ -89,7 +90,19 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
                                                                  isSecret: data.chatroom?.isSecret ?? false,
                                                                  isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue,
                                                                  unreadCount: data.chatroom?.unseenCount ?? 0,
-                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA", fileType: fileType))
+                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA",
+                                                                 fileTypeWithCount: getAttachmentType(data: data)))
+    }
+    
+    func getAttachmentType(data: ContentModel) -> [(String, Int)] {
+        guard let attachments = data.chatroom?.lastConversation?.attachments else { return [] }
+        let attachmentTypes = attachments.compactMap({$0.type}).unique()
+        let groupedBy = Dictionary(grouping: attachments, by: { $0.type })
+        var typeArray: [(String, Int)] = []
+        for atType in attachmentTypes {
+            typeArray.append((atType, groupedBy[atType]?.count ?? 0))
+        }
+        return typeArray
     }
     
     func timestampConverted(createdAtInEpoch: Int) -> String? {
