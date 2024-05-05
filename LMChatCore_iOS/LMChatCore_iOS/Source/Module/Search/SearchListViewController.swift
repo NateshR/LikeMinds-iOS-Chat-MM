@@ -19,7 +19,7 @@ public class SearchListViewController: LMViewController {
         }
     }
     
-    lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView(frame: .zero, style: .grouped).translatesAutoresizingMaskIntoConstraints()
         table.register(SearchMessageCell.self)
         table.register(SearchGroupCell.self)
@@ -29,16 +29,16 @@ public class SearchListViewController: LMViewController {
         return table
     }()
     
-    lazy var searchController: UISearchController = {
+    open private(set) lazy var searchController: UISearchController = {
         let search = UISearchController()
         search.searchBar.delegate = self
         search.obscuresBackgroundDuringPresentation = false
         return search
     }()
     
-    var searchResults: [ContentModel] = []
-    var timer: Timer?
-    var viewmodel: SearchListViewModel?
+    public var searchResults: [ContentModel] = []
+    public var timer: Timer?
+    public var viewmodel: SearchListViewModel?
     
     open override func setupViews() {
         super.setupViews()
@@ -95,6 +95,13 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         .leastNonzeroMagnitude
     }
+    
+    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.section == searchResults.count - 1,
+           indexPath.row == searchResults[indexPath.section].data.count - 1 {
+            viewmodel?.fetchMoreData()
+        }
+    }
 }
 
 
@@ -128,8 +135,19 @@ extension SearchListViewController: UISearchBarDelegate {
 
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
+    public func showHideFooterLoader(isShow: Bool) {
+        tableView.showHideFooterLoader(isShow: isShow)
+    }
+    
     public func updateSearchList(with data: [ContentModel]) {
+        tableView.backgroundView = nil
         self.searchResults = data
         tableView.reloadData()
+    }
+    
+    public func showNoDataUI() {
+        let noUIView = SearchListNoResultView(frame: tableView.frame)
+        noUIView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundView = noUIView
     }
 }

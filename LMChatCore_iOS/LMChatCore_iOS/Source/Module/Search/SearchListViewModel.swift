@@ -10,6 +10,8 @@ import Foundation
 
 public protocol SearchListViewProtocol: AnyObject {
     func updateSearchList(with data: [SearchListViewController.ContentModel])
+    func showHideFooterLoader(isShow: Bool)
+    func showNoDataUI()
 }
 
 final public class SearchListViewModel {
@@ -60,24 +62,36 @@ final public class SearchListViewModel {
     }
     
     var delegate: SearchListViewProtocol?
-    var followedChatroomData: [SearchChatroomDataModel]
-    var notFollowedChatroomData: [SearchChatroomDataModel]
-    var conversationData: [SearchConversationDataModel]
+    
+    var headerChatroomData: [SearchChatroomDataModel]
+    var titleFollowedChatroomData: [SearchChatroomDataModel]
+    var titleNotFollowedChatroomData: [SearchChatroomDataModel]
+    var followedConversationData: [SearchConversationDataModel]
+    var notFollowedConversationData: [SearchConversationDataModel]
     
     private var searchString: String
     private var currentAPIStatus: APIStatus
-    private var currentPage = 1
-    private let pageSize = 10
+    private var currentPage: Int
+    private let pageSize: Int
+    private var isAPICallInProgress: Bool
+    private var shouldAllowAPICall: Bool
     
     init(delegate: SearchListViewProtocol? = nil) {
         self.delegate = delegate
         
-        followedChatroomData = []
-        notFollowedChatroomData = []
-        conversationData = []
+        headerChatroomData = []
+        titleFollowedChatroomData = []
+        titleNotFollowedChatroomData = []
+        followedConversationData = []
+        notFollowedConversationData = []
         
         searchString = ""
         currentAPIStatus = .headerChatroomFollowTrue
+        currentPage = 1
+        pageSize = 10
+        
+        isAPICallInProgress = false
+        shouldAllowAPICall = true
     }
     
     func searchList(with searchString: String) {
@@ -85,15 +99,22 @@ final public class SearchListViewModel {
         
         guard !self.searchString.isEmpty else {
             // Empty String, so showing emptying UI
-            followedChatroomData.removeAll(keepingCapacity: true)
-            notFollowedChatroomData.removeAll(keepingCapacity: true)
-            conversationData.removeAll(keepingCapacity: true)
+            headerChatroomData.removeAll(keepingCapacity: true)
+            titleFollowedChatroomData.removeAll(keepingCapacity: true)
+            titleNotFollowedChatroomData.removeAll(keepingCapacity: true)
+            followedConversationData.removeAll(keepingCapacity: true)
+            notFollowedConversationData.removeAll(keepingCapacity: true)
+            
+            delegate?.showHideFooterLoader(isShow: false)
             
             return
         }
         
+        shouldAllowAPICall = true
+        isAPICallInProgress = false
         currentAPIStatus = .headerChatroomFollowTrue
         currentPage = 1
+        fetchData(searchString: searchString)
     }
     
     func fetchMoreData() {
@@ -101,6 +122,12 @@ final public class SearchListViewModel {
     }
     
     private func setNewAPIStatus() {
+        // This means we have fetched all available data, no need to progress further
+        if currentAPIStatus == .conversationFollowFalse {
+            shouldAllowAPICall = false
+            return
+        }
+        
         currentPage = 1
         
         if currentAPIStatus == .headerChatroomFollowTrue {
@@ -114,9 +141,17 @@ final public class SearchListViewModel {
         } else if currentAPIStatus == .titleChatroomFollowFalse {
             currentAPIStatus = .conversationFollowFalse
         }
+        
+        fetchMoreData()
     }
     
     private func fetchData(searchString: String) {
+        guard !isAPICallInProgress,
+              shouldAllowAPICall else { return }
+        
+        delegate?.showHideFooterLoader(isShow: true)
+        isAPICallInProgress = true
+        
         switch currentAPIStatus {
         case .headerChatroomFollowTrue,
                 .headerChatroomFollowFalse,
@@ -141,19 +176,35 @@ final public class SearchListViewModel {
             .build()
         
         LMChatClient.shared.searchChatroom(request: request) { [weak self] response in
-            guard let self else { return }
+            self?.isAPICallInProgress = false
+            self?.delegate?.showHideFooterLoader(isShow: false)
             
+            guard let self,
+                  let chatrooms = response.data?.conversations else { return }
             
+            currentPage += 1
             
-            let chatroomData: [SearchChatroomDataModel] = response.data?.conversations.compactMap { chatroom in
+            if chatrooms.isEmpty || chatrooms.count < pageSize {
+                setNewAPIStatus()
+            }
+            
+            let chatroomData: [SearchChatroomDataModel] = chatrooms.compactMap { chatroom in
                 self.convertToChatroomData(form: chatroom.chatroom)
-            } ?? []
-                        
-//            if isFollowed {
-//                self?.followedChatroomData.append(contentsOf: chatroomData)
-//            } else {
-//                self?.notFollowedChatroomData.append(contentsOf: chatroomData)
-//            }
+            }
+            
+            switch currentAPIStatus {
+            case .headerChatroomFollowTrue,
+                    .headerChatroomFollowFalse:
+                headerChatroomData.append(contentsOf: chatroomData)
+            case .titleChatroomFollowTrue:
+                titleFollowedChatroomData.append(contentsOf: chatroomData)
+            case .titleChatroomFollowFalse:
+                titleNotFollowedChatroomData.append(contentsOf: chatroomData)
+            default:
+                break
+            }
+            
+            convertToContentModel()
         }
     }
     
@@ -178,13 +229,34 @@ final public class SearchListViewModel {
             .build()
         
         LMChatClient.shared.searchConversation(request: request) { [weak self] response in
-            let conversationData: [SearchConversationDataModel] = response.data?.conversations.compactMap { conversation in
-                guard let chatroomData = self?.convertToChatroomData(form: conversation.chatroom) else { return .none }
+            self?.isAPICallInProgress = false
+            self?.delegate?.showHideFooterLoader(isShow: false)
+            
+            guard let self,
+                  let conversations = response.data?.conversations else { return }
+            
+            currentPage += 1
+            
+            if conversations.isEmpty || conversations.count < pageSize {
+                setNewAPIStatus()
+            }
+            
+            let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
+                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom) else { return .none }
                 
                 return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, message: conversation.answer, createdAt: conversation.createdAt)
-            } ?? []
+            }
+                        
+            switch currentAPIStatus {
+            case .conversationFollowTrue:
+                followedConversationData.append(contentsOf: conversationData)
+            case .conversationFollowFalse:
+                notFollowedConversationData.append(contentsOf: conversationData)
+            default:
+                break
+            }
             
-            self?.conversationData.append(contentsOf: conversationData)
+            convertToContentModel()
         }
     }
 }
@@ -195,26 +267,32 @@ extension SearchListViewModel {
     func convertToContentModel() {
         var dataModel: [SearchListViewController.ContentModel] = []
         
-        let followedChatroomConverted = convertChatroomCell(from: followedChatroomData)
-        
-        if !followedChatroomConverted.isEmpty {
+        if !headerChatroomData.isEmpty {
+            let followedChatroomConverted = convertChatroomCell(from: headerChatroomData)
             dataModel.append(.init(title: nil, data: followedChatroomConverted))
         }
         
-        let notFollowedChatroomConverted = convertChatroomCell(from: notFollowedChatroomData)
-        let conversationDataConverted = convertMessageCell(from: conversationData)
-    
-        var sectionData: [SearchCellProtocol] = []
-        
-        sectionData.append(contentsOf: conversationDataConverted)
-        sectionData.append(contentsOf: notFollowedChatroomConverted)
-        
-        if !sectionData.isEmpty {
-            dataModel.append(.init(title: conversationDataConverted.isEmpty ? nil : "Messages", data: sectionData))
+        if !titleFollowedChatroomData.isEmpty || !titleNotFollowedChatroomData.isEmpty || !followedConversationData.isEmpty || !notFollowedConversationData.isEmpty {
+            
+            let titleFollowedData = convertChatroomCell(from: titleFollowedChatroomData)
+            let followedConversationData = convertMessageCell(from: followedConversationData)
+            let titleNotFollowedData = convertChatroomCell(from: titleNotFollowedChatroomData)
+            let notFollowedConversationData = convertMessageCell(from: notFollowedConversationData)
+            
+            var sectionData: [SearchCellProtocol] = []
+            
+            sectionData.append(contentsOf: titleFollowedData)
+            sectionData.append(contentsOf: followedConversationData)
+            sectionData.append(contentsOf: titleNotFollowedData)
+            sectionData.append(contentsOf: notFollowedConversationData)
+            
+            dataModel.append(.init(title: "Messages", data: sectionData))
         }
         
+        
+        delegate?.showHideFooterLoader(isShow: false)
         if dataModel.isEmpty {
-            // TODO: Show UI for no data
+            delegate?.showNoDataUI()
         } else {
             delegate?.updateSearchList(with: dataModel)
         }
