@@ -129,6 +129,8 @@ open class LMMessageListView: LMView {
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
     let menuHeight: CGFloat = 200
+    var isMultipleSelectionEnable: Bool = false
+    var selectedItems: [ContentModel.Message] = []
     
     // MARK: setupViews
     open override func setupViews() {
@@ -176,6 +178,11 @@ open class LMMessageListView: LMView {
     }
     
     open func reloadData() {
+        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        tableView.reloadData()
+    }
+    
+    func justReloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         tableView.reloadData()
     }
@@ -235,9 +242,15 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         switch item.messageType {
         case 0, 10:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
+                let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+                cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
                 cell.delegate = self
+                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false) {
+                    cell.selectedButton.isHidden = false
+                } else {
+                    cell.selectedButton.isHidden = true
+                }
                 return cell
             }
         case 1:
@@ -258,7 +271,9 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.delegate?.didTapOnCell(indexPath: indexPath)
+        if !self.isMultipleSelectionEnable {
+            self.delegate?.didTapOnCell(indexPath: indexPath)
+        }
     }
     
     open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -301,7 +316,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard (item.messageType == 0 || item.messageType == 10) && (item.isDeleted != true) else { return nil }
+        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10) && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
@@ -443,6 +458,13 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             actions.append(reportAction)
         }
         
+        let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
+                                  image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
+            self?.isMultipleSelectionEnable = true
+            self?.delegate?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
+        }
+        actions.append(selectAction)
+        
         return UIMenu(title: "", children: actions)
     }
 }
@@ -472,6 +494,18 @@ extension LMMessageListView: LMChatAudioProtocol {
 }
 
 extension LMMessageListView: LMChatMessageCellDelegate {
+    
+    public func didTappedOnSelectionButton(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        let itemIndex = selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+        if let itemIndex {
+            self.selectedItems.remove(at: itemIndex)
+        } else {
+            self.selectedItems.append(item)
+        }
+    }
+    
     public func onClickReplyOfMessage(indexPath: IndexPath?) {
         guard let indexPath else { return }
         delegate?.didTappedOnReplyPreviewOfMessage(indexPath: indexPath)

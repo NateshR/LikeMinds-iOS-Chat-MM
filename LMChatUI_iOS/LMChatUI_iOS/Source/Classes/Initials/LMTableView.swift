@@ -23,6 +23,11 @@ public extension UITableView {
         return dequeueReusableCell(withIdentifier: className) as? T
     }
     
+    func dequeueReusableCell<T>(_ type: T.Type, atIndexPath indexPath: IndexPath) -> T? {
+        let className = String(describing: type)
+        return dequeueReusableCell(withIdentifier: className, for: indexPath) as? T
+    }
+    
     func dequeueReusableHeaderFooterView<T>(_ type: T.Type) -> T? {
         let className = String(describing: type)
         return dequeueReusableHeaderFooterView(withIdentifier: className) as? T

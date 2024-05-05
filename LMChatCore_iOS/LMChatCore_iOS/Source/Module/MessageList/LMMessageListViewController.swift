@@ -51,6 +51,22 @@ open class LMMessageListViewController: LMViewController {
     var linkDetectorTimer: Timer?
     var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
+    open private(set) lazy var deleteMessageBarItem: UIBarButtonItem = {
+        let buttonItem = UIBarButtonItem(image: Constants.shared.images.deleteIcon, style: .plain, target: self, action: #selector(deleteSelectedMessageAction))
+        return buttonItem
+    }()
+    
+    open private(set) lazy var cancelSelectionsBarItem: UIBarButtonItem = {
+        let buttonItem = UIBarButtonItem(image: Constants.shared.images.crossIcon, style: .plain, target: self, action: #selector(cancelSelectedMessageAction))
+        return buttonItem
+    }()
+    
+    open private(set) lazy var copySelectedMessagesBarItem: UIBarButtonItem = {
+        let buttonItem = UIBarButtonItem(image: Constants.shared.images.copyIcon, style: .plain, target: self, action: #selector(copySelectedMessageAction))
+        return buttonItem
+    }()
+    
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -75,7 +91,6 @@ open class LMMessageListViewController: LMViewController {
         self.view.addSubview(chatroomTopicBar)
         
         chatroomTopicBar.onTopicViewClick = {[weak self] topicId in
-            print("Topic \(topicId) bar clicked")
             self?.topicBarClicked(topicId: topicId)
         }
     }
@@ -149,6 +164,46 @@ open class LMMessageListViewController: LMViewController {
         }
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc
+    open func deleteSelectedMessageAction() {
+        guard !messageListView.selectedItems.isEmpty else { return }
+        deleteMessageConfirmation(messageListView.selectedItems.compactMap({$0.messageId}))
+    }
+    
+    func deleteMessageConfirmation(_ conversationIds: [String]) {
+        let alert = UIAlertController(title: "Delete Message?", message: "Are you sure you want to delete this message? This action can not be reversed.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: {[weak self] action in
+            self?.viewModel?.deleteConversations(conversationIds: conversationIds)
+            self?.cancelSelectedMessageAction()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        self.present(alert, animated: true)
+    }
+    
+    @objc
+    open func copySelectedMessageAction() {
+        guard !messageListView.selectedItems.isEmpty else { return }
+        viewModel?.copyConversation(conversationIds: messageListView.selectedItems.compactMap({$0.messageId}))
+        cancelSelectedMessageAction()
+    }
+    
+    @objc
+    open func cancelSelectedMessageAction() {
+        messageListView.isMultipleSelectionEnable = false
+        messageListView.selectedItems.removeAll()
+        navigationItem.rightBarButtonItems = nil
+        setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
+        updateChatroomSubtitles()
+        memberRightsCheck()
+        messageListView.justReloadData()
+    }
+    
+    open func multipleSelectionEnable() {
+        let barButtonItems: [UIBarButtonItem] = [cancelSelectionsBarItem, copySelectedMessagesBarItem, deleteMessageBarItem]
+        navigationItem.rightBarButtonItems = barButtonItems
+        bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: false)
     }
     
     public func updateChatroomSubtitles() {
@@ -244,8 +299,13 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
                                         attributes: .destructive) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
             }
+            let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
+                                        image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
+            }
             actions.append(editAction)
             actions.append(deleteAction)
+            actions.append(selectAction)
         } else {
             let reportAction = UIAction(title: NSLocalizedString("Report message", comment: "")) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
@@ -268,7 +328,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message) {
         switch type {
         case .delete:
-            viewModel?.deleteConversations(conversationIds: [message.messageId])
+            deleteMessageConfirmation([message.messageId])
         case .edit:
             viewModel?.editConversation(conversationId: message.messageId)
             bottomMessageBoxView.inputTextView.setAttributedText(from: viewModel?.editChatMessage?.answer ?? "")
@@ -278,12 +338,18 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
             bottomMessageBoxView.showReplyView(withData: .init(username: message.createdBy, replyMessage: message.message, attachmentsUrls: message.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
             break
         case .copy:
-            viewModel?.copyConversation(conversationId: message.messageId)
+            viewModel?.copyConversation(conversationIds: [message.messageId])
             break
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: nil, conversationId: message.messageId, memberId: nil), from: self, params: nil)
         case .select:
-            break
+            messageListView.isMultipleSelectionEnable = true
+            messageListView.justReloadData()
+            multipleSelectionEnable()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+                self?.messageListView.selectedItems.append(message)
+                self?.messageListView.tableView.reloadRows(at: [indexPath], with: .none)
+            }
         case .setTopic:
             viewModel?.setAsCurrentTopic(conversationId: message.messageId)
         default:

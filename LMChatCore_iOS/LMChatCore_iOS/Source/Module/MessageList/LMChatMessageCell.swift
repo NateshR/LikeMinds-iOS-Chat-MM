@@ -15,6 +15,7 @@ public protocol LMChatMessageCellDelegate: AnyObject {
     func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?)
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
     func onClickReplyOfMessage(indexPath: IndexPath?)
+    func didTappedOnSelectionButton(indexPath: IndexPath?)
 }
 
 @IBDesignable
@@ -22,6 +23,7 @@ open class LMChatMessageCell: LMTableViewCell {
     
     public struct ContentModel {
         public let message: LMMessageListView.ContentModel.Message?
+        public var isSelected: Bool = false
     }
     
     // MARK: UI Elements
@@ -29,6 +31,15 @@ open class LMChatMessageCell: LMTableViewCell {
         let view = LMCoreComponents.shared.messageContentView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
+    }()
+
+    open private(set) lazy var selectedButton: LMButton = {
+        let button =  LMButton()
+            .translatesAutoresizingMaskIntoConstraints()
+        button.addTarget(self, action: #selector(selectedRowButton), for: .touchUpInside)
+        button.isHidden = true
+        button.backgroundColor = Appearance.shared.colors.clear
+        return button
     }()
     
     open override func prepareForReuse() {
@@ -40,11 +51,19 @@ open class LMChatMessageCell: LMTableViewCell {
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
     
+    @objc func selectedRowButton(_ sender: UIButton) {
+        let isSelected = !sender.isSelected
+        sender.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
+        sender.isSelected = isSelected
+        delegate?.didTappedOnSelectionButton(indexPath: currentIndexPath)
+    }
+    
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
+        contentView.addSubview(selectedButton)
 //        setSwipeGesture()
         // Add swipe gesture recognizer
         // Add pan gesture recognizer
@@ -106,6 +125,7 @@ open class LMChatMessageCell: LMTableViewCell {
             chatMessageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
+        contentView.pinSubView(subView: selectedButton)
     }
     
     
@@ -122,7 +142,7 @@ open class LMChatMessageCell: LMTableViewCell {
     // MARK: configure
     open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         chatMessageView.setDataView(data, delegate: delegate, index: index)
-
+        updateSelection(data: data)
         chatMessageView.clickedOnReaction = {[weak self] reaction in
             self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
         }
@@ -142,6 +162,12 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
             self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
         }
+    }
+    
+    func updateSelection(data: ContentModel) {
+        let isSelected = data.isSelected
+        selectedButton.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
+        selectedButton.isSelected = isSelected
     }
     
     open func resetAudio() {

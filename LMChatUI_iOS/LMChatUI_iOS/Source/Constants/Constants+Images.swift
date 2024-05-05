@@ -54,6 +54,7 @@ public extension Constants {
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
         public var videoSystemIcon = loadSystemImage(with: "video.fill")
+        public var copyIcon = loadSystemImage(with: "doc.on.doc")
         
         public var pdfIcon = loadImage(with: "pdfIcon")
         public var placeholderImage = loadImage(with: "placeholderImage")

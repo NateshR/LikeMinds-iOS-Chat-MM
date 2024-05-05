@@ -816,7 +816,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
                 let conversation = chatMessages[index]
                 let request = GetMemberRequest.builder()
-                    .uuid(memberState?.member?.uuid ?? "")
+                    .uuid(memberState?.member?.sdkClientInfo?.uuid ?? "")
                     .build()
                 let builder = conversation.toBuilder()
                                 .deletedBy(conId)
@@ -851,15 +851,18 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         }
     }
     
-    func copyConversation(conversationId: String) {
-        guard let chatMessage = self.chatMessages.first(where: {$0.id == conversationId}), !chatMessage.answer.isEmpty else {return}
-        var copiedString: String?
-        let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer)
-        copiedString = "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) "
-//        else if let chatRoom = chatMessage.chatRoom {
-//            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
-//            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
-//        }
+    func copyConversation(conversationIds: [String]) {
+        
+        var copiedString: String = ""
+        for convId in conversationIds {
+            guard let chatMessage = self.chatMessages.first(where: {$0.id == convId}), !chatMessage.answer.isEmpty else {return}
+            let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer)
+            copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
+            //        else if let chatRoom = chatMessage.chatRoom {
+            //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
+            //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
+            //        }
+        }
         
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
