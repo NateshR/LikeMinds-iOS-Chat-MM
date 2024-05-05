@@ -25,6 +25,9 @@ open class LMMessageListViewController: LMViewController {
     // MARK: UI Elements
     open private(set) lazy var bottomMessageBoxView: LMBottomMessageComposerView = {
         let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
+        view.layer.cornerRadius = 16
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.clipsToBounds = true
         view.delegate = self
         return view
     }()

@@ -87,7 +87,7 @@ public class LMExploreChatroomViewModel {
     func followUnfollow(chatroomId: String, status: Bool) {
         let request = FollowChatroomRequest.builder()
             .chatroomId(chatroomId)
-            .uuid(UserPreferences.shared.getLMUUID() ?? "")
+            .uuid(UserPreferences.shared.getClientUUID() ?? "")
             .value(status)
             .build()
         LMChatClient.shared.followChatroom(request: request) { response in

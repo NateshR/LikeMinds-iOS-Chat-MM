@@ -7,6 +7,7 @@
 
 import Foundation
 import LikeMindsChat
+import FirebaseMessaging
 
 public class LMChatMain {
     
@@ -16,6 +17,7 @@ public class LMChatMain {
 //    static var analytics: LMFeedAnalyticsProtocol = LMFeedAnalyticsTracker()
     static private(set) var isInitialized: Bool = false
     var apiKey: String = ""
+    var deviceId: String?
     public func configure(apiKey: String) {
         self.apiKey = apiKey
         LMAWSManager.shared.initialize()
@@ -23,6 +25,7 @@ public class LMChatMain {
     }
     
     public func initiateUser(username: String, userId: String, deviceId: String) throws {
+        self.deviceId = deviceId
         let request = InitiateUserRequest.builder()
             .userName(username)
             .uuid(userId)
@@ -30,18 +33,49 @@ public class LMChatMain {
             .isGuest(false)
             .apiKey(apiKey)
             .build()
-        LMChatClient.shared.initiateUser(request: request) { response in
+        LMChatClient.shared.initiateUser(request: request) {[weak self] response in
             guard response.success, response.data?.appAccess == true else {
+                print("error in initiate user: \(response.errorMessage ?? "")")
+                self?.logout()
                 return
             }
             Self.isInitialized = true
+            self?.registerDevice(deviceId: deviceId)
         }
-        
-        print("test ")
+    }
+
+    func registerDevice(deviceId: String) {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                print("FCM registration token: \(token)")
+                let request = RegisterDeviceRequest.builder()
+                    .deviceId(deviceId)
+                    .token(token)
+                    .build()
+                LMChatClient.shared.registerDevice(request: request) { response in
+                    guard response.success else {
+                        print("error in device register: \(response.errorMessage ?? "")")
+                        return
+                    }
+                }
+            }
+        }
     }
     
+    
     func logout() {
-        
+        guard let deviceId else {
+            print("error in logout: device id not present")
+            return
+        }
+        let request = LogoutRequest.builder()
+            .deviceId(deviceId)
+            .build()
+        LMChatClient.shared.logout(request: request) { response in
+            
+        }
     }
     
 }

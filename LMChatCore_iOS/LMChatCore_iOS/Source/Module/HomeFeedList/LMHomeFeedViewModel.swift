@@ -34,6 +34,7 @@ public class LMHomeFeedViewModel {
     
     func getChatrooms() {
         LMChatClient.shared.getChatrooms(withObserver: self)
+//        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }
     
     func syncChatroom() {
@@ -53,9 +54,11 @@ extension LMHomeFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
         print("Chatrooms data Intial")
-        self.chatrooms = chatrooms
-        self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
-        self.delegate?.updateHomeFeedChatroomsData()
+        if !chatrooms.isEmpty {
+            self.chatrooms = chatrooms
+            self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
+            self.delegate?.updateHomeFeedChatroomsData()
+        }
     }
     
     public func onChange(removed: [Int], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {

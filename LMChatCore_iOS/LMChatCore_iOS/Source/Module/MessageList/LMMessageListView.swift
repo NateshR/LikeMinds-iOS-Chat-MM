@@ -301,7 +301,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard item.messageType == 0 && (item.isDeleted != true) else { return nil }
+        guard (item.messageType == 0 || item.messageType == 10) && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }

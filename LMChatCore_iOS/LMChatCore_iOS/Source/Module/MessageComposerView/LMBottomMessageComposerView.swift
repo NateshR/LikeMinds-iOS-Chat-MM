@@ -427,6 +427,7 @@ open class LMBottomMessageComposerView: LMView {
         inputTextView.resignFirstResponder()
         isLinkPreviewCancel = false
         replyMessageViewContainer.isHidden = true
+        closeLinkPreview()
         contentHeightChanged()
         delegate?.composeMessage(message: message)
         

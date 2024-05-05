@@ -144,6 +144,11 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
+    open private(set) lazy var loaderView: LMLoaderView = {
+        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
     var clickedOnReaction: ((String) -> Void)?

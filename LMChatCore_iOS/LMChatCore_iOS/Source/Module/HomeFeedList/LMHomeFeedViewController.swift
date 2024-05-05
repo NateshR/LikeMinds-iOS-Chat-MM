@@ -19,6 +19,17 @@ open class LMHomeFeedViewController: LMViewController {
         return view
     }()
     
+    open private(set) lazy var profileIcon: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.clipsToBounds = true
+        image.contentMode = .scaleAspectFill
+        image.setWidthConstraint(with: 44)
+        image.setHeightConstraint(with: 44)
+        image.image = Constants.shared.images.personCircleFillIcon
+        image.cornerRadius(with: 22)
+        return image
+    }()
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -28,16 +39,17 @@ open class LMHomeFeedViewController: LMViewController {
         viewModel?.getExploreTabCount()
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
+        self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .leading)
     }
     
     // MARK: setupViews
     open override func setupViews() {
         self.view.addSubview(feedListView)
+        setupRightItemBars()
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        
         NSLayoutConstraint.activate([
             feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -46,6 +58,11 @@ open class LMHomeFeedViewController: LMViewController {
             feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
+    }
+    
+    func setupRightItemBars() {
+        let profileItem = UIBarButtonItem(customView: profileIcon)
+        navigationController?.navigationItem.rightBarButtonItems = [profileItem]
     }
 }
 

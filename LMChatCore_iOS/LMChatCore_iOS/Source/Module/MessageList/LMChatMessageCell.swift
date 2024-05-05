@@ -45,37 +45,50 @@ open class LMChatMessageCell: LMTableViewCell {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
+//        setSwipeGesture()
         // Add swipe gesture recognizer
         // Add pan gesture recognizer
 //        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
 //        addGestureRecognizer(panGesture)
     }
     
-//    @objc func handlePanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
-//        switch gestureRecognizer.state {
-//        case .began:
-//            // Save original center position
-//            originalCenter = center
-//        case .changed:
-//            // Calculate translation
-//            let translation = gestureRecognizer.translation(in: self)
-//            center = CGPoint(x: originalCenter.x + translation.x, y: originalCenter.y)
-//        case .ended:
-//            // Check if the swipe distance meets the threshold for reply
-//            if frame.origin.x < -frame.size.width / 2 {
-//                // Perform reply action when swipe distance exceeds threshold
-//                replyActionHandler?()
-//                print("perform reply action...")
-//            } else {
-//                // Return the message view to its original position if swipe distance is not enough
-//                UIView.animate(withDuration: 0.2) {
-//                    self.center = self.originalCenter
-//                }
-//            }
-//        default:
-//            break
-//        }
-//    }
+    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let translation = panGestureRecognizer.translation(in: superview!)
+            if abs(translation.x) > abs(translation.y) {
+                return true
+            }
+            return false
+        }
+        return false
+    }
+    
+    @objc func handlePanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .began:
+            // Save original center position
+            originalCenter = center
+        case .changed:
+            // Calculate translation
+            let translation = gestureRecognizer.translation(in: self)
+            center = CGPoint(x: originalCenter.x + translation.x, y: originalCenter.y)
+        case .ended:
+            // Check if the swipe distance meets the threshold for reply
+            if frame.origin.x < -frame.size.width / 3 {
+                // Perform reply action when swipe distance exceeds threshold
+                replyActionHandler?()
+                print("perform reply action...")
+                
+            } else {
+                // Return the message view to its original position if swipe distance is not enough
+                UIView.animate(withDuration: 0.2) {
+                    self.center = self.originalCenter
+                }
+            }
+        default:
+            break
+        }
+    }
     
     
     // MARK: setupLayouts
@@ -137,6 +150,50 @@ open class LMChatMessageCell: LMTableViewCell {
     
     open func seekSlider(to position: Float, url: String) {
         chatMessageView.seekSlider(to: position, url: url)
+    }
+    
+    
+    //declare the `UISwipeGestureRecognizer`
+    let swipeGesture = UISwipeGestureRecognizer()
+    
+    //a call back to notify the swipe in `cellForRowAt` as follow.
+    var replyCallBack : ( () -> Void)?
+    
+    func setSwipeGesture(){
+        // Add the swipe gesture and set the direction to the right or left according to your needs
+        swipeGesture.direction = .right
+        contentView.addGestureRecognizer(swipeGesture)
+        
+        // Add a target to the swipe gesture to handle the swipe
+        swipeGesture.addTarget(self, action: #selector(handleSwipe(_:)))
+    }
+    
+    
+    @objc func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        // Animate the action view onto the screen when the user swipes right
+        if gesture.direction == .right {
+            UIView.animate(withDuration: 0.15) {
+                self.chatMessageView.transform = CGAffineTransform(translationX: self.contentView.frame.width / 2.5, y: 0)
+                
+                // Schedule a timer to restore the cell after 0.2 seconds or change it according to your needs
+                Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { (_) in
+                    UIView.animate(withDuration: 0.1) {
+                        self.chatMessageView.transform = .identity
+                        
+                        //callback to notify in cellForRowAt
+                        self.replyCallBack?()
+                        
+                        //your code when
+                    }
+                }
+            }
+        } else {
+            // Animate the action view off the screen when the user swipes left
+            
+            UIView.animate(withDuration: 0.3) {
+                self.chatMessageView.transform = .identity
+            }
+        }
     }
 }
 

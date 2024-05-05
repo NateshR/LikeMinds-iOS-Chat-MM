@@ -104,9 +104,10 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
         let dateFormatter = DateFormatter()
         
         if Calendar.current.isDateInToday(date) {
-            dateFormatter.dateFormat = "hh:mm a"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
+            dateFormatter.dateFormat = "HH:MM"
+//            dateFormatter.dateFormat = "hh:mm a"
+//            dateFormatter.amSymbol = "AM"
+//            dateFormatter.pmSymbol = "PM"
             return dateFormatter.string(from: date)
         } else if Calendar.current.isDateInYesterday(date) {
             return "Yesterday"

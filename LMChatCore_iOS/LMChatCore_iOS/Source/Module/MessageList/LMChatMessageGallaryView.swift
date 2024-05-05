@@ -163,6 +163,13 @@ open class LMChatMessageGallaryView: LMView {
         return view
     }()
     
+    
+    open private(set) lazy var loaderView: LMLoaderView = {
+        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
+    
     var viewData: [ContentModel]?
     var onClickAttachment: ((Int) -> Void)?
     
@@ -172,6 +179,8 @@ open class LMChatMessageGallaryView: LMView {
         super.setupLayouts()
         
         pinSubView(subView:previewsContainerView)
+        loaderView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        loaderView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         
     }
     
@@ -179,7 +188,8 @@ open class LMChatMessageGallaryView: LMView {
     open override func setupViews() {
         super.setupViews()
         addSubview(previewsContainerView)
-        
+        addSubview(loaderView)
+
         previewsContainerView.addArrangedSubview(topPreviewsContainerView)
         
         topPreviewsContainerView.addArrangedSubview(itemSpots[0])
