@@ -12,8 +12,8 @@ import LMChatUI_iOS
 open class LMMessageLoading: LMTableViewCell {
     
     
-    open private(set) lazy var messageView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var messageView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 80)
         view.cornerRadius(with: 12)
@@ -21,8 +21,8 @@ open class LMMessageLoading: LMTableViewCell {
         return view
     }()
     
-    open private(set) lazy var titleView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var titleView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 14)
         view.cornerRadius(with: 7)
@@ -30,8 +30,8 @@ open class LMMessageLoading: LMTableViewCell {
         return view
     }()
     
-    open private(set) lazy var subtitleView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var subtitleView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 12)
         view.cornerRadius(with: 6)
@@ -51,7 +51,6 @@ open class LMMessageLoading: LMTableViewCell {
 //        containerView.addSubview(titleView)
 //        containerView.addSubview(subtitleView)
         
-        messageView.startAnimating()
 //        titleView.startAnimating()
 //        subtitleView.startAnimating()
     }

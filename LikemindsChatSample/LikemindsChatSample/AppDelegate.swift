@@ -7,8 +7,8 @@
 
 import UIKit
 import LMChatCore_iOS
-import FirebaseMessaging
-import FirebaseCore
+//import FirebaseMessaging
+//import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -24,8 +24,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            .isGuest(false)
 //            .deviceId(UIDevice.current.identifierForVendor?.uuidString ?? "")
         LMCoreComponents.shared.homeFeedChatroomView = CustomChatroomView.self
-        FirebaseApp.configure()
-        Messaging.messaging().delegate = self
+//        FirebaseApp.configure()
+//        Messaging.messaging().delegate = self
         registerForPushNotifications(application: application)
 
         try? LMChatMain.shared.initiateUser(username: "DEFCON", userId: "53b0176d-246f-4954-a746-9de96a572cc6", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "")
@@ -74,9 +74,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     
 }
 
-extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
-    }
-    
-}
+//extension AppDelegate: MessagingDelegate {
+//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+//        print("Firebase registration token: \(String(describing: fcmToken))")
+//    }
+//    
+//}

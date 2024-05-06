@@ -43,7 +43,16 @@ public class SearchListViewController: LMViewController {
     
     open override func setupViews() {
         super.setupViews()
-        view.addSubviewWithDefaultConstraints(tableView)
+        view.addSubview(tableView)
+    }
+    
+    open override func setupLayouts() {
+        super.setupLayouts()
+        
+        tableView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 0),
+                                bottom: (view.safeAreaLayoutGuide.bottomAnchor, 0),
+                                leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
+                                trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
     }
     
     open override func viewDidLoad() {
@@ -119,9 +128,10 @@ extension SearchListViewController: UISearchBarDelegate {
             return
         }
         
+        tableView.backgroundView = LMChatSearchShimmerView(frame: tableView.bounds)
+        
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-            self?.tableView.backgroundView = nil
             self?.viewmodel?.searchList(with: text)
         }
     }
@@ -142,18 +152,14 @@ extension SearchListViewController: UISearchBarDelegate {
 
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
-    public func showHideFooterLoader(isShow: Bool) {
-        tableView.showHideFooterLoader(isShow: isShow)
-    }
-    
-    public func updateSearchList(with data: [ContentModel]) {
-        tableView.backgroundView = nil
+   public func updateSearchList(with data: [ContentModel]) {
+       tableView.backgroundView = data.isEmpty ? SearchListNoResultView(frame: tableView.bounds) : nil
+        showHideFooterLoader(isShow: false)
         self.searchResults = data
         tableView.reloadData()
     }
     
-    public func showNoDataUI() {
-        let noUIView = SearchListNoResultView(frame: tableView.bounds)
-        tableView.backgroundView = noUIView
+    public func showHideFooterLoader(isShow: Bool) {
+        tableView.showHideFooterLoader(isShow: isShow)
     }
 }

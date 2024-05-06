@@ -11,7 +11,6 @@ import Foundation
 public protocol SearchListViewProtocol: AnyObject {
     func updateSearchList(with data: [SearchListViewController.ContentModel])
     func showHideFooterLoader(isShow: Bool)
-    func showNoDataUI()
 }
 
 final public class SearchListViewModel {
@@ -297,13 +296,7 @@ extension SearchListViewModel {
             dataModel.append(.init(title: "Messages", data: sectionData))
         }
         
-        
-        delegate?.showHideFooterLoader(isShow: false)
-        if dataModel.isEmpty {
-            delegate?.showNoDataUI()
-        } else {
-            delegate?.updateSearchList(with: dataModel)
-        }
+        delegate?.updateSearchList(with: dataModel)
     }
     
     private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [SearchGroupCell.ContentModel] {

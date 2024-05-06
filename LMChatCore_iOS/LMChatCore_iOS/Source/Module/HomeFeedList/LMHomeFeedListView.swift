@@ -161,7 +161,6 @@ extension LMHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
             }
         case .shimmer:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.homeFeedShimmerCell) {
-                cell.profileView.startAnimating()
                 return cell
             }
         }

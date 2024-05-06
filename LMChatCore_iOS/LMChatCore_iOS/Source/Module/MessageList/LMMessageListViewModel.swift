@@ -8,7 +8,6 @@
 import Foundation
 import LMChatUI_iOS
 import LikeMindsChat
-import FirebaseDatabase
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
