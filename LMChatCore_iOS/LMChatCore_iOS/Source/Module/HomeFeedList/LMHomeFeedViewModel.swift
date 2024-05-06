@@ -19,6 +19,7 @@ public class LMHomeFeedViewModel {
     weak var delegate: LMHomeFeedViewModelProtocol?
     var chatrooms: [Chatroom] = []
     var exploreTabCountData: GetExploreTabCountResponse?
+    var memberProfile: User?
     
     init(_ viewController: LMHomeFeedViewModelProtocol) {
         self.delegate = viewController
@@ -32,8 +33,14 @@ public class LMHomeFeedViewModel {
         return viewController
     }
     
+    func fetchUserProfile() {
+        memberProfile = LMChatClient.shared.getLoggedInUser()
+    }
+    
     func getChatrooms() {
+        fetchUserProfile()
         LMChatClient.shared.getChatrooms(withObserver: self)
+//        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }
     
     func syncChatroom() {
@@ -53,9 +60,11 @@ extension LMHomeFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
         print("Chatrooms data Intial")
-        self.chatrooms = chatrooms
-        self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
-        self.delegate?.updateHomeFeedChatroomsData()
+        if !chatrooms.isEmpty {
+            self.chatrooms = chatrooms
+            self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
+            self.delegate?.updateHomeFeedChatroomsData()
+        }
     }
     
     public func onChange(removed: [Int], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {

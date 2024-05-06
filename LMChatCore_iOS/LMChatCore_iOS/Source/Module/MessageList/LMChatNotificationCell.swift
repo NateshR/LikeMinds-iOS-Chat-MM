@@ -14,6 +14,8 @@ open class LMChatNotificationCell: LMTableViewCell {
     
     public struct ContentModel {
         public let message: LMMessageListView.ContentModel.Message?
+        public let loggedInUserTag: String
+        public let loggedInUserReplaceTag: String
     }
     
 //    open private(set) lazy var infoLabel: LMLabel = {
@@ -38,7 +40,10 @@ open class LMChatNotificationCell: LMTableViewCell {
         label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
+        label.textContainer.maximumNumberOfLines = 2
+        label.textContainer.lineBreakMode = .byTruncatingTail
         label.isEditable = false
+        label.tintColor = Appearance.shared.colors.white
         label.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         label.cornerRadius(with: 12)
         label.text = ""
@@ -67,11 +72,11 @@ open class LMChatNotificationCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            infoLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
+            infoLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 6),
             infoLabel.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
             infoLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16),
             infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -5)
+            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -6)
         ])
     }
     
@@ -87,7 +92,8 @@ open class LMChatNotificationCell: LMTableViewCell {
     
     // MARK: configure
     open func setData(with data: ContentModel) {
-        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.shared.fonts.subHeadingFont2, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
+        let message = (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: data.loggedInUserTag, with: data.loggedInUserReplaceTag)
+        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: message, font: Appearance.shared.fonts.subHeadingFont2, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
     }
 }
 

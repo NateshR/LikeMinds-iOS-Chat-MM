@@ -17,12 +17,13 @@ open class LMReactionTitleCell: LMCollectionViewCell {
  
     lazy var titleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.textColor = Appearance.shared.colors.previewSubtitleTextColor
         return label
     }()
     
     lazy var selectedView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .blue
+        view.backgroundColor = Appearance.shared.colors.linkColor
         return view
     }()
     
@@ -67,7 +68,12 @@ open class LMReactionTitleCell: LMCollectionViewCell {
     }
     
     func configure(data: ContentModel) {
-        titleLabel.text = "\(data.title) \(data.count)"
+        if data.title.lowercased() == "all" {
+            titleLabel.text = "\(data.title) (\(data.count))"
+        } else {
+            titleLabel.text = "\(data.title) \(data.count)"
+        }
         selectedView.isHidden = !data.isSelected
+        titleLabel.textColor = data.isSelected ? Appearance.shared.colors.linkColor : Appearance.shared.colors.previewSubtitleTextColor
     }
 }

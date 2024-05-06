@@ -22,18 +22,20 @@ final public  class LMReactionViewModel {
     var reactionList: [LMReactionViewCell.ContentModel] = []
     var conversationId: String?
     var chatroomId: String?
+    var selectedReaction: String?
     
     init(delegate: ReactionViewModelProtocol?) {
         self.delegate = delegate
     }
     
-    public static func createModule(reactions: [Reaction], conversationId: String?, chatroomId: String?) throws -> LMReactionViewController? {
+    public static func createModule(reactions: [Reaction], selected: String?, conversationId: String?, chatroomId: String?) throws -> LMReactionViewController? {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         let vc = LMReactionViewController()
         let viewmodel = Self.init(delegate: vc)
         viewmodel.reactionsData = reactions
         viewmodel.conversationId = conversationId
         viewmodel.chatroomId = chatroomId
+        viewmodel.selectedReaction = selected
         vc.viewModel = viewmodel
         return vc
     }
@@ -43,13 +45,18 @@ final public  class LMReactionViewModel {
     }
     
     func fetchReactions() {
+        let reactionsOnly = reactionsData.map { $0.reaction }.unique()
         reactionsByGroup = Dictionary(grouping: reactionsData, by: ({$0.reaction}))
         reactions.append(.init(title: "All", count: reactionsData.count, isSelected: true))
-        for react in reactionsByGroup.keys {
+        for react in reactionsOnly {
             reactions.append(.init(title: react, count: reactionsByGroup[react]?.count ?? 0, isSelected: false))
         }
         reactionList = reactionsData.map({.init(image: $0.member?.imageUrl, username: $0.member?.name ?? "", isSelfReaction: (($0.member?.sdkClientInfo?.uuid ?? "") == UserPreferences.shared.getClientUUID()), reaction: $0.reaction)})
-        delegate?.showData(with: reactions, cells: reactionList)
+        if let selectedReaction, !selectedReaction.isEmpty {
+            fetchReactionBy(reaction: selectedReaction)
+        } else {
+            delegate?.showData(with: reactions, cells: reactionList)
+        }
     }
     
     func fetchReactionBy(reaction: String) {
@@ -81,7 +88,6 @@ final public  class LMReactionViewModel {
                 print(response.errorMessage)
                 return
             }
-            
             (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
         }
     }
@@ -91,11 +97,12 @@ final public  class LMReactionViewModel {
         let request = DeleteReactionRequest.builder()
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.deleteReaction(request: request) { response in
+        LMChatClient.shared.deleteReaction(request: request) {[weak self] response in
             guard response.success else {
                 print(response.errorMessage)
                 return
             }
+            (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
         }
     }
 }

@@ -144,6 +144,11 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
+    open private(set) lazy var loaderView: LMLoaderView = {
+        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
     var clickedOnReaction: ((String) -> Void)?
@@ -188,15 +193,15 @@ open class LMChatMessageContentView: LMView {
         super.setupLayouts()
         
         NSLayoutConstraint.activate([
-            reactionContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -2),
+            reactionContainerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
             reactionContainerStackView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
             reactionContainerStackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
             chatProfileImageContainerStackView.topAnchor.constraint(equalTo: topAnchor),
-            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionContainerStackView.topAnchor, constant: 4),
+            chatProfileImageContainerStackView.bottomAnchor.constraint(equalTo: reactionContainerStackView.topAnchor, constant: 2),
             chatProfileImageContainerStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            bubbleView.topAnchor.constraint(equalTo: topAnchor),
+            bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
-            bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -4),
+            bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
             timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
             timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
@@ -214,7 +219,6 @@ open class LMChatMessageContentView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         bubble.backgroundColor = Appearance.shared.colors.clear
 //        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-//        
 //        bubble.addGestureRecognizer(panGesture)
         return bubble
     }
@@ -255,7 +259,7 @@ open class LMChatMessageContentView: LMView {
             bubbleTrailingConstraint?.constant = 0
             usernameLabel.isHidden = true
         } else {
-            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""))
+            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy ?? ""))
             chatProfileImageView.isHidden = false
             bubbleLeadingConstraint?.constant = 00
             bubbleTrailingConstraint?.constant = -40

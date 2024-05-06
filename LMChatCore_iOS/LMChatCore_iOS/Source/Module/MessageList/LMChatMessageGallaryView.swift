@@ -163,6 +163,14 @@ open class LMChatMessageGallaryView: LMView {
         return view
     }()
     
+    
+    open private(set) lazy var loaderView: LMLoaderView = {
+        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+        view.isHidden = true
+        return view
+    }()
+    
+    
     var viewData: [ContentModel]?
     var onClickAttachment: ((Int) -> Void)?
     
@@ -172,6 +180,8 @@ open class LMChatMessageGallaryView: LMView {
         super.setupLayouts()
         
         pinSubView(subView:previewsContainerView)
+        loaderView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        loaderView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         
     }
     
@@ -179,7 +189,8 @@ open class LMChatMessageGallaryView: LMView {
     open override func setupViews() {
         super.setupViews()
         addSubview(previewsContainerView)
-        
+        addSubview(loaderView)
+
         previewsContainerView.addArrangedSubview(topPreviewsContainerView)
         
         topPreviewsContainerView.addArrangedSubview(itemSpots[0])
@@ -209,17 +220,19 @@ open class LMChatMessageGallaryView: LMView {
                 return
             }
             itemSpots[index].isHidden = false
-            itemSpots[index].setData(imageUrl)
+            
             if item.fileType == "video" {
+                itemSpots[index].setData(imageUrl, withPlaceholder: nil)
                 itemSpots[index].playIconImage.isHidden = false
             } else {
+                itemSpots[index].setData(imageUrl)
                 itemSpots[index].playIconImage.isHidden = true
             }
         }
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
-        guard let tag = gesture.view?.tag else { return }
+        guard viewData?.first?.fileType?.lowercased() != "gif", let tag = gesture.view?.tag else { return }
         onClickAttachment?(tag)
     }
     
@@ -235,8 +248,9 @@ extension LMChatMessageGallaryView {
             let imageView = LMImageView()
             imageView.contentMode = .scaleAspectFill
             imageView.layer.masksToBounds = true
-            imageView.image = UIImage(systemName: "photo")
-            imageView.backgroundColor = .black
+            imageView.image = Constants.shared.images.galleryIcon
+            imageView.tintColor = Appearance.shared.colors.gray51
+            imageView.backgroundColor = Appearance.shared.colors.black
             return imageView
                 .translatesAutoresizingMaskIntoConstraints()
         }()
@@ -246,12 +260,13 @@ extension LMChatMessageGallaryView {
             image.translatesAutoresizingMaskIntoConstraints = false
             image.contentMode = .scaleAspectFill
             image.clipsToBounds = true
-            image.backgroundColor = .clear
+            image.backgroundColor = Appearance.shared.colors.white
             image.isUserInteractionEnabled = false
-            image.image = Constants.shared.images.playIcon
+            image.image = Constants.shared.images.playCircleFilled
             image.setWidthConstraint(with: 40)
             image.setHeightConstraint(with: 40)
-            image.tintColor = .white
+            image.cornerRadius(with: 20)
+            image.tintColor = Appearance.shared.colors.black.withAlphaComponent(0.8)
             return image
         }()
         
@@ -295,8 +310,8 @@ extension LMChatMessageGallaryView {
             playIconImage.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         }
         
-        func setData(_ url: String) {
-            imageView.kf.setImage(with: URL(string: url), placeholder: Constants.shared.images.placeholderImage)
+        func setData(_ url: String, withPlaceholder placeholder: UIImage? = Constants.shared.images.galleryIcon) {
+            imageView.kf.setImage(with: URL(string: url), placeholder: placeholder)
         }
         
 //        override open func updateContent() {

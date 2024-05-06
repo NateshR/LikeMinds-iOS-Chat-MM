@@ -226,14 +226,14 @@ open class LMViewController: UIViewController {
         if let title,
            !title.isEmpty {
             navigationHeaderTitleLabel.text = title
-            navigationHeaderTitleLabel.textColor = Appearance.shared.colors.gray51
+            navigationHeaderTitleLabel.textColor = Appearance.shared.colors.black
             navigationHeaderTitleLabel.font = Appearance.shared.fonts.navigationTitleFont
             titleStackView.addArrangedSubview(navigationHeaderTitleLabel)
         }
         if let subtitle,
            !subtitle.isEmpty {
             navigationHeaderSubtitleLabel.text = subtitle
-            navigationHeaderSubtitleLabel.textColor = Appearance.shared.colors.gray51
+            navigationHeaderSubtitleLabel.textColor = Appearance.shared.colors.textColor
             navigationHeaderSubtitleLabel.font = Appearance.shared.fonts.navigationSubtitleFont
             titleStackView.addArrangedSubview(navigationHeaderSubtitleLabel)
         }

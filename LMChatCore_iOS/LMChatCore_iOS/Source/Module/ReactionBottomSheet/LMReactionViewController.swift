@@ -37,6 +37,7 @@ open class LMReactionViewController: LMViewController {
         table.dataSource = self
         table.delegate = self
         table.register(LMReactionViewCell.self, forCellReuseIdentifier: "reactionView")
+        table.separatorStyle = .none
         return table
     }()
     
@@ -52,6 +53,7 @@ open class LMReactionViewController: LMViewController {
     lazy var titleLabel: LMLabel = {
         let label = LMLabel()
         label.text = "Reactions"
+        label.font = Appearance.shared.fonts.textFont1
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -96,7 +98,7 @@ open class LMReactionViewController: LMViewController {
             containerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 24),
             titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16),
             
             collectionView.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),

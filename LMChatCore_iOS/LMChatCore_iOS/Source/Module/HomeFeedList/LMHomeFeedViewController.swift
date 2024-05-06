@@ -19,6 +19,16 @@ open class LMHomeFeedViewController: LMViewController {
         return view
     }()
     
+    open private(set) lazy var profileIcon: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.clipsToBounds = true
+        image.contentMode = .scaleAspectFill
+        image.setWidthConstraint(with: 36)
+        image.setHeightConstraint(with: 36)
+        image.cornerRadius(with: 18)
+        return image
+    }()
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -28,16 +38,21 @@ open class LMHomeFeedViewController: LMViewController {
         viewModel?.getExploreTabCount()
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
+        self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .leading)
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name ?? ""))
     }
     
     // MARK: setupViews
     open override func setupViews() {
         self.view.addSubview(feedListView)
+        setupRightItemBars()
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        
         NSLayoutConstraint.activate([
             feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -46,6 +61,13 @@ open class LMHomeFeedViewController: LMViewController {
             feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
+    }
+    
+    func setupRightItemBars() {
+        let profileItem = UIBarButtonItem(customView: profileIcon)
+        let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: nil)
+        searchItem.tintColor = Appearance.shared.colors.textColor
+        navigationItem.rightBarButtonItems = [profileItem, searchItem]
     }
 }
 
@@ -56,13 +78,11 @@ extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
             LMHomeFeedChatroomCell.ContentModel(chatroom: chatroom)
         })
         feedListView.updateChatroomsData(chatroomData: chatrooms)
-        feedListView.reloadData()
     }
     
     public func updateHomeFeedExploreCountData() {
         guard let countData = viewModel?.exploreTabCountData else { return }
         feedListView.updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
-        feedListView.reloadData()
     }
     
     
@@ -81,6 +101,8 @@ extension LMHomeFeedViewController: LMHomFeedListViewDelegate {
             guard let viewModel else { return }
             let chatroom = viewModel.chatrooms[indexPath.row]
             NavigationScreen.shared.perform(.chatroom(chatroomId: chatroom.id), from: self, params: nil)
+        default:
+            break
         }
     }
     

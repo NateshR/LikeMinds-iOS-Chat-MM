@@ -23,6 +23,8 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
     func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMMessageListView.ContentModel.Message)
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
+    func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu
+    func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
 }
 
 public enum LMMessageActionType: String {
@@ -104,12 +106,14 @@ open class LMMessageListView: LMView {
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
         table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
+        table.register(LMUIComponents.shared.messageLoadingCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
-        table.backgroundColor = .gray
+        table.keyboardDismissMode = .onDrag
+        table.contentInset = .init(top: 10, left: 0, bottom: 14, right: 0)
         return table
     }()
     
@@ -120,10 +124,14 @@ open class LMMessageListView: LMView {
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
     public var audioIndex: IndexPath?
+    public var currentLoggedInUserTagFormat: String = ""
+    public var currentLoggedInUserReplaceTagFormat: String = ""
     
     let reactionHeight: CGFloat = 50.0
     let spaceReactionHeight: CGFloat = 10.0
     let menuHeight: CGFloat = 200
+    var isMultipleSelectionEnable: Bool = false
+    var selectedItems: [ContentModel.Message] = []
     
     // MARK: setupViews
     open override func setupViews() {
@@ -171,6 +179,11 @@ open class LMMessageListView: LMView {
     }
     
     open func reloadData() {
+        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        tableView.reloadData()
+    }
+    
+    func justReloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         tableView.reloadData()
     }
@@ -228,14 +241,20 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let item = tableSections[indexPath.section].data[indexPath.row]
         
         switch item.messageType {
-        case 0:
+        case 0, 10:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                cell.setData(with: .init(message: item), delegate: self, index: indexPath)
+                let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+                cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
                 cell.delegate = self
+                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
+                    cell.selectedButton.isHidden = false
+                } else {
+                    cell.selectedButton.isHidden = true
+                }
                 return cell
             }
-        case 1:
+        case 111:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
@@ -243,7 +262,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             }
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
-                cell.setData(with: .init(message: item))
+                cell.setData(with: .init(message: item, loggedInUserTag: currentLoggedInUserTagFormat, loggedInUserReplaceTag: currentLoggedInUserReplaceTagFormat))
                 return cell
             }
         }
@@ -253,7 +272,9 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.delegate?.didTapOnCell(indexPath: indexPath)
+        if !self.isMultipleSelectionEnable {
+            self.delegate?.didTapOnCell(indexPath: indexPath)
+        }
     }
     
     open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -264,6 +285,48 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         }
         return LMView()
     }
+    
+    //Swipe to reply
+    public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false && !isMultipleSelectionEnable else { return nil }
+        guard let replyAction = delegate?.trailingSwipeAction(forRowAtIndexPath: indexPath) else { return nil }
+        let swipeConfig = UISwipeActionsConfiguration(actions: [replyAction])
+        swipeConfig.performsFirstActionWithFullSwipe = true
+        return swipeConfig
+    }
+    
+    public func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            tableView.isEditing = false
+        }
+    }
+    
+    public func tableView(_ tableView: UITableView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
+        
+        return true
+    }
+    
+    public func tableView(_ tableView: UITableView, didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
+//        self.setEditing(true, animated: true)
+    }
+    
+    public func tableViewDidEndMultipleSelectionInteraction(_ tableView: UITableView) {
+    }
+    
+    public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false else { return false }
+        
+//        if dataProvider?.currentChatRoom?.type == .introductions {
+            // To block left/right swipe gesture
+//            return false
+//        } else {
+            return true
+//        }
+    }
+    
     
     // this delegate is called when the scrollView (i.e your UITableView) will start scrolling
     open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -296,11 +359,11 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard item.messageType == 0 && (item.isDeleted != true) else { return nil }
+        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10) && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
-            return self.createContextMenu(indexPath, item: item)
+            return delegate?.getMessageContextMenu(indexPath, item: item)//self.createContextMenu(indexPath, item: item)
         }
     }
     
@@ -370,7 +433,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
 //        reactionView.widthAnchor.constraint(equalToConstant: 50*4).isActive = true
         reactionView.heightAnchor.constraint(equalToConstant: reactionHeight).isActive = true
         
-        let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y)
+        let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y + 26)
         let previewTarget = UIPreviewTarget(container: tableView, center: centerPoint)
         let parameters = UIPreviewParameters()
         parameters.backgroundColor = .clear
@@ -383,8 +446,11 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     func makeTargetedDismissPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
         guard let identifier = configuration.identifier as? String else { return nil }
-        guard let row = Int(identifier) else { return nil }
-        guard let cell = tableView.cellForRow(at: .init(row: row, section: 0)) as? LMChatMessageCell else { return nil }
+        let values = identifier.components(separatedBy: ",")
+        guard let row = Int(values.first ?? "0") else { return nil }
+        guard let section = Int(values.last ?? "0") else { return nil }
+        let indexPath = IndexPath(row: row, section: section)
+        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,
@@ -402,27 +468,47 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     @available(iOS 13.0, *)
     func createContextMenu(_ indexPath: IndexPath, item: ContentModel.Message) -> UIMenu {
+        var actions: [UIAction] = []
         let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
                                    image: UIImage(systemName: "arrow.down.square")) { [weak self] action in
             self?.delegate?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
-        
-        let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                  image: UIImage(systemName: "pencil")) { [weak self] action in
-            self?.delegate?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
-        }
+        actions.append(replyAction)
         
         let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
                                   image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
             self?.delegate?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
         }
-        
-        let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
-                                    image: UIImage(systemName: "trash"),
-                                    attributes: .destructive) { [weak self] action in
-            self?.delegate?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
+        actions.append(copyAction)
+
+        if item.isIncoming == false {
+            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                      image: UIImage(systemName: "pencil")) { [weak self] action in
+                self?.delegate?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
+            }
+            
+            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
+                                        image: UIImage(systemName: "trash"),
+                                        attributes: .destructive) { [weak self] action in
+                self?.delegate?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
+            }
+            actions.append(editAction)
+            actions.append(deleteAction)
+        } else {
+            let reportAction = UIAction(title: NSLocalizedString("Report message", comment: "")) { [weak self] action in
+                self?.delegate?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
+            }
+            actions.append(reportAction)
         }
-        return UIMenu(title: "", children: [replyAction, editAction, copyAction, deleteAction])
+        
+        let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
+                                  image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
+            self?.isMultipleSelectionEnable = true
+            self?.delegate?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
+        }
+        actions.append(selectAction)
+        
+        return UIMenu(title: "", children: actions)
     }
 }
 
@@ -451,6 +537,18 @@ extension LMMessageListView: LMChatAudioProtocol {
 }
 
 extension LMMessageListView: LMChatMessageCellDelegate {
+    
+    public func didTappedOnSelectionButton(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        let itemIndex = selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+        if let itemIndex {
+            self.selectedItems.remove(at: itemIndex)
+        } else {
+            self.selectedItems.append(item)
+        }
+    }
+    
     public func onClickReplyOfMessage(indexPath: IndexPath?) {
         guard let indexPath else { return }
         delegate?.didTappedOnReplyPreviewOfMessage(indexPath: indexPath)

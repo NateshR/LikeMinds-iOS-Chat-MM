@@ -55,6 +55,7 @@ public struct LMUIComponents {
     //MARK: LMHomeFeed
     public var homeFeedChatroomCell: LMHomeFeedChatroomCell.Type = LMHomeFeedChatroomCell.self
     public var homeFeedExploreTabCell: LMHomeFeedExploreTabCell.Type = LMHomeFeedExploreTabCell.self
+    public var homeFeedShimmerCell: LMHomeFeedLoading.Type = LMHomeFeedLoading.self
     
     public var exploreChatroomCell: LMExploreChatroomCell.Type = LMExploreChatroomCell.self 
     
@@ -67,4 +68,5 @@ public struct LMUIComponents {
     public var chatMessageCell: LMChatMessageCell.Type = LMChatMessageCell.self
     public var chatNotificationCell: LMChatNotificationCell.Type = LMChatNotificationCell.self
     public var chatroomHeaderMessageCell: LMChatroomHeaderMessageCell.Type = LMChatroomHeaderMessageCell.self
+    public var messageLoadingCell: LMMessageLoading.Type = LMMessageLoading.self
 }

@@ -50,10 +50,12 @@ public extension Constants {
         public var personIcon = loadSystemImage(with: "person")
         public var checkmarkIconFilled = loadSystemImage(with: "checkmark.circle.fill")
         public var plusIcon = loadSystemImage(with: "plus")
+        public var photoPlusIcon = loadSystemImage(with: "photo.badge.plus")
         public var notificationBell = loadSystemImage(with: "bell.fill")
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
         public var videoSystemIcon = loadSystemImage(with: "video.fill")
+        public var copyIcon = loadSystemImage(with: "doc.on.doc")
         
         public var pdfIcon = loadImage(with: "pdfIcon")
         public var placeholderImage = loadImage(with: "placeholderImage")
@@ -61,6 +63,7 @@ public extension Constants {
         public var videoIcon = loadImage(with: "videoIcon")
         public var paperclipIcon = loadImage(with: "paperclip")
         public var createPostIcon = loadImage(with: "createPostIcon")
+        public var gifBadgeIcon = loadImage(with: "gifBadge")
         
         public var lockFillIcon = loadSystemImage(with: "lock.fill")
         public var annoucementIcon = loadSystemImage(with: "speaker.zzz.fill")
@@ -84,5 +87,8 @@ public extension Constants {
         public var stopRecordButton = loadSystemImage(with: "stop.circle")
         public var deleteIcon = loadSystemImage(with: "trash.fill")
         public var playFilled = loadSystemImage(with: "play.fill")
+        public var playCircleFilled = loadSystemImage(with: "play.circle.fill")
+        public var replyIcon = loadSystemImage(with: "arrowshape.turn.up.backward.fill")
+        public var searchIcon = loadSystemImage(with: "magnifyingglass")
     }
 }

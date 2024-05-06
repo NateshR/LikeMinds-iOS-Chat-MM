@@ -214,9 +214,9 @@ open class LMParticipantView: LMView {
         nameLabel.text = data.name
         designationLabel.text = data.designationDetail
         customTitle.text = data.customTitle
-        let placeholder = Constants.Images.shared.placeholderImage
+        let placeholder = UIImage.generateLetterImage(name: data.name)
         if let imageUrl = data.profileImageUrl, let url = URL(string: imageUrl) {
-            profileImageView.kf.setImage(with: url)
+            profileImageView.kf.setImage(with: url, placeholder: placeholder)
         } else {
             profileImageView.image = placeholder
         }

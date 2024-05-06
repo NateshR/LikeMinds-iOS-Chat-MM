@@ -7,6 +7,8 @@
 
 import Foundation
 import LMChatUI_iOS
+import AVFoundation
+import AVKit
 
 public protocol LMChatAttachmentViewDelegate: AnyObject {
     func postConversationWithAttchments(message: String?, attachments: [MediaPickerModel])
@@ -19,14 +21,14 @@ open class LMChatAttachmentViewController: LMViewController {
     
     open private(set) lazy var bottomMessageBoxView: LMAttachmentBottomMessageView = {
         let view = LMAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
+        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         view.delegate = self
         return view
     }()
     
     open private(set) lazy var imageViewCarouselContainer: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
+        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         return view
     }()
     
@@ -40,6 +42,14 @@ open class LMChatAttachmentViewController: LMViewController {
         let view = LMZoomImageViewContainer()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = backgroundColor
+        return view
+    }()
+    
+    open private(set) lazy var videoImageViewContainer: LMChatMediaVideoPreview = {
+        let view = LMChatMediaVideoPreview()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = backgroundColor
+        view.isHidden = true
         return view
     }()
     
@@ -98,20 +108,33 @@ open class LMChatAttachmentViewController: LMViewController {
         return collection
     }()
     
-    public var viewmodel: LMChatAttachmentViewModel?
-    public var mediaCellData: [MediaPickerModel] = []
-    private var selectedMedia: MediaPickerModel?
+    public var viewModel: LMChatAttachmentViewModel?
     var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .black
         // Do any additional setup after loading the view.
         setupViews()
         setupLayouts()
-        
-        addMoreAttachment()
-        bottomMessageBoxView.inputTextView.chatroomId = viewmodel?.chatroomId ?? ""
+        setupAppearance()
+        openPicker()
+        bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomId ?? ""
+    }
+    
+    func openPicker() {
+        if let cellData = viewModel?.mediaCellData, !cellData.isEmpty {
+            mediaCollectionView.reloadData()
+            editButton.isHidden = true
+            bottomMessageBoxView.attachmentButton.isHidden = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if self.zoomableImageViewContainer.imageView.image == nil {
+                    self.viewModel?.selectedMedia = cellData[0]
+                    self.zoomableImageViewContainer.configure(with: cellData[0].url)
+                }
+            }
+        } else {
+            addMoreAttachment()
+        }
     }
     
     // MARK: setupViews
@@ -119,6 +142,7 @@ open class LMChatAttachmentViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(imageActionsContainer)
         self.view.addSubview(zoomableImageViewContainer)
+        self.view.addSubview(videoImageViewContainer)
         self.view.addSubview(bottomMessageBoxView)
         self.view.addSubview(imageViewCarouselContainer)
         imageViewCarouselContainer.addSubview(mediaCollectionView)
@@ -144,6 +168,12 @@ open class LMChatAttachmentViewController: LMViewController {
             zoomableImageViewContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             zoomableImageViewContainer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
             zoomableImageViewContainer.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            
+            videoImageViewContainer.leadingAnchor.constraint(equalTo: zoomableImageViewContainer.leadingAnchor),
+            videoImageViewContainer.trailingAnchor.constraint(equalTo: zoomableImageViewContainer.trailingAnchor),
+            videoImageViewContainer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
+            videoImageViewContainer.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            
             imageViewCarouselContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageViewCarouselContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageViewCarouselContainer.heightAnchor.constraint(equalToConstant: 70),
@@ -151,7 +181,12 @@ open class LMChatAttachmentViewController: LMViewController {
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
-        imageViewCarouselContainer.pinSubView(subView: mediaCollectionView)
+        imageViewCarouselContainer.pinSubView(subView: mediaCollectionView, padding: .init(top: 0, left: 6, bottom: 0, right: -6))
+    }
+    
+    open override func setupAppearance() {
+        super.setupAppearance()
+        view.backgroundColor = .white
     }
     
     @objc
@@ -177,21 +212,40 @@ open class LMChatAttachmentViewController: LMViewController {
     }
     
     @objc open func editingImage(_ sender: UIButton?) {
-        guard let currentImage = selectedMedia?.photo else { return }
+        guard let currentImage = viewModel?.selectedMedia?.photo else { return }
         editImage(currentImage, editModel: nil)
     }
     
     @objc open func deleteImage(_ sender: UIButton?) {
-        guard let index = mediaCellData.firstIndex(where: {$0.localPath == self.selectedMedia?.localPath}) else { return }
-        mediaCellData.remove(at: index)
+        guard let index = viewModel?.mediaCellData.firstIndex(where: {$0.localPath == self.viewModel?.selectedMedia?.localPath}) else { return }
+        deleteMedia(atIndex: index)
         let afterDeleteIndex = index - 1
-        if mediaCellData.count > afterDeleteIndex {
+        if let cellData = viewModel?.mediaCellData, !cellData.isEmpty, cellData.count > afterDeleteIndex {
             let currentIndex = afterDeleteIndex < 0 ? 0 : afterDeleteIndex
-            setDataToView(mediaCellData[currentIndex])
+            setDataToView(cellData[currentIndex])
+        } else {
+            cancelEditing(nil)
+        }
+    }
+    
+    func deleteMedia(atIndex index: Int) {
+        guard (viewModel?.mediaCellData.count ?? 0) > index else { return }
+        let attachment = viewModel?.mediaCellData.remove(at: index)
+        do {
+            if let localFilePath = attachment?.localPath {
+                try FileManager.default.removeItem(at: localFilePath)
+            }
+        } catch {
+            print("Error deleting file: \(error)")
         }
     }
     
     @objc open func cancelEditing(_ sender: UIButton?) {
+        if let media = viewModel?.mediaCellData {
+            for index in 0..<media.count {
+                deleteMedia(atIndex: index)
+            }
+        }
         guard let _ = self.navigationController?.popViewController(animated: true) else {
             self.dismiss(animated: true)
             return
@@ -201,7 +255,7 @@ open class LMChatAttachmentViewController: LMViewController {
     func editImage(_ image: UIImage, editModel: LMEditImageModel?) {
         LMEditImageViewController.showEditImageVC(parentVC: self, image: image, editModel: editModel) { [weak self] resImage, editModel in
             self?.zoomableImageViewContainer.configure(with: resImage)
-            self?.selectedMedia?.photo = resImage
+            self?.viewModel?.selectedMedia?.photo = resImage
         }
     }
 }
@@ -209,12 +263,12 @@ open class LMChatAttachmentViewController: LMViewController {
 // MARK: UICollectionView
 extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
-    open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { mediaCellData.count
+    open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { viewModel?.mediaCellData.count ?? 0
     }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let data = mediaCellData[indexPath.row]
-        if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+        if let data = viewModel?.mediaCellData[indexPath.row],
+           let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
             cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true))
             return cell
         }
@@ -226,24 +280,47 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let data = mediaCellData[indexPath.row]
-        if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+        
+        if let data = viewModel?.mediaCellData[indexPath.row],
+           let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
             collectionView.reloadData()
-            cell.imageView.borderColor(withBorderWidth: 2, with: .green)
             setDataToView(data)
         }
     }
     
     func setDataToView(_ data: MediaPickerModel) {
-        self.selectedMedia = data
+        viewModel?.selectedMedia = data
         switch data.mediaType {
         case .image, .gif:
+            editButton.isHidden = false
+            videoImageViewContainer.isHidden = true
+            zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
-            break
+            editButton.isHidden = true
+            videoImageViewContainer.isHidden = false
+            zoomableImageViewContainer.isHidden = true
+            videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
+                self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
+            }
         default:
-            break
+            editButton.isHidden = true
+        }
+    }
+    
+    func navigateToVideoPlayer(with url: String) {
+        guard let videoURL = URL(string: url) else {
+            showErrorAlert(message: "Unable to play video")
+            return
+        }
+        let player = AVPlayer(url: videoURL)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        playerViewController.allowsPictureInPicturePlayback = false
+        playerViewController.showsPlaybackControls = true
+        present(playerViewController, animated: false) {
+            player.play()
         }
     }
 }
@@ -258,8 +335,12 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
         MediaPickerManager.shared.presentPicker(viewController: self, delegate: self)
     }
     
+    public func addGifAttachment() {
+        MediaPickerManager.shared.presentGifPicker(viewController: self, delegate: self, fileType: .gif)
+    }
+    
     public func sendAttachment(message: String?) {
-        delegate?.postConversationWithAttchments(message: message, attachments: mediaCellData)
+        delegate?.postConversationWithAttchments(message: message, attachments: viewModel?.mediaCellData ?? [])
         self.dismissViewController()
     }
 }
@@ -267,18 +348,18 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
 extension LMChatAttachmentViewController: MediaPickerDelegate {
     
     func mediaPicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel]) {
-        guard !results.isEmpty || !mediaCellData.isEmpty else {
+        guard !results.isEmpty || !(viewModel?.mediaCellData ?? []).isEmpty else {
             picker.dismiss(animated: true)
             cancelEditing(nil)
             return
         }
-        self.mediaCellData = results
+        viewModel?.mediaCellData = results
         mediaCollectionView.reloadData()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if self.zoomableImageViewContainer.imageView.image == nil {
-                self.selectedMedia = results[0]
-                self.zoomableImageViewContainer.configure(with: results[0].photo)
+            if self.zoomableImageViewContainer.imageView.image == nil, let item = results.first {
+                self.viewModel?.selectedMedia = item
+                self.setDataToView(item)
             }
         }
     }

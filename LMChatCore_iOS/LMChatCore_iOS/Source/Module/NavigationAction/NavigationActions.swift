@@ -18,7 +18,7 @@ enum NavigationActions {
     case messageAttachment(delegat: LMChatAttachmentViewDelegate?, chatroomId: String?)
     case participants(chatroomId: String, isSecret: Bool)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
-    case reactionSheet(reactions: [Reaction], conversation: String?, chatroomId: String?)
+    case reactionSheet(reactions: [Reaction], selectedReaction: String?, conversation: String?, chatroomId: String?)
     case exploreFeed
     case browser(url: URL)
     case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
@@ -53,8 +53,8 @@ class NavigationScreen: NavigationScreenProtocol {
         case .report(let chatroomId, let conversationId, let memberId):
             guard let report = try? LMChatReportViewModel.createModule(reportContentId: (chatroomId, conversationId, memberId)) else { return }
             source.navigationController?.pushViewController(report, animated: true)
-        case .reactionSheet(let reactions, let conversationId, let chatroomId):
-            guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, conversationId: conversationId, chatroomId: chatroomId) else { return }
+        case .reactionSheet(let reactions, let selected, let conversationId, let chatroomId):
+            guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, selected: selected, conversationId: conversationId, chatroomId: chatroomId) else { return }
             source.present(reactions, animated: true)
         case .exploreFeed:
             guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }
