@@ -16,14 +16,16 @@ public class SearchMessageCell: LMTableViewCell {
         public var messageID: String?
         public let chatroomName: String
         public let message: String
+        public let senderName: String
         public let date: Date
         public let isJoined: Bool
         
-        public init(chatroomID: String, messageID: String, chatroomName: String, message: String, date: Date, isJoined: Bool) {
+        public init(chatroomID: String, messageID: String, chatroomName: String, message: String, senderName: String, date: Date, isJoined: Bool) {
             self.chatroomID = chatroomID
             self.messageID = messageID
             self.chatroomName = chatroomName
             self.message = message
+            self.senderName = senderName
             self.date = date
             self.isJoined = isJoined
         }
@@ -115,7 +117,7 @@ public class SearchMessageCell: LMTableViewCell {
     func configure(with data: ContentModel) {
         titleLabel.text = data.chatroomName
         subtitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(
-            from: data.message,
+            from: "\(data.senderName): \(data.message)",
             andPrefix: "@",
             allowLink: false,
             allowHashtags: false

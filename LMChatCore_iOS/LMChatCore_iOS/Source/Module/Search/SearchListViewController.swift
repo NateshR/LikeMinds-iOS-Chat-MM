@@ -26,6 +26,7 @@ public class SearchListViewController: LMViewController {
         table.dataSource = self
         table.delegate = self
         table.estimatedSectionHeaderHeight = .leastNonzeroMagnitude
+        table.bounces = false
         return table
     }()
     
@@ -102,6 +103,10 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
             viewmodel?.fetchMoreData()
         }
     }
+    
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print(indexPath)
+    }
 }
 
 
@@ -116,6 +121,7 @@ extension SearchListViewController: UISearchBarDelegate {
         
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.tableView.backgroundView = nil
             self?.viewmodel?.searchList(with: text)
         }
     }
@@ -128,6 +134,7 @@ extension SearchListViewController: UISearchBarDelegate {
         timer?.invalidate()
         viewmodel?.searchList(with: "")
         searchResults.removeAll(keepingCapacity: true)
+        tableView.backgroundView = nil
         tableView.reloadData()
     }
 }
@@ -146,8 +153,7 @@ extension SearchListViewController: SearchListViewProtocol {
     }
     
     public func showNoDataUI() {
-        let noUIView = SearchListNoResultView(frame: tableView.frame)
-        noUIView.translatesAutoresizingMaskIntoConstraints = false
+        let noUIView = SearchListNoResultView(frame: tableView.bounds)
         tableView.backgroundView = noUIView
     }
 }

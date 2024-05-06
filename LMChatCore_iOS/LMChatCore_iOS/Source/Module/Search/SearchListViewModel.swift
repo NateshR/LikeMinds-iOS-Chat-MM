@@ -242,9 +242,11 @@ final public class SearchListViewModel {
             }
             
             let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
-                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom) else { return .none }
+                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom),
+                      let user = self.generateUserDetails(from: conversation.member) else { return .none }
+
                 
-                return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, message: conversation.answer, createdAt: conversation.createdAt)
+                return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, userDetails: user, message: conversation.answer, createdAt: conversation.createdAt)
             }
                         
             switch currentAPIStatus {
@@ -258,6 +260,12 @@ final public class SearchListViewModel {
             
             convertToContentModel()
         }
+    }
+    
+    private func generateUserDetails(from data: Member) -> SearchConversationUserDataModel? {
+        guard let uuid = data.sdkClientInfo?.uuid else { return .none }
+        
+        return .init(uuid: uuid, username: data.name ?? "User", imageURL: data.imageUrl, isGuest: data.isGuest)
     }
 }
 
@@ -306,7 +314,15 @@ extension SearchListViewModel {
     
     private func convertMessageCell(from data: [SearchConversationDataModel]) -> [SearchMessageCell.ContentModel] {
         data.map {
-            .init(chatroomID: $0.chatroomDetails.id, messageID: $0.id, chatroomName: $0.chatroomDetails.chatroomTitle, message: $0.message, date: Date(timeIntervalSince1970: $0.createdAt), isJoined: $0.chatroomDetails.isFollowed)
+            .init(
+                chatroomID: $0.chatroomDetails.id,
+                messageID: $0.id,
+                chatroomName: $0.chatroomDetails.chatroomTitle,
+                message: $0.message,
+                senderName: "d",
+                date: Date(timeIntervalSince1970: $0.createdAt),
+                isJoined: $0.chatroomDetails.isFollowed
+            )
         }
     }
 }
