@@ -94,6 +94,7 @@ public class LMExploreChatroomViewModel {
             guard response.success else {
                 return
             }
+            LMChatClient.shared.syncChatrooms()
         }
     }
 }

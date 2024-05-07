@@ -38,9 +38,6 @@ open class LMHomeFeedShimmerView: LMView {
             let shimmer = LMHomeFeedLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             shimmer.setHeightConstraint(with: 80)
-            shimmer.profileView.startAnimating()
-            shimmer.titleView.startAnimating()
-            shimmer.subtitleView.startAnimating()
             stackView.addArrangedSubview(shimmer)
         }
         stackView.addArrangedSubview(UIView())

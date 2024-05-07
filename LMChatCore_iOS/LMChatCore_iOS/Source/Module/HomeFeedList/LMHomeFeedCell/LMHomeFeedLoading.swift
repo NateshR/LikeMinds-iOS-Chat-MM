@@ -17,8 +17,8 @@ open class LMHomeFeedLoading: LMView {
         return view
     }()
     
-    open private(set) lazy var profileView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var profileView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setWidthConstraint(with: 56)
         view.setHeightConstraint(with: 56)
@@ -27,8 +27,8 @@ open class LMHomeFeedLoading: LMView {
         return view
     }()
     
-    open private(set) lazy var titleView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var titleView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 14)
         view.cornerRadius(with: 7)
@@ -36,8 +36,8 @@ open class LMHomeFeedLoading: LMView {
         return view
     }()
     
-    open private(set) lazy var subtitleView: ShimmerView = {
-        let view = ShimmerView()
+    open private(set) lazy var subtitleView: LMChatShimmerView = {
+        let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 12)
         view.cornerRadius(with: 6)
@@ -56,10 +56,6 @@ open class LMHomeFeedLoading: LMView {
         containerView.addSubview(profileView)
         containerView.addSubview(titleView)
         containerView.addSubview(subtitleView)
-        
-        profileView.startAnimating()
-        titleView.startAnimating()
-        subtitleView.startAnimating()
     }
     
     // MARK: setupLayouts

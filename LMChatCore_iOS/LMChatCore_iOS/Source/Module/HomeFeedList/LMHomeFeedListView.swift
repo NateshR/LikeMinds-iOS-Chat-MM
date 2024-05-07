@@ -104,7 +104,6 @@ open class LMHomeFeedListView: LMView {
     
     open func reloadData() {
         tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
-        if !tableSections.isEmpty { tableView.backgroundView = nil }
         self.tableView.reloadData()
     }
     
@@ -114,6 +113,7 @@ open class LMHomeFeedListView: LMView {
         } else {
             if !chatroomData.isEmpty {
                 tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
+                tableView.backgroundView = nil
             }
         }
         reloadData()

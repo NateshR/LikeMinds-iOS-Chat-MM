@@ -92,8 +92,8 @@ open class LMReactionViewCell: LMTableViewCell {
             userImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             userStackView.leadingAnchor.constraint(equalTo: userImageView.trailingAnchor, constant: 16),
-            userStackView.topAnchor.constraint(equalTo: userImageView.topAnchor),
-            userStackView.bottomAnchor.constraint(equalTo: userImageView.bottomAnchor),
+            userStackView.topAnchor.constraint(greaterThanOrEqualTo: userImageView.topAnchor),
+            userStackView.bottomAnchor.constraint(lessThanOrEqualTo: userImageView.bottomAnchor),
             userStackView.trailingAnchor.constraint(lessThanOrEqualTo: reactionImage.leadingAnchor, constant: 8),
             
             reactionImage.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),

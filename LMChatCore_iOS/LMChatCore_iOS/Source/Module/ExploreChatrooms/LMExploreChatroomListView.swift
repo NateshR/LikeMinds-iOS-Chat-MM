@@ -34,6 +34,12 @@ open class LMExploreChatroomListView: LMView {
         return view
     }()
     
+    open private(set) lazy var loadingView: LMHomeFeedShimmerView = {
+        let view = LMHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+        view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
+        return view
+    }()
+    
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.exploreChatroomCell)
@@ -43,6 +49,7 @@ open class LMExploreChatroomListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundColor = .gray
+        table.backgroundView = loadingView
         return table
     }()
     
@@ -90,6 +97,7 @@ open class LMExploreChatroomListView: LMView {
     
     open func reloadData() {
         tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
+        if !tableSections.isEmpty { tableView.backgroundView = nil }
         tableView.reloadData()
     }
     

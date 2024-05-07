@@ -211,7 +211,7 @@ open class LMParticipantView: LMView {
     public func setData(_ data: ContentModel) {
         nameLabel.text = data.name
         designationLabel.text = data.designationDetail
-        customTitle.text = data.customTitle
+        customTitle.text =  data.customTitle != nil ? "\(Constants.Strings.shared.dot) " + (data.customTitle ?? "") : nil
         let placeholder = UIImage.generateLetterImage(name: data.name)
         if let imageUrl = data.profileImageUrl, let url = URL(string: imageUrl) {
             profileImageView.kf.setImage(with: url, placeholder: placeholder)
