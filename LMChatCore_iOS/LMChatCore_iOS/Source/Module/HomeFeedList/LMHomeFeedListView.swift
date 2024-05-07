@@ -41,6 +41,12 @@ open class LMHomeFeedListView: LMView {
         return view
     }()
     
+    open private(set) lazy var loadingView: LMHomeFeedShimmerView = {
+        let view = LMHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+        view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
+        return view
+    }()
+    
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.homeFeedChatroomCell)
@@ -66,6 +72,7 @@ open class LMHomeFeedListView: LMView {
         super.setupViews()
         addSubview(containerView)
         containerView.addSubview(tableView)
+        tableView.backgroundView = loadingView
     }
     
     
@@ -97,7 +104,7 @@ open class LMHomeFeedListView: LMView {
     
     open func reloadData() {
         tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
-        print("chatroom data $#$#$: \(tableSections.first(where: {$0.sectionType == .chatrooms})?.data.count)")
+        if !tableSections.isEmpty { tableView.backgroundView = nil }
         self.tableView.reloadData()
     }
     

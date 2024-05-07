@@ -106,15 +106,21 @@ open class LMMessageListView: LMView {
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
         table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
-        table.register(LMUIComponents.shared.messageLoadingCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
+        table.backgroundView = loadingView
 //        table.keyboardDismissMode = .onDrag
         table.contentInset = .init(top: 10, left: 0, bottom: 14, right: 0)
         return table
+    }()
+    
+    private(set) lazy var loadingView: LMMessageLoadingShimmerView = {
+        let view = LMMessageLoadingShimmerView().translatesAutoresizingMaskIntoConstraints()
+        view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
+        return view
     }()
     
     
@@ -181,11 +187,13 @@ open class LMMessageListView: LMView {
     
     open func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        if !tableSections.isEmpty { tableView.backgroundView = nil }
         tableView.reloadData()
     }
     
     func justReloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        if !tableSections.isEmpty { tableView.backgroundView = nil }
         tableView.reloadData()
     }
     

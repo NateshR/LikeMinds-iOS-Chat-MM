@@ -9,15 +9,21 @@ import Foundation
 import LMChatUI_iOS
 
 @IBDesignable
-open class LMMessageLoading: LMTableViewCell {
+open class LMMessageLoading: LMView {
     
+    // MARK: UI Elements
+    open private(set) lazy var containerView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
     
-    open private(set) lazy var messageView: ShimmerView = {
+    open private(set) lazy var profileView: ShimmerView = {
         let view = ShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setHeightConstraint(with: 80)
-        view.cornerRadius(with: 12)
-//        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
+        view.setWidthConstraint(with: 56)
+        view.setHeightConstraint(with: 56)
+        view.cornerRadius(with: 28)
+        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
         return view
     }()
     
@@ -26,7 +32,7 @@ open class LMMessageLoading: LMTableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 14)
         view.cornerRadius(with: 7)
-//        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
+        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
         return view
     }()
     
@@ -35,7 +41,7 @@ open class LMMessageLoading: LMTableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 12)
         view.cornerRadius(with: 6)
-//        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
+        view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
         return view
     }()
     
@@ -47,11 +53,11 @@ open class LMMessageLoading: LMTableViewCell {
     open override func setupViews() {
         super.setupViews()
         addSubview(containerView)
-        containerView.addSubview(messageView)
-//        containerView.addSubview(titleView)
-//        containerView.addSubview(subtitleView)
+        containerView.addSubview(profileView)
+        containerView.addSubview(titleView)
+        containerView.addSubview(subtitleView)
         
-        messageView.startAnimating()
+        profileView.startAnimating()
         titleView.startAnimating()
         subtitleView.startAnimating()
     }
@@ -65,18 +71,17 @@ open class LMMessageLoading: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            messageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant:  16),
-            messageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
-            messageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant:  -12),
-            messageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant:  -90),
+            profileView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant:  16),
+            profileView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
+            profileView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant:  -12),
             
-//            titleView.leadingAnchor.constraint(equalTo: profileView.trailingAnchor, constant:  10),
-//            titleView.topAnchor.constraint(equalTo: profileView.topAnchor, constant: 6),
-//            titleView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant:  -16),
-//            
-//            subtitleView.leadingAnchor.constraint(equalTo: profileView.trailingAnchor, constant:  10),
-//            subtitleView.topAnchor.constraint(greaterThanOrEqualTo: titleView.bottomAnchor, constant:10),
-//            subtitleView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant:  -30),
+            titleView.leadingAnchor.constraint(equalTo: profileView.trailingAnchor, constant:  10),
+            titleView.topAnchor.constraint(equalTo: profileView.topAnchor, constant: 6),
+            titleView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant:  -16),
+            
+            subtitleView.leadingAnchor.constraint(equalTo: profileView.trailingAnchor, constant:  10),
+            subtitleView.topAnchor.constraint(greaterThanOrEqualTo: titleView.bottomAnchor, constant:10),
+            subtitleView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant:  -30),
         ])
     }
 }

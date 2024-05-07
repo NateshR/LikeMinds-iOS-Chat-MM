@@ -1,14 +1,14 @@
 //
-//  LMMessageLoadingShimmerView.swift
+//  LMHomeFeedShimmerView.swift
 //  LMChatCore_iOS
 //
-//  Created by Pushpendra Singh on 15/04/24.
+//  Created by Pushpendra Singh on 07/05/24.
 //
 
 import Foundation
 import LMChatUI_iOS
 
-class LMMessageLoadingShimmerView: LMView {
+open class LMHomeFeedShimmerView: LMView {
     
     open private(set) lazy var containerView: LMView = {
         let view = LMView()
@@ -35,7 +35,7 @@ class LMMessageLoadingShimmerView: LMView {
     open override func setupLayouts() {
         super.setupLayouts()
         for _ in 0..<5 {
-            let shimmer = LMMessageLoading()
+            let shimmer = LMHomeFeedLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             shimmer.setHeightConstraint(with: 80)
             shimmer.profileView.startAnimating()
