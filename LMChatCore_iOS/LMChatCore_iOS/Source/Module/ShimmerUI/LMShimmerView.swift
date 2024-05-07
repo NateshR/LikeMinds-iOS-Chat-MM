@@ -10,39 +10,31 @@ import UIKit
 import LMChatUI_iOS
 
 @IBDesignable
-open class ShimmerView: UIView {
+open class LMChatShimmerView: LMView {
+    private let gradientLayer = CAGradientLayer()
+    private var gradientColorOne = UIColor(white: 0.85, alpha: 1.0).cgColor
+    private var gradientColorTwo = UIColor(white: 0.95, alpha: 1.0).cgColor
     
-    var gradientColorOne : CGColor = UIColor(white: 0.85, alpha: 1.0).cgColor
-    var gradientColorTwo : CGColor = UIColor(white: 0.95, alpha: 1.0).cgColor
-    
-    func addGradientLayer() -> CAGradientLayer {
+    open override func setupViews() {
+        super.setupViews()
         
-        let gradientLayer = CAGradientLayer()
-        
-        gradientLayer.frame = self.bounds
-        gradientLayer.startPoint = CGPoint(x: 0.0, y: 1.0)
-        gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
         gradientLayer.colors = [gradientColorOne, gradientColorTwo, gradientColorOne]
+        gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
         gradientLayer.locations = [0.0, 0.5, 1.0]
-        self.layer.addSublayer(gradientLayer)
-        
-        return gradientLayer
+        layer.addSublayer(gradientLayer)
     }
     
-    func addAnimation() -> CABasicAnimation {
+    open override func setupAppearance() {
+        super.setupAppearance()
+        
+        gradientLayer.frame = self.bounds
         
         let animation = CABasicAnimation(keyPath: "locations")
         animation.fromValue = [-1.0, -0.5, 0.0]
         animation.toValue = [1.0, 1.5, 2.0]
-        animation.repeatCount = .infinity
-        animation.duration = 1
-        return animation
+        animation.duration = 1.5
+        animation.repeatCount = Float.infinity
+        gradientLayer.add(animation, forKey: "shimmerAnimation")
     }
-    
-    func startAnimating() {
-        let gradientLayer = addGradientLayer()
-        let animation = addAnimation()
-        gradientLayer.add(animation, forKey: animation.keyPath)
-    }
-    
 }

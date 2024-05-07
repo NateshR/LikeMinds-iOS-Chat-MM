@@ -22,6 +22,7 @@ enum NavigationActions {
     case exploreFeed
     case browser(url: URL)
     case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
+    case searchScreen
 //    case giphy
     
 }
@@ -67,6 +68,9 @@ class NavigationScreen: NavigationScreenProtocol {
         case .mediaPreview(let data, let startIndex):
             let mediaPreview = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: startIndex)
             source.navigationController?.pushViewController(mediaPreview, animated: true)
+        case .searchScreen:
+            guard let searchScreen = try? SearchListViewModel.createModule() else { return }
+            source.navigationController?.pushViewController(searchScreen, animated: false)
 //        case .giphy:
 //            let giphy = GiphyViewController()
 //            giphy.mediaTypeConfig = [.gifs]

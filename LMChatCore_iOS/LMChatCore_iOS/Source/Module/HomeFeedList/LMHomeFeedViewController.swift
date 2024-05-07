@@ -71,7 +71,7 @@ open class LMHomeFeedViewController: LMViewController {
     }
     
     @objc func searchBarItemClicked() {
-        feedListView.reloadData()
+        NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
     }
 }
 

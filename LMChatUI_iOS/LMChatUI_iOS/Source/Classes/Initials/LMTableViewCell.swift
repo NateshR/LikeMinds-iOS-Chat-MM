@@ -30,6 +30,7 @@ open class LMTableViewCell: UITableViewCell {
         setupViews()
         setupLayouts()
         setupActions()
+        self.selectionStyle = .none
     }
     
     open override func layoutSubviews() {
