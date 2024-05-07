@@ -112,7 +112,7 @@ open class LMMessageListView: LMView {
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
-        table.keyboardDismissMode = .onDrag
+//        table.keyboardDismissMode = .onDrag
         table.contentInset = .init(top: 10, left: 0, bottom: 14, right: 0)
         return table
     }()
@@ -132,6 +132,7 @@ open class LMMessageListView: LMView {
     let menuHeight: CGFloat = 200
     var isMultipleSelectionEnable: Bool = false
     var selectedItems: [ContentModel.Message] = []
+    var isLoadingMoreData: Bool = false
     
     // MARK: setupViews
     open override func setupViews() {
@@ -335,14 +336,34 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     // while scrolling this delegate is being called so you may now check which direction your scrollView is being scrolled to
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.height
+        
+        // Check if user scrolled to the top
+        if contentOffsetY <= 0 && !isLoadingMoreData {
+            print("end dragged top!$!$")
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let firstIndexPath = visibleIndexPaths.first else {return}
+            isLoadingMoreData = true
+            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
+        }
+        
+        // Check if user scrolled to the bottom
+        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData {
+            print("end dragged bottom!$!$")
+            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
+                  let lastIndexPath = visibleIndexPaths.last else {return}
+            isLoadingMoreData = true
+            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
+        }
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        
+       /*
         if scrollView.contentOffset.y <= 20 {
             print("end dragged top!$!$")
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
@@ -354,6 +375,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
                   let lastIndexPath = visibleIndexPaths.last else {return}
             delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
         }
+        */
     }
 
     @available(iOS 13.0, *)

@@ -28,6 +28,7 @@ open class LMParticipantListViewController: LMViewController {
         self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
         self.setupSearchBar()
         viewModel?.getParticipants()
+        viewModel?.fetchChatroomData()
     }
     
     open func setupSearchBar() {
@@ -59,7 +60,7 @@ extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
     public func reloadData() {
         containerView.data = viewModel?.participantsContentModels ?? []
         containerView.reloadList()
-        setNavigationTitleAndSubtitle(with: "Participants", subtitle: "\(viewModel?.totalParticipantCount ?? 0) participants")
+        setNavigationTitleAndSubtitle(with: "Participants", subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
     }
 }
 

@@ -110,8 +110,8 @@ open class LMChatMessageLinkPreview: LMView {
             containerStackView.topAnchor.constraint(equalTo: containerView.topAnchor),
             containerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             
-            metaDataStackView.leadingAnchor.constraint(equalTo: metaDataContainerView.leadingAnchor, constant: 16),
-            metaDataStackView.trailingAnchor.constraint(equalTo: metaDataContainerView.trailingAnchor, constant: -16),
+            metaDataStackView.leadingAnchor.constraint(equalTo: metaDataContainerView.leadingAnchor, constant: 10),
+            metaDataStackView.trailingAnchor.constraint(equalTo: metaDataContainerView.trailingAnchor, constant: -10),
             metaDataStackView.topAnchor.constraint(equalTo: metaDataContainerView.topAnchor, constant: 8),
             metaDataStackView.bottomAnchor.constraint(equalTo: metaDataContainerView.bottomAnchor, constant: -8)
         ])

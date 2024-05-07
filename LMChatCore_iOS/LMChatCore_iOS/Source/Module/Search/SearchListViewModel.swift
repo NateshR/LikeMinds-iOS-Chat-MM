@@ -182,10 +182,6 @@ final public class SearchListViewModel {
             
             currentPage += 1
             
-            if chatrooms.isEmpty || chatrooms.count < pageSize {
-                setNewAPIStatus()
-            }
-            
             let chatroomData: [SearchChatroomDataModel] = chatrooms.compactMap { chatroom in
                 self.convertToChatroomData(form: chatroom.chatroom)
             }
@@ -200,6 +196,10 @@ final public class SearchListViewModel {
                 titleNotFollowedChatroomData.append(contentsOf: chatroomData)
             default:
                 break
+            }
+            
+            if chatrooms.isEmpty || chatrooms.count < pageSize {
+                setNewAPIStatus()
             }
             
             convertToContentModel()
@@ -235,10 +235,6 @@ final public class SearchListViewModel {
             
             currentPage += 1
             
-            if conversations.isEmpty || conversations.count < pageSize {
-                setNewAPIStatus()
-            }
-            
             let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
                 guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom),
                       let user = self.generateUserDetails(from: conversation.member) else { return .none }
@@ -254,6 +250,10 @@ final public class SearchListViewModel {
                 notFollowedConversationData.append(contentsOf: conversationData)
             default:
                 break
+            }
+            
+            if conversations.isEmpty || conversations.count < pageSize {
+                setNewAPIStatus()
             }
             
             convertToContentModel()

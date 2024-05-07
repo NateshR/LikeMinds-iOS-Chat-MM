@@ -40,7 +40,7 @@ public class LMHomeFeedViewModel {
     func getChatrooms() {
         fetchUserProfile()
         LMChatClient.shared.getChatrooms(withObserver: self)
-//        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
+        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }
     
     func syncChatroom() {
@@ -54,31 +54,47 @@ public class LMHomeFeedViewModel {
             self?.delegate?.updateHomeFeedExploreCountData()
         }
     }
+    
+    func reloadChatroomsData(data: [Chatroom]) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            self?.chatrooms = data
+            self?.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
+            self?.delegate?.updateHomeFeedChatroomsData()
+        }
+    }
+    
+    func updateChatroomsData(data: [Chatroom]) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            for item in data {
+                if let firstIndex = self?.chatrooms.firstIndex(where: {$0.id == item.id}) {
+                    self?.chatrooms[firstIndex] = item
+                } else {
+                    self?.chatrooms.append(item)
+                }
+            }
+            self?.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
+            self?.delegate?.updateHomeFeedChatroomsData()
+        }
+    }
 }
 
 extension LMHomeFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
         print("Chatrooms data Intial")
-        if !chatrooms.isEmpty {
-            self.chatrooms = chatrooms
-            self.chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
-            self.delegate?.updateHomeFeedChatroomsData()
-        }
+        reloadChatroomsData(data: chatrooms)
     }
     
     public func onChange(removed: [Int], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {
-        print("Chatrooms data changed")
+        print("Chatrooms data changed inserted: \(inserted.count) updated: \(updated.count) deleted: \(removed.count)")
         removed.forEach { index in
             chatrooms.remove(at: index)
         }
-        updated.forEach { data in
-            chatrooms[data.0] = data.1
+        if updated.count > 0 {
+            updateChatroomsData(data: updated.compactMap({$0.1}))
         }
-        inserted.forEach { data in
-            chatrooms.insert(data.1, at: data.0)
+        if inserted.count > 0 {
+            updateChatroomsData(data: inserted.compactMap({$0.1}))
         }
-        chatrooms.sort(by: {($0.lastConversation?.createdEpoch ?? 0) > ($1.lastConversation?.createdEpoch ?? 0)})
-        self.delegate?.updateHomeFeedChatroomsData()
     }
 }

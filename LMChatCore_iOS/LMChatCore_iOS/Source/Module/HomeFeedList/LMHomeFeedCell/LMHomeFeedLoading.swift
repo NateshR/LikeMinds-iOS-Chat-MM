@@ -9,7 +9,14 @@ import Foundation
 import LMChatUI_iOS
 
 @IBDesignable
-open class LMHomeFeedLoading: LMTableViewCell {
+open class LMHomeFeedLoading: LMView {
+    
+    // MARK: UI Elements
+    open private(set) lazy var containerView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
     open private(set) lazy var profileView: LMChatShimmerView = {
         let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false

@@ -24,7 +24,7 @@ public class LMChatMain {
         GiphyAPIConfiguration.configure()
     }
     
-    public func initiateUser(username: String, userId: String, deviceId: String) throws {
+    public func initiateUser(username: String, userId: String, deviceId: String, completion: ((Bool, String?) -> Void)?) throws {
         self.deviceId = deviceId
         let request = InitiateUserRequest.builder()
             .userName(username)
@@ -37,10 +37,12 @@ public class LMChatMain {
             guard response.success, response.data?.appAccess == true else {
                 print("error in initiate user: \(response.errorMessage ?? "")")
                 self?.logout()
+                completion?(response.success, response.errorMessage)
                 return
             }
             Self.isInitialized = true
             self?.registerDevice(deviceId: deviceId)
+            completion?(response.success, nil)
         }
     }
 
