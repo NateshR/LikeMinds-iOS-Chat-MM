@@ -77,7 +77,7 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
     open func configure(with data: ContentModel) {
         let lastConversation = data.chatroom?.lastConversation
         let isLoggedInUser = lastConversation?.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()
-        let creatorName = isLoggedInUser ? "You" : lastConversation?.member?.name ?? "NA"
+        let creatorName = isLoggedInUser ? "You" : (lastConversation?.member?.name ?? "").components(separatedBy: " ").first ?? "NA"
         var lastMessage = data.chatroom?.lastConversation?.answer ?? "NA"
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
         let fileType = lastConversation?.attachments?.first?.type
@@ -90,8 +90,9 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
                                                                  isSecret: data.chatroom?.isSecret ?? false,
                                                                  isAnnouncementRoom: data.chatroom?.type == ChatroomType.purpose.rawValue,
                                                                  unreadCount: data.chatroom?.unseenCount ?? 0,
-                                                                 timestamp: timestampConverted(createdAtInEpoch: data.chatroom?.updatedAt ?? 0) ?? "NA",
-                                                                 fileTypeWithCount: getAttachmentType(data: data)))
+                                                                 timestamp: timestampConverted(createdAtInEpoch: lastConversation?.createdEpoch ?? 0) ?? "NA",
+                                                                 fileTypeWithCount: getAttachmentType(data: data),
+                                                                 messageType: data.chatroom?.lastConversation?.state.rawValue ?? 0))
     }
     
     func getAttachmentType(data: ContentModel) -> [(String, Int)] {
@@ -117,7 +118,7 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
         let dateFormatter = DateFormatter()
         
         if Calendar.current.isDateInToday(date) {
-            dateFormatter.dateFormat = "HH:MM"
+            dateFormatter.dateFormat = "HH:mm"
 //            dateFormatter.dateFormat = "hh:mm a"
 //            dateFormatter.amSymbol = "AM"
 //            dateFormatter.pmSymbol = "PM"

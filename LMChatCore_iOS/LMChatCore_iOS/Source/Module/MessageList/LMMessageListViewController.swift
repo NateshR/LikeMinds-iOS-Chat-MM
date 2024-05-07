@@ -125,8 +125,9 @@ open class LMMessageListViewController: LMViewController {
         self.bottomTextViewContainerBottomConstraints?.isActive = false
         self.bottomTextViewContainerBottomConstraints?.constant = -((frame.size.height - self.view.safeAreaInsets.bottom))
         self.bottomTextViewContainerBottomConstraints?.isActive = true
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) {[weak self] in
+            self?.view.layoutIfNeeded()
+//            self?.messageListView.scrollToBottom()
         }
     }
     
@@ -148,6 +149,7 @@ open class LMMessageListViewController: LMViewController {
         super.viewWillDisappear(animated)
         LMChatAudioRecordManager.shared.deleteAudioRecording()
         LMChatAudioPlayManager.shared.resetAudioPlayer()
+        self.view.endEditing(true)
     }
     
     @objc
@@ -419,6 +421,9 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {[weak self] in
+            self?.messageListView.isLoadingMoreData = false
+        }
     }
     
     

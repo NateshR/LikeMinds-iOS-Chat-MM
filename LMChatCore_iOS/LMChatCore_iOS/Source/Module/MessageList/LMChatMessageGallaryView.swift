@@ -249,7 +249,6 @@ extension LMChatMessageGallaryView {
             imageView.contentMode = .scaleAspectFill
             imageView.layer.masksToBounds = true
             imageView.image = Constants.shared.images.galleryIcon
-            imageView.tintColor = Appearance.shared.colors.gray51
             imageView.backgroundColor = Appearance.shared.colors.black
             return imageView
                 .translatesAutoresizingMaskIntoConstraints()
@@ -310,7 +309,7 @@ extension LMChatMessageGallaryView {
             playIconImage.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         }
         
-        func setData(_ url: String, withPlaceholder placeholder: UIImage? = Constants.shared.images.galleryIcon) {
+        func setData(_ url: String, withPlaceholder placeholder: UIImage? = UIImage(named: "imageplaceholder", in: LMChatCoreBundle, compatibleWith: nil)) {
             imageView.kf.setImage(with: URL(string: url), placeholder: placeholder)
         }
         

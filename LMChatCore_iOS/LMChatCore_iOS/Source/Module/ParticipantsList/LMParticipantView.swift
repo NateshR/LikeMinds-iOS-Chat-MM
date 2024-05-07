@@ -45,11 +45,9 @@ open class LMParticipantView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.alignment = .center
-//        view.distribution = .fillProportionally
         view.spacing = 10
         view.addArrangedSubview(profileImageView)
         view.addArrangedSubview(participantNameAndDesignationContainerStackView)
-//        view.addArrangedSubview(moreActionsContainerStackView)
         return view
     }()
     
@@ -88,7 +86,7 @@ open class LMParticipantView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Participant name"
         label.font = Appearance.shared.fonts.headingFont1
-        label.textColor = Appearance.shared.colors.textColor
+        label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label

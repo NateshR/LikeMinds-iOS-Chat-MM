@@ -65,9 +65,13 @@ open class LMHomeFeedViewController: LMViewController {
     
     func setupRightItemBars() {
         let profileItem = UIBarButtonItem(customView: profileIcon)
-        let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: nil)
+        let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(searchBarItemClicked))
         searchItem.tintColor = Appearance.shared.colors.textColor
         navigationItem.rightBarButtonItems = [profileItem, searchItem]
+    }
+    
+    @objc func searchBarItemClicked() {
+        feedListView.reloadData()
     }
 }
 

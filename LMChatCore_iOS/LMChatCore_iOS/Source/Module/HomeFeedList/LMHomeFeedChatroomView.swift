@@ -23,8 +23,9 @@ open class LMHomeFeedChatroomView: LMView {
         public let unreadCount: Int
         public let timestamp: String
         public let fileTypeWithCount: [(type: String, count: Int)]?
+        public let messageType: Int
         
-        public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String, fileTypeWithCount: [(type: String, count: Int)]?) {
+        public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String, fileTypeWithCount: [(type: String, count: Int)]?, messageType: Int) {
             self.userName = userName
             self.lastMessage = lastMessage
             self.chatroomName = chatroomName
@@ -35,6 +36,7 @@ open class LMHomeFeedChatroomView: LMView {
             self.unreadCount = unreadCount
             self.timestamp = timestamp
             self.fileTypeWithCount = fileTypeWithCount
+            self.messageType = messageType
         }
         
     }
@@ -107,7 +109,7 @@ open class LMHomeFeedChatroomView: LMView {
     
     open private(set) lazy var lastMessageLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "You: test the facebook.com data present"
+        label.text = ""
         label.font = Appearance.shared.fonts.textFont2
         label.numberOfLines = 1
         label.textColor = Appearance.shared.colors.textColor
@@ -116,7 +118,7 @@ open class LMHomeFeedChatroomView: LMView {
     
     open private(set) lazy var timestampLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "yesterday"
+        label.text = ""
         label.font = Appearance.shared.fonts.textFont2
         label.numberOfLines = 1
         label.textColor = Appearance.shared.colors.textColor
@@ -291,10 +293,26 @@ open class LMHomeFeedChatroomView: LMView {
                 initalType = "Document"
             case "link":
                 image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            case "gif":
+                image = UIImage(named: "gifBadge", in: LMChatCoreBundle, with: nil) ?? UIImage()
+                initalType = "GIF"
             default:
                 break
             }
-            attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
+            if fileType.lowercased() == "gif" {
+                let textAtt = NSTextAttachment(image: image)
+                textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
+                attributedText.append(NSAttributedString(string: " "))
+                attributedText.append(NSAttributedString(attachment: textAtt))
+                attributedText.append(NSAttributedString(string: " \(initalType) "))
+            } else {
+                attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+            }
+        }
+        
+        if data.messageType == 10 {
+            let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
         }
 

@@ -25,6 +25,7 @@ public class LMParticipantListViewModel {
     var isParticipantLoading: Bool = false
     var isAllParticipantLoaded: Bool = false
     var searchedText: String?
+    var chatroomActionData: GetChatroomActionsResponse?
     
     init(_ viewController: LMParticipantListViewModelProtocol, chatroomId: String, isSecret: Bool) {
         self.delegate = viewController
@@ -62,6 +63,19 @@ public class LMParticipantListViewModel {
             delegate?.reloadData()
             isAllParticipantLoaded = (totalParticipantCount == participants.count)
             isParticipantLoading = false
+        }
+    }
+    
+    func fetchChatroomData() {
+        let request = GetChatroomActionsRequest.builder()
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.getChatroomActions(request: request) {[weak self] response in
+            guard let actionsData = response.data else { return }
+            self?.chatroomActionData = actionsData
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.delegate?.reloadData()
+            }
         }
     }
     

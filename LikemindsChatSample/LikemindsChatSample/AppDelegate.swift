@@ -17,7 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        LMChatMain.shared.configure(apiKey: "17ab90f3-6cba-4dd9-aeea-979a081081b7")
+        
+//        api ke"17ab90f3-6cba-4dd9-aeea-979a081081b7"
+        LMChatMain.shared.configure(apiKey: "62723803-8577-4314-b3bd-c65dce56c1df")
 //        LMChatMain.shared.configure(apiKey: "5f567ca1-9d74-4a1b-be8b-a7a81fef796f")
 //            .uuid("53b0176d-246f-4954-a746-9de96a572cc6")
 //            .userName("DEFCON")
@@ -27,8 +29,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         registerForPushNotifications(application: application)
-
-        try? LMChatMain.shared.initiateUser(username: "DEFCON", userId: "53b0176d-246f-4954-a746-9de96a572cc6", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "")
         return true
     }
 

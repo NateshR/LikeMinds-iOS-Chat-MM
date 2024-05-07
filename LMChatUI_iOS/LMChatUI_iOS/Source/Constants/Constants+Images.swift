@@ -90,5 +90,6 @@ public extension Constants {
         public var playCircleFilled = loadSystemImage(with: "play.circle.fill")
         public var replyIcon = loadSystemImage(with: "arrowshape.turn.up.backward.fill")
         public var searchIcon = loadSystemImage(with: "magnifyingglass")
+        public var pollIcon = loadSystemImage(with: "chart.bar.xaxis")
     }
 }

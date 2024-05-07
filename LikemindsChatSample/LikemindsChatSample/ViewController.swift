@@ -50,6 +50,10 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        try? LMChatMain.shared.initiateUser(username: "DEFCON", userId: "53b0176d-246f-4954-a746-9de96a572cc6", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
+            guard success else { return }
+            self?.moveToNextScreen()
+        }
         
         // MEDIA PREVIEW
 //         var data: [LMChatMediaPreviewViewModel.DataModel] = []
@@ -62,22 +66,24 @@ class ViewController: UIViewController {
 //         let vc = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: 3)
 //         navigationController?.pushViewController(vc, animated: true)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            guard let homefeedvc =
+    }
+    
+    func moveToNextScreen() {
+        guard let homefeedvc =
 //                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
 //              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
-            try? LMHomeFeedViewModel.createModule() else { return }
+                try? LMHomeFeedViewModel.createModule() else { return }
 //            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
 //            self.addChild(homefeedvc)
 //            self.view.addSubview(homefeedvc.view)
 //            homefeedvc.didMove(toParent: self)
-            self.navigationController?.pushViewController(homefeedvc, animated: true)
+        self.navigationController?.pushViewController(homefeedvc, animated: true)
 //            self.navigationItem.leftBarButtonItem = LMBarButtonItem()
-        }
     }
+    
     // MARK: setupViews
     open func setupViews() {
         self.view.addSubview(containerView)

@@ -71,16 +71,16 @@ open class LMChatMessageCell: LMTableViewCell {
 //        addGestureRecognizer(panGesture)
     }
     
-    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
-            let translation = panGestureRecognizer.translation(in: superview!)
-            if abs(translation.x) > abs(translation.y) {
-                return true
-            }
-            return false
-        }
-        return false
-    }
+//    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+//        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+//            let translation = panGestureRecognizer.translation(in: superview!)
+//            if abs(translation.x) > abs(translation.y) {
+//                return true
+//            }
+//            return false
+//        }
+//        return false
+//    }
     
     @objc func handlePanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
         switch gestureRecognizer.state {

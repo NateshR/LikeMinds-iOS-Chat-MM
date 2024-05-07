@@ -18,7 +18,6 @@ public protocol LMHomFeedListViewDelegate: AnyObject {
 public enum HomeFeedSection: String {
     case exploreTab = "Explore Tab"
     case chatrooms = "Chatrooms"
-    case shimmer
 }
 
 @IBDesignable
@@ -46,7 +45,6 @@ open class LMHomeFeedListView: LMView {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.homeFeedChatroomCell)
         table.register(LMUIComponents.shared.homeFeedExploreTabCell)
-        table.register(LMUIComponents.shared.homeFeedShimmerCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -109,8 +107,6 @@ open class LMHomeFeedListView: LMView {
         } else {
             if !chatroomData.isEmpty {
                 tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
-            } else {
-                tableSections.append(.init(data: [1,2,3], sectionType: .shimmer, sectionOrder: 2))
             }
         }
         reloadData()
@@ -157,11 +153,6 @@ extension LMHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
                 if indexPath.row >= (items.count - 4) {
                     self.delegate?.fetchMoreData()
                 }
-                return cell
-            }
-        case .shimmer:
-            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.homeFeedShimmerCell) {
-                cell.profileView.startAnimating()
                 return cell
             }
         }

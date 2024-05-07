@@ -178,8 +178,8 @@ open class LMAttachmentBottomMessageView: LMView {
     
     @objc func sendAttachmentButtonClicked(_ sender: UIButton) {
         
-        var message = inputTextView.getText()
-        if message != inputTextView.placeHolderText, !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        var message = inputTextView.getText().trimmingCharacters(in: .whitespacesAndNewlines)
+        if message == inputTextView.placeHolderText || message.isEmpty {
             message = ""
         }
         inputTextView.text = ""

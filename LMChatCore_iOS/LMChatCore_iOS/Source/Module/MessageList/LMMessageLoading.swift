@@ -52,8 +52,8 @@ open class LMMessageLoading: LMTableViewCell {
 //        containerView.addSubview(subtitleView)
         
         messageView.startAnimating()
-//        titleView.startAnimating()
-//        subtitleView.startAnimating()
+        titleView.startAnimating()
+        subtitleView.startAnimating()
     }
     
     // MARK: setupLayouts
