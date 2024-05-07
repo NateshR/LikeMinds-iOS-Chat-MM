@@ -19,6 +19,7 @@ open class SearchListNoResultView: LMView {
     open private(set) lazy var placeholderImage: LMImageView = {
         let image = LMImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
+        image.image = UIImage(named: "noDataImage", in: Bundle(for: SearchListNoResultView.self), with: nil)
         return image
     }()
     

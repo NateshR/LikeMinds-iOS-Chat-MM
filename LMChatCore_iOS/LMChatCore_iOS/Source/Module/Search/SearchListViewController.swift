@@ -109,6 +109,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.section == searchResults.count - 1,
            indexPath.row == searchResults[indexPath.section].data.count - 1 {
+            self.showHideFooterLoader(isShow: true)
             viewmodel?.fetchMoreData()
         }
     }

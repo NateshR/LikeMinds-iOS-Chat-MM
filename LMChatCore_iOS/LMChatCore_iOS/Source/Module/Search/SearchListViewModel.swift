@@ -148,7 +148,6 @@ final public class SearchListViewModel {
         guard !isAPICallInProgress,
               shouldAllowAPICall else { return }
         
-        delegate?.showHideFooterLoader(isShow: true)
         isAPICallInProgress = true
         
         switch currentAPIStatus {
