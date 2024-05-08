@@ -768,6 +768,10 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     }
     
     func putConversationReaction(conversationId: String, reaction: String) {
+        // TODO: Analytics Add Community ID
+        LMChatMain.analytics?.trackEvent(for: .reactionAdded, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         updateReactionsForUI(reaction: reaction, conversationId: conversationId)
         let request = PutReactionRequest.builder()
             .conversationId(conversationId)

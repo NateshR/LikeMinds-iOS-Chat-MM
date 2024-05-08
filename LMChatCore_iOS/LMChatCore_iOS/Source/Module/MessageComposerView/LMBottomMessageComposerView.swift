@@ -414,22 +414,21 @@ open class LMBottomMessageComposerView: LMView {
     }
     
     @objc func sendMessageButtonClicked(_ sender: UIButton) {
+        let message = inputTextView.getText()
+        
         if sender.tag == audioButtonTag {
             audioButtonClicked(sender)
-            return
+        } else if !message.isEmpty,
+                  message != inputTextView.placeHolderText {
+            delegate?.composeMessage(message: message)
         }
-        let message = inputTextView.getText()
-        guard !message.isEmpty,
-              message != inputTextView.placeHolderText else {
-            return
-        }
+        
         inputTextView.text = inputTextView.placeHolderText
         inputTextView.resignFirstResponder()
         isLinkPreviewCancel = false
         replyMessageViewContainer.isHidden = true
         closeLinkPreview()
         contentHeightChanged()
-        delegate?.composeMessage(message: message)
         
         checkSendButtonGestures()
     }

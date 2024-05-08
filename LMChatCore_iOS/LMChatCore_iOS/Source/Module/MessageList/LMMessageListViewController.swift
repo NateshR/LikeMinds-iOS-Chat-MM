@@ -41,8 +41,6 @@ open class LMMessageListViewController: LMViewController {
     
     open private(set) lazy var chatroomTopicBar: LMChatroomTopicView = {
         let view = LMChatroomTopicView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .systemGroupedBackground
-//        view.delegate = self
         return view
     }()
     
@@ -77,6 +75,13 @@ open class LMMessageListViewController: LMViewController {
         viewModel?.syncConversation()
         
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
+        
+        LMChatMain.analytics?.trackEvent(for: .chatRoomOpened, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: "",
+                                                                                 LMChatAnalyticsKeys.chatroomType.rawValue: "",
+                                                                                 LMChatAnalyticsKeys.chatroomName.rawValue: "",
+                                                                                 LMChatAnalyticsKeys.communityId.rawValue: "",
+                                                                                 LMChatAnalyticsKeys.source.rawValue: ""
+                                                                                ])
     }
     
     open override func setupAppearance() {
@@ -335,7 +340,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func didReactOnMessage(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         if reaction == "more" {
-            
+            // TODO:
         } else {
             viewModel?.putConversationReaction(conversationId: message.messageId, reaction: reaction)
         }
@@ -391,15 +396,19 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
-        guard let fileUrl = URL(string: url) else {
-            return
-        }
+        guard let fileUrl = URL(string: url) else { return }
+        // TODO: Analytics Properties
+        LMChatMain.analytics?.trackEvent(for: .chatLinkClicked, eventProperties: [:])
+        
         NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
     }
     
     public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let attachments = message.attachments, !attachments.isEmpty else { return }
+        
+        // TODO: Analytics Parameter -> How to identify image/video! That too need to be decided
+        LMChatMain.analytics?.trackEvent(for: .imageViewed, eventProperties: [:])
         
         let mediaData: [LMChatMediaPreviewViewModel.DataModel.MediaModel] = attachments.compactMap {
             .init(mediaType: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, thumbnailURL: $0.thumbnailUrl, mediaURL: $0.fileUrl ?? "")
@@ -414,6 +423,10 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
               let reactions = conversation.reactions else { return }
+        
+        // TODO: Analytics Properties
+        LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [:])
+        
         NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
@@ -533,6 +546,10 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         if let audioURL = LMChatAudioRecordManager.shared.recordingStopped() {
             let mediaModel = MediaPickerModel(with: audioURL, type: .voice_note)
             postConversationWithAttchments(message: nil, attachments: [mediaModel])
+            
+            // TODO: Analytics Parameters
+            LMChatMain.analytics?.trackEvent(for: .voiceNoteSent, eventProperties: [:])
+            
 //            delegate?.postMessageWithAudioAttachment(with: audioURL)
         }
         LMChatAudioRecordManager.shared.resetAudioParameters()
@@ -570,6 +587,11 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
             if canRecord {
                 bottomMessageBoxView.showRecordingView()
                 NotificationCenter.default.addObserver(self, selector: #selector(updateRecordDuration), name: .audioDurationUpdate, object: nil)
+                
+                // TODO: Analytics Parameter
+                LMChatMain.analytics?.trackEvent(for: .voiceNoteRecorded, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: "",
+                                                                                            LMChatAnalyticsKeys.communityId.rawValue: "",
+                                                                                            LMChatAnalyticsKeys.chatroomType.rawValue: ""])
             } else {
                 // TODO: Show Error Alert if false
             }
@@ -590,6 +612,10 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func playRecording() {
         guard let url = LMChatAudioRecordManager.shared.audioURL else { return }
+        
+        // TODO: Analytics Parameter
+        LMChatMain.analytics?.trackEvent(for: .voiceNotePreviewed, eventProperties: [:])
+        
         LMChatAudioPlayManager.shared.startAudio(fileURL: url.absoluteString) { [weak self] progress in
             self?.bottomMessageBoxView.updateRecordTime(with: progress, isPlayback: true)
         }
@@ -600,6 +626,8 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     }
     
     public func deleteRecording() {
+        // TODO: Analytics Parameter
+        LMChatMain.analytics?.trackEvent(for: .voiceNoteCanceled, eventProperties: [:])
         LMChatAudioRecordManager.shared.deleteAudioRecording()
     }
     

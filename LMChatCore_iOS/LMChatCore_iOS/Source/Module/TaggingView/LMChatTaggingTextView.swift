@@ -108,6 +108,9 @@ open class LMChatTaggingTextView: LMTextView {
     }
     
     public func addTaggedUser(with username: String, route: String) {
+        // TODO: Analytics for Adding User
+        // Not Adding now as, it should be in UI Layer, the flow is wrogn
+        
         if let startIndex {
             let partOneString = NSMutableAttributedString(attributedString: attributedText.attributedSubstring(from: NSRange(location: 0, length: startIndex)))
             let partTwoString = NSMutableAttributedString(attributedString: attributedText.attributedSubstring(from: NSRange(location: startIndex + 1 + characters.count, length: attributedText.length - startIndex - 1 - characters.count)))

@@ -129,7 +129,6 @@ open class LMReactionViewController: LMViewController {
         dimmedView.isUserInteractionEnabled = true
         dimmedView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didTapDimmedView)))
         viewModel?.getData()
-
     }
     
     open override func viewDidAppear(_ animated: Bool) {

@@ -71,6 +71,8 @@ open class LMHomeFeedViewController: LMViewController {
     }
     
     @objc func searchBarItemClicked() {
+        LMChatMain.analytics?.trackEvent(for: .searchIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
+        
         NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
     }
 }

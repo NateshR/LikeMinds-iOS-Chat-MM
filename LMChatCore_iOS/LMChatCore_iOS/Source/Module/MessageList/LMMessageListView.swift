@@ -462,6 +462,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         if #available(iOS 14.0, *) {
             parameters.shadowPath = UIBezierPath()
         }
+        
         return UITargetedPreview(view: container, parameters: parameters, target: previewTarget)
     }
     

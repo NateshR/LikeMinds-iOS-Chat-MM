@@ -66,6 +66,12 @@ public class SearchListViewController: LMViewController {
         super.viewDidAppear(animated)
         searchController.searchBar.becomeFirstResponder()
     }
+    
+    open override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        LMChatMain.analytics?.trackEvent(for: .chatroomSearchClosed, eventProperties: [:])
+    }
 }
 
 // MARK: UITableView
@@ -115,6 +121,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // TODO: Add Tap Gesture and analytics event
         print(indexPath)
     }
 }
@@ -138,6 +145,8 @@ extension SearchListViewController: UISearchBarDelegate {
     }
     
     open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        LMChatMain.analytics?.trackEvent(for: .searchCrossIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
+        
         resetSearchData()
     }
     

@@ -85,6 +85,11 @@ public class LMExploreChatroomViewModel {
     }
     
     func followUnfollow(chatroomId: String, status: Bool) {
+        // TODO: Analytics Community ID
+        LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                                                 LMChatAnalyticsKeys.communityId.rawValue: "",
+                                                                                                                 LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.communityFeed])
+        
         let request = FollowChatroomRequest.builder()
             .chatroomId(chatroomId)
             .uuid(UserPreferences.shared.getClientUUID() ?? "")

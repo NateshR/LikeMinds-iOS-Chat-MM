@@ -9,10 +9,6 @@ import Foundation
 import LMChatUI_iOS
 
 open class LMExploreChatroomViewController: LMViewController {
-    
-    
-    var viewModel: LMExploreChatroomViewModel?
-    
     open private(set) lazy var containerView: LMExploreChatroomListView = {
         let view = LMExploreChatroomListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
@@ -29,6 +25,8 @@ open class LMExploreChatroomViewController: LMViewController {
         button.addTarget(self, action: #selector(filterButtonClicked), for: .touchUpInside)
         return button
     }()
+    
+    public var viewModel: LMExploreChatroomViewModel?
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -93,7 +91,6 @@ extension LMExploreChatroomViewController: LMExploreChatroomViewModelDelegate {
 }
 
 extension LMExploreChatroomViewController: LMExploreChatroomListViewDelegate {
-    
     public func didTapOnCell(indexPath: IndexPath) {
         guard let viewModel else { return }
         let chatroom = viewModel.chatrooms[indexPath.row]
