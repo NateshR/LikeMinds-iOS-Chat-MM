@@ -32,18 +32,13 @@ public enum LMChatAnalyticsEventName: String {
     case chatroomUnmuted = "Chatroom unmuted" // Done
     case chatroomResponded = "Chatroom responded"
     case chatRoomDeleted = "Chatroom deleted" 
-    case chatRoomFollowed = "Chatroom followed"
+    case chatRoomFollowed = "Chatroom followed" // Done
     case chatRoomLeft = "Chatroom left"
-    case chatRoomOpened = "Chatroom opened"
+    case chatRoomOpened = "Chatroom opened" // Done
     case chatRoomShared = "Chatroom shared"
-    case chatRoomUnfollowed = "Chatroom unfollowed"
+    case chatRoomUnfollowed = "Chatroom unfollowed" // Done
     case chatroomAutoFollow = "Auto follow enabled"
     case setChatroomTopic = "Current topic updated" // Done
-
-    // Member Profile Events
-    case memberProfileView = "Member profile view"
-    case memberProfileReport = "Member profile report"
-    case memberProfileReportConfirmed = "Member profile report confirmed"
     
     // Notification Events
     case notificationReceived = "Notification Received"
@@ -58,9 +53,9 @@ public enum LMChatAnalyticsEventName: String {
     // Search Events
     case searchIconClicked = "Clicked search icon" // Done
     case searchCrossIconClicked = "Clicked cross search icon" // Done
-    case chatroomSearched = "Chatroom searched"
+    case chatroomSearched = "Chatroom searched" // Done
     case chatroomSearchClosed = "Chatroom search closed"
-    case messageSearched = "Message searched"
+    case messageSearched = "Message searched" // Done
     case messageSearchClosed = "Message search closed"
 
     // Voice Note Events

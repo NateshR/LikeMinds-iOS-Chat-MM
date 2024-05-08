@@ -47,11 +47,11 @@ public final class LMMessageListViewModel {
     }
     
     
-    public static func createModule(withChatroomId chatroomId: String) throws -> LMMessageListViewController {
+    public static func createModule(withChatroomId chatroomId: String, conversationId: String?) throws -> LMMessageListViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.messageListScreen.init()
-        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, nil, nil))
+        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationId, nil))
         
         viewcontroller.viewModel = viewmodel
         viewcontroller.delegate = viewmodel
@@ -453,15 +453,13 @@ public final class LMMessageListViewModel {
     }
     
     func muteUnmuteChatroom(value: Bool) {
-        
-        LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: chatroomViewData?.header ?? ""])
-        
         let request = MuteChatroomRequest.builder()
             .chatroomId(chatroomViewData?.id ?? "")
             .value(value)
             .build()
         LMChatClient.shared.muteChatroom(request: request) {[weak self] response in
             guard response.success else { return }
+            LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: self?.chatroomViewData?.header ?? ""])
             self?.fetchChatroomActions()
         }
     }
@@ -764,9 +762,8 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .value(status)
             .build()
         LMChatClient.shared.followChatroom(request: request) { response in
-            guard response.success else {
-                return
-            }
+            guard response.success else { return }
+            LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
         }
     }
     

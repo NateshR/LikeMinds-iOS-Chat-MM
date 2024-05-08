@@ -121,8 +121,13 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // TODO: Add Tap Gesture and analytics event
-        print(indexPath)
+        if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel {
+            LMChatMain.analytics?.trackEvent(for: .chatroomSearched, eventProperties: [:])
+            NavigationScreen.shared.perform(.chatroom(chatroomId: data.chatroomID, conversationId: nil), from: self, params: nil)
+        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel {
+            LMChatMain.analytics?.trackEvent(for: .messageSearched, eventProperties: [:])
+            NavigationScreen.shared.perform(.chatroom(chatroomId: data.chatroomID, conversationId: data.messageID), from: self, params: nil)
+        }
     }
 }
 

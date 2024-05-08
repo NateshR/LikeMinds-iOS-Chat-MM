@@ -107,8 +107,6 @@ extension LMHomeFeedViewController: LMHomFeedListViewDelegate {
             guard let viewModel else { return }
             let chatroom = viewModel.chatrooms[indexPath.row]
             NavigationScreen.shared.perform(.chatroom(chatroomId: chatroom.id), from: self, params: nil)
-        default:
-            break
         }
     }
     

@@ -123,6 +123,7 @@ final public class SearchListViewModel {
     private func setNewAPIStatus() {
         // This means we have fetched all available data, no need to progress further
         if currentAPIStatus == .conversationFollowFalse {
+            convertToContentModel()
             shouldAllowAPICall = false
             return
         }
@@ -146,7 +147,10 @@ final public class SearchListViewModel {
     
     private func fetchData(searchString: String) {
         guard !isAPICallInProgress,
-              shouldAllowAPICall else { return }
+              shouldAllowAPICall else {
+            delegate?.showHideFooterLoader(isShow: false)
+            return
+        }
         
         isAPICallInProgress = true
         
@@ -200,9 +204,9 @@ final public class SearchListViewModel {
             
             if chatrooms.isEmpty || chatrooms.count < pageSize {
                 setNewAPIStatus()
+            } else {
+                convertToContentModel()
             }
-            
-            convertToContentModel()
         }
     }
     
@@ -254,9 +258,9 @@ final public class SearchListViewModel {
             
             if conversations.isEmpty || conversations.count < pageSize {
                 setNewAPIStatus()
+            } else {
+                convertToContentModel()
             }
-            
-            convertToContentModel()
         }
     }
     
