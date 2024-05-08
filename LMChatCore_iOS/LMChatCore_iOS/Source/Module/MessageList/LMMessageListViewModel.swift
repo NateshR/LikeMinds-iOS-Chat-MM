@@ -453,6 +453,9 @@ public final class LMMessageListViewModel {
     }
     
     func muteUnmuteChatroom(value: Bool) {
+        
+        LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: chatroomViewData?.header ?? ""])
+        
         let request = MuteChatroomRequest.builder()
             .chatroomId(chatroomViewData?.id ?? "")
             .value(value)
@@ -833,6 +836,9 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     }
     
     private func onDeleteConversation(ids: [String]) {
+        LMChatMain.analytics?.trackEvent(for: .messageDeleted, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                 "message_ids": ids.joined(separator: ", ")])
+        
         for conId in ids {
             if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
                 let conversation = chatMessages[index]
@@ -851,6 +857,8 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     }
     
     func editConversation(conversationId: String) {
+        LMChatMain.analytics?.trackEvent(for: .messageEdited, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                LMChatAnalyticsKeys.messageId.rawValue: conversationId])
         self.editChatMessage = chatMessages.first(where: {$0.id == conversationId})
     }
     
@@ -859,6 +867,10 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     }
     
     func setAsCurrentTopic(conversationId: String) {
+        // TODO: Analytics Parameters
+        LMChatMain.analytics?.trackEvent(for: .setChatroomTopic, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                   LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         let request = SetChatroomTopicRequest.builder()
             .chatroomId(chatroomId)
             .conversationId(conversationId)
@@ -873,6 +885,8 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     }
     
     func copyConversation(conversationIds: [String]) {
+        LMChatMain.analytics?.trackEvent(for: .messageCopied, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                                                                                "messages_id": conversationIds.joined(separator: ", ")])
         
         var copiedString: String = ""
         for convId in conversationIds {
@@ -891,7 +905,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
     
     func fetchReplyConversationOnClick(repliedConversationId: String) {
         if let conversation = chatMessages.first(where: {$0.id == repliedConversationId}) {
-            messagesList
+            
         } else if let chatroomViewData {
             fetchIntermediateConversations(chatroom: chatroomViewData, conversationId: repliedConversationId)
         }

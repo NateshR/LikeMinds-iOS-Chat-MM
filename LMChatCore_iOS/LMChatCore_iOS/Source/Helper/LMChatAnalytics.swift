@@ -27,18 +27,18 @@ final class LMChatAnalyticsTracker: LMChatAnalyticsProtocol {
 public enum LMChatAnalyticsEventName: String {
     // Chatroom Events
     case chatroomLinkClicked = "Chatroom link clicked"
-    case userTagsSomeone = "User tags someone"
-    case chatroomMuted = "Chatroom muted"
-    case chatroomUnmuted = "Chatroom unmuted"
+    case userTagsSomeone = "User tags someone" // Done
+    case chatroomMuted = "Chatroom muted" // Done
+    case chatroomUnmuted = "Chatroom unmuted" // Done
     case chatroomResponded = "Chatroom responded"
-    case chatRoomDeleted = "Chatroom deleted"
+    case chatRoomDeleted = "Chatroom deleted" 
     case chatRoomFollowed = "Chatroom followed"
     case chatRoomLeft = "Chatroom left"
     case chatRoomOpened = "Chatroom opened"
     case chatRoomShared = "Chatroom shared"
     case chatRoomUnfollowed = "Chatroom unfollowed"
     case chatroomAutoFollow = "Auto follow enabled"
-    case setChatroomTopic = "Current topic updated"
+    case setChatroomTopic = "Current topic updated" // Done
 
     // Member Profile Events
     case memberProfileView = "Member profile view"
@@ -51,7 +51,7 @@ public enum LMChatAnalyticsEventName: String {
 
     // Reaction Events
     case reactionsClicked = "Reactions Click"
-    case reactionAdded = "Reaction Added"
+    case reactionAdded = "Reaction Added" // Done
     case reactionListOpened = "Reaction List Opened" // Done
     case reactionRemoved = "Reaction Removed" // Done
 
@@ -81,10 +81,10 @@ public enum LMChatAnalyticsEventName: String {
     case chatLinkClicked = "Chat link clicked" // Done
 
     // Message Action Events
-    case messageEdited = "Message Edited"
-    case messageDeleted = "Message Deleted"
-    case messageCopied = "Message Copied"
-    case messageReply = "Message Reply"
+    case messageEdited = "Message Edited" // Done
+    case messageDeleted = "Message Deleted" // Done
+    case messageCopied = "Message Copied" // Done
+    case messageReply = "Message Reply" // Done
 
     // Reporting Events
     case messageReported = "Message reported"
