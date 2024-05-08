@@ -80,7 +80,7 @@ open class LMBottomMessageComposerView: LMView {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
         //        view.textContainerInset = .zero
         view.backgroundColor = Appearance.shared.colors.white
-        view.placeHolderText = "Write somthing"
+        view.placeHolderText = "Write something"
         view.mentionDelegate = self
         view.isScrollEnabled = false
         return view
@@ -423,8 +423,7 @@ open class LMBottomMessageComposerView: LMView {
               message != inputTextView.placeHolderText else {
             return
         }
-        inputTextView.text = inputTextView.placeHolderText
-        inputTextView.resignFirstResponder()
+        inputTextView.text = ""
         isLinkPreviewCancel = false
         replyMessageViewContainer.isHidden = true
         closeLinkPreview()

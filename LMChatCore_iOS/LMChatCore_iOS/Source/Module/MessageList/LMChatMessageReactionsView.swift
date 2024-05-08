@@ -19,6 +19,7 @@ open class LMChatMessageReactionsView: LMView {
         view.spacing = 2
         view.isLayoutMarginsRelativeArrangement = true
         view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+        view.setHeightConstraint(with: 34)
         return view
     }()
     

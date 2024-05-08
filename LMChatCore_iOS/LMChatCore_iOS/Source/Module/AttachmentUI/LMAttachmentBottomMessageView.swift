@@ -64,8 +64,8 @@ open class LMAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var inputTextView: LMChatTaggingTextView = {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
-        //        view.textContainerInset = .zero
-        view.placeHolderText = "Write somthing"
+//        view.textContainerInset = .zero
+        view.placeHolderText = "Write something"
         view.mentionDelegate = self
         view.isScrollEnabled = false
         view.typingTextColor = Appearance.shared.colors.white

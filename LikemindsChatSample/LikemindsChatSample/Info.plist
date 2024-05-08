@@ -27,5 +27,7 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>App using camera for photo click and post in chatroom</string>
 </dict>
 </plist>

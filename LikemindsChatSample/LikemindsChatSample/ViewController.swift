@@ -11,6 +11,12 @@ import LikeMindsChat
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var apiKeyField: UITextField?
+    @IBOutlet weak var userIdField: UITextField?
+    @IBOutlet weak var userNameField: UITextField?
+    @IBOutlet weak var loginButton: UIButton?
+    
+    
 //    open private(set) lazy var containerView: LMBottomMessageComposerView = {
 //        let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
 ////        view.backgroundColor = .cyan
@@ -50,10 +56,11 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        try? LMChatMain.shared.initiateUser(username: "DEFCON", userId: "53b0176d-246f-4954-a746-9de96a572cc6", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
-            guard success else { return }
-            self?.moveToNextScreen()
-        }
+        
+//        try? LMChatMain.shared.initiateUser(username: "DEFCON", userId: "53b0176d-246f-4954-a746-9de96a572cc6", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
+//            guard success else { return }
+//            self?.moveToNextScreen()
+//        }
         
         // MEDIA PREVIEW
 //         var data: [LMChatMediaPreviewViewModel.DataModel] = []
@@ -65,7 +72,7 @@ class ViewController: UIViewController {
 //        
 //         let vc = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: 3)
 //         navigationController?.pushViewController(vc, animated: true)
-
+       isSavedData()
     }
     
     func moveToNextScreen() {
@@ -80,7 +87,9 @@ class ViewController: UIViewController {
 //            self.addChild(homefeedvc)
 //            self.view.addSubview(homefeedvc.view)
 //            homefeedvc.didMove(toParent: self)
-        self.navigationController?.pushViewController(homefeedvc, animated: true)
+        let navigation = UINavigationController(rootViewController: homefeedvc)
+        navigation.modalPresentationStyle = .overFullScreen
+        self.present(navigation, animated: false)
 //            self.navigationItem.leftBarButtonItem = LMBarButtonItem()
     }
     
@@ -101,21 +110,47 @@ class ViewController: UIViewController {
             containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
     }
- 
-/*
-    func syncChatroom() {
-        let request = InitiateUserRequest.builder()
-            .apiKey("5f567ca1-9d74-4a1b-be8b-a7a81fef796f")
-            .uuid("53b0176d-246f-4954-a746-9de96a572cc6")
-            .userName("DEFCON")
-            .isGuest(false)
-            .deviceId(UIDevice.current.identifierForVendor?.uuidString ?? "")
-            .build()
-        LMChatClient.shared.initiateUser(request: request) { response in
-            print(response)
+
+    @IBAction func loginButtonClicked(_ sender: UIButton) {
+        guard let apiKey = apiKeyField?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !apiKey.isEmpty,
+              let userId = userIdField?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !userId.isEmpty,
+              let username = userNameField?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !username.isEmpty else {
+            showAlert(message: "All fields are mandatory!")
+            return
+        }
+        
+        let userDefalut = UserDefaults.standard
+        userDefalut.setValue(apiKey, forKey: "apiKey")
+        userDefalut.setValue(userId, forKey: "userId")
+        userDefalut.setValue(username, forKey: "username")
+        userDefalut.synchronize()
+        callInitiateApi(userId: userId, username: username, apiKey: apiKey)
+    }
+    
+    func isSavedData() -> Bool {
+        let userDefalut = UserDefaults.standard
+        guard let apiKey = userDefalut.value(forKey: "apiKey") as? String,
+              let userId = userDefalut.value(forKey: "userId") as? String,
+              let username = userDefalut.value(forKey: "username") as? String else {
+            return false
+        }
+        callInitiateApi(userId: userId, username: username, apiKey: apiKey)
+        return true
+    }
+    
+    func callInitiateApi(userId: String, username: String, apiKey: String) {
+        LMChatMain.shared.configure(apiKey: apiKey)
+        try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
+            guard success else { return }
+            self?.moveToNextScreen()
         }
     }
-*/
     
+    func showAlert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .cancel))
+        present(alert, animated: true)
+    }
+ 
 }
 

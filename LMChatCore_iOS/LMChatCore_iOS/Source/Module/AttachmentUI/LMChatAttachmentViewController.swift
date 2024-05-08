@@ -9,6 +9,7 @@ import Foundation
 import LMChatUI_iOS
 import AVFoundation
 import AVKit
+import CoreServices
 
 public protocol LMChatAttachmentViewDelegate: AnyObject {
     func postConversationWithAttchments(message: String?, attachments: [MediaPickerModel])
@@ -127,13 +128,25 @@ open class LMChatAttachmentViewController: LMViewController {
             editButton.isHidden = true
             bottomMessageBoxView.attachmentButton.isHidden = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if self.zoomableImageViewContainer.imageView.image == nil {
-                    self.viewModel?.selectedMedia = cellData[0]
-                    self.zoomableImageViewContainer.configure(with: cellData[0].url)
+                if self.zoomableImageViewContainer.imageView.image == nil, let firstData = cellData.first {
+                    self.setDataToView(firstData)
                 }
             }
         } else {
-            addMoreAttachment()
+            switch viewModel?.sourceType {
+            case .photoLibrary:
+                addMoreAttachment()
+            case .camera:
+                presentCamera()
+            default:
+                break
+            }
+        }
+    }
+    
+    func presentCamera() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            MediaPickerManager.shared.presentCamera(viewController: self, delegate: self)
         }
     }
     
@@ -292,7 +305,7 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         viewModel?.selectedMedia = data
         switch data.mediaType {
         case .image, .gif:
-            editButton.isHidden = false
+            editButton.isHidden = data.mediaType == .gif
             videoImageViewContainer.isHidden = true
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
@@ -336,7 +349,7 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     }
     
     public func addGifAttachment() {
-        MediaPickerManager.shared.presentGifPicker(viewController: self, delegate: self, fileType: .gif)
+//        MediaPickerManager.shared.presentGifPicker(viewController: self, delegate: self, fileType: .gif)
     }
     
     public func sendAttachment(message: String?) {
@@ -363,4 +376,23 @@ extension LMChatAttachmentViewController: MediaPickerDelegate {
             }
         }
     }
+}
+
+extension LMChatAttachmentViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let videoURL = info[.mediaURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: videoURL) {
+            viewModel?.mediaCellData.append(.init(with: localPath, type: .video))
+        } else if let imageUrl = info[.imageURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: imageUrl) {
+            viewModel?.mediaCellData.append(.init(with: localPath, type: .image))
+        } else if let capturedImage = info[.originalImage] as? UIImage, let localPath = MediaPickerManager.shared.saveImageIntoDirecotry(image: capturedImage) {
+            viewModel?.mediaCellData.append(.init(with: localPath, type: .image))
+        }
+        mediaPicker(picker, didFinishPicking: viewModel?.mediaCellData ?? [])
+    }
+
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
 }

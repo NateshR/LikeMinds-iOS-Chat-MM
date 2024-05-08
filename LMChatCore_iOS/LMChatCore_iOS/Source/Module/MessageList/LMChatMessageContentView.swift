@@ -252,6 +252,7 @@ open class LMChatMessageContentView: LMView {
         let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
         self.timestampLabel.text = edited + (data.message?.createdTime ?? "")
         let isIncoming = data.message?.isIncoming ?? true
+        galleryView.loaderView.isHidden = data.message?.attachmentUploaded ?? true
         bubbleView.bubbleFor(isIncoming)
         if !isIncoming {
             chatProfileImageView.isHidden = true

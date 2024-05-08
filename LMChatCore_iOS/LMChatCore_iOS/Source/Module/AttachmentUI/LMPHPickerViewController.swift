@@ -67,7 +67,7 @@ public class MediaPickerModel {
     }
 }
 
-protocol MediaPickerDelegate: AnyObject {
+protocol MediaPickerDelegate: AnyObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func mediaPicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel])
     func filePicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel], fileType: MediaType)
 }
@@ -105,8 +105,19 @@ class MediaPickerManager: NSObject {
             viewController.present(picker, animated: true)
         } else {
             let imagePicker = UIImagePickerController()
-            imagePicker.delegate = self
+//            imagePicker.delegate = self
             imagePicker.sourceType = .photoLibrary
+            imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String] // Only videos
+            imagePicker.allowsEditing = false
+            viewController.present(imagePicker, animated: true, completion: nil)
+        }
+    }
+    
+    func presentCamera(viewController: UIViewController, delegate: (UIImagePickerControllerDelegate & UINavigationControllerDelegate)?) {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = delegate
+            imagePicker.sourceType = .camera
             imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String] // Only videos
             imagePicker.allowsEditing = false
             viewController.present(imagePicker, animated: true, completion: nil)
@@ -124,20 +135,7 @@ class MediaPickerManager: NSObject {
         docVc.isModalInPresentation = true
         viewController.present(docVc, animated: true)
     }
-    
-    func presentGifPicker(viewController: UIViewController, delegate: MediaPickerDelegate?, fileType: MediaType) {
-        guard [MediaType.gif].contains(fileType) else { return }
-        self.fileTypeForDocument = fileType
-        self.delegate = delegate
-        let giphy = GiphyViewController()
-        giphy.mediaTypeConfig = [.gifs]
-        giphy.theme = GPHTheme(type: .lightBlur)
-        giphy.showConfirmationScreen = false
-        giphy.rating = .ratedPG
-        giphy.delegate = self
-        viewController.present(giphy, animated: true, completion: nil)
-    }
-    
+
     // get video dimensions
     func initAspectRatioOfVideo(with fileURL: URL) -> (width: CGFloat, height: CGFloat)? {
         let resolution = resolutionForLocalVideo(url: fileURL)
@@ -192,6 +190,21 @@ class MediaPickerManager: NSObject {
                 try FileManager.default.removeItem(at: targetURL)
             }
             try FileManager.default.copyItem(at: url, to: targetURL)
+        } catch {
+            print(error.localizedDescription)
+        }
+        return targetURL
+    }
+    
+    func saveImageIntoDirecotry(image: UIImage) -> URL? {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        guard let targetURL = documentsDirectory?.appendingPathComponent("IMG_\(Date().timeIntervalSince1970).jpeg") else { return nil }
+        
+        do {
+            // Convert to Data
+            if let data = image.jpegData(compressionQuality: 1) {
+                try data.write(to: targetURL)
+            }
         } catch {
             print(error.localizedDescription)
         }
@@ -284,24 +297,6 @@ extension MediaPickerManager: PHPickerViewControllerDelegate  {
     }
 }
 
-extension MediaPickerManager: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let videoURL = info[.mediaURL] as? URL, let localPath = createLocalURLfromPickedAssetsUrl(url: videoURL) {
-            mediaPickerItems.append(.init(with: localPath, type: .video))
-        } else if let imageUrl = info[.imageURL] as? URL, let localPath = createLocalURLfromPickedAssetsUrl(url: imageUrl) {
-            mediaPickerItems.append(.init(with: localPath, type: .image))
-        }
-        delegate?.mediaPicker(picker, didFinishPicking: mediaPickerItems)
-    }
-    
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true, completion: nil)
-    }
-    
-}
-
 extension MediaPickerManager: UIDocumentPickerDelegate {
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
@@ -313,43 +308,3 @@ extension MediaPickerManager: UIDocumentPickerDelegate {
     }
 }
 
-extension MediaPickerManager: GiphyDelegate {
-    
-    public func didDismiss(controller: GiphyViewController?) {
-        
-    }
-    
-    public func didSelectMedia(giphyViewController: GiphyViewController, media: GPHMedia, contentType: GPHContentType) {
-        giphyViewController.dismiss(animated: true) {
-//            delegate?.showHideLoaderView(isShow: true, backgroundColor: .clear)
-            guard contentType == .gifs else {return}
-            DispatchQueue.main.async {
-                URLSession.shared.dataTask(with: URL(string: media.url(rendition: .fixedHeight, fileType: .gif)!)!) { data, response, error in
-                    guard let gifImageData = data, error == nil else {
-                        print(error)
-                        return
-                    }
-                    let fileName = (media.title?.components(separatedBy: " ").joined(separator: "_") ?? "\(Date().millisecondsSince1970)") + ".gif"
-                    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-                    guard let targetURL = documentsDirectory?.appendingPathComponent(fileName) else { return }
-                    do {
-                        if FileManager.default.fileExists(atPath: targetURL.path) {
-                            try FileManager.default.removeItem(at: targetURL)
-                        }
-                        try gifImageData.write(to: targetURL, options: .atomic)
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self, let giphyImage = GiphyYYImage(data: gifImageData) else {return}
-                        let size = giphyImage.size
-                        let gifImage = GIFImage(withGIFImageData: gifImageData, withSize: size, withTitle: media.title, url: targetURL)
-//                        weakSelf.showHideLoaderView(isShow: false)
-//                        weakSelf.postConversationWithAttchments(message: nil, attachments: [.init(with: targetURL, type: .gif)])
-                        self?.delegate?.mediaPicker(giphyViewController, didFinishPicking: [.init(with: targetURL, type: .gif)])
-                    }
-                }.resume()
-            }
-        }
-    }
-}

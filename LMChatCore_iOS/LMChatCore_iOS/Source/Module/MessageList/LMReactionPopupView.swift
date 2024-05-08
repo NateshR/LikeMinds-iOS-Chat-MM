@@ -17,7 +17,7 @@ open class LMReactionPopupView: LMView {
         case sad = "😢"
         case angry = "😡"
         case like = "👍"
-        case more = "⨁"
+        case more = "more"
     }
     
     /// The `UIImageView` instance that shows the avatar image.

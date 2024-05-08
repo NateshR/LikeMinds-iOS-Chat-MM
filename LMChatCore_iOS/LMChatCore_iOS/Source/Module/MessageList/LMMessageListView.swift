@@ -69,6 +69,7 @@ open class LMMessageListView: LMView {
             public let createdTime: String?
             public let ogTags: OgTags?
             public let isEdited: Bool?
+            public let attachmentUploaded: Bool?
         }
         
         public struct Reaction {
@@ -198,10 +199,13 @@ open class LMMessageListView: LMView {
     }
     
     func scrollToBottom() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
+//            let section = self.tableSections.count - 1
+//            let row = self.tableSections[section].data.count - 1
+//            let indexPath = IndexPath(row: row, section: section)
             if hasRowAtIndexPath(indexPath: indexPath) {
                 self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
             }
@@ -210,6 +214,7 @@ open class LMMessageListView: LMView {
         func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
             return indexPath.section < tableView.numberOfSections && indexPath.row < tableView.numberOfRows(inSection: indexPath.section)
         }
+        
     }
     
     func scrollAtIndexPath(indexPath: IndexPath) {

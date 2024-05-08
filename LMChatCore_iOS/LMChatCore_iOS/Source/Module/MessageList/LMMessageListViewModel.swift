@@ -11,6 +11,7 @@ import LikeMindsChat
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
+    func insertRowFor(data: [[String: String]])
     func scrollToBottom()
     func updateChatroomSubtitles()
     func updateTopicBar()
@@ -27,7 +28,7 @@ public final class LMMessageListViewModel {
     var chatroomDetailsExtra: ChatroomDetailsExtra
     var chatMessages: [Conversation] = []
     var messagesList:[LMMessageListView.ContentModel] = []
-    let conversationFetchLimit: Int = 20
+    let conversationFetchLimit: Int = 10
     var chatroomViewData: Chatroom?
     var chatroomWasNotLoaded: Bool = true
     var chatroomActionData: GetChatroomActionsResponse?
@@ -92,11 +93,14 @@ public final class LMMessageListViewModel {
             //1st case -> chatroom is not present, if yes return
             guard let chatroom = response.data?.chatroom, let self else {
                 self?.chatroomWasNotLoaded = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    self?.getInitialData()
+                }
                 return
             }
             //2nd case -> chatroom is deleted, if yes return
             if chatroom.deletedBy != nil {
-                // Back from this screen
+                (delegate as? LMMessageListViewController)?.navigationController?.popViewController(animated: true)
                 return
             }
             chatroomViewData = chatroom
@@ -227,7 +231,7 @@ public final class LMMessageListViewModel {
         print("conversations ------> \(conversations)")
         chatMessages.append(contentsOf: conversations)
         let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-        
+        var insertData: [[String: String]] = []
         for key in dictionary.keys {
             if let index = messagesList.firstIndex(where: {$0.section == (key ?? "")}) {
                 guard let messages = dictionary[key]?.sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({ self.convertConversation($0)}) else { return}
@@ -238,7 +242,8 @@ public final class LMMessageListViewModel {
                 messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
             }
         }
-        delegate?.reloadChatMessageList()
+        delegate?.insertRowFor(data: insertData)
+//        delegate?.reloadChatMessageList()
     }
     
     func getMoreConversations(conversationId: String, direction: ScrollDirection) {
@@ -316,7 +321,7 @@ public final class LMMessageListViewModel {
                    message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
-                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags), isEdited: replyConversation.isEdited)]
+                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags), isEdited: replyConversation.isEdited, attachmentUploaded: replyConversation.attachmentUploaded)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
@@ -328,7 +333,7 @@ public final class LMMessageListViewModel {
                      createdBy: conversation.member?.name,
                      createdByImageUrl: conversation.member?.imageUrl,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited)
+                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded)
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
@@ -466,6 +471,7 @@ public final class LMMessageListViewModel {
     func leaveChatroom() {
         let request = LeaveSecretChatroomRequest.builder()
             .chatroomId(chatroomViewData?.id ?? "")
+            .uuid(UserPreferences.shared.getClientUUID() ?? "")
             .isSecret(chatroomViewData?.isSecret ?? false)
             .build()
         LMChatClient.shared.leaveSecretChatroom(request: request) { [weak self] response in
@@ -485,6 +491,10 @@ public final class LMMessageListViewModel {
             NavigationScreen.shared.perform(.report(chatroomId: chatroomViewData?.id ?? "", conversationId: nil, memberId: nil), from: fromViewController, params: nil)
         case .leaveChatRoom:
             leaveChatroom()
+        case .unFollow:
+            followUnfollow(status: false)
+        case .follow:
+            followUnfollow(status: true)
         case .mute:
             muteUnmuteChatroom(value: true)
         case .unMute:
@@ -760,10 +770,11 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .uuid(UserPreferences.shared.getClientUUID() ?? "")
             .value(status)
             .build()
-        LMChatClient.shared.followChatroom(request: request) { response in
+        LMChatClient.shared.followChatroom(request: request) {[weak self] response in
             guard response.success else {
                 return
             }
+            self?.fetchChatroomActions()
         }
     }
     

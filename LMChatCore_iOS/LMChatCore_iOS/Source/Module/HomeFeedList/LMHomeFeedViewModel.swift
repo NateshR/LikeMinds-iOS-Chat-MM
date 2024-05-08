@@ -81,15 +81,10 @@ public class LMHomeFeedViewModel {
 extension LMHomeFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
-        print("Chatrooms data Intial")
         reloadChatroomsData(data: chatrooms)
     }
     
     public func onChange(removed: [Int], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {
-        print("Chatrooms data changed inserted: \(inserted.count) updated: \(updated.count) deleted: \(removed.count)")
-        removed.forEach { index in
-            chatrooms.remove(at: index)
-        }
         if updated.count > 0 {
             updateChatroomsData(data: updated.compactMap({$0.1}))
         }

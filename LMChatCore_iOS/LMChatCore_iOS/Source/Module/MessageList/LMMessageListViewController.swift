@@ -249,6 +249,18 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
     }
     
+    public func insertRowFor(data: [[String : String]]) {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
+//            guard let self else { return }
+            let oldContentHeight: CGFloat = messageListView.tableView.contentSize.height
+            let oldOffsetY: CGFloat = messageListView.tableView.contentOffset.y
+            messageListView.tableSections = viewModel?.messagesList ?? []
+            messageListView.reloadData()
+            let newContentHeight: CGFloat = messageListView.tableView.contentSize.height
+            messageListView.tableView.contentOffset.y = oldOffsetY + (newContentHeight - oldContentHeight)
+//        }
+    }
+    
     public func scrollToBottom() {
         reloadChatMessageList()
         messageListView.scrollToBottom()
@@ -335,7 +347,10 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func didReactOnMessage(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         if reaction == "more" {
-            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+                guard let self else { return }
+                NavigationScreen.shared.perform(.emojiPicker(conversationId: message.messageId), from: self, params: nil)
+            }
         } else {
             viewModel?.putConversationReaction(conversationId: message.messageId, reaction: reaction)
         }
@@ -421,7 +436,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {[weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.messageListView.isLoadingMoreData = false
         }
     }
@@ -477,15 +492,20 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 //        alert.view.tintColor = BrandingColor.shared.buttonColor
-        let camera = UIAlertAction(title: "Camera", style: UIAlertAction.Style.default) { (UIAlertAction) in
-//            self.presenter?.openMediaPicker(mediaType: "camera")
+        let camera = UIAlertAction(title: "Camera", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
+            guard let self else { return }
+            MediaPickerManager.shared.presentCamera(viewController: self, delegate: self)
+//            NavigationScreen.shared.perform(.messageAttachment(delegat: self, chatroomId: self.viewModel?.chatroomId, sourceType: .camera), from: self, params: nil)
         }
         let cameraImage = Constants.shared.images.cameraIcon
         camera.setValue(cameraImage, forKey: "image")
         
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
-            guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self, chatroomId: self?.viewModel?.chatroomId) else { return }
-            self?.present(viewController, animated: true)
+            guard let self else { return }
+            NavigationScreen.shared.perform(.messageAttachment(delegat: self, chatroomId: viewModel?.chatroomId, sourceType: .photoLibrary), from: self, params: nil)
+            
+//            guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self, chatroomId: self?.viewModel?.chatroomId, sourceType: .photoLibrary) else { return }
+//            self?.present(viewController, animated: true)
         }
         
         let photoImage = Constants.shared.images.galleryIcon
@@ -505,9 +525,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         let documentImage = Constants.shared.images.documentsIcon
         document.setValue(documentImage, forKey: "image")
         
-        let cancel = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel) { (UIAlertAction) in
-            self.dismiss(animated: true, completion: nil)
-        }
+        let cancel = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel) 
         
         alert.addAction(camera)
         alert.addAction(photo)
@@ -675,5 +693,34 @@ extension LMMessageListViewController: AVAudioRecorderDelegate {
     open func audioEnded(_ notification: Notification) {
         let duration: Int = (notification.object as? Int) ?? 0
         bottomMessageBoxView.resetAudioDuration(with: duration)
+    }
+}
+
+extension LMMessageListViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+        var targetUrl: URL?
+        if let videoURL = info[.mediaURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: videoURL) {
+            targetUrl = localPath
+        } else if let imageUrl = info[.imageURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: imageUrl) {
+            targetUrl = localPath
+        } else if let capturedImage = info[.originalImage] as? UIImage, let localPath = MediaPickerManager.shared.saveImageIntoDirecotry(image: capturedImage) {
+            targetUrl = localPath
+        }
+        guard let targetUrl, let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetUrl, type: .image)], delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: .image) else { return }
+        self.present(viewController, animated: true)
+    }
+    
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+}
+
+extension LMMessageListViewController: LMEmojiListViewDelegate {
+    func emojiSelected(emoji: String, conversationId: String?) {
+        guard let conversationId else { return }
+        viewModel?.putConversationReaction(conversationId: conversationId, reaction: emoji)
     }
 }

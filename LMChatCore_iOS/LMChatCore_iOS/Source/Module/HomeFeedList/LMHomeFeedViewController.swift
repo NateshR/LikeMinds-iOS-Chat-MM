@@ -38,7 +38,7 @@ open class LMHomeFeedViewController: LMViewController {
         viewModel?.getExploreTabCount()
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
-        self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .leading)
+        self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
     }
     
     open override func viewDidAppear(_ animated: Bool) {

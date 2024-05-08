@@ -15,7 +15,7 @@ import SafariServices
 enum NavigationActions {
     case homeFeed
     case chatroom(chatroomId: String)
-    case messageAttachment(delegat: LMChatAttachmentViewDelegate?, chatroomId: String?)
+    case messageAttachment(delegat: LMChatAttachmentViewDelegate?, chatroomId: String?, sourceType: LMChatAttachmentViewModel.LMAttachmentSourceType)
     case participants(chatroomId: String, isSecret: Bool)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
     case reactionSheet(reactions: [Reaction], selectedReaction: String?, conversation: String?, chatroomId: String?)
@@ -23,6 +23,7 @@ enum NavigationActions {
     case browser(url: URL)
     case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
     case searchScreen
+    case emojiPicker(conversationId: String)
 //    case giphy
     
 }
@@ -45,9 +46,9 @@ class NavigationScreen: NavigationScreenProtocol {
         case .chatroom(let chatroomId):
             guard let chatroom = try? LMMessageListViewModel.createModule(withChatroomId: chatroomId) else { return }
             source.navigationController?.pushViewController(chatroom, animated: true)
-        case .messageAttachment(let delegate, let chatroomId):
-            guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate, chatroomId: chatroomId) else { return }
-            source.navigationController?.pushViewController(attachment, animated: true)
+        case .messageAttachment(let delegate, let chatroomId, let sourceType):
+            guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate, chatroomId: chatroomId, sourceType: sourceType) else { return }
+            source.present(attachment, animated: true)
         case .participants(let chatroomId, let isSecret):
             guard let participants = try? LMParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
             source.navigationController?.pushViewController(participants, animated: true)
@@ -71,6 +72,11 @@ class NavigationScreen: NavigationScreenProtocol {
         case .searchScreen:
             guard let searchScreen = try? SearchListViewModel.createModule() else { return }
             source.navigationController?.pushViewController(searchScreen, animated: false)
+        case .emojiPicker(let conversationId):
+            let picker = LMEmojiListViewController()
+            picker.conversationId = conversationId
+            picker.delegate = source as? LMMessageListViewController
+            source.present(picker, animated: true)
 //        case .giphy:
 //            let giphy = GiphyViewController()
 //            giphy.mediaTypeConfig = [.gifs]
