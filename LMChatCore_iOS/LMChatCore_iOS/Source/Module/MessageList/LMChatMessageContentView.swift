@@ -90,10 +90,10 @@ open class LMChatMessageContentView: LMView {
     
     open private(set) lazy var galleryView: LMChatMessageGallaryView = {
         let image = LMChatMessageGallaryView().translatesAutoresizingMaskIntoConstraints()
-        image.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
-        let aspectRatioConstraints = NSLayoutConstraint(item: image, attribute: .width, relatedBy: .lessThanOrEqual, toItem: image, attribute: .height, multiplier: 1.4, constant: 0)
-        image.addConstraint(aspectRatioConstraints)
-        image.heightAnchor.constraint(equalToConstant:  UIScreen.main.bounds.width * 0.6).isActive = true
+//        image.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+//        let aspectRatioConstraints = NSLayoutConstraint(item: image, attribute: .width, relatedBy: .lessThanOrEqual, toItem: image, attribute: .height, multiplier: 1.4, constant: 0)
+//        image.addConstraint(aspectRatioConstraints)
+//        image.heightAnchor.constraint(equalToConstant:  UIScreen.main.bounds.width * 0.6).isActive = true
         image.backgroundColor = .clear
         image.cornerRadius(with: 12)
         return image

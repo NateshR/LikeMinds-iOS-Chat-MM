@@ -23,6 +23,7 @@ open class LMChatReportViewController: LMViewController {
     open private(set) lazy var containerScrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.contentInset = .init(top: 16, left: 0, bottom: 0, right: 0)
         return scroll
     }()
     
@@ -115,7 +116,7 @@ open class LMChatReportViewController: LMViewController {
     open override func setupLayouts() {
         super.setupLayouts()
         
-        view.pinSubView(subView: containerView, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
+        view.pinSubView(subView: containerView, padding: .init(top: 0, left: 0, bottom: 0, right: 0))
         
         containerScrollView.addConstraint(top: (containerView.topAnchor, 20),
                                           leading: (containerView.leadingAnchor, 0),
@@ -187,7 +188,7 @@ open class LMChatReportViewController: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        setNavigationTitleAndSubtitle(with: "Report Abuse", subtitle: nil, alignment: .center)
+        updateTitle()
         
         otherReasonTextView.text = placeholderText
         otherReasonTextView.textColor = Appearance.shared.colors.gray155
@@ -200,6 +201,18 @@ open class LMChatReportViewController: LMViewController {
     open func setupButton(isEnabled: Bool) {
         submitButton.isEnabled = isEnabled
         submitButton.backgroundColor = isEnabled ? Appearance.shared.colors.red : Appearance.shared.colors.gray4
+    }
+    
+    func updateTitle() {
+        if viewmodel?.messageId != nil {
+            setNavigationTitleAndSubtitle(with: "Report Message", subtitle: nil, alignment: .center)
+        } else if viewmodel?.chatroomId != nil {
+            setNavigationTitleAndSubtitle(with: "Report Chatroom", subtitle: nil, alignment: .center)
+        } else if viewmodel?.memberId != nil {
+            setNavigationTitleAndSubtitle(with: "Report Member", subtitle: nil, alignment: .center)
+        } else {
+            setNavigationTitleAndSubtitle(with: "Report", subtitle: nil, alignment: .center)
+        }
     }
     
     

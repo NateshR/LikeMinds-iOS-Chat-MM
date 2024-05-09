@@ -57,6 +57,7 @@ class NavigationScreen: NavigationScreenProtocol {
             source.navigationController?.pushViewController(report, animated: true)
         case .reactionSheet(let reactions, let selected, let conversationId, let chatroomId):
             guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, selected: selected, conversationId: conversationId, chatroomId: chatroomId) else { return }
+            reactions.delegate = (source as? LMMessageListViewController)
             source.present(reactions, animated: true)
         case .exploreFeed:
             guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }

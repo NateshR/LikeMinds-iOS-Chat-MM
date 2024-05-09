@@ -8,6 +8,10 @@
 import UIKit
 import LMChatUI_iOS
 
+public protocol LMReactionViewControllerDelegate: AnyObject {
+    func reactionDeleted(chatroomId: String?, conversationId: String?)
+}
+
 open class LMReactionViewController: LMViewController {
     
     lazy var containerView: LMView = {
@@ -20,6 +24,7 @@ open class LMReactionViewController: LMViewController {
     }()
     
     let maxDimmedAlpha: CGFloat = 0.6
+    weak var delegate: LMReactionViewControllerDelegate?
     
     lazy var dimmedView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -103,7 +108,7 @@ open class LMReactionViewController: LMViewController {
             
             collectionView.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
             collectionView.heightAnchor.constraint(equalToConstant: 50),
             
             bottomLine.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -163,6 +168,11 @@ open class LMReactionViewController: LMViewController {
 
 
 extension LMReactionViewController: ReactionViewModelProtocol {
+    
+    func reactionDeleted() {
+        delegate?.reactionDeleted(chatroomId: viewModel?.chatroomId, conversationId: viewModel?.conversationId)
+    }
+    
     func showData(with collection: [LMReactionTitleCell.ContentModel], cells: [LMReactionViewCell.ContentModel]) {
         self.titleData = collection
         self.emojiData = cells

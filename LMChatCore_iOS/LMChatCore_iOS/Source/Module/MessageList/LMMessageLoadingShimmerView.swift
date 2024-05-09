@@ -37,7 +37,6 @@ class LMMessageLoadingShimmerView: LMView {
         for _ in 0..<5 {
             let shimmer = LMMessageLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
-            shimmer.setHeightConstraint(with: 80)
             stackView.addArrangedSubview(shimmer)
         }
         stackView.addArrangedSubview(UIView())

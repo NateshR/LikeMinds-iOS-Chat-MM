@@ -25,6 +25,9 @@ open class LMChatMessageGallaryView: LMView {
     /// Content the gallery should display.
     public var content: [UIView] = []
     
+    let heightViewSize = UIScreen.main.bounds.width * 0.6
+    let widthViewSize = UIScreen.main.bounds.width * 0.7
+    
     // Previews indices locations:
     // When one item available:
     // -------
@@ -66,6 +69,23 @@ open class LMChatMessageGallaryView: LMView {
         itemSpot3
     ]
     
+    open private(set) lazy var singleImage: ImagePreview = {
+        let imagePreview =  ImagePreview()
+            .translatesAutoresizingMaskIntoConstraints()
+        imagePreview.backgroundColor = .black
+        imagePreview.cornerRadius(with: 12)
+        imagePreview.tag = 0
+        imagePreview.isUserInteractionEnabled = true
+        let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
+        tapGuesture.numberOfTapsRequired = 1
+        imagePreview.addGestureRecognizer(tapGuesture)
+        imagePreview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: imagePreview, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imagePreview, attribute: .height, multiplier: 1.4, constant: 0)
+        imagePreview.addConstraint(aspectRatioConstraints)
+        imagePreview.heightAnchor.constraint(equalToConstant:  heightViewSize).isActive = true
+        return imagePreview
+    }()
+    
     open private(set) lazy var itemSpot0: ImagePreview = {
         let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
@@ -76,6 +96,10 @@ open class LMChatMessageGallaryView: LMView {
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
         tapGuesture.numberOfTapsRequired = 1
         imagePreview.addGestureRecognizer(tapGuesture)
+        imagePreview.widthAnchor.constraint(equalToConstant: widthViewSize/2).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: imagePreview, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imagePreview, attribute: .height, multiplier: 1.4, constant: 0)
+        imagePreview.addConstraint(aspectRatioConstraints)
+        imagePreview.heightAnchor.constraint(equalToConstant:  heightViewSize/2).isActive = true
         return imagePreview
     }()
     
@@ -89,6 +113,10 @@ open class LMChatMessageGallaryView: LMView {
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
         tapGuesture.numberOfTapsRequired = 1
         imagePreview.addGestureRecognizer(tapGuesture)
+        imagePreview.widthAnchor.constraint(equalToConstant: widthViewSize/2).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: imagePreview, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imagePreview, attribute: .height, multiplier: 1.4, constant: 0)
+        imagePreview.addConstraint(aspectRatioConstraints)
+        imagePreview.heightAnchor.constraint(equalToConstant:  heightViewSize/2).isActive = true
         return imagePreview
     }()
     
@@ -102,6 +130,10 @@ open class LMChatMessageGallaryView: LMView {
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
         tapGuesture.numberOfTapsRequired = 1
         imagePreview.addGestureRecognizer(tapGuesture)
+        imagePreview.widthAnchor.constraint(equalToConstant: widthViewSize/2).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: imagePreview, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imagePreview, attribute: .height, multiplier: 1.4, constant: 0)
+        imagePreview.addConstraint(aspectRatioConstraints)
+        imagePreview.heightAnchor.constraint(equalToConstant:  heightViewSize/2).isActive = true
         return imagePreview
     }()
     
@@ -116,6 +148,10 @@ open class LMChatMessageGallaryView: LMView {
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
         tapGuesture.numberOfTapsRequired = 1
         imagePreview.addGestureRecognizer(tapGuesture)
+        imagePreview.widthAnchor.constraint(equalToConstant: widthViewSize/2).isActive = true
+        let aspectRatioConstraints = NSLayoutConstraint(item: imagePreview, attribute: .width, relatedBy: .lessThanOrEqual, toItem: imagePreview, attribute: .height, multiplier: 1.4, constant: 0)
+        imagePreview.addConstraint(aspectRatioConstraints)
+        imagePreview.heightAnchor.constraint(equalToConstant:  heightViewSize/2).isActive = true
         return imagePreview
     }()
     
@@ -200,6 +236,8 @@ open class LMChatMessageGallaryView: LMView {
         
         bottomPreviewsContainerView.addArrangedSubview(itemSpots[2])
         bottomPreviewsContainerView.addArrangedSubview(itemSpots[3])
+        
+        previewsContainerView.addArrangedSubview(singleImage)
     }
         
     override open func setupAppearance() {
@@ -208,7 +246,17 @@ open class LMChatMessageGallaryView: LMView {
     func setData(_ data: [ContentModel]) {
         viewData = data
         itemSpots.forEach({$0.isHidden = true})
-        bottomPreviewsContainerView.isHidden = data.count < 2
+        singleImage.isHidden = true
+        if data.count == 1, let item = data.first {
+            singleImage.isHidden = false
+            topPreviewsContainerView.isHidden = true
+            bottomPreviewsContainerView.isHidden = true
+            loadImageData(item: item, imagePreview: singleImage)
+            return
+        } else {
+            topPreviewsContainerView.isHidden = false
+        }
+        bottomPreviewsContainerView.isHidden = data.count < 3
         for (index, item) in data.enumerated() {
             if index > 3 {
                 moreItemsOverlay.isHidden = false
@@ -216,19 +264,35 @@ open class LMChatMessageGallaryView: LMView {
                 break
             }
             moreItemsOverlay.isHidden = true
-            guard let imageUrl = item.thumbnailUrl ?? item.fileUrl else {
-                return
-            }
-            itemSpots[index].isHidden = false
-            
-            if item.fileType == "video" {
-                itemSpots[index].setData(imageUrl, withPlaceholder: nil)
-                itemSpots[index].playIconImage.isHidden = false
-            } else {
-                itemSpots[index].setData(imageUrl)
-                itemSpots[index].playIconImage.isHidden = true
-            }
+           loadImageData(item: item, imagePreview: itemSpots[index])
         }
+    }
+    
+    func loadImageData(item: ContentModel, imagePreview: ImagePreview) {
+        guard let imageUrl = item.thumbnailUrl ?? item.fileUrl else {
+            return
+        }
+        
+        imagePreview.isHidden = false
+        
+        if item.fileType == "video" {
+            imagePreview.setData(imageUrl, withPlaceholder: nil)
+            imagePreview.playIconImage.isHidden = false
+        } else {
+            imagePreview.setData(imageUrl)
+            imagePreview.playIconImage.isHidden = true
+        }
+        
+        
+//        itemSpots[index].isHidden = false
+//        
+//        if item.fileType == "video" {
+//            itemSpots[index].setData(imageUrl, withPlaceholder: nil)
+//            itemSpots[index].playIconImage.isHidden = false
+//        } else {
+//            itemSpots[index].setData(imageUrl)
+//            itemSpots[index].playIconImage.isHidden = true
+//        }
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {

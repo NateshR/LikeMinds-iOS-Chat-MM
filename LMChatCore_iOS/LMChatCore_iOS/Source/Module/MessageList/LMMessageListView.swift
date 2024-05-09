@@ -198,14 +198,15 @@ open class LMMessageListView: LMView {
         tableView.reloadData()
     }
     
+    func removeShimmer() {
+        if !tableSections.isEmpty { tableView.backgroundView = nil }
+    }
+    
     func scrollToBottom() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
-//            let section = self.tableSections.count - 1
-//            let row = self.tableSections[section].data.count - 1
-//            let indexPath = IndexPath(row: row, section: section)
             if hasRowAtIndexPath(indexPath: indexPath) {
                 self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
             }

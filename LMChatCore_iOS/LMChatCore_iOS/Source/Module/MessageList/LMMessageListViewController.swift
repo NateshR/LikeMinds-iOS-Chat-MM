@@ -154,6 +154,7 @@ open class LMMessageListViewController: LMViewController {
     
     @objc
     open func chatroomActions() {
+        self.view.endEditing(true)
         guard let actions = viewModel?.chatroomActionData?.chatroomActions else { return }
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         for item in actions {
@@ -206,9 +207,11 @@ open class LMMessageListViewController: LMViewController {
         let barButtonItems: [UIBarButtonItem] = [cancelSelectionsBarItem, copySelectedMessagesBarItem, deleteMessageBarItem]
         navigationItem.rightBarButtonItems = barButtonItems
         bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: false)
+        navigationTitleView.isHidden = true
     }
     
     public func updateChatroomSubtitles() {
+        navigationTitleView.isHidden = false
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
         let message = "Only community managers can respond here."
         if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
@@ -491,11 +494,9 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     public func composeAttachment() {
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        alert.view.tintColor = BrandingColor.shared.buttonColor
         let camera = UIAlertAction(title: "Camera", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
             guard let self else { return }
             MediaPickerManager.shared.presentCamera(viewController: self, delegate: self)
-//            NavigationScreen.shared.perform(.messageAttachment(delegat: self, chatroomId: self.viewModel?.chatroomId, sourceType: .camera), from: self, params: nil)
         }
         let cameraImage = Constants.shared.images.cameraIcon
         camera.setValue(cameraImage, forKey: "image")
@@ -503,9 +504,6 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
             guard let self else { return }
             NavigationScreen.shared.perform(.messageAttachment(delegat: self, chatroomId: viewModel?.chatroomId, sourceType: .photoLibrary), from: self, params: nil)
-            
-//            guard let viewController =  try? LMChatAttachmentViewModel.createModule(delegate: self, chatroomId: self?.viewModel?.chatroomId, sourceType: .photoLibrary) else { return }
-//            self?.present(viewController, animated: true)
         }
         
         let photoImage = Constants.shared.images.galleryIcon
@@ -722,5 +720,14 @@ extension LMMessageListViewController: LMEmojiListViewDelegate {
     func emojiSelected(emoji: String, conversationId: String?) {
         guard let conversationId else { return }
         viewModel?.putConversationReaction(conversationId: conversationId, reaction: emoji)
+    }
+}
+
+extension LMMessageListViewController: LMReactionViewControllerDelegate {
+    public func reactionDeleted(chatroomId: String?, conversationId: String?) {
+        guard let conversationId else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            self?.viewModel?.updateDeletedReactionConversation(conversationId: conversationId)
+        }
     }
 }

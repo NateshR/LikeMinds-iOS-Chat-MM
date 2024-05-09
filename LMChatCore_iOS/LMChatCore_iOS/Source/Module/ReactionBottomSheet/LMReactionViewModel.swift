@@ -10,6 +10,7 @@ import LikeMindsChat
 
 protocol ReactionViewModelProtocol: AnyObject {
     func showData(with collection: [LMReactionTitleCell.ContentModel], cells: [LMReactionViewCell.ContentModel])
+    func reactionDeleted()
 }
 
 final public  class LMReactionViewModel {
@@ -88,6 +89,7 @@ final public  class LMReactionViewModel {
                 print(response.errorMessage)
                 return
             }
+            self?.delegate?.reactionDeleted()
             (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
         }
     }

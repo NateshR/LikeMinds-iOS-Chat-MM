@@ -377,7 +377,7 @@ public final class LMMessageListViewModel {
     }
     
     func insertOrUpdateConversationIntoList(_ conversation: Conversation) {
-        if let firstIndex = chatMessages.firstIndex(where: {($0.id == conversation.id) || ($0.temporaryId == conversation.temporaryId)}) {
+        if let firstIndex = chatMessages.firstIndex(where: {($0.id == conversation.id) || ($0.temporaryId != nil && $0.temporaryId == conversation.temporaryId)}) {
             chatMessages[firstIndex] = conversation
             updateConversationIntoList(conversation)
         } else {
@@ -837,6 +837,27 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             }
             self?.onDeleteConversation(ids: conversationIds)
         }
+    }
+    
+    func fetchConversation(withId conversationId: String) {
+        let request = GetConversationRequest.builder()
+            .conversationId(conversationId)
+            .build()
+        guard let conversation = LMChatClient.shared.getConversation(request: request)?.data?.conversation else { return }
+        insertOrUpdateConversationIntoList(conversation)
+        delegate?.reloadChatMessageList()
+    }
+    
+    func updateDeletedReactionConversation(conversationId: String) {
+        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
+        var reactions = conversation.reactions ?? []
+        reactions.removeAll(where: {$0.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()})
+        let updatedConversation = conversation.toBuilder()
+            .reactions(reactions)
+            .hasReactions(!reactions.isEmpty)
+            .build()
+        insertOrUpdateConversationIntoList(updatedConversation)
+        delegate?.reloadChatMessageList()
     }
     
     private func onDeleteConversation(ids: [String]) {

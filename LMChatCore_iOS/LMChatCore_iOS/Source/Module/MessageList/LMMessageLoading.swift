@@ -17,18 +17,46 @@ open class LMMessageLoading: LMView {
         return view
     }()
     
+    let receivedBubble = UIImage(named: "bubble_received", in: LMChatCoreBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+        .withRenderingMode(.alwaysTemplate)
+    
+    let sentBubble = UIImage(named: "bubble_sent", in: LMChatCoreBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+        .withRenderingMode(.alwaysTemplate)
+    
+    var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
+    var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 0.4)
+    
+    open private(set) lazy var outgoingImageView: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.image = sentBubble
+        image.tintColor = outgoingColor
+        image.backgroundColor = Appearance.shared.colors.clear
+//        image.setWidthConstraint(with: 150)
+        image.setHeightConstraint(with: 40)
+        return image
+    }()
+    
+    open private(set) lazy var incomingImageView: LMImageView = {
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.image = receivedBubble
+        image.backgroundColor = Appearance.shared.colors.clear
+        image.tintColor = incomingColor
+//        image.setWidthConstraint(with: 150)
+        image.setHeightConstraint(with: 40)
+        return image
+    }()
 
-    open private(set) lazy var messageView: LMChatShimmerView = {
+    open private(set) lazy var profileMessageView: LMChatShimmerView = {
         let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setWidthConstraint(with: 56)
-        view.setHeightConstraint(with: 56)
-        view.cornerRadius(with: 28)
+        view.setWidthConstraint(with: 36)
+        view.setHeightConstraint(with: 36)
+        view.cornerRadius(with: 18)
         view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
         return view
     }()
     
-    open private(set) lazy var titleView: LMChatShimmerView = {
+    open private(set) lazy var sentmessageTitleView: LMChatShimmerView = {
         let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.setHeightConstraint(with: 14)
@@ -37,11 +65,11 @@ open class LMMessageLoading: LMView {
         return view
     }()
     
-    open private(set) lazy var subtitleView: LMChatShimmerView = {
+    open private(set) lazy var incomingMessageTitleView: LMChatShimmerView = {
         let view = LMChatShimmerView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.setHeightConstraint(with: 12)
-        view.cornerRadius(with: 6)
+        view.setHeightConstraint(with: 14)
+        view.cornerRadius(with: 7)
         view.backgroundColor = Appearance.shared.colors.previewSubtitleTextColor
         return view
     }()
@@ -54,9 +82,12 @@ open class LMMessageLoading: LMView {
     open override func setupViews() {
         super.setupViews()
         addSubview(containerView)
-        containerView.addSubview(messageView)
-        containerView.addSubview(titleView)
-        containerView.addSubview(subtitleView)
+        containerView.addSubview(profileMessageView)
+        containerView.addSubview(incomingImageView)
+        containerView.addSubview(outgoingImageView)
+        
+        outgoingImageView.addSubview(sentmessageTitleView)
+        incomingImageView.addSubview(incomingMessageTitleView)
     }
     
     // MARK: setupLayouts
@@ -68,17 +99,25 @@ open class LMMessageLoading: LMView {
             containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            messageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant:  16),
-            messageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
-            messageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant:  -12),
+            profileMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            profileMessageView.bottomAnchor.constraint(equalTo: incomingImageView.bottomAnchor),
             
-            titleView.leadingAnchor.constraint(equalTo: messageView.trailingAnchor, constant:  10),
-            titleView.topAnchor.constraint(equalTo: messageView.topAnchor, constant: 6),
-            titleView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant:  -16),
+            incomingImageView.leadingAnchor.constraint(equalTo: profileMessageView.trailingAnchor),
+            incomingImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -100),
+            incomingImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
             
-            subtitleView.leadingAnchor.constraint(equalTo: messageView.trailingAnchor, constant:  10),
-            subtitleView.topAnchor.constraint(greaterThanOrEqualTo: titleView.bottomAnchor, constant:10),
-            subtitleView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant:  -30),
+            incomingMessageTitleView.leadingAnchor.constraint(equalTo: incomingImageView.leadingAnchor, constant: 16),
+            incomingMessageTitleView.trailingAnchor.constraint(equalTo: incomingImageView.trailingAnchor, constant: -30),
+            incomingMessageTitleView.topAnchor.constraint(equalTo: incomingImageView.topAnchor,constant: 12),
+            
+            outgoingImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 100),
+            outgoingImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            outgoingImageView.topAnchor.constraint(equalTo: incomingImageView.bottomAnchor, constant: 20),
+            outgoingImageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20),
+            
+            sentmessageTitleView.leadingAnchor.constraint(equalTo: outgoingImageView.leadingAnchor, constant: 30),
+            sentmessageTitleView.trailingAnchor.constraint(equalTo: outgoingImageView.trailingAnchor, constant: -16),
+            sentmessageTitleView.topAnchor.constraint(equalTo: outgoingImageView.topAnchor,constant: 12),
         ])
     }
 }
