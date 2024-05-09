@@ -28,7 +28,7 @@ public final class LMMessageListViewModel {
     var chatroomDetailsExtra: ChatroomDetailsExtra
     var chatMessages: [Conversation] = []
     var messagesList:[LMMessageListView.ContentModel] = []
-    let conversationFetchLimit: Int = 10
+    let conversationFetchLimit: Int = 100
     var chatroomViewData: Chatroom?
     var chatroomWasNotLoaded: Bool = true
     var chatroomActionData: GetChatroomActionsResponse?
@@ -486,7 +486,8 @@ public final class LMMessageListViewModel {
         case .viewParticipants:
             NavigationScreen.shared.perform(.participants(chatroomId: chatroomViewData?.id ?? "", isSecret: chatroomViewData?.isSecret ?? false), from: fromViewController, params: nil)
         case .invite:
-            break
+            guard let chatroomId = chatroomViewData?.id else { return }
+            ShareContentUtil.shareChatroom(viewController: fromViewController, chatroomId: chatroomId)
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: chatroomViewData?.id ?? "", conversationId: nil, memberId: nil), from: fromViewController, params: nil)
         case .leaveChatRoom:

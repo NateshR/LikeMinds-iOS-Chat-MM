@@ -11,15 +11,9 @@ class RouteBuilderManager {
  
     static let domainName = "likeminds.community"
     
-    class func buildRouteForCollabcard(withDict dict: [AnyHashable : Any]?) -> String? {
-
-        let collabcardId = dict?["collabcard_id"] as? String
-        let refId = dict?["ref_id"] != nil ? (dict?["ref_id"] as? String) : ""
-        let aj = dict?["aj"] != nil ? (dict?["aj"] as? String) : ""
-        let sourceId = dict?["source_id"] != nil ? (dict?["source_id"] as? String) : ""
-        let source = dict?["source"] != nil ? (dict?["source"] as? String) : ""
-
-        let route = "route://collabcard?collabcard_id=\(collabcardId ?? "")&ref_id=\(refId ?? "")&aj=\(aj ?? "")&source_id=\(sourceId ?? "")&source=\(source ?? "")"
+    class func buildRouteForChatroom(withDict dict: [AnyHashable : Any]?) -> String? {
+        let chatroomId = dict?["chatroom_id"] as? String
+        let route = "route://chatroom_detail?chatroom_id=\(chatroomId ?? "")"
         return route
     }
 

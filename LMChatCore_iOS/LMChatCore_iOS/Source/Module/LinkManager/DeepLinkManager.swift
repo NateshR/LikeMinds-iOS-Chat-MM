@@ -24,7 +24,7 @@ import Foundation
     
 // MARK: - Private Variable (Internal)
     private var stringCollabcard = "collabcard"
-    private var stringCommunityCollabcard = "community_collabcard"
+    private var stringChatroomDetails = "chatroom_detail"
     private var limitAcessCalled = false
  
 // MARK: - Func Access obj-C Classes
@@ -49,38 +49,40 @@ import Foundation
         }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
-
- // MARK: - GoTo Collabcard
-    private func gotoCollabcard(withPathComponents pathComponents: [AnyHashable]?, andUrlComponents dict: [AnyHashable : Any]?) {
-        var mutableDict: [AnyHashable : Any] = [:]
-
-        if (pathComponents?.count ?? 0) >= 2 {
-            mutableDict["collabcard_id"] = pathComponents?[2]
-        }
-        let routeUrl = RouteBuilderManager.buildRouteForCollabcard(withDict: mutableDict ) ?? ""
-        openScreenWithRoute(route: routeUrl)
-
+    
+    func didReceivedRemoteNotification(_ routeUrl: String) {
+        print("Notification URL: \(routeUrl)")
+        routeToScreen(routeUrl: routeUrl, fromNotification: true, fromDeeplink: false)
     }
     
-    public func didReceivedRemoteNotification(_ userInfo: [AnyHashable : Any]) {
-        if let url = userInfo["route"] as? String {
-            print("Notification URL: \(url)")
-            let route = Routes(route: url, fromNotification: true)
-            route.fetchRoute { viewController in
-                guard let viewController, let topMostController = UIViewController.topViewController() else { return
-                }
-                if let vc = topMostController as? UINavigationController, let homeFeedVC = vc.topViewController as? LMHomeFeedViewController {
-                    homeFeedVC.navigationController?.pushViewController(viewController, animated: true)
-                } else {
-                    let chatMessageViewController = UINavigationController(rootViewController: viewController)
-                    topMostController.present(chatMessageViewController, animated: false)
+    func deeplinkRoute(routeUrl: String, fromNotification: Bool, fromDeeplink: Bool) {
+        guard let linkUrl = URL(string: routeUrl),
+              let firstPath = linkUrl.path.components(separatedBy: "/").filter({$0 != ""}).first?.lowercased(),
+              (firstPath == stringCollabcard || firstPath == stringChatroomDetails),
+              let finalRouteUrl = RouteBuilderManager.buildRouteForChatroom(withDict: params(fromRoute: routeUrl)) else {
+            return
+        }
+        routeToScreen(routeUrl: finalRouteUrl, fromNotification: true, fromDeeplink: false)
+    }
+
+    //MARK:- Deeplink SDK route handled
+    func routeToScreen(routeUrl: String, fromNotification: Bool, fromDeeplink: Bool) {
+        let routeManager = Routes(route: routeUrl, fromNotification: fromNotification, fromDeeplink: fromDeeplink)
+        DispatchQueue.main.async {
+            routeManager.fetchRoute { viewController in
+                DispatchQueue.main.async {
+                    guard let viewController, let topMostController = UIViewController.topViewController() else {
+                        LMSharedPreferences.setString(routeUrl, forKey: .tempDeeplinkUrl)
+                        return
+                    }
+                    if let vc = topMostController as? UINavigationController, let homeFeedVC = vc.topViewController as? LMHomeFeedViewController {
+                        homeFeedVC.navigationController?.pushViewController(viewController, animated: true)
+                    } else {
+                        let chatMessageViewController = UINavigationController(rootViewController: viewController)
+                        topMostController.present(chatMessageViewController, animated: false)
+                    }
                 }
             }
         }
     }
-
-    private func openScreenWithRoute(route: String) {
-//        AppDelegate.sharedInstance().initiateAuthApiForRoute(url: route)
-    }
-
 }

@@ -80,6 +80,16 @@ public class LMChatMain {
         }
     }
     
+    public func parseDeepLink(routeUrl: String) {
+        DeepLinkManager.sharedInstance.deeplinkRoute(routeUrl: routeUrl, fromNotification: false, fromDeeplink: true)
+    }
+    
+    public func didReceieveNotification(userInfo: [AnyHashable: Any]) -> Bool {
+        guard let route = userInfo["route"] as? String, UIApplication.shared.applicationState == .inactive else {return false }
+        DeepLinkManager.sharedInstance.didReceivedRemoteNotification(route)
+        return true
+    }
+    
 }
 
 // MARK: LMFeedAnalyticsProtocol

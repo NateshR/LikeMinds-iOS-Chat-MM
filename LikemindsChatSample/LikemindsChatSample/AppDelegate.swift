@@ -55,7 +55,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        DeepLinkManager.sharedInstance.didReceivedRemoteNotification(response.notification.request.content.userInfo)
+        LMChatMain.shared.didReceieveNotification(userInfo: response.notification.request.content.userInfo)
     }
     
     

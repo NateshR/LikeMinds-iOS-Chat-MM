@@ -379,6 +379,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LikemindsChatSample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "LM Chat";
+				INFOPLIST_KEY_NSCameraUsageDescription = "App using cammer for photo click";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This App Records Fire";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -414,6 +415,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LikemindsChatSample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "LM Chat";
+				INFOPLIST_KEY_NSCameraUsageDescription = "App using cammer for photo click";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This App Records Fire";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

@@ -79,6 +79,10 @@ open class LMMessageListViewController: LMViewController {
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
     }
     
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
     open override func setupAppearance() {
         super.setupAppearance()
     }

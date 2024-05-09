@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import LMChatCore_iOS
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -17,6 +18,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+        
+        if let url = connectionOptions.urlContexts.first?.url {
+            LMChatMain.shared.parseDeepLink(routeUrl: url.absoluteString)
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -46,7 +51,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        var url = ""
+        for context in URLContexts {
+            print("url: \(context.url.absoluteURL)")
+            url = context.url.absoluteString
+            print("scheme: \(context.url.scheme)")
+            print("host: \(context.url.host)")
+            print("path: \(context.url.path)")
+            print("components: \(context.url.pathComponents)")
+        }
+        LMChatMain.shared.parseDeepLink(routeUrl: url)
+    }
 
 }
 

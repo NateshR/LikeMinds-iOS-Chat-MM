@@ -42,6 +42,11 @@ open class LMHomeFeedViewController: LMViewController {
     }
     
     open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let deeplinkUrl = LMSharedPreferences.getString(forKey: .tempDeeplinkUrl) {
+            LMSharedPreferences.removeValue(forKey: .tempDeeplinkUrl)
+            DeepLinkManager.sharedInstance.routeToScreen(routeUrl: deeplinkUrl, fromNotification: false, fromDeeplink: true)
+        }
         profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name ?? ""))
     }
     
