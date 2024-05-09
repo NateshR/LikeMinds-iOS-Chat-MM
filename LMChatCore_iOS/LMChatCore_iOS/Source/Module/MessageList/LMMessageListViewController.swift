@@ -453,6 +453,11 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.messageListView.isLoadingMoreData = false
         }
+        if direction == .scroll_UP {
+            chatroomTopicBar.isHidden = true
+        } else {
+            chatroomTopicBar.isHidden = false
+        }
     }
     
     

@@ -114,7 +114,7 @@ open class LMMessageListView: LMView {
         table.separatorStyle = .none
         table.backgroundView = loadingView
 //        table.keyboardDismissMode = .onDrag
-        table.contentInset = .init(top: 10, left: 0, bottom: 14, right: 0)
+        table.contentInset = .init(top: 0, left: 0, bottom: 14, right: 0)
         return table
     }()
     
