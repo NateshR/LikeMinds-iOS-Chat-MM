@@ -35,7 +35,6 @@ open class LMHomeFeedViewController: LMViewController {
         setupViews()
         setupLayouts()
         
-        viewModel?.getExploreTabCount()
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
@@ -48,6 +47,7 @@ open class LMHomeFeedViewController: LMViewController {
             DeepLinkManager.sharedInstance.routeToScreen(routeUrl: deeplinkUrl, fromNotification: false, fromDeeplink: true)
         }
         profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name ?? ""))
+        viewModel?.getExploreTabCount()
     }
     
     // MARK: setupViews

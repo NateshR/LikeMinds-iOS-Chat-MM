@@ -493,9 +493,9 @@ public final class LMMessageListViewModel {
         case .leaveChatRoom:
             leaveChatroom()
         case .unFollow:
-            followUnfollow(status: false)
+            followUnfollow(status: false, forceToUpdate: true)
         case .follow:
-            followUnfollow(status: true)
+            followUnfollow(status: true, forceToUpdate: true)
         case .mute:
             muteUnmuteChatroom(value: true)
         case .unMute:
@@ -616,6 +616,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .repliedConversationId(replyConversationId)
             .repliedChatroomId(replyChatRoomId)
             .attachmentCount(filesUrls?.count)
+            .shareLink(shareLink)
         
         if let shareLink, !shareLink.isEmpty, self.currentDetectedOgTags?.url == shareLink {
             requestBuilder = requestBuilder.shareLink(shareLink)
@@ -759,13 +760,13 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .build()
         LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
             guard resposne.success, let conversation = resposne.data?.conversation else { return}
-            self?.insertOrUpdateConversationIntoList(conversation)
-            self?.delegate?.reloadChatMessageList()
+//            self?.insertOrUpdateConversationIntoList(conversation)
+//            self?.delegate?.reloadChatMessageList()
         }
     }
     
-    func followUnfollow(status: Bool = true) {
-        guard chatroomViewData?.followStatus == false, let chatroomId = chatroomViewData?.id else { return }
+    func followUnfollow(status: Bool = true, forceToUpdate: Bool = false) {
+        guard (chatroomViewData?.followStatus == false || forceToUpdate), let chatroomId = chatroomViewData?.id else { return }
         let request = FollowChatroomRequest.builder()
             .chatroomId(chatroomId)
             .uuid(UserPreferences.shared.getClientUUID() ?? "")

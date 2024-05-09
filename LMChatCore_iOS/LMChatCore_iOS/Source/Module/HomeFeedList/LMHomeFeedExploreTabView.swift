@@ -67,7 +67,7 @@ open class LMHomeFeedExploreTabView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Explore"
         label.font = Appearance.shared.fonts.headingFont1
-        label.textColor = Appearance.shared.colors.textColor
+        label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
@@ -145,9 +145,9 @@ open class LMHomeFeedExploreTabView: LMView {
     public func setData(_ data: ContentModel) {
         exploreTitleLabel.text = data.tilesName
         if data.unreadCount <= 0 {
-            chatroomCountBadgeLabel.text = data.totalCount > 99 ? "+99" : "\(data.totalCount)"
+            chatroomCountBadgeLabel.text = data.totalCount > 99 ? "99+" : "\(data.totalCount) Chatrooms"
         } else {
-            chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "+99" : "\(data.unreadCount) NEW"
+            chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "99+" : "\(data.unreadCount) NEW"
         }
     }
 }

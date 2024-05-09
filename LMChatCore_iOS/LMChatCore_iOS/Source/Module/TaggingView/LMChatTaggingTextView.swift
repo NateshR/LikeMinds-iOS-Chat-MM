@@ -167,6 +167,7 @@ open class LMChatTaggingTextView: LMTextView {
             textColor = placeholderColor
             font = textAttributes[.font] as? UIFont
         }
+        mentionDelegate?.contentHeightChanged()
     }
 }
 

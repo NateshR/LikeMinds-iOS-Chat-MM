@@ -369,9 +369,16 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
             deleteMessageConfirmation([message.messageId])
         case .edit:
             viewModel?.editConversation(conversationId: message.messageId)
-            bottomMessageBoxView.inputTextView.setAttributedText(from: viewModel?.editChatMessage?.answer ?? "")
+            guard let message = viewModel?.editChatMessage?.answer.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "").trimmingCharacters(in: .whitespacesAndNewlines), !message.isEmpty else {
+                viewModel?.editChatMessage = nil
+                return
+            }
+            bottomMessageBoxView.inputTextView.becomeFirstResponder()
+            bottomMessageBoxView.inputTextView.setAttributedText(from: message)
+            bottomMessageBoxView.showEditView(withData: .init(username: "", replyMessage: message, attachmentsUrls: []))
             break
         case .reply:
+            bottomMessageBoxView.inputTextView.becomeFirstResponder()
             viewModel?.replyConversation(conversationId: message.messageId)
             bottomMessageBoxView.showReplyView(withData: .init(username: message.createdBy, replyMessage: message.message, attachmentsUrls: message.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
             break
@@ -477,19 +484,20 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
+        viewModel?.editChatMessage = nil
     }
     
     public func cancelLinkPreview() {
         viewModel?.currentDetectedOgTags = nil
     }
     
-    public func composeMessage(message: String) {
-        print("\(message)")
+    public func composeMessage(message: String, composeLink: String?) {
+        
         if let chatMessage = viewModel?.editChatMessage {
             viewModel?.editChatMessage = nil
-            viewModel?.postEditedConversation(text: message, shareLink: viewModel?.currentDetectedOgTags?.url, conversation: chatMessage)
+            viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
         } else {
-            delegate?.postMessage(message: message, filesUrls: nil, shareLink: viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
+            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
         }
         cancelReply()
         cancelLinkPreview()
@@ -570,12 +578,14 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func linkDetected(_ link: String) { 
         linkDetectorTimer?.invalidate()
-        linkDetectorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: {[weak self] timer in
+        linkDetectorTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false, block: {[weak self] timer in
             print("detected first link: \(link)")
             self?.viewModel?.decodeUrl(url: link) {[weak self] ogTags in
                 guard let ogTags else { return }
-                self?.bottomMessageBoxView.linkPreviewView.isHidden = false
-                self?.bottomMessageBoxView.linkPreviewView.setData(.init(title: ogTags.title, description: ogTags.description, link: ogTags.url, imageUrl: ogTags.image))
+                if self?.bottomMessageBoxView.detectedFirstLink != nil && self?.bottomMessageBoxView.detectedFirstLink == ogTags.url {
+                    self?.bottomMessageBoxView.linkPreviewView.isHidden = false
+                    self?.bottomMessageBoxView.linkPreviewView.setData(.init(title: ogTags.title, description: ogTags.description, link: ogTags.url, imageUrl: ogTags.image))
+                }
             }
         })
     }

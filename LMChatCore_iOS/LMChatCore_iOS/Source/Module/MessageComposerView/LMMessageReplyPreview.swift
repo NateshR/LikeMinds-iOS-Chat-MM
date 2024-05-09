@@ -165,6 +165,15 @@ open class LMMessageReplyPreview: LMView {
         }
     }
     
+    public func setDataForEdit(_ data: ContentModel) {
+        viewData = data
+        self.userNameLabel.text = "Edit message"
+        let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
+        self.messageLabel.attributedText = createAttributedString(for: data.attachmentsUrls?.first?.fileType, with: attributedText.string)
+        messageAttachmentImageView.isHidden = true
+        
+    }
+    
     func createAttributedString(for fileType: String?, with message: String?) -> NSAttributedString {
         guard let fileType else {
             return NSAttributedString(string: message ?? "")
