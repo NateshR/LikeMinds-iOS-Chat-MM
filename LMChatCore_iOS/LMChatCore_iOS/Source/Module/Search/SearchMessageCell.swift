@@ -20,7 +20,7 @@ public class SearchMessageCell: LMTableViewCell {
         public let date: Date
         public let isJoined: Bool
         
-        public init(chatroomID: String, messageID: String, chatroomName: String, message: String, senderName: String, date: Date, isJoined: Bool) {
+        public init(chatroomID: String, messageID: String?, chatroomName: String, message: String, senderName: String, date: Date, isJoined: Bool) {
             self.chatroomID = chatroomID
             self.messageID = messageID
             self.chatroomName = chatroomName

@@ -147,7 +147,10 @@ final public class SearchListViewModel {
     
     private func fetchData(searchString: String) {
         guard !isAPICallInProgress,
-              shouldAllowAPICall else { return }
+              shouldAllowAPICall else {
+            delegate?.showHideFooterLoader(isShow: false)
+            return
+    }
         
         isAPICallInProgress = true
         
@@ -212,13 +215,17 @@ final public class SearchListViewModel {
     
     private func convertToChatroomData(form chatroom: _Chatroom_?) -> SearchChatroomDataModel? {
         guard let chatroom,
-              let id = chatroom.id else { return .none }
+              let id = chatroom.id,
+              let user = generateUserDetails(from: chatroom.member) else { return .none }
         
         return .init(
             id: id,
             chatroomTitle: chatroom.header ?? "",
             chatroomImage: chatroom.chatroomImageUrl,
-            isFollowed: chatroom.followStatus ?? false
+            isFollowed: chatroom.followStatus ?? false, 
+            title: chatroom.title, 
+            createdAt: Double(chatroom.createdAt ?? "") ?? 0, 
+            user: user
         )
     }
     
@@ -243,11 +250,9 @@ final public class SearchListViewModel {
             currentPage += 1
             
             let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
-                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom),
-                      let user = self.generateUserDetails(from: conversation.member) else { return .none }
+                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom) else { return .none }
 
-                
-                return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, userDetails: user, message: conversation.answer, createdAt: conversation.createdAt)
+                return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, message: conversation.answer, createdAt: conversation.createdAt)
             }
                         
             switch currentAPIStatus {
@@ -267,8 +272,9 @@ final public class SearchListViewModel {
         }
     }
     
-    private func generateUserDetails(from data: Member) -> SearchConversationUserDataModel? {
-        guard let uuid = data.sdkClientInfo?.uuid else { return .none }
+    private func generateUserDetails(from data: Member?) -> SearchListUserDataModel? {
+        guard let data,
+              let uuid = data.sdkClientInfo?.uuid else { return .none }
         
         return .init(uuid: uuid, username: data.name ?? "User", imageURL: data.imageUrl, isGuest: data.isGuest)
     }
@@ -287,9 +293,9 @@ extension SearchListViewModel {
         
         if !titleFollowedChatroomData.isEmpty || !titleNotFollowedChatroomData.isEmpty || !followedConversationData.isEmpty || !notFollowedConversationData.isEmpty {
             
-            let titleFollowedData = convertChatroomCell(from: titleFollowedChatroomData)
+            let titleFollowedData = convertTitleMessageCell(from: titleFollowedChatroomData)
             let followedConversationData = convertMessageCell(from: followedConversationData)
-            let titleNotFollowedData = convertChatroomCell(from: titleNotFollowedChatroomData)
+            let titleNotFollowedData = convertTitleMessageCell(from: titleNotFollowedChatroomData)
             let notFollowedConversationData = convertMessageCell(from: notFollowedConversationData)
             
             var sectionData: [SearchCellProtocol] = []
@@ -311,6 +317,20 @@ extension SearchListViewModel {
         }
     }
     
+    private func convertTitleMessageCell(from data: [SearchChatroomDataModel]) -> [SearchMessageCell.ContentModel] {
+        data.map {
+            .init(
+                chatroomID: $0.id,
+                messageID: nil,
+                chatroomName: $0.chatroomTitle,
+                message: $0.title ?? "",
+                senderName: $0.user.firstName,
+                date: Date(timeIntervalSince1970: $0.createdAt),
+                isJoined: $0.isFollowed
+            )
+        }
+    }
+    
     private func convertMessageCell(from data: [SearchConversationDataModel]) -> [SearchMessageCell.ContentModel] {
         data.map {
             .init(
@@ -318,7 +338,7 @@ extension SearchListViewModel {
                 messageID: $0.id,
                 chatroomName: $0.chatroomDetails.chatroomTitle,
                 message: $0.message,
-                senderName: "d",
+                senderName: $0.chatroomDetails.user.firstName,
                 date: Date(timeIntervalSince1970: $0.createdAt),
                 isJoined: $0.chatroomDetails.isFollowed
             )
