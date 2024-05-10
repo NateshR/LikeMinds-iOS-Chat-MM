@@ -188,13 +188,13 @@ open class LMMessageListView: LMView {
     
     open func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
-        if !tableSections.isEmpty { tableView.backgroundView = nil }
+        removeShimmer()
         tableView.reloadData()
     }
     
     func justReloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
-        if !tableSections.isEmpty { tableView.backgroundView = nil }
+        removeShimmer()
         tableView.reloadData()
     }
     
@@ -333,13 +333,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         
         let item = tableSections[indexPath.section].data[indexPath.row]
         guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false else { return false }
-        
-//        if dataProvider?.currentChatRoom?.type == .introductions {
-            // To block left/right swipe gesture
-//            return false
-//        } else {
             return true
-//        }
     }
     
     
@@ -355,7 +349,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let frameHeight = scrollView.frame.height
         
         // Check if user scrolled to the top
-        if contentOffsetY <= 0 && !isLoadingMoreData {
+        if contentOffsetY <= 40 && !isLoadingMoreData {
             print("end dragged top!$!$")
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}

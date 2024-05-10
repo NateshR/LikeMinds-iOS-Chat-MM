@@ -109,7 +109,8 @@ extension LMChatTaggingListView: UITableViewDataSource, UITableViewDelegate {
         return UITableViewCell()
     }
     
-    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat { cellHeight }
+    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat { cellHeight
+    }
     
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if taggingCellsData.count - 1 == indexPath.row {
@@ -121,6 +122,7 @@ extension LMChatTaggingListView: UITableViewDataSource, UITableViewDelegate {
         let user = taggingCellsData[indexPath.row]
         delegate?.userSelected(with: user.route, and: user.userName)
     }
+    
 }
 
 
@@ -130,7 +132,7 @@ extension LMChatTaggingListView: LMChatTaggingListViewModelProtocol {
         taggingCellsData.removeAll(keepingCapacity: true)
         taggingCellsData.append(contentsOf: users)
         tableView.reloadData()
-        delegate?.updateHeight(with: min(tableView.tableViewHeight, cellHeight * 2))
+        delegate?.updateHeight(with: min(tableView.tableViewHeight, cellHeight * 3))
     }
 }
 

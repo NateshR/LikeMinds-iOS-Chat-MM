@@ -44,7 +44,7 @@ open class LMChatroomHeaderMessageView: LMView {
     
     open private(set) lazy var nameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Pushpendra Singh \(Constants.shared.strings.dot)"
+        label.text = ""
         label.numberOfLines = 1
         label.font = Appearance.shared.fonts.textFont2
         label.textColor = Appearance.shared.colors.black
@@ -53,7 +53,7 @@ open class LMChatroomHeaderMessageView: LMView {
     
     open private(set) lazy var timeLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "01:22"
+        label.text = ""
         label.numberOfLines = 1
         label.font = Appearance.shared.fonts.subHeadingFont1
         label.textColor = Appearance.shared.colors.previewSubtitleTextColor

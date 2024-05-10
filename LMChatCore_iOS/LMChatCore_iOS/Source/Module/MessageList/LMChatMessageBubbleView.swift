@@ -105,12 +105,6 @@ open class LMChatMessageBubbleView: LMView {
     }
     
     open func addArrangeSubview(_ view: UIView) {
-//        let leading: CGFloat = isIncoming ? 4 : 8
-//        let trailing: CGFloat = isIncoming ? 8 : 4
-//        
-//        containerViewLeadingConstraint?.constant = leading
-//        containerViewTrailingConstraint?.constant = -trailing
-        
         contentContainer.addArrangedSubview(view)
     }
     

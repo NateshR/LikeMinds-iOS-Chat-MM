@@ -207,7 +207,7 @@ open class LMChatMessageContentView: LMView {
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
         
-         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
+         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
          bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
         
     }
@@ -254,6 +254,8 @@ open class LMChatMessageContentView: LMView {
         let isIncoming = data.message?.isIncoming ?? true
         galleryView.loaderView.isHidden = data.message?.attachmentUploaded ?? true
         bubbleView.bubbleFor(isIncoming)
+        bubbleLeadingConstraint?.isActive = false
+        bubbleTrailingConstraint?.isActive = false
         if !isIncoming {
             chatProfileImageView.isHidden = true
             bubbleLeadingConstraint?.constant = 40
@@ -262,7 +264,7 @@ open class LMChatMessageContentView: LMView {
         } else {
             chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy ?? ""))
             chatProfileImageView.isHidden = false
-            bubbleLeadingConstraint?.constant = 00
+            bubbleLeadingConstraint?.constant = 0
             bubbleTrailingConstraint?.constant = -40
             messageByName(data)
             usernameLabel.isHidden = false
@@ -393,7 +395,8 @@ open class LMChatMessageContentView: LMView {
         if let repliedMessage = data.message?.replied?.first {
             replyMessageView.isHidden = false
             replyMessageView.closeReplyButton.isHidden = true
-            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: repliedMessage.message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
+            let message = repliedMessage.isDeleted == true ? "This message was deleted!" : repliedMessage.message
+            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
         } else {
             replyMessageView.isHidden = true
         }

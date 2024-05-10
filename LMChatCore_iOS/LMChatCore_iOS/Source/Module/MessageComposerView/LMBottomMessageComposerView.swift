@@ -512,6 +512,13 @@ extension LMBottomMessageComposerView: LMChatTaggedUserFoundProtocol {
     }
     
     public func updateHeight(with height: CGFloat) {
+        
+//        self.taggingViewHeightConstraints?.isActive = false
+//        self.taggingViewHeightConstraints?.constant = height
+//        self.taggingViewHeightConstraints?.isActive = true
+//        UIView.animate(withDuration: 0.3) {[weak self] in
+//            self?.taggingListView.layoutIfNeeded()
+//        }
         taggingViewHeightConstraints?.constant = height
     }
 }

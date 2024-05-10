@@ -63,10 +63,10 @@ open class LMChatTaggingUserTableCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            userImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
             userImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            userImage.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
-            userImage.widthAnchor.constraint(equalTo: userImage.heightAnchor),
+            userImage.widthAnchor.constraint(equalToConstant: 36),
+            userImage.heightAnchor.constraint(equalToConstant: 36),
+            userImage.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             userNameLabel.centerYAnchor.constraint(equalTo: userImage.centerYAnchor),
             userNameLabel.leadingAnchor.constraint(equalTo: userImage.trailingAnchor, constant: 12),
@@ -74,7 +74,7 @@ open class LMChatTaggingUserTableCell: LMTableViewCell {
             
             sepratorView.leadingAnchor.constraint(equalTo: userNameLabel.leadingAnchor),
             sepratorView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
-            sepratorView.bottomAnchor.constraint(equalTo: userImage.bottomAnchor),
+            sepratorView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             sepratorView.heightAnchor.constraint(equalToConstant: 1)
         ])
     }

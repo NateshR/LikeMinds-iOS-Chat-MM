@@ -28,7 +28,7 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
     open override func prepareForReuse() {
         super.prepareForReuse()
     }
-//    weak var delegate: LMChatMessageCellDelegate?
+    
     var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
@@ -38,38 +38,7 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
-        // Add swipe gesture recognizer
-        // Add pan gesture recognizer
-        //        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-        //        addGestureRecognizer(panGesture)
     }
-    
-    //    @objc func handlePanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
-    //        switch gestureRecognizer.state {
-    //        case .began:
-    //            // Save original center position
-    //            originalCenter = center
-    //        case .changed:
-    //            // Calculate translation
-    //            let translation = gestureRecognizer.translation(in: self)
-    //            center = CGPoint(x: originalCenter.x + translation.x, y: originalCenter.y)
-    //        case .ended:
-    //            // Check if the swipe distance meets the threshold for reply
-    //            if frame.origin.x < -frame.size.width / 2 {
-    //                // Perform reply action when swipe distance exceeds threshold
-    //                replyActionHandler?()
-    //                print("perform reply action...")
-    //            } else {
-    //                // Return the message view to its original position if swipe distance is not enough
-    //                UIView.animate(withDuration: 0.2) {
-    //                    self.center = self.originalCenter
-    //                }
-    //            }
-    //        default:
-    //            break
-    //        }
-    //    }
-    
     
     // MARK: setupLayouts
     open override func setupLayouts() {

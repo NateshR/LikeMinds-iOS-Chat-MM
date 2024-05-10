@@ -67,6 +67,10 @@ public class LMHomeFeedViewModel {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
             for item in data {
                 if let firstIndex = self?.chatrooms.firstIndex(where: {$0.id == item.id}) {
+                    if item.followStatus == false {
+                        self?.chatrooms.remove(at: firstIndex)
+                        continue
+                    }
                     self?.chatrooms[firstIndex] = item
                 } else {
                     self?.chatrooms.append(item)
@@ -84,7 +88,11 @@ extension LMHomeFeedViewModel: HomeFeedClientObserver {
         reloadChatroomsData(data: chatrooms)
     }
     
-    public func onChange(removed: [Int], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {
+    public func onChange(removed: [Chatroom], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {
+        
+//        if removed.count > 0 {
+//            reloadChatroomsData(data: chatrooms)
+//        }
         if updated.count > 0 {
             updateChatroomsData(data: updated.compactMap({$0.1}))
         }

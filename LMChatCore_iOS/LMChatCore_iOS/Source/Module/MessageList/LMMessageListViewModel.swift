@@ -11,7 +11,7 @@ import LikeMindsChat
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
-    func insertRowFor(data: [[String: String]])
+    func reloadData(at: ScrollDirection)
     func scrollToBottom()
     func updateChatroomSubtitles()
     func updateTopicBar()
@@ -28,7 +28,7 @@ public final class LMMessageListViewModel {
     var chatroomDetailsExtra: ChatroomDetailsExtra
     var chatMessages: [Conversation] = []
     var messagesList:[LMMessageListView.ContentModel] = []
-    let conversationFetchLimit: Int = 100
+    let conversationFetchLimit: Int = 10
     var chatroomViewData: Chatroom?
     var chatroomWasNotLoaded: Bool = true
     var chatroomActionData: GetChatroomActionsResponse?
@@ -227,22 +227,32 @@ public final class LMMessageListViewModel {
             .type(type)
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
-        guard let conversations = response?.data?.conversations, conversations.count > 0 else { return }
-        print("conversations ------> \(conversations)")
+        guard var conversations = response?.data?.conversations, conversations.count > 0 else { return }
+        if type == .above, conversations.count < conversationFetchLimit, let chatroom = self.chatroomViewData {
+            conversations.insert(chatroomDataToConversation(chatroom), at: 0)
+        }
         chatMessages.append(contentsOf: conversations)
         let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-        var insertData: [[String: String]] = []
         for key in dictionary.keys {
             if let index = messagesList.firstIndex(where: {$0.section == (key ?? "")}) {
                 guard let messages = dictionary[key]?.sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({ self.convertConversation($0)}) else { return}
                 var messageSectionData = messagesList[index]
-                messageSectionData.data.insert(contentsOf: messages, at: 0)
+                if type == .below {
+                    messageSectionData.data.append(contentsOf: messages)
+                } else {
+                    messageSectionData.data.insert(contentsOf: messages, at: 0)
+                }
                 messagesList[index] = messageSectionData
             } else {
-                messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
+                if type == .below {
+                    messagesList.append((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))))
+                } else {
+                    messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
+                }
             }
         }
-        delegate?.insertRowFor(data: insertData)
+        let direction: ScrollDirection = type == .above ? .scroll_UP : .scroll_DOWN
+        delegate?.reloadData(at: direction)
 //        delegate?.reloadChatMessageList()
     }
     
@@ -337,9 +347,6 @@ public final class LMMessageListViewModel {
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-//        if message.trimmingCharacters(in: .whitespacesAndNewlines) == GiphyAPIConfiguration.gifMessage {
-//            return ""
-//        }
         return message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
     }
     
@@ -509,23 +516,9 @@ public final class LMMessageListViewModel {
 extension LMMessageListViewModel: ConversationClientObserver {
     
     public func initial(_ conversations: [Conversation]) {
-//        print("conversations ------> \(conversations)")
-//        let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-//
-//        chatMessages = conversations
-//        for key in dictionary.keys {
-//            messagesList.append(.init(data: (dictionary[key] ?? []).compactMap({convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? "")))
-//        }
-//        delegate?.reloadChatMessageList()
     }
     
     public func onChange(removed: [Int], inserted: [(Int, Conversation)], updated: [(Int, Conversation)]) {
-//        print("Inserted-- \(inserted)")
-//        print("updated--- \(updated)")
-//        for item in inserted {
-//            insertConversationIntoList(item.1)
-//        }
-//        delegate?.reloadChatMessageList()
     }
     
     func convertDateStringToInterval(_ strDate: String) -> Int {

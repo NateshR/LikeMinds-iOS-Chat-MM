@@ -256,16 +256,22 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
     }
     
-    public func insertRowFor(data: [[String : String]]) {
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
-//            guard let self else { return }
+    public func reloadData(at: ScrollDirection) {
+        
+        if at == .scroll_UP {
             let oldContentHeight: CGFloat = messageListView.tableView.contentSize.height
             let oldOffsetY: CGFloat = messageListView.tableView.contentOffset.y
             messageListView.tableSections = viewModel?.messagesList ?? []
             messageListView.reloadData()
-            let newContentHeight: CGFloat = messageListView.tableView.contentSize.height
-            messageListView.tableView.contentOffset.y = oldOffsetY + (newContentHeight - oldContentHeight)
-//        }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {[weak self] in
+                guard let self else { return }
+                let newContentHeight: CGFloat = messageListView.tableView.contentSize.height
+                messageListView.tableView.contentOffset.y = oldOffsetY + (newContentHeight - oldContentHeight)
+            }
+        } else {
+            messageListView.tableSections = viewModel?.messagesList ?? []
+            messageListView.reloadData()
+        }
     }
     
     public func scrollToBottom() {
