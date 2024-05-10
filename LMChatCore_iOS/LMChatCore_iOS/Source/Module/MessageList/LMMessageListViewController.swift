@@ -467,6 +467,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     
     
     public func didTapOnCell(indexPath: IndexPath) {
+        self.bottomMessageBoxView.inputTextView.resignFirstResponder()
     }
 
     // TODO: Move to Date Extension Folder

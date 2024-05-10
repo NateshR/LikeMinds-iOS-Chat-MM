@@ -120,6 +120,9 @@ open class LMChatAttachmentViewController: LMViewController {
         setupAppearance()
         openPicker()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomId ?? ""
+        
+        initializeHideKeyboard(zoomableImageViewContainer)
+        initializeHideKeyboard(videoImageViewContainer)
     }
     
     func openPicker() {

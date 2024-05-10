@@ -296,7 +296,8 @@ open class LMChatMessageGallaryView: LMView {
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
-        guard viewData?.first?.fileType?.lowercased() != "gif", let tag = gesture.view?.tag else { return }
+//        viewData?.first?.fileType?.lowercased() != "gif", 
+        guard let tag = gesture.view?.tag else { return }
         onClickAttachment?(tag)
     }
     
