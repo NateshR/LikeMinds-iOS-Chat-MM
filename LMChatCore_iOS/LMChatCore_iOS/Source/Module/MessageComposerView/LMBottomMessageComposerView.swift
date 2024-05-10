@@ -651,7 +651,6 @@ extension LMBottomMessageComposerView {
 }
 
 extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
-    
     public func closeLinkPreview() {
         linkPreviewView.isHidden = true
         isLinkPreviewCancel = true
@@ -661,8 +660,7 @@ extension LMBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
 }
 
 
-
-// Audio Logic
+// MARK: Audio Logic
 extension LMBottomMessageComposerView {
     // Resets Recording View and shows Text Input View
     func resetRecordingView() {

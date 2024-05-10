@@ -99,11 +99,11 @@ PODS:
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
   - PromisesObjC (2.4.0)
-  - Realm (10.50.0):
-    - Realm/Headers (= 10.50.0)
-  - Realm/Headers (10.50.0)
-  - RealmSwift (10.50.0):
-    - Realm (= 10.50.0)
+  - Realm (10.49.3):
+    - Realm/Headers (= 10.49.3)
+  - Realm/Headers (10.49.3)
+  - RealmSwift (10.49.3):
+    - Realm (= 10.49.3)
 
 DEPENDENCIES:
   - LikeMindsChat (from `../../LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec`)
@@ -165,9 +165,9 @@ SPEC CHECKSUMS:
   LMChatUI_iOS: 2b5a3f021d7c41af0c84a34c3bd099a23406b1e2
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  Realm: a0a6a99e3dfa8959358a95c3c05845b5e5d6af30
-  RealmSwift: fa111fb98e092a4dff1d0785ad0c3483feda607a
+  Realm: d7cfad3146a7cb9caa00799a216ff0d80c33f36f
+  RealmSwift: 06fb2d9cf029b837fe76136446199906b096470a
 
 PODFILE CHECKSUM: 28705c694d7ba4a2ff4fd063e58449f502dd38c4
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2
