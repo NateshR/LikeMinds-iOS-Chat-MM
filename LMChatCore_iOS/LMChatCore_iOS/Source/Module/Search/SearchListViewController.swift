@@ -55,6 +55,13 @@ public class SearchListViewController: LMViewController {
                                 trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
     }
     
+    open override func setupAppearance() {
+        super.setupAppearance()
+        
+        view.backgroundColor = Appearance.shared.colors.white
+        tableView.backgroundColor = Appearance.shared.colors.clear
+    }
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -64,7 +71,10 @@ public class SearchListViewController: LMViewController {
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        searchController.searchBar.becomeFirstResponder()
+        
+        DispatchQueue.main.async {
+            self.searchController.searchBar.becomeFirstResponder()
+        }
     }
 }
 

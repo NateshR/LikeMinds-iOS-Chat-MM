@@ -124,6 +124,7 @@ final public class SearchListViewModel {
         // This means we have fetched all available data, no need to progress further
         if currentAPIStatus == .conversationFollowFalse {
             shouldAllowAPICall = false
+            convertToContentModel()
             return
         }
         
@@ -178,7 +179,10 @@ final public class SearchListViewModel {
             self?.delegate?.showHideFooterLoader(isShow: false)
             
             guard let self,
-                  let chatrooms = response.data?.conversations else { return }
+                  let chatrooms = response.data?.conversations else {
+                self?.convertToContentModel()
+                return
+            }
             
             currentPage += 1
             
@@ -200,9 +204,9 @@ final public class SearchListViewModel {
             
             if chatrooms.isEmpty || chatrooms.count < pageSize {
                 setNewAPIStatus()
+            } else {
+                convertToContentModel()
             }
-            
-            convertToContentModel()
         }
     }
     
@@ -231,7 +235,10 @@ final public class SearchListViewModel {
             self?.delegate?.showHideFooterLoader(isShow: false)
             
             guard let self,
-                  let conversations = response.data?.conversations else { return }
+                  let conversations = response.data?.conversations else {
+                self?.convertToContentModel()
+                return
+            }
             
             currentPage += 1
             
@@ -254,9 +261,9 @@ final public class SearchListViewModel {
             
             if conversations.isEmpty || conversations.count < pageSize {
                 setNewAPIStatus()
+            } else {
+                convertToContentModel()
             }
-            
-            convertToContentModel()
         }
     }
     

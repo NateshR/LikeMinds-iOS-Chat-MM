@@ -27,7 +27,6 @@ open class LMMessageListViewController: LMViewController {
         let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
         view.layer.cornerRadius = 16
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        view.clipsToBounds = true
         view.delegate = self
         return view
     }()
@@ -564,7 +563,8 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     
     public func composeAudio() {
         if let audioURL = LMChatAudioRecordManager.shared.recordingStopped() {
-            let mediaModel = MediaPickerModel(with: audioURL, type: .voice_note)
+            let newURL = URL(fileURLWithPath: audioURL.absoluteString)
+            let mediaModel = MediaPickerModel(with: newURL, type: .voice_note)
             postConversationWithAttchments(message: nil, attachments: [mediaModel])
 //            delegate?.postMessageWithAudioAttachment(with: audioURL)
         }
