@@ -81,7 +81,10 @@ class FileUtils {
     }
     
     static func getDetail(forVideoUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, fileSize: Double?, duration: Int?)? {
-        let asset: AVAsset = AVAsset(url: url)
+        let abString = url.absoluteString
+        let newURL = URL(fileURLWithPath: abString)
+        
+        let asset: AVAsset = AVAsset(url: newURL)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.appliesPreferredTrackTransform = true
         imageGenerator.maximumSize = .init(width: 240, height: 240)
@@ -95,7 +98,7 @@ class FileUtils {
         } catch let error {
             print(error)
         }
-        return (nil, nil, Self.fileSizeInByte(url: url), Int(CMTimeGetSeconds(asset.duration)))
+        return (nil, nil, Self.fileSizeInByte(url: newURL), Int(CMTimeGetSeconds(asset.duration)))
     }
     
     static func getDetail(forPDFUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, pageCount: Int?, fileSize: Double?)? {
