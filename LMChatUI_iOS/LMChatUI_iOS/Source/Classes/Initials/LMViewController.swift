@@ -105,10 +105,19 @@ open class LMViewController: UIViewController {
         super.viewDidLoad()
         
         overrideUserInterfaceStyle = .light
-        
+        changeNavBar()
         setupActions()
         setupObservers()
         setupNavigationBar()
+    }
+    
+    func changeNavBar() {
+        guard let navigationBar = navigationController?.navigationBar else { return }
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = Appearance.shared.colors.navigationBackgroundColor
+        navigationBar.standardAppearance = appearance;
+        navigationBar.scrollEdgeAppearance = navigationBar.standardAppearance
     }
     
     open override func viewDidLayoutSubviews() {

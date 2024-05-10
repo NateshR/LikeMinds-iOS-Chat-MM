@@ -366,7 +366,9 @@ extension LMChatAttachmentViewController: MediaPickerDelegate {
             cancelEditing(nil)
             return
         }
-        viewModel?.mediaCellData = results
+        viewModel?.mediaCellData.append(contentsOf: results)
+        viewModel?.mediaCellData = (viewModel?.mediaCellData ?? []).unique(map: {$0.localPath})
+        
         mediaCollectionView.reloadData()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

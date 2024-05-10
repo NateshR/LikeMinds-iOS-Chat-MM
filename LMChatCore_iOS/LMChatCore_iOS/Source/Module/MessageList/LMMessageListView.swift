@@ -113,7 +113,7 @@ open class LMMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-//        table.keyboardDismissMode = .onDrag
+//        table.keyboardDismissMode = .interactive
         table.contentInset = .init(top: 0, left: 0, bottom: 14, right: 0)
         return table
     }()
@@ -254,7 +254,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        
+        var tableViewCell: UITableViewCell = UITableViewCell()
         switch item.messageType {
         case 0, 10:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
@@ -267,21 +267,21 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
                 } else {
                     cell.selectedButton.isHidden = true
                 }
-                return cell
+                tableViewCell =  cell
             }
         case 111:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
                 cell.currentIndexPath = indexPath
-                return cell
+                tableViewCell = cell
             }
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
                 cell.setData(with: .init(message: item, loggedInUserTag: currentLoggedInUserTagFormat, loggedInUserReplaceTag: currentLoggedInUserReplaceTagFormat))
-                return cell
+                tableViewCell =  cell
             }
         }
-        return UITableViewCell()
+        return tableViewCell
     }
     
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
@@ -349,7 +349,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let frameHeight = scrollView.frame.height
         
         // Check if user scrolled to the top
-        if contentOffsetY <= 40 && !isLoadingMoreData {
+        if contentOffsetY <= 0 && !isLoadingMoreData {
             print("end dragged top!$!$")
             guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}

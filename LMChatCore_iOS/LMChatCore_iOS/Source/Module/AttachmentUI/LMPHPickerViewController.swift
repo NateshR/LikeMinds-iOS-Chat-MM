@@ -20,7 +20,16 @@ public enum MediaType: String {
     case voice_note
 }
 
-public class MediaPickerModel {
+public class MediaPickerModel: Hashable {
+    
+    static public func ==(lhs: MediaPickerModel, rhs: MediaPickerModel) -> Bool {
+        return lhs.localPath == rhs.localPath
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(localPath)
+    }
+    
     public var id: String
     var photo: UIImage? {
         didSet {

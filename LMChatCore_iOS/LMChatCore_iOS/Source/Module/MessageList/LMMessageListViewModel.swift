@@ -478,7 +478,7 @@ public final class LMMessageListViewModel {
     func leaveChatroom() {
         let request = LeaveSecretChatroomRequest.builder()
             .chatroomId(chatroomViewData?.id ?? "")
-//            .uuid(UserPreferences.shared.getClientUUID() ?? "")
+            .uuid(UserPreferences.shared.getClientUUID() ?? "")
             .isSecret(chatroomViewData?.isSecret ?? false)
             .build()
         LMChatClient.shared.leaveSecretChatroom(request: request) { [weak self] response in
@@ -560,7 +560,7 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.scrollToBottom()
+        delegate?.reloadChatMessageList()
         self.markChatroomAsRead()
     }
     
@@ -570,7 +570,7 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.scrollToBottom()
+        delegate?.reloadChatMessageList()
         self.markChatroomAsRead()
     }
     
@@ -586,7 +586,9 @@ extension LMMessageListViewModel: ConversationChangeDelegate {
                 insertOrUpdateConversationIntoList(item)
             }
         }
-        delegate?.scrollToBottom()
+        if !conversations.isEmpty {
+            delegate?.scrollToBottom()
+        }
         self.markChatroomAsRead()
     }
     

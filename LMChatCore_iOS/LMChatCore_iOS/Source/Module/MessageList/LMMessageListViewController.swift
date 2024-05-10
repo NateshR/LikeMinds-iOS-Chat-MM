@@ -258,12 +258,12 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
     public func reloadData(at: ScrollDirection) {
         
         if at == .scroll_UP {
-            let oldContentHeight: CGFloat = messageListView.tableView.contentSize.height
-            let oldOffsetY: CGFloat = messageListView.tableView.contentOffset.y
-            messageListView.tableSections = viewModel?.messagesList ?? []
-            messageListView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {[weak self] in
                 guard let self else { return }
+                let oldContentHeight: CGFloat = messageListView.tableView.contentSize.height
+                let oldOffsetY: CGFloat = messageListView.tableView.contentOffset.y
+                messageListView.tableSections = viewModel?.messagesList ?? []
+                messageListView.reloadData()
                 let newContentHeight: CGFloat = messageListView.tableView.contentSize.height
                 messageListView.tableView.contentOffset.y = oldOffsetY + (newContentHeight - oldContentHeight)
             }
@@ -441,7 +441,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         
         let data: LMChatMediaPreviewViewModel.DataModel = .init(userName: message.createdBy ?? "User", senDate: formatDate(message.timestamp ?? 0), media: mediaData)
         
-        NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: indexPath.row), from: self, params: nil)
+        NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: attachmentIndex), from: self, params: nil)
     }
     
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
