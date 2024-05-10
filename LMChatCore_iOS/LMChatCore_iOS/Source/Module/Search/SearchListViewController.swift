@@ -139,6 +139,8 @@ extension SearchListViewController: UISearchBarDelegate {
             return
         }
         
+        searchResults.removeAll(keepingCapacity: true)
+        tableView.reloadData()
         tableView.backgroundView = LMChatSearchShimmerView(frame: tableView.bounds)
         
         timer?.invalidate()
