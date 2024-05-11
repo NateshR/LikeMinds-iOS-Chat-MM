@@ -179,7 +179,7 @@ open class LMMessageListViewController: LMViewController {
     }
     
     func deleteMessageConfirmation(_ conversationIds: [String]) {
-        let alert = UIAlertController(title: "Delete Message?", message: "Are you sure you want to delete this message? This action can not be reversed.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Delete Message?", message: Constants.shared.strings.warningMessageForDeletion, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: {[weak self] action in
             self?.viewModel?.deleteConversations(conversationIds: conversationIds)
             self?.cancelSelectedMessageAction()
@@ -215,12 +215,14 @@ open class LMMessageListViewController: LMViewController {
     
     public func updateChatroomSubtitles() {
         navigationTitleView.isHidden = false
-        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
-        let message = "Only community managers can respond here."
+        let participantCount = viewModel?.chatroomActionData?.participantCount ?? 0
+        let subtitle = participantCount > 0 ? "\(participantCount) participants" : ""
+        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: subtitle)
+        
         if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
-            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: false)
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
         } else {
-            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: (viewModel?.chatroomViewData?.memberCanMessage ?? true))
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: (viewModel?.chatroomViewData?.memberCanMessage ?? true))
         }
     }
     
@@ -232,9 +234,8 @@ open class LMMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
-        let message = "Restricted to respond in this chatroom by community manager"
         if viewModel?.checkMemberRight(.respondsInChatRoom) == false {
-            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: message, isEnable: false)
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: false)
         }
     }
     
@@ -294,13 +295,13 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     public func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu {
         var actions: [UIAction] = []
         let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
-                                   image: UIImage(systemName: "arrowshape.turn.up.backward.fill")) { [weak self] action in
+                                   image: Constants.shared.images.replyIcon) { [weak self] action in
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         actions.append(replyAction)
         if let message = item.message, !message.isEmpty {
             let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
-                                      image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
+                                      image: Constants.shared.images.copyIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
             }
             actions.append(copyAction)
@@ -308,28 +309,30 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         
         if viewModel?.isAdmin() == true {
             let copyAction = UIAction(title: NSLocalizedString("Set as current topic", comment: ""),
-                                      image: UIImage(systemName: "doc")) { [weak self] action in
+                                      image: Constants.shared.images.documentsIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .setTopic, atIndex: indexPath, message: item)
             }
             actions.append(copyAction)
         }
         
         if item.isIncoming == false, viewModel?.checkMemberRight(.respondsInChatRoom) == true {
-            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                      image: UIImage(systemName: "pencil")) { [weak self] action in
-                self?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
+            if item.message?.isEmpty == false {
+                let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                                          image:Constants.shared.images.pencilIcon) { [weak self] action in
+                    self?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
+                }
+                actions.append(editAction)
             }
             
             let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
-                                        image: UIImage(systemName: "trash"),
+                                        image: Constants.shared.images.trashIcon,
                                         attributes: .destructive) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
             }
             let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
-                                        image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
+                                        image: Constants.shared.images.checkmarkCircleIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
             }
-            actions.append(editAction)
             actions.append(deleteAction)
             actions.append(selectAction)
         } else {
@@ -425,7 +428,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
-        guard let fileUrl = URL(string: url) else {
+        guard let fileUrl = URL(string: url.getLinkWithHttps()) else {
             return
         }
         NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
@@ -496,10 +499,12 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
         viewModel?.editChatMessage = nil
+        bottomMessageBoxView.replyMessageViewContainer.isHidden = true
     }
     
     public func cancelLinkPreview() {
         viewModel?.currentDetectedOgTags = nil
+        bottomMessageBoxView.linkPreviewView.isHidden = true
     }
     
     public func composeMessage(message: String, composeLink: String?) {
@@ -664,9 +669,28 @@ extension LMMessageListViewController: UIDocumentPickerDelegate {
         var results: [MediaPickerModel] = []
         for item in urls {
             guard let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: item) else { continue }
-            results.append(.init(with: localPath, type: MediaPickerManager.shared.fileTypeForDocument))
+            switch MediaPickerManager.shared.fileTypeForDocument {
+            case .audio:
+                if let mediaDeatil = FileUtils.getDetail(forVideoUrl: localPath) {
+                    var mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
+                    mediaModel.duration = mediaDeatil.duration
+                    mediaModel.fileSize = Int(mediaDeatil.fileSize ?? 0)
+                    results.append(mediaModel)
+                }
+            case .pdf:
+                if let pdfDetail = FileUtils.getDetail(forPDFUrl: localPath) {
+                    var mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
+                    mediaModel.numberOfPages = pdfDetail.pageCount
+                    mediaModel.fileSize = Int(pdfDetail.fileSize ?? 0)
+                    results.append(mediaModel)
+                }
+            default:
+                continue
+            }
         }
-        postConversationWithAttchments(message: nil, attachments: results)
+        
+        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: results, delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: MediaPickerManager.shared.fileTypeForDocument) else { return }
+        self.present(viewController, animated: true)
     }
 }
 
@@ -706,7 +730,9 @@ extension LMMessageListViewController: LMChatAttachmentViewDelegate {
             return mediaData.build()
         }
         
-        viewModel?.postMessage(message: message, filesUrls: attachmentMedia, shareLink: nil, replyConversationId: nil, replyChatRoomId: nil)
+        viewModel?.postMessage(message: message, filesUrls: attachmentMedia, shareLink: self.viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
+        cancelReply()
+        cancelLinkPreview()
     }
 }
 
@@ -752,7 +778,7 @@ extension LMMessageListViewController: LMEmojiListViewDelegate {
 extension LMMessageListViewController: LMReactionViewControllerDelegate {
     public func reactionDeleted(chatroomId: String?, conversationId: String?) {
         guard let conversationId else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {[weak self] in
             self?.viewModel?.updateDeletedReactionConversation(conversationId: conversationId)
         }
     }

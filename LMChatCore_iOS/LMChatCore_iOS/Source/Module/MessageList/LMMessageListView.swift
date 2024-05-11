@@ -393,7 +393,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
-            return delegate?.getMessageContextMenu(indexPath, item: item)//self.createContextMenu(indexPath, item: item)
+            return delegate?.getMessageContextMenu(indexPath, item: item)
         }
     }
     
@@ -494,51 +494,6 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             parameters.shadowPath = UIBezierPath()
         }
         return UITargetedPreview(view: snapshot, parameters: parameters, target: previewTarget)
-    }
-    
-    @available(iOS 13.0, *)
-    func createContextMenu(_ indexPath: IndexPath, item: ContentModel.Message) -> UIMenu {
-        var actions: [UIAction] = []
-        let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
-                                   image: UIImage(systemName: "arrow.down.square")) { [weak self] action in
-            self?.delegate?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
-        }
-        actions.append(replyAction)
-        
-        let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
-                                  image: UIImage(systemName: "doc.on.doc")) { [weak self] action in
-            self?.delegate?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
-        }
-        actions.append(copyAction)
-
-        if item.isIncoming == false {
-            let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
-                                      image: UIImage(systemName: "pencil")) { [weak self] action in
-                self?.delegate?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
-            }
-            
-            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
-                                        image: UIImage(systemName: "trash"),
-                                        attributes: .destructive) { [weak self] action in
-                self?.delegate?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
-            }
-            actions.append(editAction)
-            actions.append(deleteAction)
-        } else {
-            let reportAction = UIAction(title: NSLocalizedString("Report message", comment: "")) { [weak self] action in
-                self?.delegate?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
-            }
-            actions.append(reportAction)
-        }
-        
-        let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
-                                  image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
-            self?.isMultipleSelectionEnable = true
-            self?.delegate?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
-        }
-        actions.append(selectAction)
-        
-        return UIMenu(title: "", children: actions)
     }
 }
 

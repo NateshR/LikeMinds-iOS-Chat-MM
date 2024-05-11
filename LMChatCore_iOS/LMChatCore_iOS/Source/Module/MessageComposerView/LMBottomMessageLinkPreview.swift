@@ -83,7 +83,8 @@ open class LMBottomMessageLinkPreview: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.xmarkIcon, for: .normal)
         button.addTarget(self, action: #selector(closeButtonClicked), for: .touchUpInside)
-        button.setWidthConstraint(with: 40)
+        button.tintColor = Appearance.shared.colors.textColor
+        button.setWidthConstraint(with: 35)
         return button
     }()
     

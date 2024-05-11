@@ -21,7 +21,7 @@ open class LMExploreChatroomView: LMView {
         public let isAnnouncementRoom: Bool?
         public let participantsCount: Int?
         public let messageCount: Int?
-        public let isFollowed: Bool?
+        public var isFollowed: Bool?
         public let chatroomId: String
         public let externalSeen: Bool?
         public let isPinned: Bool?
@@ -279,6 +279,7 @@ open class LMExploreChatroomView: LMView {
     @objc func joinButtonClicked(_ sender: UIButton) {
         guard let viewData else { return }
         let updatedStatus = !(viewData.isFollowed ?? false)
+        self.viewData?.isFollowed = updatedStatus
         joinButtonTitle(updatedStatus)
         onJoinButtonClick?(updatedStatus, viewData.chatroomId)
     }

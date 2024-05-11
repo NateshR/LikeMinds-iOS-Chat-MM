@@ -48,6 +48,9 @@ public class MediaPickerModel: Hashable {
     var mediaType: MediaType = .image
     var localPath: URL?
     var thumnbailLocalPath: URL?
+    var fileSize: Int?
+    var duration: Int?
+    var numberOfPages: Int?
     
     init(with photo: UIImage) {
         id = UUID().uuidString

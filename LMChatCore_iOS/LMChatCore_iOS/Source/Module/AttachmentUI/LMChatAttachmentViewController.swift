@@ -320,6 +320,20 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
             videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
                 self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
             }
+        case .pdf:
+            editButton.isHidden = true
+            videoImageViewContainer.isHidden = true
+            zoomableImageViewContainer.isHidden = false
+            self.zoomableImageViewContainer.zoomScale = 1
+            self.zoomableImageViewContainer.zoomFeatureEnable = false
+            self.zoomableImageViewContainer.configure(with: data.thumnbailLocalPath)
+        case .audio:
+            editButton.isHidden = true
+            videoImageViewContainer.isHidden = true
+            zoomableImageViewContainer.isHidden = false
+            self.zoomableImageViewContainer.zoomScale = 1
+            self.zoomableImageViewContainer.zoomFeatureEnable = false
+            self.zoomableImageViewContainer.configure(with: data.thumnbailLocalPath)
         default:
             editButton.isHidden = true
         }

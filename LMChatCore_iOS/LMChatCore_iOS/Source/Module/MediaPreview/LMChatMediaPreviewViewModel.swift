@@ -37,7 +37,7 @@ public final class LMChatMediaPreviewViewModel {
     }
     
     let data: DataModel
-    let startIndex: Int
+    var startIndex: Int?
     weak var delegate: LMMediaViewModelDelegate?
     
     init(data: DataModel, startIndex: Int, delegate: LMMediaViewModelDelegate?) {
@@ -63,6 +63,8 @@ public final class LMChatMediaPreviewViewModel {
     }
     
     public func scrollToMediaPreview() {
+        guard let startIndex else { return }
         delegate?.scrollToIndex(index: startIndex)
+        self.startIndex = nil
     }
 }

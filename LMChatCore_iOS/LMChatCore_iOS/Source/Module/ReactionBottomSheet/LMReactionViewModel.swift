@@ -84,12 +84,12 @@ final public  class LMReactionViewModel {
         let request = DeleteReactionRequest.builder()
             .conversationId(conversationId)
             .build()
+        self.delegate?.reactionDeleted()
         LMChatClient.shared.deleteReaction(request: request) {[weak self] response in
             guard response.success else {
                 print(response.errorMessage)
                 return
             }
-            self?.delegate?.reactionDeleted()
             (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
         }
     }

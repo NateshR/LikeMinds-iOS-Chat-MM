@@ -218,8 +218,6 @@ open class LMChatMessageContentView: LMView {
             .init()
             .translatesAutoresizingMaskIntoConstraints()
         bubble.backgroundColor = Appearance.shared.colors.clear
-//        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-//        bubble.addGestureRecognizer(panGesture)
         return bubble
     }
     

@@ -15,6 +15,7 @@ public extension Appearance {
         public static var shared = Fonts()
         
         // Variables
+        public var headingFont: UIFont = .systemFont(ofSize: 18, weight: .medium)
         public var headingFont1: UIFont = .systemFont(ofSize: 16, weight: .medium)
         public var headingFont2: UIFont = .systemFont(ofSize: 12, weight: .medium)
         public var headingFont3: UIFont = .systemFont(ofSize: 14, weight: .medium)

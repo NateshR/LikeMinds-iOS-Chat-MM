@@ -39,6 +39,7 @@ public class LMExploreChatroomViewModel {
     var chatrooms: [Chatroom] = []
     var currentPage: Int = 1
     var orderType: Filter = .newest
+    var isPinnedSelected: Bool?
     var isLoading = false
     
     init(_ viewController: LMExploreChatroomViewModelDelegate) {
@@ -59,6 +60,7 @@ public class LMExploreChatroomViewModel {
         let request = GetExploreFeedRequest.builder()
             .orderType(orderType.rawValue)
             .page(currentPage)
+            .isPinned(isPinnedSelected)
             .build()
         LMChatClient.shared.getExploreFeed(request: request) {[weak self] response in
             guard let self, 
@@ -80,6 +82,12 @@ public class LMExploreChatroomViewModel {
     
     func applyFilter(filter: Filter) {
         orderType = filter
+        currentPage = 1
+        getExploreChatrooms()
+    }
+    
+    func applyFilter(isPinned: Bool?) {
+        isPinnedSelected = isPinned
         currentPage = 1
         getExploreChatrooms()
     }

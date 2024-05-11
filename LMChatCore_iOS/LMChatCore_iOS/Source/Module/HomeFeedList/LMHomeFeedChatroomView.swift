@@ -24,8 +24,9 @@ open class LMHomeFeedChatroomView: LMView {
         public let timestamp: String
         public let fileTypeWithCount: [(type: String, count: Int)]?
         public let messageType: Int
+        public let isContainOgTags: Bool
         
-        public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String, fileTypeWithCount: [(type: String, count: Int)]?, messageType: Int) {
+        public init(userName: String, lastMessage: String, chatroomName: String, chatroomImageUrl: String?, isMuted: Bool, isSecret: Bool, isAnnouncementRoom: Bool, unreadCount: Int, timestamp: String, fileTypeWithCount: [(type: String, count: Int)]?, messageType: Int, isContainOgTags: Bool) {
             self.userName = userName
             self.lastMessage = lastMessage
             self.chatroomName = chatroomName
@@ -37,6 +38,7 @@ open class LMHomeFeedChatroomView: LMView {
             self.timestamp = timestamp
             self.fileTypeWithCount = fileTypeWithCount
             self.messageType = messageType
+            self.isContainOgTags = isContainOgTags
         }
         
     }
@@ -306,8 +308,14 @@ open class LMHomeFeedChatroomView: LMView {
                 attributedText.append(NSAttributedString(attachment: textAtt))
                 attributedText.append(NSAttributedString(string: " \(initalType) "))
             } else {
-                attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
-                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                if fileAttachmentType.count > 1 {
+                    attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
+                    attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                } else {
+                    attributedText.append(NSAttributedString(string: " "))
+                    attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                    attributedText.append(NSAttributedString(string: " \(initalType) "))
+                }
             }
         }
         

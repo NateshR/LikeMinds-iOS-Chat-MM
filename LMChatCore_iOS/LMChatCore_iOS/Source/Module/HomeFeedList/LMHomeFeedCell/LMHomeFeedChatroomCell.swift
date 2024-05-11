@@ -92,7 +92,8 @@ open class LMHomeFeedChatroomCell: LMTableViewCell {
                                                                  unreadCount: data.chatroom?.unseenCount ?? 0,
                                                                  timestamp: timestampConverted(createdAtInEpoch: lastConversation?.createdEpoch ?? 0) ?? "NA",
                                                                  fileTypeWithCount: getAttachmentType(data: data),
-                                                                 messageType: data.chatroom?.lastConversation?.state.rawValue ?? 0))
+                                                                 messageType: data.chatroom?.lastConversation?.state.rawValue ?? 0,
+                                                                 isContainOgTags: lastConversation?.ogTags != nil))
     }
     
     func getAttachmentType(data: ContentModel) -> [(String, Int)] {

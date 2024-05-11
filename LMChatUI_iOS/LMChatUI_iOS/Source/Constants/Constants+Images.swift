@@ -82,6 +82,7 @@ public extension Constants {
         public var messageIcon = loadSystemImage(with: "message")
         public var person2Icon = loadSystemImage(with: "person.2")
         public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
+        public var pinCircleIcon = loadSystemImage(with: "pin.circle")
         public var downArrowIcon = loadSystemImage(with: "arrow.down")
         public var sendButton = loadSystemImage(with: "paperplane.circle.fill")
         public var stopRecordButton = loadSystemImage(with: "stop.circle")
@@ -91,5 +92,6 @@ public extension Constants {
         public var replyIcon = loadSystemImage(with: "arrowshape.turn.up.backward.fill")
         public var searchIcon = loadSystemImage(with: "magnifyingglass")
         public var pollIcon = loadSystemImage(with: "chart.bar.xaxis")
+        public var trashIcon = loadSystemImage(with: "trash")
     }
 }

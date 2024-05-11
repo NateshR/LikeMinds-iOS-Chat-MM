@@ -46,6 +46,8 @@ open class LMZoomImageViewContainer: UIScrollView {
 //        self.image = image
     }
     
+    public var zoomFeatureEnable: Bool? = true
+    
     private func commonInit() {
         // Setup image view
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -73,6 +75,7 @@ open class LMZoomImageViewContainer: UIScrollView {
     
     @objc 
     private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+        guard zoomFeatureEnable == true else { return }
         if zoomScale == 1 {
             setZoomScale(2, animated: true)
         } else {

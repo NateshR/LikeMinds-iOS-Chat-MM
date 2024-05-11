@@ -161,7 +161,7 @@ open class LMChatMessageGallaryView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.headingFont
         label.backgroundColor = .gray.withAlphaComponent(0.8)
         label.text = "+2"
         return label

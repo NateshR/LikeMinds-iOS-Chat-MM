@@ -117,7 +117,6 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var replyMessageViewContainer: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.addSubview(replyMessageView)
-        view.pinSubView(subView: replyMessageView, padding: .init(top: 6, left: 16, bottom: -4, right: -16))
         view.isHidden = true
         return view
     }()
@@ -321,7 +320,12 @@ open class LMBottomMessageComposerView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
+                
+        replyMessageView.addConstraint(top: (replyMessageViewContainer.topAnchor, 6),
+                                       bottom: (replyMessageViewContainer.bottomAnchor, -4),
+                                       leading: (replyMessageViewContainer.leadingAnchor, 16),
+                                       trailing: (inputTextContainerView.trailingAnchor, 0))
+                
         pinSubView(subView: containerView)
         addOnVerticleStackView.addConstraint(top: (containerView.topAnchor, 4),
                                              leading: (containerView.leadingAnchor, 0),

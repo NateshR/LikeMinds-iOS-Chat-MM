@@ -81,8 +81,12 @@ open class LMMessageReplyPreview: LMView {
     open private(set) lazy var closeReplyButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.xmarkIcon, for: .normal)
+        button.tintColor = Appearance.shared.colors.textColor
         button.addTarget(self, action: #selector(cancelReply), for: .touchUpInside)
-        button.setWidthConstraint(with: 40)
+        button.backgroundColor = Appearance.shared.colors.white.withAlphaComponent(0.6)
+        button.setWidthConstraint(with: 25)
+        button.setHeightConstraint(with: 25)
+        button.cornerRadius(with: 12.5)
         return button
     }()
     
@@ -114,9 +118,9 @@ open class LMMessageReplyPreview: LMView {
         addSubview(containerView)
         containerView.addSubview(sidePannelColorView)
         containerView.addSubview(horizontalReplyStackView)
+        containerView.addSubview(closeReplyButton)
         horizontalReplyStackView.addArrangedSubview(verticleUsernameAndMessageContainerStackView)
         horizontalReplyStackView.addArrangedSubview(messageAttachmentImageView)
-        horizontalReplyStackView.addArrangedSubview(closeReplyButton)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(userNameLabel)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(messageLabel)
         isUserInteractionEnabled = true
@@ -134,6 +138,9 @@ open class LMMessageReplyPreview: LMView {
             containerView.topAnchor.constraint(equalTo: topAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
+            closeReplyButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -2),
+            closeReplyButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 2),
+            
             sidePannelColorView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             sidePannelColorView.topAnchor.constraint(equalTo: containerView.topAnchor),
             sidePannelColorView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
@@ -144,8 +151,8 @@ open class LMMessageReplyPreview: LMView {
             horizontalReplyStackView.topAnchor.constraint(equalTo: sidePannelColorView.topAnchor),
             horizontalReplyStackView.bottomAnchor.constraint(equalTo: sidePannelColorView.bottomAnchor),
             
-            messageAttachmentImageView.widthAnchor.constraint(equalToConstant: 50),
-            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 50)
+            messageAttachmentImageView.widthAnchor.constraint(equalToConstant: 60),
+            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 60)
             
             ])
     }
