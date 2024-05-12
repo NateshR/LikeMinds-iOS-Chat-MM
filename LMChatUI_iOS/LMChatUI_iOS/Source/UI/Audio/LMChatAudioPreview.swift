@@ -27,7 +27,7 @@ open class LMChatAudioPreview: LMView {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         view.layer.cornerRadius = 8
-        view.backgroundColor = .black.withAlphaComponent(0.5)
+        view.backgroundColor = .black.withAlphaComponent(0.6)
         return view
     }()
     
@@ -119,7 +119,7 @@ open class LMChatAudioPreview: LMView {
         durationLbl.trailingAnchor.constraint(equalTo: headphoneContainerView.trailingAnchor, constant: -4).isActive = true
         durationLbl.bottomAnchor.constraint(equalTo: headphoneContainerView.bottomAnchor, constant: -4).isActive = true
         
-        titleLabel.addConstraint(bottom: (thumbnailImage.bottomAnchor, 0),
+        titleLabel.addConstraint(bottom: (thumbnailImage.bottomAnchor, -8),
                                  leading: (thumbnailImage.trailingAnchor, 8),
                                  trailing: (containerView.trailingAnchor, -8))
         

@@ -107,6 +107,10 @@ open class LMMessageListView: LMView {
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
         table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
+        table.register(LMUIComponents.shared.chatMessageGalleryCell)
+        table.register(LMUIComponents.shared.chatMessageDocumentCell)
+        table.register(LMUIComponents.shared.chatMessageAudioCell)
+        table.register(LMUIComponents.shared.chatMessageLinkPreviewCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -257,18 +261,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         var tableViewCell: UITableViewCell = UITableViewCell()
         switch item.messageType {
         case 0, 10:
-            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
-                cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
-                cell.currentIndexPath = indexPath
-                cell.delegate = self
-                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
-                    cell.selectedButton.isHidden = false
-                } else {
-                    cell.selectedButton.isHidden = true
-                }
-                tableViewCell =  cell
-            }
+            tableViewCell =  cellFor(rowAt: indexPath, tableView: tableView)
         case 111:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
@@ -282,6 +275,40 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             }
         }
         return tableViewCell
+    }
+    
+    func cellFor(rowAt indexPath: IndexPath, tableView: UITableView) -> LMChatMessageCell {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        var cell: LMChatMessageCell?
+        if let attachments = item.attachments,
+              !attachments.isEmpty,
+            let type = attachments.first?.fileType {
+            switch type {
+            case "image", "video", "gif":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageGalleryCell)
+            case "pdf", "document", "doc":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageDocumentCell)
+            case "audio", "voice_note":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageAudioCell)
+            default:
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
+            }
+        } else if let ogTag = item.ogTags {
+            cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageLinkPreviewCell)
+        } else {
+            cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
+        }
+        guard let cell else { return  LMChatMessageCell() }
+        let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+        cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
+        cell.currentIndexPath = indexPath
+        cell.delegate = self
+        if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
+            cell.selectedButton.isHidden = false
+        } else {
+            cell.selectedButton.isHidden = true
+        }
+        return cell
     }
     
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
@@ -398,7 +425,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        (cell as? LMChatMessageCell)?.resetAudio()
+        (cell as? LMChatAudioViewCell)?.resetAudio()
         if indexPath == audioIndex {
             LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
@@ -505,7 +532,7 @@ extension LMMessageListView: LMChatAudioProtocol {
         audioIndex = index
         
         LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
-            (self?.tableView.cellForRow(at: index) as? LMChatMessageCell)?.seekSlider(to: Float(progress), url: url)
+            (self?.tableView.cellForRow(at: index) as? LMChatAudioViewCell)?.seekSlider(to: Float(progress), url: url)
         }
     }
     
@@ -515,7 +542,7 @@ extension LMMessageListView: LMChatAudioProtocol {
     
     public func resetAudio() {
         if let audioIndex {
-            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+            (tableView.cellForRow(at: audioIndex) as? LMChatAudioViewCell)?.resetAudio()
         }
         audioIndex = nil
     }

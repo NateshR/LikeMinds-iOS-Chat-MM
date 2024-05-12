@@ -104,8 +104,12 @@ open class LMChatMessageBubbleView: LMView {
         containerViewTrailingConstraint?.isActive = true
     }
     
-    open func addArrangeSubview(_ view: UIView) {
-        contentContainer.addArrangedSubview(view)
+    open func addArrangeSubview(_ view: UIView, atIndex: Int? = nil) {
+        guard let atIndex else {
+            contentContainer.addArrangedSubview(view)
+            return
+        }
+        contentContainer.insertArrangedSubview(view, at: atIndex)
     }
     
     func bubbleFor(_ isInComing: Bool) {

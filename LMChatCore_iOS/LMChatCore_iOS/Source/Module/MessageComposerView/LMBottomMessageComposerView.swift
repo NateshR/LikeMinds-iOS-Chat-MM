@@ -332,7 +332,7 @@ open class LMBottomMessageComposerView: LMView {
                                              trailing: (containerView.trailingAnchor, 0))
         
         audioMessageContainerStack.addConstraint(top: (addOnVerticleStackView.bottomAnchor, 4),
-                                                 bottom: (containerView.bottomAnchor, -4),
+                                                 bottom: (containerView.bottomAnchor, -8),
                                                  leading: (containerView.leadingAnchor, 8))
         
         micFlickerButton.addConstraint(top: (audioContainerView.topAnchor, 4),

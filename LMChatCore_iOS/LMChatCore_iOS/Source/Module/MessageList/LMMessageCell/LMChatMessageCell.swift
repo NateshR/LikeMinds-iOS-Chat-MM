@@ -27,7 +27,7 @@ open class LMChatMessageCell: LMTableViewCell {
     }
     
     // MARK: UI Elements
-    open private(set) lazy var chatMessageView: LMChatMessageContentView = {
+    open internal(set) lazy var chatMessageView: LMChatMessageContentView = {
         let view = LMCoreComponents.shared.messageContentView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
@@ -103,35 +103,28 @@ open class LMChatMessageCell: LMTableViewCell {
             self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
         }
         
-        chatMessageView.galleryView.onClickAttachment = {[weak self] index in
-            self?.delegate?.onClickGalleryOfMessage(attachmentIndex: index, indexPath: self?.currentIndexPath)
-        }
+//        chatMessageView.galleryView.onClickAttachment = {[weak self] index in
+//            self?.delegate?.onClickGalleryOfMessage(attachmentIndex: index, indexPath: self?.currentIndexPath)
+//        }
         
-        chatMessageView.clickedOnAttachment = {[weak self] url in
-            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
-        }
-        
+//        chatMessageView.clickedOnAttachment = {[weak self] url in
+//            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+//        }
+//        
         chatMessageView.replyMessageView.onClickReplyPreview = { [weak self] in
             self?.delegate?.onClickReplyOfMessage(indexPath: self?.currentIndexPath)
         }
         
-        chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
-            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
-        }
+//        chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
+//            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
+//        }
+        chatMessageView.layoutIfNeeded()
     }
     
     func updateSelection(data: ContentModel) {
         let isSelected = data.isSelected
         selectedButton.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
         selectedButton.isSelected = isSelected
-    }
-    
-    open func resetAudio() {
-        chatMessageView.resetAudio()
-    }
-    
-    open func seekSlider(to position: Float, url: String) {
-        chatMessageView.seekSlider(to: position, url: url)
     }
 }
 

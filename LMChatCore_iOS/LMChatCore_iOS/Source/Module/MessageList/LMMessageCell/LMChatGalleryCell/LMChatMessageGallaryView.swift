@@ -282,17 +282,6 @@ open class LMChatMessageGallaryView: LMView {
             imagePreview.setData(imageUrl)
             imagePreview.playIconImage.isHidden = true
         }
-        
-        
-//        itemSpots[index].isHidden = false
-//        
-//        if item.fileType == "video" {
-//            itemSpots[index].setData(imageUrl, withPlaceholder: nil)
-//            itemSpots[index].playIconImage.isHidden = false
-//        } else {
-//            itemSpots[index].setData(imageUrl)
-//            itemSpots[index].playIconImage.isHidden = true
-//        }
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
@@ -334,37 +323,14 @@ extension LMChatMessageGallaryView {
             return image
         }()
         
-//        public private(set) lazy var loadingIndicator = components
-//            .loadingIndicator
-//            .init()
-//            .withoutAutoresizingMaskConstraints
-//            .withAccessibilityIdentifier(identifier: "loadingIndicator")
-//        
-//        public private(set) lazy var uploadingOverlay = components
-//            .uploadingOverlayView
-//            .init()
-//            .withoutAutoresizingMaskConstraints
-//            .withAccessibilityIdentifier(identifier: "uploadingOverlay")
-        
-        // MARK: - Overrides
-        
         override open func setupAppearance() {
             super.setupAppearance()
-//            imageView.backgroundColor = appearance.colorPalette.background1
         }
         
         override open func setupViews() {
             super.setupViews()
             addSubview(imageView)
             addSubview(playIconImage)
-//            let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnAttachment(_:)))
-//            addGestureRecognizer(tapRecognizer)
-//            
-//            uploadingOverlay.didTapActionButton = { [weak self] in
-//                guard let self = self, let attachment = self.content else { return }
-//                
-//                self.didTapOnUploadingActionButton?(attachment)
-//            }
         }
         
         override open func setupLayouts() {
@@ -377,37 +343,5 @@ extension LMChatMessageGallaryView {
         func setData(_ url: String, withPlaceholder placeholder: UIImage? = UIImage(named: "imageplaceholder", in: LMChatCoreBundle, compatibleWith: nil)) {
             imageView.kf.setImage(with: URL(string: url), placeholder: placeholder)
         }
-        
-//        override open func updateContent() {
-//            super.updateContent()
-//            
-//            let attachment = content
-//            
-//            loadingIndicator.isVisible = true
-//            imageTask = components.imageLoader.loadImage(
-//                into: imageView,
-//                from: attachment?.payload,
-//                maxResolutionInPixels: components.imageAttachmentMaxPixels
-//            ) { [weak self] _ in
-//                self?.loadingIndicator.isVisible = false
-//                self?.imageTask = nil
-//            }
-//            
-//            uploadingOverlay.content = content?.uploadingState
-//            uploadingOverlay.isVisible = attachment?.uploadingState != nil
-//        }
-        
-        // MARK: - Actions
-        
-//        @objc open func didTapOnAttachment(_ recognizer: UITapGestureRecognizer) {
-//            guard let attachment = content else { return }
-//            didTapOnAttachment?(attachment)
-//        }
-//        
-//        // MARK: - Init & Deinit
-//        
-//        deinit {
-//            imageTask?.cancel()
-//        }
     }
 }

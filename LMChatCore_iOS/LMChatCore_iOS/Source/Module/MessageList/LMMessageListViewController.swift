@@ -31,6 +31,19 @@ open class LMMessageListViewController: LMViewController {
         return view
     }()
     
+    open private(set) lazy var scrollToBottomButton: LMButton = {
+        let button = LMButton().translatesAutoresizingMaskIntoConstraints()
+        button.setImage(Constants.shared.images.downArrow, for: .normal)
+        button.contentMode = .scaleToFill
+        button.setWidthConstraint(with: 40)
+        button.setHeightConstraint(with: 40)
+        button.backgroundColor = Appearance.shared.colors.white.withAlphaComponent(0.7)
+        button.tintColor = Appearance.shared.colors.gray155
+        button.cornerRadius(with: 20)
+        button.addTarget(self, action: #selector(scrollToBottomClicked), for: .touchUpInside)
+        return button
+    }()
+    
     open private(set) lazy var messageListView: LMMessageListView = {
         let view = LMMessageListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
@@ -92,6 +105,7 @@ open class LMMessageListViewController: LMViewController {
         self.view.addSubview(messageListView)
         self.view.addSubview(bottomMessageBoxView)
         self.view.addSubview(chatroomTopicBar)
+        self.view.addSubview(scrollToBottomButton)
         
         chatroomTopicBar.onTopicViewClick = {[weak self] topicId in
             self?.topicBarClicked(topicId: topicId)
@@ -114,6 +128,9 @@ open class LMMessageListViewController: LMViewController {
             messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
             messageListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             
+            scrollToBottomButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            scrollToBottomButton.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor, constant: -10),
+            
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
@@ -130,7 +147,6 @@ open class LMMessageListViewController: LMViewController {
         self.bottomTextViewContainerBottomConstraints?.isActive = true
         UIView.animate(withDuration: 0.3) {[weak self] in
             self?.view.layoutIfNeeded()
-//            self?.messageListView.scrollToBottom()
         }
     }
     
@@ -139,7 +155,9 @@ open class LMMessageListViewController: LMViewController {
         self.bottomTextViewContainerBottomConstraints?.isActive = false
         self.bottomTextViewContainerBottomConstraints?.constant = 0
         self.bottomTextViewContainerBottomConstraints?.isActive = true
-        self.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) {[weak self] in
+            self?.view.layoutIfNeeded()
+        }
     }
     
     open override func setupObservers() {
@@ -170,6 +188,12 @@ open class LMMessageListViewController: LMViewController {
         }
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc
+    open func scrollToBottomClicked(_ sender: UIButton) {
+        self.scrollToBottomButton.isHidden = true
+        viewModel?.fetchBottomConversations()
     }
     
     @objc
@@ -279,6 +303,7 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         messageListView.scrollToBottom()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         updateChatroomSubtitles()
+//        self.scrollToBottomButton.isHidden = true
     }
     
     public func updateTopicBar() {
@@ -578,7 +603,6 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
             let newURL = URL(fileURLWithPath: audioURL.absoluteString)
             let mediaModel = MediaPickerModel(with: newURL, type: .voice_note)
             postConversationWithAttchments(message: nil, attachments: [mediaModel])
-//            delegate?.postMessageWithAudioAttachment(with: audioURL)
         }
         LMChatAudioRecordManager.shared.resetAudioParameters()
     }
