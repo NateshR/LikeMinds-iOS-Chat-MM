@@ -333,7 +333,16 @@ public final class LMMessageListViewModel {
                    message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
-                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil, isDeleted: replyConversation.deletedByMember != nil, createdBy: replyConversation.member?.name, createdByImageUrl: replyConversation.member?.imageUrl, isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(), messageType: replyConversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0), ogTags: createOgTags(replyConversation.ogTags), isEdited: replyConversation.isEdited, attachmentUploaded: replyConversation.attachmentUploaded)]
+                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
+                   isDeleted: replyConversation.deletedByMember != nil,
+                   createdBy: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID() ? replyConversation.member?.name : "You",
+                   createdByImageUrl: replyConversation.member?.imageUrl,
+                   isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
+                   messageType: replyConversation.state.rawValue,
+                   createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0),
+                   ogTags: createOgTags(replyConversation.ogTags),
+                   isEdited: replyConversation.isEdited,
+                   attachmentUploaded: replyConversation.attachmentUploaded)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),

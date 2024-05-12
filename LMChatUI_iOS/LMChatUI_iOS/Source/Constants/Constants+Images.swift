@@ -96,5 +96,7 @@ public extension Constants {
         public var searchIcon = loadSystemImage(with: "magnifyingglass")
         public var pollIcon = loadSystemImage(with: "chart.bar.xaxis")
         public var trashIcon = loadSystemImage(with: "trash")
+        
+        public var docPlusIcon = loadSystemImage(with: "doc.badge.plus")
     }
 }

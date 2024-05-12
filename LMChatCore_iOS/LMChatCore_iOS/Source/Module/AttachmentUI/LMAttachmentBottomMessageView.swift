@@ -123,6 +123,15 @@ open class LMAttachmentBottomMessageView: LMView {
         return view
     }()
     
+    open private(set) lazy var seperatorLineView: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        //        view.cornerRadius(with: 18)
+        view.backgroundColor = Appearance.shared.colors.white
+        view.setWidthConstraint(with: 2)
+        //        view.borderColor(withBorderWidth: 1, with: .lightGray)
+        return view
+    }()
+    
     let maxHeightOfTextView: CGFloat = 120
     let minHeightOfTextView: CGFloat = 44
     
@@ -137,6 +146,7 @@ open class LMAttachmentBottomMessageView: LMView {
 //        inputTextAndGifHorizontalStackView.addArrangedSubview(gifButton)
         
         horizontalStackView.addArrangedSubview(attachmentButton)
+        horizontalStackView.addArrangedSubview(seperatorLineView)
         horizontalStackView.addArrangedSubview(inputTextContainerView)
         horizontalStackView.addArrangedSubview(sendButton)
         

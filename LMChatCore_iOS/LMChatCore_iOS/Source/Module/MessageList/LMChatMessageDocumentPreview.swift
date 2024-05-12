@@ -18,7 +18,8 @@ open class LMChatMessageDocumentPreview: LMView {
         public let fileType: String?
         public let fileName: String?
         public var fileSizeInMb: String {
-            let kbs = Float((fileSize ?? 0)/1000)
+            guard let fileSize else { return "" }
+            let kbs = Float((fileSize )/1000)
             let size = kbs > 999 ? String(format: "%0.2f MB",(kbs/1000)) : String(format: "%0.1f KB", kbs)
            return size
         }
@@ -128,8 +129,15 @@ open class LMChatMessageDocumentPreview: LMView {
     
     func setData(_ data: ContentModel) {
         viewData = data
-        titleLabel.text = data.fileName
-        subtitleLabel.text = "\(data.numberOfPages ?? 0) Pages • \(data.fileSizeInMb) • \(data.fileType?.uppercased() ?? "PDF")"
+        titleLabel.text = data.fileName ?? "Document"
+        var details = ""
+        if let pages = data.numberOfPages, pages > 0 {
+            details = details + "\(data.numberOfPages ?? 0) Pages • "
+        }
+        if !data.fileSizeInMb.isEmpty {
+            details = details + "\(data.fileSizeInMb) • "
+        }
+        subtitleLabel.text = details + "\(data.fileType?.uppercased() ?? "PDF")"
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {

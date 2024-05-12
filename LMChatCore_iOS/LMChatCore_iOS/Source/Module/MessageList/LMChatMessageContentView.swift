@@ -170,10 +170,7 @@ open class LMChatMessageContentView: LMView {
         bubble.addArrangeSubview(docPreviewContainerStackView)
         bubble.addArrangeSubview(textLabel)
         bubble.addSubview(timestampLabel)
-//        let interaction = UIContextMenuInteraction(delegate: self)
-//        bubble.addInteraction(interaction)
         backgroundColor = .clear
-        
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
         linkPreview.isHidden = true

@@ -383,10 +383,14 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.zoomFeatureEnable = false
             self.zoomableImageViewContainer.configure(with: data.thumnbailLocalPath)
+            self.bottomMessageBoxView.attachmentButton.isHidden = false
+            self.bottomMessageBoxView.attachmentButton.setImage(Constants.shared.images.docPlusIcon.withSystemImageConfig(pointSize: 25), for: .normal)
             self.fileNameLabel.text = data.name
             self.fileDetailLabel.text = "\(data.numberOfPages ?? 0) pages \(Constants.shared.strings.dot) \(FileUtils.fileSizeInMBOrKB(size: data.fileSize) ?? "") \(Constants.shared.strings.dot) \(data.mediaType.rawValue)"
         case .audio:
             audioPlayer.isHidden = false
+            self.bottomMessageBoxView.attachmentButton.isHidden = false
+            self.bottomMessageBoxView.attachmentButton.setImage(Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 25), for: .normal)
             audioPlayer.url = data.url?.absoluteString ?? ""
         default:
             editButton.isHidden = true
@@ -417,7 +421,14 @@ extension LMChatAttachmentViewController: LMChatAttachmentViewModelProtocol {
 extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     
     public func addMoreAttachment() {
-        MediaPickerManager.shared.presentPicker(viewController: self, delegate: self)
+        switch self.viewModel?.mediaType {
+        case .pdf:
+            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .pdf)
+        case .audio:
+            MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .audio)
+        default:
+            MediaPickerManager.shared.presentPicker(viewController: self, delegate: self)
+        }
     }
     
     public func addGifAttachment() {
@@ -469,4 +480,41 @@ extension LMChatAttachmentViewController: UIImagePickerControllerDelegate, UINav
         picker.dismiss(animated: true, completion: nil)
     }
     
+}
+
+extension LMChatAttachmentViewController: UIDocumentPickerDelegate {
+    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        controller.dismiss(animated: true)
+        var results: [MediaPickerModel] = []
+        for item in urls {
+            guard let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: item) else { continue }
+            switch MediaPickerManager.shared.fileTypeForDocument {
+            case .audio:
+                if let mediaDeatil = FileUtils.getDetail(forVideoUrl: localPath) {
+                    let mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
+                    mediaModel.duration = mediaDeatil.duration
+                    mediaModel.fileSize = Int(mediaDeatil.fileSize ?? 0)
+                    results.append(mediaModel)
+                }
+            case .pdf:
+                if let pdfDetail = FileUtils.getDetail(forPDFUrl: localPath) {
+                    let mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
+                    mediaModel.numberOfPages = pdfDetail.pageCount
+                    mediaModel.fileSize = Int(pdfDetail.fileSize ?? 0)
+                    results.append(mediaModel)
+                }
+            default:
+                continue
+            }
+        }
+        
+        guard !results.isEmpty || !(viewModel?.mediaCellData ?? []).isEmpty else {
+            cancelEditing(nil)
+            return
+        }
+        viewModel?.mediaCellData.append(contentsOf: results)
+        viewModel?.mediaCellData = (viewModel?.mediaCellData ?? []).unique(map: {$0.localPath})
+        
+        mediaCollectionView.reloadData()
+    }
 }

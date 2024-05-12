@@ -139,13 +139,12 @@ class MediaPickerManager: NSObject {
         }
     }
     
-    func presentAudioAndDocumentPicker(viewController: UIViewController, delegate: MediaPickerDelegate?, fileType: MediaType) {
+    func presentAudioAndDocumentPicker(viewController: UIViewController, delegate: UIDocumentPickerDelegate?, fileType: MediaType) {
         guard [MediaType.pdf, .audio].contains(fileType) else { return }
         self.fileTypeForDocument = fileType
-        self.delegate = delegate
         let docTypes = fileType == .pdf ? ["com.adobe.pdf"] : ["public.audiovisual-​content", "public.audio"]
         let docVc = UIDocumentPickerViewController(documentTypes: docTypes, in: .import)
-        docVc.delegate = (delegate as? LMMessageListViewController)
+        docVc.delegate = delegate
         docVc.allowsMultipleSelection = true
         docVc.isModalInPresentation = true
         viewController.present(docVc, animated: true)
