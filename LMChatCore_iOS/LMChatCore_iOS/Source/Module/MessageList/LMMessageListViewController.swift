@@ -688,7 +688,6 @@ extension LMMessageListViewController: UIDocumentPickerDelegate {
                 continue
             }
         }
-        
         guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: results, delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: MediaPickerManager.shared.fileTypeForDocument) else { return }
         self.present(viewController, animated: true)
     }

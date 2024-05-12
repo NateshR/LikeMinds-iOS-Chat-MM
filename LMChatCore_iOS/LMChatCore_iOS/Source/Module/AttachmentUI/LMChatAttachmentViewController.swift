@@ -54,6 +54,13 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
+    open private(set) lazy var audioPlayer: LMAudioPlayerView = {
+        let view = LMAudioPlayerView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = backgroundColor
+        view.isHidden = true
+        return view
+    }()
+    
     open private(set) lazy var editButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(Constants.shared.images.pencilIcon.withSystemImageConfig(pointSize: 22, weight: .bold), for: .normal)
@@ -70,7 +77,7 @@ open class LMChatAttachmentViewController: LMViewController {
         button.tintColor = .white
         button.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
         button.heightAnchor.constraint(equalToConstant: 44.0).isActive = true
-        button.addTarget(self, action: #selector(deleteImage), for: .touchUpInside)
+        button.addTarget(self, action: #selector(deleteMediaData), for: .touchUpInside)
         return button
     }()
     
@@ -101,6 +108,7 @@ open class LMChatAttachmentViewController: LMViewController {
         let collection = LMCollectionView(frame: .zero, collectionViewLayout: layout)
         collection.translatesAutoresizingMaskIntoConstraints = false
         collection.registerCell(type: LMMediaCarouselCell.self)
+        collection.registerCell(type: LMAudioCarouselCell.self)
         collection.showsVerticalScrollIndicator = false
         collection.showsHorizontalScrollIndicator = false
         collection.backgroundColor = .clear
@@ -109,12 +117,41 @@ open class LMChatAttachmentViewController: LMViewController {
         return collection
     }()
     
+    open private(set) lazy var mediaDetailLabelContainerStackView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .vertical
+        view.alignment = .center
+        view.spacing = 4
+        view.addArrangedSubview(fileNameLabel)
+        view.addArrangedSubview(fileDetailLabel)
+        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.8)
+        return view
+    }()
+    
+    open private(set) lazy var fileNameLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.font = Appearance.shared.fonts.headingFont
+        label.textColor = Appearance.shared.colors.white
+        label.numberOfLines = 1
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        return label
+    }()
+    
+    open private(set) lazy var fileDetailLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = nil
+        label.font = Appearance.shared.fonts.headingFont1
+        label.textColor = Appearance.shared.colors.white
+        label.numberOfLines = 1
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        return label
+    }()
+    
     public var viewModel: LMChatAttachmentViewModel?
     var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         setupViews()
         setupLayouts()
         setupAppearance()
@@ -123,6 +160,7 @@ open class LMChatAttachmentViewController: LMViewController {
         
         initializeHideKeyboard(zoomableImageViewContainer)
         initializeHideKeyboard(videoImageViewContainer)
+        initializeHideKeyboard(audioPlayer)
     }
     
     func openPicker() {
@@ -159,6 +197,8 @@ open class LMChatAttachmentViewController: LMViewController {
         self.view.addSubview(imageActionsContainer)
         self.view.addSubview(zoomableImageViewContainer)
         self.view.addSubview(videoImageViewContainer)
+        self.view.addSubview(audioPlayer)
+        self.view.addSubview(mediaDetailLabelContainerStackView)
         self.view.addSubview(bottomMessageBoxView)
         self.view.addSubview(imageViewCarouselContainer)
         imageViewCarouselContainer.addSubview(mediaCollectionView)
@@ -188,7 +228,16 @@ open class LMChatAttachmentViewController: LMViewController {
             videoImageViewContainer.leadingAnchor.constraint(equalTo: zoomableImageViewContainer.leadingAnchor),
             videoImageViewContainer.trailingAnchor.constraint(equalTo: zoomableImageViewContainer.trailingAnchor),
             videoImageViewContainer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
-            videoImageViewContainer.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            videoImageViewContainer.bottomAnchor.constraint(equalTo: zoomableImageViewContainer.bottomAnchor),
+            
+            audioPlayer.leadingAnchor.constraint(equalTo: zoomableImageViewContainer.leadingAnchor),
+            audioPlayer.trailingAnchor.constraint(equalTo: zoomableImageViewContainer.trailingAnchor),
+            audioPlayer.topAnchor.constraint(equalTo: imageActionsContainer.bottomAnchor),
+            audioPlayer.bottomAnchor.constraint(equalTo: zoomableImageViewContainer.bottomAnchor),
+            
+            mediaDetailLabelContainerStackView.leadingAnchor.constraint(equalTo: zoomableImageViewContainer.leadingAnchor),
+            mediaDetailLabelContainerStackView.trailingAnchor.constraint(equalTo: zoomableImageViewContainer.trailingAnchor),
+            mediaDetailLabelContainerStackView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
             
             imageViewCarouselContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageViewCarouselContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -202,7 +251,7 @@ open class LMChatAttachmentViewController: LMViewController {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        view.backgroundColor = .white
+        view.backgroundColor = Appearance.shared.colors.white
     }
     
     @objc
@@ -232,7 +281,7 @@ open class LMChatAttachmentViewController: LMViewController {
         editImage(currentImage, editModel: nil)
     }
     
-    @objc open func deleteImage(_ sender: UIButton?) {
+    @objc open func deleteMediaData(_ sender: UIButton?) {
         guard let index = viewModel?.mediaCellData.firstIndex(where: {$0.localPath == self.viewModel?.selectedMedia?.localPath}) else { return }
         deleteMedia(atIndex: index)
         let afterDeleteIndex = index - 1
@@ -283,10 +332,19 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let data = viewModel?.mediaCellData[indexPath.row],
-           let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
-            cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true))
-            return cell
+        if let data = viewModel?.mediaCellData[indexPath.row] {
+            switch data.mediaType {
+            case .audio:
+                if let cell = collectionView.dequeueReusableCell(with: LMAudioCarouselCell.self, for: indexPath) {
+                    cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true, duration: data.duration))
+                    return cell
+                }
+            default:
+                if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+                    cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true))
+                    return cell
+                }
+            }
         }
         return UICollectionViewCell()
     }
@@ -299,44 +357,41 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         
         if let data = viewModel?.mediaCellData[indexPath.row],
            let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
-            collectionView.reloadData()
             setDataToView(data)
         }
     }
     
     func setDataToView(_ data: MediaPickerModel) {
         viewModel?.selectedMedia = data
+        videoImageViewContainer.isHidden = true
+        zoomableImageViewContainer.isHidden = true
+        editButton.isHidden = true
+        audioPlayer.isHidden = true
         switch data.mediaType {
         case .image, .gif:
             editButton.isHidden = data.mediaType == .gif
-            videoImageViewContainer.isHidden = true
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
-            editButton.isHidden = true
             videoImageViewContainer.isHidden = false
-            zoomableImageViewContainer.isHidden = true
             videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
                 self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
             }
         case .pdf:
-            editButton.isHidden = true
-            videoImageViewContainer.isHidden = true
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.zoomFeatureEnable = false
             self.zoomableImageViewContainer.configure(with: data.thumnbailLocalPath)
+            self.fileNameLabel.text = data.name
+            self.fileDetailLabel.text = "\(data.numberOfPages ?? 0) pages \(Constants.shared.strings.dot) \(FileUtils.fileSizeInMBOrKB(size: data.fileSize) ?? "") \(Constants.shared.strings.dot) \(data.mediaType.rawValue)"
         case .audio:
-            editButton.isHidden = true
-            videoImageViewContainer.isHidden = true
-            zoomableImageViewContainer.isHidden = false
-            self.zoomableImageViewContainer.zoomScale = 1
-            self.zoomableImageViewContainer.zoomFeatureEnable = false
-            self.zoomableImageViewContainer.configure(with: data.thumnbailLocalPath)
+            audioPlayer.isHidden = false
+            audioPlayer.url = data.url?.absoluteString ?? ""
         default:
             editButton.isHidden = true
         }
+        mediaCollectionView.reloadData()
     }
     
     func navigateToVideoPlayer(with url: String) {

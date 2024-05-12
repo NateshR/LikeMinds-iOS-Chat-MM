@@ -80,10 +80,14 @@ class FileUtils {
         return nil
     }
     
-    static func getDetail(forVideoUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, fileSize: Double?, duration: Int?)? {
-        let abString = url.absoluteString
-        let newURL = url//URL(fileURLWithPath: abString)
-        
+    static func fileSizeInMBOrKB(size: Int?) -> String? {
+        let kbs = Float((size ?? 0)/1000)
+        let size = kbs > 999 ? String(format: "%0.2f MB",(kbs/1000)) : String(format: "%0.1f KB", kbs)
+        return size
+    }
+    
+    static func getDetail(forVideoUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, fileSize: Double?, duration: Int?, name: String?)? {
+        let newURL = url
         let asset: AVAsset = AVAsset(url: newURL)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.appliesPreferredTrackTransform = true
@@ -94,14 +98,14 @@ class FileUtils {
             return (image,
                     saveImageToLocalDirectory(image: image, imageName: "thumbnail_\(fileNameWithoutExtension(url.lastPathComponent)).jpeg"),
                     Self.fileSizeInByte(url: url),
-                    Int(CMTimeGetSeconds(asset.duration)))
+                    Int(CMTimeGetSeconds(asset.duration)), url.lastPathComponent)
         } catch let error {
             print(error)
         }
-        return (nil, nil, Self.fileSizeInByte(url: newURL), Int(CMTimeGetSeconds(asset.duration)))
+        return (nil, nil, Self.fileSizeInByte(url: newURL), Int(CMTimeGetSeconds(asset.duration)), url.lastPathComponent)
     }
     
-    static func getDetail(forPDFUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, pageCount: Int?, fileSize: Double?)? {
+    static func getDetail(forPDFUrl url: URL) -> (thumbnail: UIImage?, thumbnailUrl: URL?, pageCount: Int?, fileSize: Double?, name: String?)? {
         guard let pdfDoc = PDFDocument(url: url),
               let pdfPage = pdfDoc.page(at: 0) else { return nil }
         let pdfPageRect = pdfPage.bounds(for: .mediaBox)
@@ -109,6 +113,6 @@ class FileUtils {
         return (thumbnailImage,
                 saveImageToLocalDirectory(image: thumbnailImage, imageName: "thumbnail_\(fileNameWithoutExtension(url.lastPathComponent)).jpeg"),
                 pdfDoc.pageCount,
-                Self.fileSizeInByte(url: url))
+                Self.fileSizeInByte(url: url), url.lastPathComponent)
     }
 }

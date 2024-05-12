@@ -76,6 +76,9 @@ public extension Constants {
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")
+        public var pauseCircleIcon = loadSystemImage(with: "pause.circle")
+        public var goForwardIcon = loadSystemImage(with: "goforward.10")
+        public var goBackwardIcon = loadSystemImage(with: "gobackward.10")
         public var playFill = loadSystemImage(with: "play.fill")
         public var pauseIcon = loadSystemImage(with: "pause.fill")
         public var linkIcon = loadSystemImage(with: "link.circle.fill")
