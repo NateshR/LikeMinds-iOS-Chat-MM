@@ -135,7 +135,7 @@ open class LMMessageListView: LMView {
     private var data: [BaseContentModel] = []
     public weak var delegate: LMMessageListViewDelegate?
     public var tableSections:[ContentModel] = []
-    public var audioIndex: IndexPath?
+    public var audioIndex: (section: Int, messageID: String)?
     public var currentLoggedInUserTagFormat: String = ""
     public var currentLoggedInUserReplaceTagFormat: String = ""
     
@@ -373,25 +373,6 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         delegate?.didScrollTableView(scrollView)
     }
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    }
-    
-    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-       /*
-        if scrollView.contentOffset.y <= 20 {
-            print("end dragged top!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let firstIndexPath = visibleIndexPaths.first else {return}
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
-        } else  if tableView.contentOffset.y >= (tableView.contentSize.height - tableView.frame.size.height) {
-            print("end dragged bottom!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
-        }
-        */
-    }
-
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
@@ -405,7 +386,8 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         (cell as? LMChatAudioViewCell)?.resetAudio()
-        if indexPath == audioIndex {
+        if indexPath.section == audioIndex?.section,
+           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
             LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
     }
@@ -466,7 +448,6 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         
         reactionView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10).isActive = true
         reactionView.bottomAnchor.constraint(equalTo: container.bottomAnchor).isActive = true
-//        reactionView.widthAnchor.constraint(equalToConstant: 50*4).isActive = true
         reactionView.heightAnchor.constraint(equalToConstant: reactionHeight).isActive = true
         
         let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y + 26)
@@ -506,9 +487,19 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: LMChatAudioProtocol
 extension LMMessageListView: LMChatAudioProtocol {
+    public func pauseAudioPlayer() {
+        LMChatAudioPlayManager.shared.stopAudio { }
+    }
+    
     public func didTapPlayPauseButton(for url: String, index: IndexPath) {
         resetAudio()
-        audioIndex = index
+        
+        guard tableSections.indices.contains(index.section),
+              tableSections[index.section].data.indices.contains(index.row) else { return }
+        
+        let messageID = tableSections[index.section].data[index.row].messageId
+        
+        audioIndex = (index.section, messageID)
         
         LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
             (self?.tableView.cellForRow(at: index) as? LMChatAudioViewCell)?.seekSlider(to: Float(progress), url: url)
@@ -520,9 +511,13 @@ extension LMMessageListView: LMChatAudioProtocol {
     }
     
     public func resetAudio() {
-        if let audioIndex {
-            (tableView.cellForRow(at: audioIndex) as? LMChatAudioViewCell)?.resetAudio()
+        if let audioIndex,
+           tableSections.indices.contains(audioIndex.section),
+           let row = tableSections[audioIndex.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }) {
+            
+            (tableView.cellForRow(at: .init(row: row, section: audioIndex.section)) as? LMChatAudioViewCell)?.resetAudio()
         }
+        
         audioIndex = nil
     }
 }
