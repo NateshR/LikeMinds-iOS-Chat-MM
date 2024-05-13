@@ -34,7 +34,7 @@ open class LMHomeFeedShimmerView: LMView {
     
     open override func setupLayouts() {
         super.setupLayouts()
-        for _ in 0..<5 {
+        for _ in 0..<8 {
             let shimmer = LMHomeFeedLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             shimmer.setHeightConstraint(with: 80)

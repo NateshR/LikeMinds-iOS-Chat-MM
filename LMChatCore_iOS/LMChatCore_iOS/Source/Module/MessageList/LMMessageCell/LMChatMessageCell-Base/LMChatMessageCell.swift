@@ -102,22 +102,9 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.clickedOnReaction = {[weak self] reaction in
             self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
         }
-        
-//        chatMessageView.galleryView.onClickAttachment = {[weak self] index in
-//            self?.delegate?.onClickGalleryOfMessage(attachmentIndex: index, indexPath: self?.currentIndexPath)
-//        }
-        
-//        chatMessageView.clickedOnAttachment = {[weak self] url in
-//            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
-//        }
-//        
         chatMessageView.replyMessageView.onClickReplyPreview = { [weak self] in
             self?.delegate?.onClickReplyOfMessage(indexPath: self?.currentIndexPath)
         }
-        
-//        chatMessageView.linkPreview.onClickLinkPriview = {[weak self] url in
-//            self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
-//        }
         chatMessageView.layoutIfNeeded()
     }
     

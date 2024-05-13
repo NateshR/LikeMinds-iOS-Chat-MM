@@ -73,6 +73,8 @@ public extension Constants {
         public var rightArrowIcon = loadSystemImage(with: "chevron.right")
         public var checkmarkCircleIcon = loadSystemImage(with: "checkmark.circle")
         public var leftArrowIcon = loadSystemImage(with: "chevron.left")
+        public var downChevronArrowIcon = loadSystemImage(with: "chevron.down")
+        public var upChevronArrowIcon = loadSystemImage(with: "chevron.up")
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")

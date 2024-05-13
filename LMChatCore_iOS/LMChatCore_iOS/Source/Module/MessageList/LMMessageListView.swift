@@ -25,6 +25,7 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
     func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
+    func didScrollTableView(_ scrollView: UIScrollView)
 }
 
 public enum LMMessageActionType: String {
@@ -143,7 +144,6 @@ open class LMMessageListView: LMView {
     let menuHeight: CGFloat = 200
     var isMultipleSelectionEnable: Bool = false
     var selectedItems: [ContentModel.Message] = []
-    var isLoadingMoreData: Bool = false
     
     // MARK: setupViews
     open override func setupViews() {
@@ -219,7 +219,6 @@ open class LMMessageListView: LMView {
         func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
             return indexPath.section < tableView.numberOfSections && indexPath.row < tableView.numberOfRows(inSection: indexPath.section)
         }
-        
     }
     
     func scrollAtIndexPath(indexPath: IndexPath) {
@@ -371,27 +370,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     // while scrolling this delegate is being called so you may now check which direction your scrollView is being scrolled to
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentOffsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.height
-        
-        // Check if user scrolled to the top
-        if contentOffsetY <= 0 && !isLoadingMoreData {
-            print("end dragged top!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let firstIndexPath = visibleIndexPaths.first else {return}
-            isLoadingMoreData = true
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
-        }
-        
-        // Check if user scrolled to the bottom
-        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData {
-            print("end dragged bottom!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            isLoadingMoreData = true
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
-        }
+        delegate?.didScrollTableView(scrollView)
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {

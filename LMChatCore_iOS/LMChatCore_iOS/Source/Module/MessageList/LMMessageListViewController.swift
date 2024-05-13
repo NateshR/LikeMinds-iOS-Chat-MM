@@ -33,11 +33,11 @@ open class LMMessageListViewController: LMViewController {
     
     open private(set) lazy var scrollToBottomButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.downArrow, for: .normal)
+        button.setImage(Constants.shared.images.downChevronArrowIcon, for: .normal)
         button.contentMode = .scaleToFill
         button.setWidthConstraint(with: 40)
         button.setHeightConstraint(with: 40)
-        button.backgroundColor = Appearance.shared.colors.white.withAlphaComponent(0.7)
+        button.backgroundColor = Appearance.shared.colors.white.withAlphaComponent(0.8)
         button.tintColor = Appearance.shared.colors.gray155
         button.cornerRadius(with: 20)
         button.addTarget(self, action: #selector(scrollToBottomClicked), for: .touchUpInside)
@@ -78,6 +78,9 @@ open class LMMessageListViewController: LMViewController {
         return buttonItem
     }()
     
+    var isLoadingMoreData: Bool = false
+    var lastSectionItem: LMMessageListView.ContentModel?
+    var lastRowItem: LMMessageListView.ContentModel.Message?
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -281,16 +284,17 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     public func reloadData(at: ScrollDirection) {
-        
         if at == .scroll_UP {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {[weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
                 guard let self else { return }
-                let oldContentHeight: CGFloat = messageListView.tableView.contentSize.height
-                let oldOffsetY: CGFloat = messageListView.tableView.contentOffset.y
                 messageListView.tableSections = viewModel?.messagesList ?? []
                 messageListView.reloadData()
-                let newContentHeight: CGFloat = messageListView.tableView.contentSize.height
-                messageListView.tableView.contentOffset.y = oldOffsetY + (newContentHeight - oldContentHeight)
+                guard let lastSectionItem,
+                      let lastRowItem,
+                    let section = messageListView.tableSections.firstIndex(where: {$0.section == lastSectionItem.section}),
+                      let row = messageListView.tableSections[section].data.firstIndex(where: {$0.messageId == lastRowItem.messageId}) else { return }
+                
+                messageListView.tableView.scrollToRow(at: IndexPath(row: row, section: section), at: .top, animated: false)
             }
         } else {
             messageListView.tableSections = viewModel?.messagesList ?? []
@@ -303,7 +307,7 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         messageListView.scrollToBottom()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         updateChatroomSubtitles()
-//        self.scrollToBottomButton.isHidden = true
+        self.scrollToBottomButton.isHidden = true
     }
     
     public func updateTopicBar() {
@@ -316,6 +320,40 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
 }
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
+    
+    public func didScrollTableView(_ scrollView: UIScrollView) {
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.height
+        
+        if let lastSection = messageListView.tableSections.last {
+            let indexPath = IndexPath(row: (lastSection.data.count - 1), section: messageListView.tableSections.count - 1)
+            if let _ = messageListView.tableView.cellForRow(at: indexPath) {
+                scrollToBottomButton.isHidden = true
+            } else {
+                scrollToBottomButton.isHidden = false
+            }
+        }
+        
+        // Check if user scrolled to the top
+        if contentOffsetY <= 20 && !isLoadingMoreData {
+            print("end dragged top!$!$")
+            guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
+                  let firstIndexPath = visibleIndexPaths.first else {return}
+            isLoadingMoreData = true
+            
+            fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
+        }
+        
+        // Check if user scrolled to the bottom
+        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData {
+            print("end dragged bottom!$!$")
+            guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
+                  let lastIndexPath = visibleIndexPaths.last else {return}
+            isLoadingMoreData = true
+            fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
+        }
+    }
 
     public func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu {
         var actions: [UIAction] = []
@@ -482,9 +520,11 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
     
     public func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        lastRowItem = message
+        lastSectionItem = messageListView.tableSections[indexPath.section]
         viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
-            self?.messageListView.isLoadingMoreData = false
+            self?.isLoadingMoreData = false
         }
         if direction == .scroll_UP {
             chatroomTopicBar.isHidden = true

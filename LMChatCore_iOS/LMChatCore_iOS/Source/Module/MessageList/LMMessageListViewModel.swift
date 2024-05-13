@@ -249,13 +249,15 @@ public final class LMMessageListViewModel {
                 if type == .below {
                     messagesList.append((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))))
                 } else {
-                    messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
+                    let data = (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)})
+                    messagesList.insert((.init(data: data, section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
                 }
             }
         }
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        
         let direction: ScrollDirection = type == .above ? .scroll_UP : .scroll_DOWN
         delegate?.reloadData(at: direction)
-//        delegate?.reloadChatMessageList()
     }
     
     func getMoreConversations(conversationId: String, direction: ScrollDirection) {
