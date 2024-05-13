@@ -49,7 +49,7 @@ public class SearchListViewController: LMViewController {
     open override func setupLayouts() {
         super.setupLayouts()
         
-        tableView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 0),
+        tableView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 8),
                                 bottom: (view.safeAreaLayoutGuide.bottomAnchor, 0),
                                 leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
                                 trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
@@ -67,6 +67,9 @@ public class SearchListViewController: LMViewController {
         
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
+        
+        let textFieldInsideSearchBar = searchController.searchBar.value(forKey: "searchField") as? UITextField
+        textFieldInsideSearchBar?.textColor = .black
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -125,7 +128,15 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(indexPath)
+        if let cell = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel {
+            NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: nil), from: self, params: nil)
+        } else if let cell = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel {
+            NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: cell.messageID), from: self, params: nil)
+        }
+    }
+    
+    open func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        (view as? UITableViewHeaderFooterView)?.textLabel?.textColor = .black
     }
 }
 
@@ -133,7 +144,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
 // MARK: UISearchResultsUpdating
 extension SearchListViewController: UISearchBarDelegate {
     open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        guard let text = searchBar.text,
+        guard let text = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else {
             resetSearchData()
             return

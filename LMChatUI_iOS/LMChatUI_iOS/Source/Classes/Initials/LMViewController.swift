@@ -104,7 +104,6 @@ open class LMViewController: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        overrideUserInterfaceStyle = .light
         changeNavBar()
         setupActions()
         setupObservers()

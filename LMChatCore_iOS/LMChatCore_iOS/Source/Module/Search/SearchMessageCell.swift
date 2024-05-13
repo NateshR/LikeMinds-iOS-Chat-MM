@@ -17,10 +17,11 @@ public class SearchMessageCell: LMTableViewCell {
         public let chatroomName: String
         public let message: String
         public let senderName: String
-        public let date: Date
+        public let date: TimeInterval
         public let isJoined: Bool
+        public let highlightedText: String
         
-        public init(chatroomID: String, messageID: String?, chatroomName: String, message: String, senderName: String, date: Date, isJoined: Bool) {
+        public init(chatroomID: String, messageID: String?, chatroomName: String, message: String, senderName: String, date: TimeInterval, isJoined: Bool, highlightedText: String) {
             self.chatroomID = chatroomID
             self.messageID = messageID
             self.chatroomName = chatroomName
@@ -28,6 +29,7 @@ public class SearchMessageCell: LMTableViewCell {
             self.senderName = senderName
             self.date = date
             self.isJoined = isJoined
+            self.highlightedText = highlightedText
         }
     }
     
@@ -116,23 +118,57 @@ public class SearchMessageCell: LMTableViewCell {
     
     func configure(with data: ContentModel) {
         titleLabel.text = data.chatroomName
-        subtitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(
-            from: "\(data.senderName): \(data.message)",
+        
+        var attrText = GetAttributedTextWithRoutes.getAttributedText(
+            from: data.message,
             andPrefix: "@",
             allowLink: false,
             allowHashtags: false
         )
+        
+        attrText = GetAttributedTextWithRoutes.detectAndHighlightText(in: attrText, text: data.highlightedText)
+        
+        let senderName = NSAttributedString(
+            string: "\(data.senderName): ",
+            attributes: [
+                .foregroundColor: Appearance.shared.colors.textColor,
+                .font: Appearance.shared.fonts.textFont1
+            ]
+        )
+        
+        attrText.insert(senderName, at: .zero)
+        
+        subtitleLabel.attributedText = attrText
         isJoinedLabel.isHidden = data.isJoined
-        dateLabel.text = data.date.inString(dateFormat: "dd/MM/yy")
+        dateLabel.text = DateUtility.formatDate(data.date)
     }
 }
 
 
-// TODO: Move to UI Library
-extension Date {
-    func inString(dateFormat format: String ) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
-        return dateFormatter.string(from: self)
+// MARK: Date Formatter Utility
+// TODO: Move To UI Library
+class DateUtility {
+    static func formatDate(_ epochTime: Double) -> String {
+        // Check if the epoch time is in seconds or milliseconds
+        let isMilliseconds = epochTime > 1_000_000_000_000
+        let interval: TimeInterval = isMilliseconds ? epochTime / 1000.0 : epochTime
+        let date = Date(timeIntervalSince1970: interval)
+        
+        // Get the current date and calendar components
+        let calendar = Calendar.current
+        
+        // Check if the date is today or yesterday
+        if calendar.isDateInToday(date) {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "HH:mm"
+            return dateFormatter.string(from: date)
+        } else if calendar.isDateInYesterday(date) {
+            return "yesterday"
+        } else {
+            // Format the date as DD/MM/YY
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd/MM/yy"
+            return dateFormatter.string(from: date)
+        }
     }
 }

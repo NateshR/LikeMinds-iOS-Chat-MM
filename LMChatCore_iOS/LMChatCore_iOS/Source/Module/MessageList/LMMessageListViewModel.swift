@@ -48,11 +48,11 @@ public final class LMMessageListViewModel {
     }
     
     
-    public static func createModule(withChatroomId chatroomId: String) throws -> LMMessageListViewController {
+    public static func createModule(withChatroomId chatroomId: String, conversationID: String?) throws -> LMMessageListViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.messageListScreen.init()
-        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, nil, nil))
+        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationID, nil))
         
         viewcontroller.viewModel = viewmodel
         viewcontroller.delegate = viewmodel
