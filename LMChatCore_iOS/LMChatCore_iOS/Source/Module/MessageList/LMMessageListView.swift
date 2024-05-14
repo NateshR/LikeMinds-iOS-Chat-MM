@@ -71,6 +71,7 @@ open class LMMessageListView: LMView {
             public let ogTags: OgTags?
             public let isEdited: Bool?
             public let attachmentUploaded: Bool?
+            public var isShowMore: Bool = false
         }
         
         public struct Reaction {
@@ -523,6 +524,15 @@ extension LMMessageListView: LMChatAudioProtocol {
 }
 
 extension LMMessageListView: LMChatMessageCellDelegate {
+    public func onClickOfSeeMore(for messageID: String, indexPath: IndexPath) {
+        guard tableSections.indices.contains(indexPath.section),
+        let row = tableSections[indexPath.section].data.firstIndex(where: { $0.messageId == messageID }) else { return }
+        
+        tableSections[indexPath.section].data[row].isShowMore.toggle()
+        tableView.beginUpdates()
+        tableView.reloadRows(at: [.init(row: row, section: indexPath.section)], with: .none)
+        tableView.endUpdates()
+    }
     
     public func didTappedOnSelectionButton(indexPath: IndexPath?) {
         guard let indexPath else { return }
