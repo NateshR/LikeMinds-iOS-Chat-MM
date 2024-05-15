@@ -20,7 +20,7 @@ final class LMAWSManager {
     private init() { }
     
     public static let shared = LMAWSManager()
-    var storedUploadTasks: [String: [UInt]] = [:]
+    var storedUploadTasks: [String: [AWSTask<AWSS3TransferUtilityUploadTask>]] = [:]
     
     public static func awsFilePathForConversation(chatroomId: String,
                                                 conversationId: String,
@@ -45,37 +45,31 @@ final class LMAWSManager {
     }
     
     func cancelAllTaskFor(groupId: String) {
-//        if let taskIds = storedUploadTasks[groupId] {
-//            taskIds.forEach { taskId in
-//                AWSS3TransferUtility.default().enumerateToAssignBlocks(forUploadTask: { (uploadTask, progress, error) in
-//                    if uploadTask.taskIdentifier == taskId {
-//                        uploadTask.cancel()
-//                    }
-//                }, downloadTask: nil)
-//            }
-//        }
+        print("passed groupId: \(groupId)")
+        print("All groupIds: \(storedUploadTasks.keys)")
+        if let tasks = storedUploadTasks[groupId] {
+            tasks.forEach { uploadTask in
+                print("Cancelling task......")
+                uploadTask.result?.cancel()
+            }
+        }
     }
     
     func resumeAllTaskFor(groupId: String) {
-//        if let taskIds = storedUploadTasks[groupId] {
-//            taskIds.forEach { taskId in
-//                AWSS3TransferUtility.default().enumerateToAssignBlocks(forUploadTask: { (uploadTask, progress, error) in
-//                    if uploadTask.taskIdentifier == taskId {
-//                        uploadTask.resume()
-//                    }
-//                }, downloadTask: nil)
-//            }
-//        }
+        if let tasks = storedUploadTasks[groupId] {
+            tasks.forEach { uploadTask in
+                print("Resuming task......")
+                uploadTask.result?.resume()
+            }
+        }
     }
     
     private func addUploadTask(groupId: String, task: AWSTask<AWSS3TransferUtilityUploadTask>) {
-        return 
-        guard let identifier = task.result?.taskIdentifier else { return }
-        if var taskIds = storedUploadTasks[groupId] {
-            taskIds.append(identifier)
-            storedUploadTasks[groupId] = taskIds
+        if var tasks = storedUploadTasks[groupId] {
+            tasks.append(task)
+            storedUploadTasks[groupId] = tasks
         } else {
-            storedUploadTasks[groupId] = [identifier]
+            storedUploadTasks[groupId] = [task]
         }
     }
     

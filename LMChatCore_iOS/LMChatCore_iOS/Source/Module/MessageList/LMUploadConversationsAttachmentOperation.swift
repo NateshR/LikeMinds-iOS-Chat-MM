@@ -14,8 +14,8 @@ class LMConversationAttachmentUpload {
     static let shared: LMConversationAttachmentUpload = .init()
     private init() {}
     
-    func uploadConversationAttchment(withAttachments attachments: [AttachmentUploadRequest], conversationId: String) {
-        let uploadConversationsAttachmentOperation = LMUploadConversationsAttachmentOperation(attachmentRequests: attachments, conversationId: conversationId)
+    func uploadConversationAttchment(withAttachments attachments: [AttachmentUploadRequest], conversationId: String, convTempId: String) {
+        let uploadConversationsAttachmentOperation = LMUploadConversationsAttachmentOperation(attachmentRequests: attachments, conversationId: conversationId, convTempId: convTempId)
         queue.addOperation(uploadConversationsAttachmentOperation)
     }
     
@@ -32,14 +32,16 @@ class LMUploadConversationsAttachmentOperation: Operation {
     
     private var attachmentRequests: [AttachmentUploadRequest]
     private var conversationId: String
+    private var conversationTempId: String
     private var groupQueue: DispatchGroup = DispatchGroup()
     
     static let attachmentPostCompleted = Notification.Name("ConversationAttachmentUploaded")
     static let postedId = "conversation_id"
     
-    init(attachmentRequests: [AttachmentUploadRequest], conversationId: String) {
+    init(attachmentRequests: [AttachmentUploadRequest], conversationId: String, convTempId: String) {
         self.attachmentRequests = attachmentRequests
         self.conversationId = conversationId
+        self.conversationTempId = convTempId
     }
     
     func uploadConversationAttachments() {
@@ -50,7 +52,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
                 LMAWSManager.shared.uploadfile(fileUrl: fileUrl,
                                                awsPath: awsFolderPath,
                                                fileName: attachment.name ?? "\(fileUrl.pathExtension)",
-                                               contenType: attachment.fileType, withTaskGroupId: conversationId)
+                                               contenType: attachment.fileType, withTaskGroupId: conversationTempId)
                 { progress in
                     print("======> \(attachment.name ?? "") progress \(progress) <=======")
                 } completion: {[weak self] awsFilePath, error in

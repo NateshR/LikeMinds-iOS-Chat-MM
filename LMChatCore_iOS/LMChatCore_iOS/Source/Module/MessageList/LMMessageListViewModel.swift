@@ -686,7 +686,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         var requestFiles:[AttachmentUploadRequest] = []
         if let updatedFileUrls, !updatedFileUrls.isEmpty {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
-            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId)
+            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId, convTempId: conversation.temporaryId ?? "")
         }
         guard let response else { return }
         savePostedConversation(requestList: requestFiles, response: response)
