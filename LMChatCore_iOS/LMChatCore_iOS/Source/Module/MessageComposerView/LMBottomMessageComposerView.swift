@@ -100,7 +100,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var attachmentButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(attachmentButtonIcon, for: .normal)
-        button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 34.0).isActive = true
         button.addTarget(self, action: #selector(attachmentButtonClicked), for: .touchUpInside)
         return button
     }()

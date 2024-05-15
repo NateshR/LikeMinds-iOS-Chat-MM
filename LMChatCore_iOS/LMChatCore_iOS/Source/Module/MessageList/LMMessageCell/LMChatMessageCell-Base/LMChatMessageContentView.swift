@@ -91,8 +91,27 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
-    open private(set) lazy var loaderView: LMLoaderView = {
-        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var cancelRetryContainerStackView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .vertical
+        view.distribution = .fill
+        view.alignment = .center
+        view.spacing = 0
+        view.addArrangedSubview(loaderView)
+        view.addArrangedSubview(retryView)
+        return view
+    }()
+    
+    open private(set) lazy var loaderView: LMAttachmentLoaderView = {
+        let view = LMAttachmentLoaderView().translatesAutoresizingMaskIntoConstraints()
+        view.cornerRadius(with: 24)
+        view.isHidden = true
+        return view
+    }()
+    
+    open private(set) lazy var retryView: LMAttachmentUploadRetryView = {
+        let view = LMAttachmentUploadRetryView().translatesAutoresizingMaskIntoConstraints()
+        view.isHidden = true
         return view
     }()
     

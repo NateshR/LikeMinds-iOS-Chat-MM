@@ -40,6 +40,7 @@ public final class LMMessageListViewModel {
     var chatroomTopic: Conversation?
     var loggedInUserTagValue: String = ""
     var loggedInUserReplaceTagValue: String = ""
+    var fetchingInitialBottomData: Bool = false
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -191,8 +192,12 @@ public final class LMMessageListViewModel {
                 insertOrUpdateConversationIntoList(message)
             }
         }
+        fetchingInitialBottomData = true
         LMChatClient.shared.observeLiveConversation(withChatroomId: chatroomId)
         delegate?.scrollToBottom()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
+            self?.fetchingInitialBottomData = false
+        }
     }
     
     func fetchTopConversations() {
@@ -754,9 +759,6 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         } else {
             insertOrUpdateConversationIntoList(conversation)
         }
-        
-//        insertOrUpdateConversationIntoList(conversation)
-//        delegate?.reloadChatMessageList()
     }
     
     func postEditedConversation(text: String, shareLink: String?, conversation: Conversation?) {
@@ -767,7 +769,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .shareLink(shareLink)
             .build()
         LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
-            guard resposne.success, let conversation = resposne.data?.conversation else { return}
+            guard resposne.success, let _ = resposne.data?.conversation else { return}
 //            self?.insertOrUpdateConversationIntoList(conversation)
 //            self?.delegate?.reloadChatMessageList()
         }

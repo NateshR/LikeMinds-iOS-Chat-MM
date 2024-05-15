@@ -26,6 +26,8 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
     func didScrollTableView(_ scrollView: UIScrollView)
+    func didCancelUploading(messageId: String)
+    func didRetryUploading(messageId: String)
 }
 
 public enum LMMessageActionType: String {
@@ -528,6 +530,17 @@ extension LMMessageListView: LMChatAudioProtocol {
 }
 
 extension LMMessageListView: LMChatMessageCellDelegate {
+    
+    public func didCancelAttachmentUploading(indexPath: IndexPath) {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        delegate?.didCancelUploading(messageId: item.messageId)
+    }
+    
+    public func didRetryAttachmentUploading(indexPath: IndexPath) {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        delegate?.didRetryUploading(messageId: item.messageId)
+    }
+    
     
     public func didTappedOnSelectionButton(indexPath: IndexPath?) {
         guard let indexPath else { return }

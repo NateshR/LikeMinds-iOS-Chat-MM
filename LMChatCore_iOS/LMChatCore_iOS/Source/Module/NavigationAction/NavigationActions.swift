@@ -15,7 +15,8 @@ import SafariServices
 enum NavigationActions {
     case homeFeed
     case chatroom(chatroomId: String)
-    case messageAttachment(delegat: LMChatAttachmentViewDelegate?, chatroomId: String?, sourceType: LMChatAttachmentViewModel.LMAttachmentSourceType)
+    case messageAttachment(delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, sourceType: LMChatAttachmentViewModel.LMAttachmentSourceType)
+    case messageAttachmentWithData(data:[MediaPickerModel], delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, mediaType: MediaType)
     case participants(chatroomId: String, isSecret: Bool)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
     case reactionSheet(reactions: [Reaction], selectedReaction: String?, conversation: String?, chatroomId: String?)
@@ -48,7 +49,12 @@ class NavigationScreen: NavigationScreenProtocol {
             source.navigationController?.pushViewController(chatroom, animated: true)
         case .messageAttachment(let delegate, let chatroomId, let sourceType):
             guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate, chatroomId: chatroomId, sourceType: sourceType) else { return }
+            attachment.modalPresentationStyle = .fullScreen
             source.present(attachment, animated: true)
+        case .messageAttachmentWithData(let data, let delegate, let chatroomId, let mediaType):
+            guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: data, delegate: delegate, chatroomId: chatroomId, mediaType: mediaType), !data.isEmpty else { return }
+            viewController.modalPresentationStyle = .fullScreen
+            source.present(viewController, animated: true)
         case .participants(let chatroomId, let isSecret):
             guard let participants = try? LMParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
             source.navigationController?.pushViewController(participants, animated: true)

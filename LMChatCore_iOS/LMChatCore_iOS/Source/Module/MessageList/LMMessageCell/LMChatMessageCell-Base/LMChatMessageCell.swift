@@ -16,6 +16,8 @@ public protocol LMChatMessageCellDelegate: AnyObject {
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
     func onClickReplyOfMessage(indexPath: IndexPath?)
     func didTappedOnSelectionButton(indexPath: IndexPath?)
+    func didCancelAttachmentUploading(indexPath: IndexPath)
+    func didRetryAttachmentUploading(indexPath: IndexPath)
 }
 
 @IBDesignable
@@ -98,6 +100,8 @@ open class LMChatMessageCell: LMTableViewCell {
     // MARK: configure
     open func setData(with data: ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         chatMessageView.setDataView(data, delegate: delegate, index: index)
+        chatMessageView.loaderView.delegate = self
+        chatMessageView.retryView.delegate = self
         updateSelection(data: data)
         chatMessageView.clickedOnReaction = {[weak self] reaction in
             self?.delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: self?.currentIndexPath)
@@ -112,6 +116,23 @@ open class LMChatMessageCell: LMTableViewCell {
         let isSelected = data.isSelected
         selectedButton.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
         selectedButton.isSelected = isSelected
+    }
+}
+
+extension LMChatMessageCell: LMAttachmentLoaderViewDelegate {
+    public func cancelUploadingAttachmentClicked() {
+        guard let currentIndexPath else { return }
+        chatMessageView.loaderView.isHidden = true
+        chatMessageView.retryView.isHidden = false
+        delegate?.didCancelAttachmentUploading(indexPath: currentIndexPath )
+    }
+}
+extension LMChatMessageCell: LMAttachmentUploadRetryViewDelegate {
+    public func retryUploadingAttachmentClicked() {
+        guard let currentIndexPath else { return }
+        chatMessageView.loaderView.isHidden = false
+        chatMessageView.retryView.isHidden = true
+        delegate?.didRetryAttachmentUploading(indexPath: currentIndexPath )
     }
 }
 

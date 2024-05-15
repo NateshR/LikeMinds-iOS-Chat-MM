@@ -27,13 +27,12 @@ open class LMChatLinkPreviewContentView: LMChatMessageContentView {
     open override func setupViews() {
         super.setupViews()
         bubbleView.addArrangeSubview(linkPreview, atIndex: 2)
+        
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
-        bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
     }
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {

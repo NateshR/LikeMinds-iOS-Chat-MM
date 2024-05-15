@@ -25,18 +25,20 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     open override func setupViews() {
         super.setupViews()
         bubbleView.addArrangeSubview(audioPreviewContainerStackView, atIndex: 2)
+        audioPreviewContainerStackView.addSubview(cancelRetryContainerStackView)
+        audioPreviewContainerStackView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
-        bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        cancelRetryContainerStackView.centerXAnchor.constraint(equalTo: audioPreviewContainerStackView.centerXAnchor).isActive = true
+        cancelRetryContainerStackView.centerYAnchor.constraint(equalTo: audioPreviewContainerStackView.centerYAnchor).isActive = true
     }
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        //        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        loaderView.isHidden = data.message?.attachmentUploaded ?? true
         if data.message?.isDeleted == true {
             audioPreviewContainerStackView.isHidden = true
         } else {

@@ -18,6 +18,14 @@ class LMConversationAttachmentUpload {
         let uploadConversationsAttachmentOperation = LMUploadConversationsAttachmentOperation(attachmentRequests: attachments, conversationId: conversationId)
         queue.addOperation(uploadConversationsAttachmentOperation)
     }
+    
+    func cancelUploadingFor(conversationId: String) {
+        LMAWSManager.shared.cancelAllTaskFor(groupId: conversationId)
+    }
+    
+    func resumeUploadingFor(conversationId: String) {
+        LMAWSManager.shared.resumeAllTaskFor(groupId: conversationId)
+    }
 }
 
 class LMUploadConversationsAttachmentOperation: Operation {
@@ -42,7 +50,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
                 LMAWSManager.shared.uploadfile(fileUrl: fileUrl,
                                                awsPath: awsFolderPath,
                                                fileName: attachment.name ?? "\(fileUrl.pathExtension)",
-                                               contenType: attachment.fileType)
+                                               contenType: attachment.fileType, withTaskGroupId: conversationId)
                 { progress in
                     print("======> \(attachment.name ?? "") progress \(progress) <=======")
                 } completion: {[weak self] awsFilePath, error in
@@ -55,7 +63,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
                         LMAWSManager.shared.uploadfile(fileUrl: thumbfileUrl,
                                                        awsPath: thumbnailAWSFolderPath,
                                                        fileName: "\(thumbfileUrl.pathExtension)",
-                                                       contenType: "image")
+                                                       contenType: "image", withTaskGroupId: nil)
                         { progress in }
                         completion: { awsThumbnailFilePath, error in
                             guard let awsThumbnailFilePath else {
