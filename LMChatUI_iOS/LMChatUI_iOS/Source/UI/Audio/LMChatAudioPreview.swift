@@ -170,12 +170,10 @@ open class LMChatAudioPreview: LMView {
               let url,
               let touchEvent = event.allTouches?.first else { return }
         switch touchEvent.phase {
-        case .began:
-            delegate?.didTapPlayPauseButton(for: url, index: index)
         case .ended:
             delegate?.didSeekTo(slider.value, url, index: index)
         default:
-            break
+            delegate?.pauseAudioPlayer()
         }
     }
     
