@@ -79,6 +79,7 @@ import Foundation
                         homeFeedVC.navigationController?.pushViewController(viewController, animated: true)
                     } else {
                         let chatMessageViewController = UINavigationController(rootViewController: viewController)
+                        chatMessageViewController.modalPresentationStyle = .fullScreen
                         topMostController.present(chatMessageViewController, animated: false)
                     }
                 }

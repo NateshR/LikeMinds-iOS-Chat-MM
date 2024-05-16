@@ -81,6 +81,7 @@ open class LMMessageListViewController: LMViewController {
     var isLoadingMoreData: Bool = false
     var lastSectionItem: LMMessageListView.ContentModel?
     var lastRowItem: LMMessageListView.ContentModel.Message?
+    let backButtonItem = LMBarButtonItem()
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,10 +93,17 @@ open class LMMessageListViewController: LMViewController {
         viewModel?.syncConversation()
         
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
+        setupBackButtonItemWithImageView()
     }
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+    }
+    
+    func setupBackButtonItemWithImageView() {
+        backButtonItem.actionButton.addTarget(self, action: #selector(dismissViewController), for: .touchUpInside)
+        navigationItem.leftItemsSupplementBackButton = false
+        navigationItem.leftBarButtonItem = backButtonItem
     }
     
     open override func setupAppearance() {
@@ -318,6 +326,8 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
         } else {
             chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? ""))
         }
+        
+        backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header ?? ""))
     }
 }
 

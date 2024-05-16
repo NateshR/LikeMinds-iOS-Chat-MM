@@ -17,7 +17,8 @@ open class LMAudioPlayerView: LMView {
     var playIcon: UIImage? = Constants.shared.images.playIcon.withSystemImageConfig(pointSize: 65, weight: .light)
     var pauseIcon: UIImage? = Constants.shared.images.pauseCircleIcon.withSystemImageConfig(pointSize: 65, weight: .light)
     
-    var viewTintColor: UIColor = Appearance.shared.colors.systemYellow
+//    var loadingView: UIActivityIndicatorView!
+    var viewTintColor: UIColor = .systemYellow
     
     open private(set) lazy var playbackSlider: UISlider = {
         let slider = UISlider()

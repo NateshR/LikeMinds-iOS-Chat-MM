@@ -686,7 +686,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         var requestFiles:[AttachmentUploadRequest] = []
         if let updatedFileUrls, !updatedFileUrls.isEmpty {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
-            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId)
+            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId, convTempId: conversation.temporaryId ?? "")
         }
         guard let response else { return }
         savePostedConversation(requestList: requestFiles, response: response)
@@ -917,12 +917,17 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         var copiedString: String = ""
         for convId in conversationIds {
             guard let chatMessage = self.chatMessages.first(where: {$0.id == convId}), !chatMessage.answer.isEmpty else {return}
-            let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer)
-            copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
-            //        else if let chatRoom = chatMessage.chatRoom {
-            //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
-            //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
-            //        }
+            if conversationIds.count > 1 {
+                let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
+                copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
+                //        else if let chatRoom = chatMessage.chatRoom {
+                //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
+                //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
+                //        }
+            } else {
+                let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
+                copiedString = copiedString  + "\(answer.string)"
+            }
         }
         
         let pasteBoard = UIPasteboard.general
