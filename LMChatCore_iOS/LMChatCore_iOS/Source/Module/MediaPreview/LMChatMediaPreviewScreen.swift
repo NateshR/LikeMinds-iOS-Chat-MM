@@ -125,7 +125,7 @@ extension LMChatMediaPreviewScreen: LMMediaViewModelDelegate {
         if index < mediaCollectionView.numberOfItems(inSection: 0) {
             DispatchQueue.main.async { [weak self] in
                 self?.mediaCollectionView.isPagingEnabled = false
-                self?.mediaCollectionView.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
+                self?.mediaCollectionView.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: true)
                 self?.mediaCollectionView.isPagingEnabled = true
             }
         }

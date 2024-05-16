@@ -17,21 +17,7 @@ open class LMChatNotificationCell: LMTableViewCell {
         public let loggedInUserTag: String
         public let loggedInUserReplaceTag: String
     }
-    
-//    open private(set) lazy var infoLabel: LMLabel = {
-//        let label =  LMLabel()
-//            .translatesAutoresizingMaskIntoConstraints()
-//        label.numberOfLines = 3
-//        label.textAlignment = .center
-//        label.font = Appearance.shared.fonts.subHeadingFont2
-//        label.textColor = Appearance.shared.colors.white
-//        label.text = ""
-//        label.setPadding(with: .init(top: 4, left: 8, bottom: 4, right: 8))
-//        label.cornerRadius(with: 12)
-//        label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
-//        return label
-//    }()
-    
+
     open private(set) lazy var infoLabel: LMTextView = {
         let label =  LMTextView()
             .translatesAutoresizingMaskIntoConstraints()

@@ -14,9 +14,17 @@ class LMConversationAttachmentUpload {
     static let shared: LMConversationAttachmentUpload = .init()
     private init() {}
     
-    func uploadConversationAttchment(withAttachments attachments: [AttachmentUploadRequest], conversationId: String) {
-        let uploadConversationsAttachmentOperation = LMUploadConversationsAttachmentOperation(attachmentRequests: attachments, conversationId: conversationId)
+    func uploadConversationAttchment(withAttachments attachments: [AttachmentUploadRequest], conversationId: String, convTempId: String) {
+        let uploadConversationsAttachmentOperation = LMUploadConversationsAttachmentOperation(attachmentRequests: attachments, conversationId: conversationId, convTempId: convTempId)
         queue.addOperation(uploadConversationsAttachmentOperation)
+    }
+    
+    func cancelUploadingFor(conversationId: String) {
+        LMAWSManager.shared.cancelAllTaskFor(groupId: conversationId)
+    }
+    
+    func resumeUploadingFor(conversationId: String) {
+        LMAWSManager.shared.resumeAllTaskFor(groupId: conversationId)
     }
 }
 
@@ -24,14 +32,16 @@ class LMUploadConversationsAttachmentOperation: Operation {
     
     private var attachmentRequests: [AttachmentUploadRequest]
     private var conversationId: String
+    private var conversationTempId: String
     private var groupQueue: DispatchGroup = DispatchGroup()
     
     static let attachmentPostCompleted = Notification.Name("ConversationAttachmentUploaded")
     static let postedId = "conversation_id"
     
-    init(attachmentRequests: [AttachmentUploadRequest], conversationId: String) {
+    init(attachmentRequests: [AttachmentUploadRequest], conversationId: String, convTempId: String) {
         self.attachmentRequests = attachmentRequests
         self.conversationId = conversationId
+        self.conversationTempId = convTempId
     }
     
     func uploadConversationAttachments() {
@@ -42,7 +52,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
                 LMAWSManager.shared.uploadfile(fileUrl: fileUrl,
                                                awsPath: awsFolderPath,
                                                fileName: attachment.name ?? "\(fileUrl.pathExtension)",
-                                               contenType: attachment.fileType)
+                                               contenType: attachment.fileType, withTaskGroupId: conversationTempId)
                 { progress in
                     print("======> \(attachment.name ?? "") progress \(progress) <=======")
                 } completion: {[weak self] awsFilePath, error in
@@ -55,7 +65,7 @@ class LMUploadConversationsAttachmentOperation: Operation {
                         LMAWSManager.shared.uploadfile(fileUrl: thumbfileUrl,
                                                        awsPath: thumbnailAWSFolderPath,
                                                        fileName: "\(thumbfileUrl.pathExtension)",
-                                                       contenType: "image")
+                                                       contenType: "image", withTaskGroupId: nil)
                         { progress in }
                         completion: { awsThumbnailFilePath, error in
                             guard let awsThumbnailFilePath else {

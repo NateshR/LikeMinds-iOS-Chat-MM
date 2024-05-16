@@ -84,7 +84,7 @@ open class LMChatMessageDocumentPreview: LMView {
     
     open override func setupViews() {
         addSubview(outerStackView)
-        outerStackView.addArrangedSubview(previewImage)
+//        outerStackView.addArrangedSubview(previewImage)
         outerStackView.addArrangedSubview(containerView)
         
         containerView.addSubview(sampleImage)
@@ -92,10 +92,10 @@ open class LMChatMessageDocumentPreview: LMView {
         
         innerStackView.addArrangedSubview(titleLabel)
         innerStackView.addArrangedSubview(subtitleLabel)
-        previewImage.image = UIImage(named: "imag", in: LMChatCoreBundle, with: nil)
+//        previewImage.image = UIImage(named: "imag", in: LMChatCoreBundle, with: nil)
         
         containerView.backgroundColor = Appearance.shared.colors.previewBackgroundColor
-        previewImage.isHidden = true
+//        previewImage.isHidden = true
         isUserInteractionEnabled = true
         let tapGuesture = UITapGestureRecognizer(target: self, action: #selector(onAttachmentClicked))
         tapGuesture.numberOfTapsRequired = 1
@@ -109,11 +109,11 @@ open class LMChatMessageDocumentPreview: LMView {
             outerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
             outerStackView.topAnchor.constraint(equalTo: topAnchor, constant: 0),
             outerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0),
-            previewImage.heightAnchor.constraint(equalTo: previewImage.widthAnchor, multiplier: 0.5),
+//            previewImage.heightAnchor.constraint(equalTo: previewImage.widthAnchor, multiplier: 0.5),
             
-            sampleImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
-            sampleImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            sampleImage.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
+            sampleImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 4),
+            sampleImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            sampleImage.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -4),
             
             innerStackView.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor, constant: 12),
             innerStackView.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -12),
@@ -129,7 +129,8 @@ open class LMChatMessageDocumentPreview: LMView {
     
     func setData(_ data: ContentModel) {
         viewData = data
-        titleLabel.text = data.fileName ?? "Document"
+        let fileName = data.fileName ?? ""
+        titleLabel.text = fileName.isEmpty ? "Document" : fileName
         var details = ""
         if let pages = data.numberOfPages, pages > 0 {
             details = details + "\(data.numberOfPages ?? 0) Pages • "

@@ -94,7 +94,13 @@ public class LMParticipantListViewModel {
         LMChatClient.shared.getParticipants(request: request) {[weak self] response in
             guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else {
                 self?.isParticipantLoading = false
-                return }
+                if self?.pageNo == 1 {
+                    self?.participants.removeAll()
+                    self?.participantsContentModels.removeAll()
+                    self?.delegate?.reloadData()
+                }
+                return
+            }
             totalParticipantCount = response.data?.totalParticipantsCount ?? 0
             pageNo += 1
             participants.removeAll()

@@ -68,5 +68,9 @@ public struct LMUIComponents {
     public var chatMessageCell: LMChatMessageCell.Type = LMChatMessageCell.self
     public var chatNotificationCell: LMChatNotificationCell.Type = LMChatNotificationCell.self
     public var chatroomHeaderMessageCell: LMChatroomHeaderMessageCell.Type = LMChatroomHeaderMessageCell.self
+    public var chatMessageGalleryCell: LMChatGalleryViewCell.Type = LMChatGalleryViewCell.self
+    public var chatMessageDocumentCell: LMChatDocumentViewCell.Type = LMChatDocumentViewCell.self
+    public var chatMessageAudioCell: LMChatAudioViewCell.Type = LMChatAudioViewCell.self
+    public var chatMessageLinkPreviewCell: LMChatLinkPreviewCell.Type = LMChatLinkPreviewCell.self
     public var messageLoadingCell: LMMessageLoading.Type = LMMessageLoading.self
 }

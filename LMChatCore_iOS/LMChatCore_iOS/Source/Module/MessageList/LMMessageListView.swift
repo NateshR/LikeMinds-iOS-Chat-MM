@@ -25,6 +25,9 @@ public protocol LMMessageListViewDelegate: AnyObject {
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
     func getMessageContextMenu(_ indexPath: IndexPath, item: LMMessageListView.ContentModel.Message) -> UIMenu
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
+    func didScrollTableView(_ scrollView: UIScrollView)
+    func didCancelUploading(messageId: String)
+    func didRetryUploading(messageId: String)
 }
 
 public enum LMMessageActionType: String {
@@ -107,6 +110,10 @@ open class LMMessageListView: LMView {
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
         table.register(LMUIComponents.shared.chatroomHeaderMessageCell)
+        table.register(LMUIComponents.shared.chatMessageGalleryCell)
+        table.register(LMUIComponents.shared.chatMessageDocumentCell)
+        table.register(LMUIComponents.shared.chatMessageAudioCell)
+        table.register(LMUIComponents.shared.chatMessageLinkPreviewCell)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -139,7 +146,6 @@ open class LMMessageListView: LMView {
     let menuHeight: CGFloat = 200
     var isMultipleSelectionEnable: Bool = false
     var selectedItems: [ContentModel.Message] = []
-    var isLoadingMoreData: Bool = false
     
     // MARK: setupViews
     open override func setupViews() {
@@ -215,7 +221,6 @@ open class LMMessageListView: LMView {
         func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
             return indexPath.section < tableView.numberOfSections && indexPath.row < tableView.numberOfRows(inSection: indexPath.section)
         }
-        
     }
     
     func scrollAtIndexPath(indexPath: IndexPath) {
@@ -257,18 +262,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
         var tableViewCell: UITableViewCell = UITableViewCell()
         switch item.messageType {
         case 0, 10:
-            if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell) {
-                let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
-                cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
-                cell.currentIndexPath = indexPath
-                cell.delegate = self
-                if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
-                    cell.selectedButton.isHidden = false
-                } else {
-                    cell.selectedButton.isHidden = true
-                }
-                tableViewCell =  cell
-            }
+            tableViewCell =  cellFor(rowAt: indexPath, tableView: tableView)
         case 111:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), delegate: self, index: indexPath)
@@ -282,6 +276,40 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
             }
         }
         return tableViewCell
+    }
+    
+    func cellFor(rowAt indexPath: IndexPath, tableView: UITableView) -> LMChatMessageCell {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        var cell: LMChatMessageCell?
+        if let attachments = item.attachments,
+              !attachments.isEmpty,
+            let type = attachments.first?.fileType {
+            switch type {
+            case "image", "video", "gif":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageGalleryCell)
+            case "pdf", "document", "doc":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageDocumentCell)
+            case "audio", "voice_note":
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageAudioCell)
+            default:
+                cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
+            }
+        } else if let ogTag = item.ogTags {
+            cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageLinkPreviewCell)
+        } else {
+            cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
+        }
+        guard let cell else { return  LMChatMessageCell() }
+        let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+        cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: self, index: indexPath)
+        cell.currentIndexPath = indexPath
+        cell.delegate = self
+        if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
+            cell.selectedButton.isHidden = false
+        } else {
+            cell.selectedButton.isHidden = true
+        }
+        return cell
     }
     
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
@@ -344,27 +372,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     
     // while scrolling this delegate is being called so you may now check which direction your scrollView is being scrolled to
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentOffsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.height
-        
-        // Check if user scrolled to the top
-        if contentOffsetY <= 0 && !isLoadingMoreData {
-            print("end dragged top!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let firstIndexPath = visibleIndexPaths.first else {return}
-            isLoadingMoreData = true
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
-        }
-        
-        // Check if user scrolled to the bottom
-        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData {
-            print("end dragged bottom!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            isLoadingMoreData = true
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
-        }
+        delegate?.didScrollTableView(scrollView)
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -398,7 +406,7 @@ extension LMMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        (cell as? LMChatMessageCell)?.resetAudio()
+        (cell as? LMChatAudioViewCell)?.resetAudio()
         if indexPath == audioIndex {
             LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
@@ -505,7 +513,7 @@ extension LMMessageListView: LMChatAudioProtocol {
         audioIndex = index
         
         LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
-            (self?.tableView.cellForRow(at: index) as? LMChatMessageCell)?.seekSlider(to: Float(progress), url: url)
+            (self?.tableView.cellForRow(at: index) as? LMChatAudioViewCell)?.seekSlider(to: Float(progress), url: url)
         }
     }
     
@@ -515,13 +523,24 @@ extension LMMessageListView: LMChatAudioProtocol {
     
     public func resetAudio() {
         if let audioIndex {
-            (tableView.cellForRow(at: audioIndex) as? LMChatMessageCell)?.resetAudio()
+            (tableView.cellForRow(at: audioIndex) as? LMChatAudioViewCell)?.resetAudio()
         }
         audioIndex = nil
     }
 }
 
 extension LMMessageListView: LMChatMessageCellDelegate {
+    
+    public func didCancelAttachmentUploading(indexPath: IndexPath) {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        delegate?.didCancelUploading(messageId: item.messageId)
+    }
+    
+    public func didRetryAttachmentUploading(indexPath: IndexPath) {
+        let item = tableSections[indexPath.section].data[indexPath.row]
+        delegate?.didRetryUploading(messageId: item.messageId)
+    }
+    
     
     public func didTappedOnSelectionButton(indexPath: IndexPath?) {
         guard let indexPath else { return }

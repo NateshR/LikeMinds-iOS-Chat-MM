@@ -112,7 +112,7 @@ open class LMChatTaggingTextView: LMTextView {
             let partOneString = NSMutableAttributedString(attributedString: attributedText.attributedSubstring(from: NSRange(location: 0, length: startIndex)))
             let partTwoString = NSMutableAttributedString(attributedString: attributedText.attributedSubstring(from: NSRange(location: startIndex + 1 + characters.count, length: attributedText.length - startIndex - 1 - characters.count)))
             
-            let attrName = NSAttributedString(string: "@\(username.trimmingCharacters(in: .whitespacesAndNewlines))", attributes: [
+            let attrName = NSAttributedString(string: "\(username.trimmingCharacters(in: .whitespacesAndNewlines))", attributes: [
                 .font: Appearance.shared.fonts.textFont1,
                 .foregroundColor: Appearance.shared.colors.linkColor,
                 .route: route

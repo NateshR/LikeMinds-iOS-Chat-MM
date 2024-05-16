@@ -27,7 +27,7 @@ open class LMExploreChatroomViewController: LMViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.semanticContentAttribute = .forceRightToLeft
         let spacing: CGFloat = 10
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: spacing, bottom: 0, right: 0);
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: spacing, bottom: 0, right: 0)
 //        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: spacing);
         button.clipsToBounds = true
         button.addTarget(self, action: #selector(filterButtonClicked), for: .touchUpInside)

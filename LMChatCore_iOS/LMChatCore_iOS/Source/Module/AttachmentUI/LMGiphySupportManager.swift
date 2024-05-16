@@ -74,8 +74,11 @@ extension LMMessageListViewController: GiphyDelegate {
                         let size = giphyImage.size
                         let gifImage = GIFImage(withGIFImageData: gifImageData, withSize: size, withTitle: media.title, url: targetURL)
                         weakSelf.showHideLoaderView(isShow: false)
-                        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetURL, type: .gif)], delegate: weakSelf, chatroomId: weakSelf.viewModel?.chatroomId, mediaType: .gif) else { return }
-                        weakSelf.present(viewController, animated: true)
+                        NavigationScreen.shared.perform(.messageAttachmentWithData(data: 
+                                                                                    [.init(with: targetURL, type: .gif)],
+                                                                                   delegate: weakSelf, chatroomId: weakSelf.viewModel?.chatroomId, mediaType: .gif), from: weakSelf, params: nil)
+//                        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetURL, type: .gif)], delegate: weakSelf, chatroomId: weakSelf.viewModel?.chatroomId, mediaType: .gif) else { return }
+//                        weakSelf.present(viewController, animated: true)
                     }
                 }.resume()
             }

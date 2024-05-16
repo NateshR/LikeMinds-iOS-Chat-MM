@@ -25,6 +25,7 @@ public class LMBarButtonItem: UIBarButtonItem {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.addSubview(itemsContainerStackView)
         view.pinSubView(subView: itemsContainerStackView)
+        view.addSubviewWithDefaultConstraints(actionButton)
         return view
     }()
     
@@ -41,11 +42,11 @@ public class LMBarButtonItem: UIBarButtonItem {
     open private(set) lazy var backArrow: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
-        image.setWidthConstraint(with: 20)
-        image.setHeightConstraint(with: 40)
+        image.setWidthConstraint(with: 18)
+        image.setHeightConstraint(with: 24)
         image.contentMode = .center
-        image.image = Constants.shared.images.leftArrowIcon.withSystemImageConfig(pointSize: 20, weight: .light, scale: .large)
-        image.tintColor = .systemGreen
+        image.image = Constants.shared.images.leftArrowIcon.withSystemImageConfig(pointSize: 18, weight: .semibold, scale: .large)
+        image.tintColor = .link
         image.isUserInteractionEnabled = true
         return image
     }()
@@ -53,14 +54,17 @@ public class LMBarButtonItem: UIBarButtonItem {
     open private(set) lazy var imageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
-        image.setWidthConstraint(with: 40)
-        image.setHeightConstraint(with: 40)
+        image.setWidthConstraint(with: 36)
+        image.setHeightConstraint(with: 36)
         image.contentMode = .scaleAspectFill
-        image.image = Constants.shared.images.personCircleFillIcon//.withSystemImageConfig(pointSize: 40, weight: .light, scale: .large)
-        image.tintColor = .systemGreen
+        image.tintColor = .link
         image.isUserInteractionEnabled = true
+        image.cornerRadius(with: 18)
         return image
     }()
     
-    
+    open private(set) lazy var actionButton: LMButton = {
+        let button = LMButton().translatesAutoresizingMaskIntoConstraints()
+        return button
+    }()
 }

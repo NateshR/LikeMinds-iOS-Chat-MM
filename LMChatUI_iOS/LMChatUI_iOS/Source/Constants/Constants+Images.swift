@@ -37,6 +37,7 @@ public extension Constants {
         public var bookmarkFilled = loadSystemImage(with: "bookmark.fill")
         public var shareIcon = loadSystemImage(with: "arrowshape.turn.up.right")
         public var xmarkIcon = loadSystemImage(with: "xmark")
+        public var cloudIcon = loadSystemImage(with: "cloud")
         public var crossIcon = loadSystemImage(with: "xmark.circle")
         public var ellipsisIcon = loadSystemImage(with: "ellipsis")
         public var ellipsisCircleIcon = loadSystemImage(with: "ellipsis.circle")
@@ -73,6 +74,8 @@ public extension Constants {
         public var rightArrowIcon = loadSystemImage(with: "chevron.right")
         public var checkmarkCircleIcon = loadSystemImage(with: "checkmark.circle")
         public var leftArrowIcon = loadSystemImage(with: "chevron.left")
+        public var downChevronArrowIcon = loadSystemImage(with: "chevron.down")
+        public var upChevronArrowIcon = loadSystemImage(with: "chevron.up")
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")

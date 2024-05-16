@@ -220,7 +220,7 @@ open class LMViewController: UIViewController {
         }
     }
     
-    open func dismissViewController() {
+    @objc open func dismissViewController() {
         guard let _ = self.navigationController?.popViewController(animated: true) else {
             self.dismiss(animated: true)
             return

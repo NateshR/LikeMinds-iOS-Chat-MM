@@ -100,7 +100,7 @@ open class LMBottomMessageComposerView: LMView {
     open private(set) lazy var attachmentButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(attachmentButtonIcon, for: .normal)
-        button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 34.0).isActive = true
         button.addTarget(self, action: #selector(attachmentButtonClicked), for: .touchUpInside)
         return button
     }()
@@ -332,7 +332,7 @@ open class LMBottomMessageComposerView: LMView {
                                              trailing: (containerView.trailingAnchor, 0))
         
         audioMessageContainerStack.addConstraint(top: (addOnVerticleStackView.bottomAnchor, 4),
-                                                 bottom: (containerView.bottomAnchor, -4),
+                                                 bottom: (containerView.bottomAnchor, -8),
                                                  leading: (containerView.leadingAnchor, 8))
         
         micFlickerButton.addConstraint(top: (audioContainerView.topAnchor, 4),
@@ -505,6 +505,7 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             self.delegate?.linkDetected(link)
         } else {
             linkPreviewView.isHidden = true
+            self.detectedFirstLink = nil
         }
     }
 }

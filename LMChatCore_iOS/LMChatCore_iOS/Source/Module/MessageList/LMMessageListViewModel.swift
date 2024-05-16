@@ -40,6 +40,7 @@ public final class LMMessageListViewModel {
     var chatroomTopic: Conversation?
     var loggedInUserTagValue: String = ""
     var loggedInUserReplaceTagValue: String = ""
+    var fetchingInitialBottomData: Bool = false
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -191,8 +192,12 @@ public final class LMMessageListViewModel {
                 insertOrUpdateConversationIntoList(message)
             }
         }
+        fetchingInitialBottomData = true
         LMChatClient.shared.observeLiveConversation(withChatroomId: chatroomId)
         delegate?.scrollToBottom()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
+            self?.fetchingInitialBottomData = false
+        }
     }
     
     func fetchTopConversations() {
@@ -249,13 +254,15 @@ public final class LMMessageListViewModel {
                 if type == .below {
                     messagesList.append((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))))
                 } else {
-                    messagesList.insert((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
+                    let data = (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)})
+                    messagesList.insert((.init(data: data, section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
                 }
             }
         }
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        
         let direction: ScrollDirection = type == .above ? .scroll_UP : .scroll_DOWN
         delegate?.reloadData(at: direction)
-//        delegate?.reloadChatMessageList()
     }
     
     func getMoreConversations(conversationId: String, direction: ScrollDirection) {
@@ -679,7 +686,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         var requestFiles:[AttachmentUploadRequest] = []
         if let updatedFileUrls, !updatedFileUrls.isEmpty {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
-            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId)
+            LMConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId, convTempId: conversation.temporaryId ?? "")
         }
         guard let response else { return }
         savePostedConversation(requestList: requestFiles, response: response)
@@ -752,9 +759,6 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         } else {
             insertOrUpdateConversationIntoList(conversation)
         }
-        
-//        insertOrUpdateConversationIntoList(conversation)
-//        delegate?.reloadChatMessageList()
     }
     
     func postEditedConversation(text: String, shareLink: String?, conversation: Conversation?) {
@@ -765,7 +769,7 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
             .shareLink(shareLink)
             .build()
         LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
-            guard resposne.success, let conversation = resposne.data?.conversation else { return}
+            guard resposne.success, let _ = resposne.data?.conversation else { return}
 //            self?.insertOrUpdateConversationIntoList(conversation)
 //            self?.delegate?.reloadChatMessageList()
         }
@@ -913,12 +917,17 @@ extension LMMessageListViewModel: LMMessageListControllerDelegate {
         var copiedString: String = ""
         for convId in conversationIds {
             guard let chatMessage = self.chatMessages.first(where: {$0.id == convId}), !chatMessage.answer.isEmpty else {return}
-            let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer)
-            copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
-            //        else if let chatRoom = chatMessage.chatRoom {
-            //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
-            //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
-            //        }
+            if conversationIds.count > 1 {
+                let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
+                copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
+                //        else if let chatRoom = chatMessage.chatRoom {
+                //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
+                //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
+                //        }
+            } else {
+                let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
+                copiedString = copiedString  + "\(answer.string)"
+            }
         }
         
         let pasteBoard = UIPasteboard.general
