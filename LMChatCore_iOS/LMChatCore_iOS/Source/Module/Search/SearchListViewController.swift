@@ -11,9 +11,9 @@ import UIKit
 public class SearchListViewController: LMViewController {
     public struct ContentModel {
         let title: String?
-        let data: [SearchCellProtocol]
+        let data: [LMChatSearchCellDataProtocol]
         
-        public init(title: String?, data: [SearchCellProtocol]) {
+        public init(title: String?, data: [LMChatSearchCellDataProtocol]) {
             self.title = title
             self.data = data
         }
@@ -21,8 +21,8 @@ public class SearchListViewController: LMViewController {
     
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView(frame: .zero, style: .grouped).translatesAutoresizingMaskIntoConstraints()
-        table.register(SearchMessageCell.self)
-        table.register(SearchGroupCell.self)
+        table.register(LMChatSearchMessageCell.self)
+        table.register(LMChatSearchChatroomCell.self)
         table.dataSource = self
         table.delegate = self
         table.estimatedSectionHeaderHeight = .leastNonzeroMagnitude
@@ -90,12 +90,12 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel,
-           let cell = tableView.dequeueReusableCell(SearchMessageCell.self) {
+        if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel,
+           let cell = tableView.dequeueReusableCell(LMChatSearchMessageCell.self) {
             cell.configure(with: data)
             return cell
-        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel,
-                  let cell = tableView.dequeueReusableCell(SearchGroupCell.self) {
+        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel,
+                  let cell = tableView.dequeueReusableCell(LMChatSearchChatroomCell.self) {
             cell.configure(with: data)
             return cell
         }
@@ -128,9 +128,9 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let cell = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel {
+        if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel {
             NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: nil), from: self, params: nil)
-        } else if let cell = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel {
+        } else if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel {
             NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: cell.messageID), from: self, params: nil)
         }
     }
@@ -177,7 +177,7 @@ extension SearchListViewController: UISearchBarDelegate {
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
    public func updateSearchList(with data: [ContentModel]) {
-       tableView.backgroundView = data.isEmpty ? SearchListNoResultView(frame: tableView.bounds) : nil
+       tableView.backgroundView = data.isEmpty ? LMChatSearchNoResultView(frame: tableView.bounds) : nil
         showHideFooterLoader(isShow: false)
         self.searchResults = data
         tableView.reloadData()

@@ -1,17 +1,14 @@
 //
-//  SearchMessageCell.swift
+//  LMChatSearchMessageCell.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 16/04/24.
 //
 
-// TODO: Move to UI Library
-
-import LMChatUI_iOS
 import UIKit
 
-public class SearchMessageCell: LMTableViewCell {
-    public struct ContentModel: SearchCellProtocol {
+public class LMChatSearchMessageCell: LMTableViewCell {
+    public struct ContentModel: LMChatSearchCellDataProtocol {
         public var chatroomID: String
         public var messageID: String?
         public let chatroomName: String
@@ -116,7 +113,7 @@ public class SearchMessageCell: LMTableViewCell {
         sepratorView.isHidden = true
     }
     
-    func configure(with data: ContentModel) {
+    open func configure(with data: ContentModel) {
         titleLabel.text = data.chatroomName
         
         var attrText = GetAttributedTextWithRoutes.getAttributedText(
@@ -140,35 +137,6 @@ public class SearchMessageCell: LMTableViewCell {
         
         subtitleLabel.attributedText = attrText
         isJoinedLabel.isHidden = data.isJoined
-        dateLabel.text = DateUtility.formatDate(data.date)
-    }
-}
-
-
-// MARK: Date Formatter Utility
-// TODO: Move To UI Library
-class DateUtility {
-    static func formatDate(_ epochTime: Double) -> String {
-        // Check if the epoch time is in seconds or milliseconds
-        let isMilliseconds = epochTime > 1_000_000_000_000
-        let interval: TimeInterval = isMilliseconds ? epochTime / 1000.0 : epochTime
-        let date = Date(timeIntervalSince1970: interval)
-        
-        // Get the current date and calendar components
-        let calendar = Calendar.current
-        
-        // Check if the date is today or yesterday
-        if calendar.isDateInToday(date) {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm"
-            return dateFormatter.string(from: date)
-        } else if calendar.isDateInYesterday(date) {
-            return "yesterday"
-        } else {
-            // Format the date as DD/MM/YY
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd/MM/yy"
-            return dateFormatter.string(from: date)
-        }
+        dateLabel.text = LMChatDateUtility.formatDate(data.date)
     }
 }

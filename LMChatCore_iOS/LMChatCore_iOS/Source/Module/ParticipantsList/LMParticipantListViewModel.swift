@@ -5,25 +5,27 @@
 //  Created by Pushpendra Singh on 16/02/24.
 //
 
-import Foundation
+import LMChatUI_iOS
 import LikeMindsChat
 
 public protocol LMParticipantListViewModelProtocol: AnyObject {
-    func reloadData()
+    func reloadData(with data: [LMParticipantCell.ContentModel])
 }
 
 public class LMParticipantListViewModel {
-    
     weak var delegate: LMParticipantListViewModelProtocol?
     var participants: [Member] = []
-    var pageNo: Int = 1
-    var pageSize: Int = 20
+    
+    private var pageNo: Int
+    private let pageSize: Int
+    private var totalParticipantCount: Int
+    private var isParticipantLoading: Bool
+    private var isAllParticipantLoaded: Bool
+    
     var chatroomId: String
-    var isSecretChatroom: Bool = false
+    var isSecretChatroom: Bool
     var participantsContentModels: [LMParticipantCell.ContentModel] = []
-    var totalParticipantCount: Int = 0
-    var isParticipantLoading: Bool = false
-    var isAllParticipantLoaded: Bool = false
+    
     var searchedText: String?
     var chatroomActionData: GetChatroomActionsResponse?
     
@@ -31,6 +33,12 @@ public class LMParticipantListViewModel {
         self.delegate = viewController
         self.chatroomId = chatroomId
         self.isSecretChatroom = isSecret
+        
+        self.pageNo = 1
+        self.pageSize = 20
+        self.totalParticipantCount = .zero
+        self.isParticipantLoading = false
+        self.isAllParticipantLoaded = false
     }
     
     public static func createModule(withChatroomId chatroomId: String, isSecretChatroom isSecret: Bool = false) throws -> LMParticipantListViewController {
@@ -42,6 +50,9 @@ public class LMParticipantListViewModel {
     
     func getParticipants() {
         guard !isParticipantLoading else { return }
+        
+        isParticipantLoading = true
+        
         let request = GetParticipantsRequest.builder()
             .chatroomId(chatroomId)
             .page(pageNo)
@@ -49,18 +60,22 @@ public class LMParticipantListViewModel {
             .participantName(searchedText)
             .isChatroomSecret(isSecretChatroom)
             .build()
-        isParticipantLoading = true
+        
         LMChatClient.shared.getParticipants(request: request) {[weak self] response in
-            guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else {
+            guard let self, 
+                    let participantsData = response.data?.participants,
+                  !participantsData.isEmpty else {
                 self?.isParticipantLoading = false
-                return }
+                return
+            }
+            
             totalParticipantCount = response.data?.totalParticipantsCount ?? 0
             pageNo += 1
             participants.append(contentsOf: participantsData)
             participantsContentModels.append(contentsOf: participantsData.compactMap({
                 .init(name: $0.name ?? "", designationDetail: nil, profileImageUrl: $0.imageUrl, customTitle: $0.customTitle)
             }))
-            delegate?.reloadData()
+            delegate?.reloadData(with: participantsContentModels)
             isAllParticipantLoaded = (totalParticipantCount == participants.count)
             isParticipantLoading = false
         }
@@ -70,19 +85,25 @@ public class LMParticipantListViewModel {
         let request = GetChatroomActionsRequest.builder()
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.getChatroomActions(request: request) {[weak self] response in
-            guard let actionsData = response.data else { return }
-            self?.chatroomActionData = actionsData
+        LMChatClient.shared.getChatroomActions(request: request) { [weak self] response in
+            guard let self,
+                  let actionsData = response.data else { return }
+            self.chatroomActionData = actionsData
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self?.delegate?.reloadData()
+                self.delegate?.reloadData(with: self.participantsContentModels)
             }
         }
     }
     
     func searchParticipants(_ searchText: String?) {
         guard !isParticipantLoading else { return }
+        isParticipantLoading = true
         pageNo = 1
         self.searchedText = searchText
+        
+        participants.removeAll(keepingCapacity: true)
+        participantsContentModels.removeAll(keepingCapacity: true)
+        
         let request = GetParticipantsRequest.builder()
             .chatroomId(chatroomId)
             .page(pageNo)
@@ -90,29 +111,26 @@ public class LMParticipantListViewModel {
             .participantName(searchedText)
             .isChatroomSecret(isSecretChatroom)
             .build()
-        isParticipantLoading = true
-        LMChatClient.shared.getParticipants(request: request) {[weak self] response in
-            guard let self, let participantsData = response.data?.participants, !participantsData.isEmpty else {
-                self?.isParticipantLoading = false
-                if self?.pageNo == 1 {
-                    self?.participants.removeAll()
-                    self?.participantsContentModels.removeAll()
-                    self?.delegate?.reloadData()
-                }
-                return
-            }
+        
+        LMChatClient.shared.getParticipants(request: request) { [weak self] response in
+            self?.isParticipantLoading = false
+            
+            guard let self else { return }
+            
+            let participantsData = response.data?.participants ?? []
+            
             totalParticipantCount = response.data?.totalParticipantsCount ?? 0
-            pageNo += 1
-            participants.removeAll()
-            participantsContentModels.removeAll()
+            pageNo += participantsData.isEmpty ? 0 : 1
+            
             participants.append(contentsOf: participantsData)
             participantsContentModels.append(contentsOf: participantsData.compactMap({
                 .init(name: $0.name ?? "", designationDetail: nil, profileImageUrl: $0.imageUrl, customTitle: $0.customTitle)
             }))
-            delegate?.reloadData()
+            
+            delegate?.reloadData(with: participantsContentModels)
+
             isAllParticipantLoaded = (totalParticipantCount == participants.count)
             isParticipantLoading = false
         }
     }
-    
 }

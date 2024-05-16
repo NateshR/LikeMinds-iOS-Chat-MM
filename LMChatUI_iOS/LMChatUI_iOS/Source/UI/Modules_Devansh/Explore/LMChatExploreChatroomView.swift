@@ -1,17 +1,19 @@
 //
-//  LMExploreChatroomView.swift
+//  LMChatExploreChatroomView.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 19/04/24.
 //
 
-import Foundation
-import LMChatUI_iOS
 import Kingfisher
+import UIKit
+
+public protocol LMChatExploreChatroomProtocol: AnyObject {
+    func onTapJoinButton(_ value: Bool, _ chatroomId: String)
+}
 
 @IBDesignable
-open class LMExploreChatroomView: LMView {
-    
+open class LMChatExploreChatroomView: LMView {
     public struct ContentModel {
         public let userName: String?
         public let title: String?
@@ -40,8 +42,9 @@ open class LMExploreChatroomView: LMView {
             self.externalSeen = externalSeen
             self.isPinned = isPinned
         }
-        
     }
+    
+    public weak var delegate: LMChatExploreChatroomProtocol?
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
@@ -201,12 +204,7 @@ open class LMExploreChatroomView: LMView {
     }()
     
     var viewData: ContentModel?
-    var onJoinButtonClick: ((_ value: Bool, _ chatroomId: String) -> Void)?
-    
-    open override func setupAppearance() {
-        super.setupAppearance()
-    }
-    
+        
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
@@ -220,12 +218,10 @@ open class LMExploreChatroomView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        
+        pinSubView(subView: containerView)
+        
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-                        
             chatroomContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             chatroomContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             chatroomContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
@@ -242,8 +238,10 @@ open class LMExploreChatroomView: LMView {
         ])
     }
     
-    open func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel, delegate: LMChatExploreChatroomProtocol?) {
+        self.delegate = delegate
         self.viewData = data
+        
         chatroomNameLabel.text = data.chatroomName
         chatroomTitleLabel.text = data.title
         getAttachmentText(participantCount: data.participantsCount ?? 0, messageCount: data.messageCount ?? 0)
@@ -252,12 +250,9 @@ open class LMExploreChatroomView: LMView {
         announcementIconImageView.isHidden = !(data.isAnnouncementRoom ?? false)
         lockIconImageView.isHidden = !(data.isSecret ?? false)
         joinButtonTitle(data.isFollowed ?? false)
+        
         let placeholder = UIImage.generateLetterImage(name: data.chatroomName?.components(separatedBy: " ").first)
-        if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
-            chatroomImageView.kf.setImage(with: url, placeholder: placeholder)
-        } else {
-            chatroomImageView.image = placeholder
-        }
+        chatroomImageView.kf.setImage(with: URL(string: data.chatroomImageUrl ?? ""), placeholder: placeholder)
     }
     
     func getAttachmentText(participantCount: Int, messageCount: Int) {
@@ -281,7 +276,7 @@ open class LMExploreChatroomView: LMView {
         let updatedStatus = !(viewData.isFollowed ?? false)
         self.viewData?.isFollowed = updatedStatus
         joinButtonTitle(updatedStatus)
-        onJoinButtonClick?(updatedStatus, viewData.chatroomId)
+        delegate?.onTapJoinButton(updatedStatus, viewData.chatroomId)
     }
     
     func joinButtonTitle(_ isFollowed: Bool) {

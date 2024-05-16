@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 // MARK: NameWithRoute
 public struct NameWithRoute {
@@ -25,7 +24,7 @@ public struct NameWithRoute {
 
 // MARK: GetAttributedTextWithRoutes
 public struct GetAttributedTextWithRoutes {
-    static func getAttributedText(from text: String,
+    public static func getAttributedText(from text: String,
                                   andPrefix: Character? = nil,
                                   allowLink: Bool = true,
                                   allowHashtags: Bool = true,

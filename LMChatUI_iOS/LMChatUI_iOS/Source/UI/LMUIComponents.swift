@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 public struct LMUIComponents {
     public static var shared = Self()
@@ -57,13 +56,13 @@ public struct LMUIComponents {
     public var homeFeedExploreTabCell: LMHomeFeedExploreTabCell.Type = LMHomeFeedExploreTabCell.self
     public var homeFeedShimmerCell: LMHomeFeedLoading.Type = LMHomeFeedLoading.self
     
-    public var exploreChatroomCell: LMExploreChatroomCell.Type = LMExploreChatroomCell.self 
+//    public var exploreChatroomCell: LMChatExploreChatroomCell.Type = LMChatExploreChatroomCell.self
     
     // MARK: Participant List View
-    public var participantListCell: LMParticipantCell.Type = LMParticipantCell.self
+//    public var participantListCell: LMParticipantCell.Type = LMParticipantCell.self
     
     // MARK: Report Screen Components
-    public var reportCollectionCell: LMChatReportViewCell.Type = LMChatReportViewCell.self
+//    public var reportCollectionCell: LMChatReportViewCell.Type = LMChatReportViewCell.self
     
     public var chatMessageCell: LMChatMessageCell.Type = LMChatMessageCell.self
     public var chatNotificationCell: LMChatNotificationCell.Type = LMChatNotificationCell.self

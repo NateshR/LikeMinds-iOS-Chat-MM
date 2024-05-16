@@ -8,7 +8,7 @@
 import UIKit
 import LMChatUI_iOS
 
-open class LMReactionViewCell: LMTableViewCell {
+open class LMChatReactionViewCell: LMTableViewCell {
     struct ContentModel {
         let image: String?
         let username: String

@@ -8,7 +8,7 @@
 import UIKit
 import LMChatUI_iOS
 
-open class LMReactionTitleCell: LMCollectionViewCell {
+open class LMChatReactionTitleCell: LMCollectionViewCell {
     struct ContentModel {
         let title: String
         let count: Int

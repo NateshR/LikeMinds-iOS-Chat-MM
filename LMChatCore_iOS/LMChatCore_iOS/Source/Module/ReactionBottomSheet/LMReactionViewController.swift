@@ -41,7 +41,7 @@ open class LMReactionViewController: LMViewController {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
-        table.register(LMReactionViewCell.self, forCellReuseIdentifier: "reactionView")
+        table.register(LMChatReactionViewCell.self)
         table.separatorStyle = .none
         return table
     }()
@@ -51,7 +51,7 @@ open class LMReactionViewController: LMViewController {
         collection.dataSource = self
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.register(LMReactionTitleCell.self, forCellWithReuseIdentifier: "reactionTitle")
+        collection.registerCell(type: LMChatReactionTitleCell.self)
         return collection
     }()
     
@@ -71,8 +71,8 @@ open class LMReactionViewController: LMViewController {
     
     var bottomConstraint: NSLayoutConstraint?
     var viewModel: LMReactionViewModel?
-    var titleData: [LMReactionTitleCell.ContentModel] = []
-    var emojiData: [LMReactionViewCell.ContentModel] = []
+    var titleData: [LMChatReactionTitleCell.ContentModel] = []
+    var emojiData: [LMChatReactionViewCell.ContentModel] = []
     
     open override func loadView() {
         super.loadView()
@@ -173,7 +173,7 @@ extension LMReactionViewController: ReactionViewModelProtocol {
         delegate?.reactionDeleted(chatroomId: viewModel?.chatroomId, conversationId: viewModel?.conversationId)
     }
     
-    func showData(with collection: [LMReactionTitleCell.ContentModel], cells: [LMReactionViewCell.ContentModel]) {
+    func showData(with collection: [LMChatReactionTitleCell.ContentModel], cells: [LMChatReactionViewCell.ContentModel]) {
         self.titleData = collection
         self.emojiData = cells
         
@@ -189,9 +189,12 @@ extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reactionView") as! LMReactionViewCell
-        cell.configure(with: emojiData[indexPath.row])
-        return cell
+        if let cell = tableView.dequeueReusableCell(LMChatReactionViewCell.self) {
+            cell.configure(with: emojiData[indexPath.row])
+            return cell
+        }
+        
+        return UITableViewCell()
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -212,9 +215,12 @@ extension LMReactionViewController: UICollectionViewDataSource, UICollectionView
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reactionTitle", for: indexPath) as! LMReactionTitleCell
-        cell.configure(data: titleData[indexPath.row])
-        return cell
+        if let cell = collectionView.dequeueReusableCell(with: LMChatReactionTitleCell.self, for: indexPath) {
+            cell.configure(data: titleData[indexPath.row])
+            return cell
+        }
+        
+        return UICollectionViewCell()
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

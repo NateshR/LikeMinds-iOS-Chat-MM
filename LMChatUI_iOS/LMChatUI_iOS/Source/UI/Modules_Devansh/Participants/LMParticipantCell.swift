@@ -7,7 +7,6 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 @IBDesignable
 open class LMParticipantCell: LMTableViewCell {
@@ -18,7 +17,7 @@ open class LMParticipantCell: LMTableViewCell {
         public let profileImageUrl: String?
         public let customTitle: String?
         
-        init(name: String, designationDetail: String?, profileImageUrl: String?, customTitle: String?) {
+        public init(name: String, designationDetail: String?, profileImageUrl: String?, customTitle: String?) {
             self.name = name
             self.designationDetail = designationDetail
             self.profileImageUrl = profileImageUrl
@@ -28,7 +27,7 @@ open class LMParticipantCell: LMTableViewCell {
     
     // MARK: UI Elements
     open private(set) lazy var participantView: LMParticipantView = {
-        let view = LMCoreComponents.shared.participantView.init().translatesAutoresizingMaskIntoConstraints()
+        let view = LMParticipantView().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
