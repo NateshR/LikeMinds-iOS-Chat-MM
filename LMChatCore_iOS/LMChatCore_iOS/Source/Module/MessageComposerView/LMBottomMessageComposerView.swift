@@ -505,6 +505,7 @@ extension LMBottomMessageComposerView: LMFeedTaggingTextViewProtocol {
             self.delegate?.linkDetected(link)
         } else {
             linkPreviewView.isHidden = true
+            self.detectedFirstLink = nil
         }
     }
 }
