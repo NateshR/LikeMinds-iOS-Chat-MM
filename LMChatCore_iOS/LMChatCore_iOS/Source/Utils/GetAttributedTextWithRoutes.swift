@@ -146,4 +146,29 @@ public struct GetAttributedTextWithRoutes {
         
         return attrString
     }
+    
+    static func detectAndHighlightText(
+        in attributedString: NSMutableAttributedString,
+        text: String,
+        color: UIColor = .black,
+        font: UIFont = Appearance.shared.fonts.headingFont1
+    ) -> NSMutableAttributedString {
+        let originalText = attributedString.string
+        let range = NSRange(location: 0, length: originalText.count)
+        let pattern = text
+        
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+            let matches = regex.matches(in: originalText, range: range)
+            
+            for match in matches.reversed() {
+                attributedString.addAttribute(.foregroundColor, value: color, range: match.range)
+                attributedString.addAttribute(.font, value: font, range: match.range)
+            }
+        } catch {
+            print("Error creating regular expression: \(error)")
+        }
+        
+        return attributedString
+    }
 }

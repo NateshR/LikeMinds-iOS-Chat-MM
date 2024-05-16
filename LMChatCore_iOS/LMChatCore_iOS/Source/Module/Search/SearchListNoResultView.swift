@@ -46,7 +46,7 @@ open class SearchListNoResultView: LMView {
         super.setupLayouts()
         
         placeholderImage.addConstraint(centerX: (containerView.centerXAnchor, 0),
-                                       centerY: (containerView.centerYAnchor, 0))
+                                       centerY: (containerView.centerYAnchor, -60))
         placeholderImage.setHeightConstraint(with: 64)
         placeholderImage.setWidthConstraint(with: placeholderImage.heightAnchor)
         
