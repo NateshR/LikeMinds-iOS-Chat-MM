@@ -38,7 +38,7 @@ open class LMMessageListViewController: LMViewController {
         button.setWidthConstraint(with: 40)
         button.setHeightConstraint(with: 40)
         button.backgroundColor = Appearance.shared.colors.white.withAlphaComponent(0.8)
-        button.tintColor = Appearance.shared.colors.gray155
+        button.tintColor = Appearance.shared.colors.black
         button.cornerRadius(with: 20)
         button.addTarget(self, action: #selector(scrollToBottomClicked), for: .touchUpInside)
         return button
@@ -100,6 +100,8 @@ open class LMMessageListViewController: LMViewController {
     
     open override func setupAppearance() {
         super.setupAppearance()
+        scrollToBottomButton.addShadow()
+        chatroomTopicBar.addShadow()
     }
     
     // MARK: setupViews
@@ -321,6 +323,14 @@ extension LMMessageListViewController: LMMessageListViewModelProtocol {
 
 extension LMMessageListViewController: LMMessageListViewDelegate {
     
+    public func didCancelUploading(messageId: String) {
+        LMAWSManager.shared.cancelAllTaskFor(groupId: messageId)
+    }
+    
+    public func didRetryUploading(messageId: String) {
+        LMAWSManager.shared.resumeAllTaskFor(groupId: messageId)
+    }
+    
     public func didScrollTableView(_ scrollView: UIScrollView) {
         let contentOffsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
@@ -336,7 +346,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         }
         
         // Check if user scrolled to the top
-        if contentOffsetY <= 20 && !isLoadingMoreData {
+        if contentOffsetY <= 20 && !isLoadingMoreData && viewModel?.fetchingInitialBottomData == false {
             print("end dragged top!$!$")
             guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}
@@ -346,7 +356,7 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
         }
         
         // Check if user scrolled to the bottom
-        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData {
+        if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData && viewModel?.fetchingInitialBottomData == false {
             print("end dragged bottom!$!$")
             guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
                   let lastIndexPath = visibleIndexPaths.last else {return}
@@ -596,20 +606,22 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
             guard let self else { return }
-            NavigationScreen.shared.perform(.messageAttachment(delegat: self, chatroomId: viewModel?.chatroomId, sourceType: .photoLibrary), from: self, params: nil)
+            NavigationScreen.shared.perform(.messageAttachment(delegate: self, chatroomId: viewModel?.chatroomId, sourceType: .photoLibrary), from: self, params: nil)
         }
         
         let photoImage = Constants.shared.images.galleryIcon
         photo.setValue(photoImage, forKey: "image")
         
-        let audio = UIAlertAction(title: "Audio", style: UIAlertAction.Style.default) { (UIAlertAction) in
+        let audio = UIAlertAction(title: "Audio", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
+            guard let self else { return }
             MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .audio)
         }
         
         let audioImage = Constants.shared.images.micIcon
         audio.setValue(audioImage, forKey: "image")
         
-        let document = UIAlertAction(title: "Document", style: UIAlertAction.Style.default) { (UIAlertAction) in
+        let document = UIAlertAction(title: "Document", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
+            guard let self else { return }
             MediaPickerManager.shared.presentAudioAndDocumentPicker(viewController: self, delegate: self, fileType: .pdf)
         }
         
@@ -752,8 +764,12 @@ extension LMMessageListViewController: UIDocumentPickerDelegate {
                 continue
             }
         }
-        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: results, delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: MediaPickerManager.shared.fileTypeForDocument) else { return }
-        self.present(viewController, animated: true)
+        NavigationScreen.shared.perform(.messageAttachmentWithData(data: results,
+                                                                   delegate: self,
+                                                                   chatroomId: viewModel?.chatroomId,
+                                                                   mediaType: MediaPickerManager.shared.fileTypeForDocument), from: self, params: nil)
+//        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: results, delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: MediaPickerManager.shared.fileTypeForDocument) else { return }
+//        self.present(viewController, animated: true)
     }
 }
 
@@ -821,8 +837,14 @@ extension LMMessageListViewController: UIImagePickerControllerDelegate, UINaviga
         } else if let capturedImage = info[.originalImage] as? UIImage, let localPath = MediaPickerManager.shared.saveImageIntoDirecotry(image: capturedImage) {
             targetUrl = localPath
         }
-        guard let targetUrl, let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetUrl, type: .image)], delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: .image) else { return }
-        self.present(viewController, animated: true)
+        
+//        guard let targetUrl, let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetUrl, type: .image)], delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: .image) else { return }
+//        self.present(viewController, animated: true)
+        guard let targetUrl else { return }
+        NavigationScreen.shared.perform(.messageAttachmentWithData(data: [.init(with: targetUrl, type: .image)],
+                                                                   delegate: self,
+                                                                   chatroomId: viewModel?.chatroomId,
+                                                                   mediaType: .image), from: self, params: nil)
     }
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

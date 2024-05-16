@@ -121,7 +121,6 @@ open class LMChatAttachmentViewController: LMViewController {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.alignment = .center
-        view.spacing = 4
         view.addArrangedSubview(fileNameLabel)
         view.addArrangedSubview(fileDetailLabel)
         view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.8)
@@ -130,9 +129,13 @@ open class LMChatAttachmentViewController: LMViewController {
     
     open private(set) lazy var fileNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.font = Appearance.shared.fonts.headingFont
+        label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.white
         label.numberOfLines = 1
+        label.paddingTop = 8
+        label.paddingRight = 16
+        label.paddingLeft = 16
+        label.paddingBottom = 4
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
     }()
@@ -140,9 +143,13 @@ open class LMChatAttachmentViewController: LMViewController {
     open private(set) lazy var fileDetailLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = nil
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.headingFont3
         label.textColor = Appearance.shared.colors.white
         label.numberOfLines = 1
+        label.paddingTop = 4
+        label.paddingRight = 16
+        label.paddingLeft = 16
+        label.paddingBottom = 8
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
     }()

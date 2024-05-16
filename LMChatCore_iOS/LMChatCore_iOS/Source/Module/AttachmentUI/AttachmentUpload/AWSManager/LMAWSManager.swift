@@ -20,6 +20,7 @@ final class LMAWSManager {
     private init() { }
     
     public static let shared = LMAWSManager()
+    var storedUploadTasks: [String: [UInt]] = [:]
     
     public static func awsFilePathForConversation(chatroomId: String,
                                                 conversationId: String,
@@ -43,6 +44,41 @@ final class LMAWSManager {
         AWSServiceManager.default().defaultServiceConfiguration = configuration
     }
     
+    func cancelAllTaskFor(groupId: String) {
+//        if let taskIds = storedUploadTasks[groupId] {
+//            taskIds.forEach { taskId in
+//                AWSS3TransferUtility.default().enumerateToAssignBlocks(forUploadTask: { (uploadTask, progress, error) in
+//                    if uploadTask.taskIdentifier == taskId {
+//                        uploadTask.cancel()
+//                    }
+//                }, downloadTask: nil)
+//            }
+//        }
+    }
+    
+    func resumeAllTaskFor(groupId: String) {
+//        if let taskIds = storedUploadTasks[groupId] {
+//            taskIds.forEach { taskId in
+//                AWSS3TransferUtility.default().enumerateToAssignBlocks(forUploadTask: { (uploadTask, progress, error) in
+//                    if uploadTask.taskIdentifier == taskId {
+//                        uploadTask.resume()
+//                    }
+//                }, downloadTask: nil)
+//            }
+//        }
+    }
+    
+    private func addUploadTask(groupId: String, task: AWSTask<AWSS3TransferUtilityUploadTask>) {
+        return 
+        guard let identifier = task.result?.taskIdentifier else { return }
+        if var taskIds = storedUploadTasks[groupId] {
+            taskIds.append(identifier)
+            storedUploadTasks[groupId] = taskIds
+        } else {
+            storedUploadTasks[groupId] = [identifier]
+        }
+    }
+    
     /// This Function uploads Any File type to AWS S3 Bucket
     /// - Parameters:
     ///   - fileUrl: File Path of the file, it is local file url
@@ -50,7 +86,7 @@ final class LMAWSManager {
     ///   - contenType: Type of Content, can be anything
     ///   - progress: Tells us about the progress rate of uploading
     ///   - completion: What to do after file is done uploading
-    func uploadfile(fileUrl: URL, awsPath: String, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
+    func uploadfile(fileUrl: URL, awsPath: String, fileName: String, contenType: String, withTaskGroupId groupid: String?, progress: progressBlock?, completion: completionBlock?) {
         do {
             _ = fileUrl.startAccessingSecurityScopedResource()
             let data = try Data(contentsOf: fileUrl)
@@ -91,7 +127,7 @@ final class LMAWSManager {
             
             // Start uploading using AWSS3TransferUtility
             let awsTransferUtility = AWSS3TransferUtility.default()
-            awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+            let task = awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
                 if let error = task.error {
                     print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
                 }
@@ -100,12 +136,15 @@ final class LMAWSManager {
                 }
                 return nil
             }
+            if let groupid, let uploadTask = task as? AWSTask<AWSS3TransferUtilityUploadTask> {
+                addUploadTask(groupId: groupid, task: uploadTask)
+            }
         } catch {
             completion?(nil, nil)
         }
     }
     
-    func uploadfile(fileData: Data, awsPath: String, fileName: String, contenType: String, progress: progressBlock?, completion: completionBlock?) {
+    func uploadfile(fileData: Data, awsPath: String, fileName: String, contenType: String, withTaskGroupId groupid: String?, progress: progressBlock?, completion: completionBlock?) {
         let expression = AWSS3TransferUtilityUploadExpression()
         expression.progressBlock = {(task, awsProgress) in
             guard let uploadProgress = progress else { return }
@@ -140,7 +179,7 @@ final class LMAWSManager {
         
         // Start uploading using AWSS3TransferUtility
         let awsTransferUtility = AWSS3TransferUtility.default()
-        awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+        let task = awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
             if let error = task.error {
                 print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
             }
@@ -148,6 +187,9 @@ final class LMAWSManager {
                 print("Starting upload...")
             }
             return nil
+        }
+        if let groupid, let uploadTask = task as? AWSTask<AWSS3TransferUtilityUploadTask> {
+            addUploadTask(groupId: groupid, task: uploadTask)
         }
     }
 }

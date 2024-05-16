@@ -198,15 +198,7 @@ open class LMChatMessageGallaryView: LMView {
         view.alignment = .fill
         return view
     }()
-    
-    
-    open private(set) lazy var loaderView: LMLoaderView = {
-        let view = LMLoaderView().translatesAutoresizingMaskIntoConstraints()
-        view.isHidden = true
-        return view
-    }()
-    
-    
+ 
     var viewData: [ContentModel]?
     var onClickAttachment: ((Int) -> Void)?
     
@@ -216,8 +208,6 @@ open class LMChatMessageGallaryView: LMView {
         super.setupLayouts()
         
         pinSubView(subView:previewsContainerView)
-        loaderView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        loaderView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         
     }
     
@@ -225,8 +215,6 @@ open class LMChatMessageGallaryView: LMView {
     open override func setupViews() {
         super.setupViews()
         addSubview(previewsContainerView)
-        addSubview(loaderView)
-
         previewsContainerView.addArrangedSubview(topPreviewsContainerView)
         
         topPreviewsContainerView.addArrangedSubview(itemSpots[0])
@@ -285,7 +273,6 @@ open class LMChatMessageGallaryView: LMView {
     }
     
     @objc func onAttachmentClicked(_ gesture: UITapGestureRecognizer) {
-//        viewData?.first?.fileType?.lowercased() != "gif", 
         guard let tag = gesture.view?.tag else { return }
         onClickAttachment?(tag)
     }

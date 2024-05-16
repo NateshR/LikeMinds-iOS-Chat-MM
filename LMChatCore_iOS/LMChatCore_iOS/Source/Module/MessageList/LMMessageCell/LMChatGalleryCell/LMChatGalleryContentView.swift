@@ -24,24 +24,25 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
         return image
     }()
     
-//    var clickedOnAttachment: ((String) -> Void)?
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
         bubbleView.addArrangeSubview(galleryView, atIndex: 2)
+        galleryView.addSubview(cancelRetryContainerStackView)
+        galleryView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
-        bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        cancelRetryContainerStackView.centerXAnchor.constraint(equalTo: galleryView.centerXAnchor).isActive = true
+        cancelRetryContainerStackView.centerYAnchor.constraint(equalTo: galleryView.centerYAnchor).isActive = true
     }
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        galleryView.loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        loaderView.isHidden = data.message?.attachmentUploaded ?? true
         if data.message?.isDeleted == true {
             galleryView.isHidden = true
         } else {

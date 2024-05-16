@@ -17,8 +17,7 @@ open class LMAudioPlayerView: LMView {
     var playIcon: UIImage? = Constants.shared.images.playIcon.withSystemImageConfig(pointSize: 65, weight: .light)
     var pauseIcon: UIImage? = Constants.shared.images.pauseCircleIcon.withSystemImageConfig(pointSize: 65, weight: .light)
     
-//    var loadingView: UIActivityIndicatorView!
-    var viewTintColor: UIColor = .systemYellow
+    var viewTintColor: UIColor = Appearance.shared.colors.systemYellow
     
     open private(set) lazy var playbackSlider: UISlider = {
         let slider = UISlider()
@@ -74,7 +73,8 @@ open class LMAudioPlayerView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.alignment = .fill
-        view.spacing = 40
+        view.spacing = 28
+        view.layoutMargins = .init(top: 12, left: 8, bottom: 12, right: 8)
         view.addArrangedSubview(fileNameLable)
         view.addArrangedSubview(durationContainerStackView)
         view.addArrangedSubview(playbackSlider)
@@ -271,6 +271,7 @@ open class LMAudioPlayerView: LMView {
         if player!.rate == 0
         {
             player?.play()
+            ButtonPlay.setImage(pauseIcon, for: UIControl.State.normal)
         }
     }
     
