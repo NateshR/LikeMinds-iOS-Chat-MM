@@ -16,6 +16,7 @@ public protocol LMChatMessageCellDelegate: AnyObject {
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
     func onClickReplyOfMessage(indexPath: IndexPath?)
     func didTappedOnSelectionButton(indexPath: IndexPath?)
+    func onClickOfSeeMore(for messageID: String, indexPath: IndexPath)
     func didCancelAttachmentUploading(indexPath: IndexPath)
     func didRetryAttachmentUploading(indexPath: IndexPath)
 }
@@ -44,14 +45,16 @@ open class LMChatMessageCell: LMTableViewCell {
         return button
     }()
     
-    open override func prepareForReuse() {
-        super.prepareForReuse()
-        chatMessageView.prepareToResuse()
-    }
     weak var delegate: LMChatMessageCellDelegate?
     var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
+    
+    
+    open override func prepareForReuse() {
+        super.prepareForReuse()
+        chatMessageView.prepareToResuse()
+    }
     
     @objc func selectedRowButton(_ sender: UIButton) {
         let isSelected = !sender.isSelected

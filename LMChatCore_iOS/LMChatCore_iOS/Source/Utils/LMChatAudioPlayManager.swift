@@ -121,7 +121,9 @@ public final class LMChatAudioPlayManager {
         
         pause()
         
-        let seconds = totalDuration.seconds * Double(percentage / 100)
+        var seconds = totalDuration.seconds * Double(percentage / 100)
+        // Case where seconds come out to be NaN or Infinite
+        seconds = seconds.isNormal ? seconds : .zero
         let targeTime = CMTimeMake(value: Int64(seconds), timescale: 1)
         
         player?.seek(to: targeTime) { [weak self] status in

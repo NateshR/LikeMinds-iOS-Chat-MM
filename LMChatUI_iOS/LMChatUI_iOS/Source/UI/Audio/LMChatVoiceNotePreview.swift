@@ -10,6 +10,7 @@ import UIKit
 public protocol LMChatAudioProtocol {
     func didTapPlayPauseButton(for url: String, index: IndexPath)
     func didSeekTo(_ position: Float, _ url: String, index: IndexPath)
+    func pauseAudioPlayer()
 }
 
 public struct LMChatAudioContentModel {

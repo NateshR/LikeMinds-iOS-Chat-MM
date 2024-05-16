@@ -44,13 +44,11 @@ open class LMChatDocumentViewCell: LMChatMessageCell {
         documentMessageView.clickedOnAttachment = {[weak self] url in
             self?.delegate?.onClickAttachmentOfMessage(url: url, indexPath: self?.currentIndexPath)
         }
+        
+        documentMessageView.onShowMoreCallback = { [weak self] in
+            self?.delegate?.onClickOfSeeMore(for: data.message?.messageId ?? "", indexPath: index)
+        }
+        
         documentMessageView.layoutIfNeeded()
     }
-    
-    func prepareToResuse() {
-        super.prepareForReuse()
-        
-    }
-    
 }
-
