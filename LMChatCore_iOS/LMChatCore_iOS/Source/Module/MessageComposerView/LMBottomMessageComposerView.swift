@@ -21,6 +21,7 @@ public protocol LMBottomMessageComposerDelegate: AnyObject {
     func playRecording()
     func stopRecording(_ onStop: (() -> Void))
     func deleteRecording()
+    func askForMicrophoneAccess()
     
     func cancelReply()
     func cancelLinkPreview()
@@ -546,19 +547,16 @@ extension LMBottomMessageComposerView {
         if #available(iOS 17, *) {
             if AVAudioApplication.shared.recordPermission == .granted {
                 handleLongPress(sender)
-            } else if AVAudioApplication.shared.recordPermission == .denied {
-                print("no mic access")
-            } else if AVAudioApplication.shared.recordPermission == .undetermined {
-                AVAudioApplication.requestRecordPermission { _ in }
+            } else if AVAudioApplication.shared.recordPermission == .denied || AVAudioApplication.shared.recordPermission == .undetermined {
+                delegate?.askForMicrophoneAccess()
             }
         } else {
             switch AVAudioSession.sharedInstance().recordPermission {
             case .granted:
                 handleLongPress(sender)
-            case .denied:
-                print("No Access to microphone")
-            case .undetermined:
-                AVAudioSession.sharedInstance().requestRecordPermission { _ in}
+            case .denied,
+                    .undetermined:
+                delegate?.askForMicrophoneAccess()
             default:
                 break
             }

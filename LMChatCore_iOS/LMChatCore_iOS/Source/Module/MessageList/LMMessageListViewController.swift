@@ -580,6 +580,9 @@ extension LMMessageListViewController: LMMessageListViewDelegate {
 }
 
 extension LMMessageListViewController: LMBottomMessageComposerDelegate {
+    public func askForMicrophoneAccess() {
+        LMChatCheckMediaAccess.askForMicrophoneAccess(from: self)
+    }
     
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
@@ -609,7 +612,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let camera = UIAlertAction(title: "Camera", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
             guard let self else { return }
-            MediaPickerManager.shared.presentCamera(viewController: self, delegate: self)
+            LMChatCheckMediaAccess.checkCameraAccess(viewController: self, delegate: self)
         }
         let cameraImage = Constants.shared.images.cameraIcon
         camera.setValue(cameraImage, forKey: "image")
@@ -644,18 +647,7 @@ extension LMMessageListViewController: LMBottomMessageComposerDelegate {
         alert.addAction(photo)
         alert.addAction(audio)
         alert.addAction(document)
-        /*
-        if let provider = dataProvider,
-           provider.checkMemberRight(with: .createPolls),
-           provider.currentChatRoom?.type != .directMessage {
-            let microPollAction = UIAlertAction(title: "Poll", style: .default) { UIAlertAction in
-                self.presenter?.openMediaPicker(mediaType: "poll")
-            }
-            let pollImage = UIImage(named: "microPoll")
-            microPollAction.setValue(pollImage, forKey: "image")
-            alert.addAction(microPollAction)
-        }
-        */
+        
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
     }
@@ -758,14 +750,14 @@ extension LMMessageListViewController: UIDocumentPickerDelegate {
             switch MediaPickerManager.shared.fileTypeForDocument {
             case .audio:
                 if let mediaDeatil = FileUtils.getDetail(forVideoUrl: localPath) {
-                    var mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
+                    let mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
                     mediaModel.duration = mediaDeatil.duration
                     mediaModel.fileSize = Int(mediaDeatil.fileSize ?? 0)
                     results.append(mediaModel)
                 }
             case .pdf:
                 if let pdfDetail = FileUtils.getDetail(forPDFUrl: localPath) {
-                    var mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
+                    let mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
                     mediaModel.numberOfPages = pdfDetail.pageCount
                     mediaModel.fileSize = Int(pdfDetail.fileSize ?? 0)
                     results.append(mediaModel)
