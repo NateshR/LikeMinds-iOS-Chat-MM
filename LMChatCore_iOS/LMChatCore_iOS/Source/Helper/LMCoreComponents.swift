@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-let LMChatCoreBundle = Bundle(for: LMMessageListViewController.self)
+let LMChatCoreBundle = Bundle(for: LMChatMessageListViewController.self)
 
 public struct LMCoreComponents {
     public static var shared = Self()
@@ -61,8 +61,5 @@ public struct LMCoreComponents {
     // MARK: Attachment message screen
     public var attachmentMessageScreen: LMChatAttachmentViewController.Type = LMChatAttachmentViewController.self
     
-    public var messageListScreen: LMMessageListViewController.Type = LMMessageListViewController.self
-    public var messageContentView: LMChatMessageContentView.Type = LMChatMessageContentView.self
-    public var messageBubbleView: LMChatMessageBubbleView.Type = LMChatMessageBubbleView.self
-    public var chatroomHeaderMessageView: LMChatroomHeaderMessageView.Type = LMChatroomHeaderMessageView.self
+    public var messageListScreen: LMChatMessageListViewController.Type = LMChatMessageListViewController.self
 }

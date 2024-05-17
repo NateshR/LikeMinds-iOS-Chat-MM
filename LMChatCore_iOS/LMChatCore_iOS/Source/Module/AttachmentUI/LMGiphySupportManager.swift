@@ -8,6 +8,7 @@
 import Foundation
 //import SwiftyGif
 import GiphyUISDK
+import LMChatUI_iOS
 
 @objc class GiphyAPIConfiguration: NSObject {
     static let gifMessage = "* This is a gif message. Please update your app *"
@@ -31,19 +32,19 @@ class GIFImage {
     }
 }
 
-extension LMBottomMessageComposerView {
+extension LMChatBottomMessageComposerView {
     @objc func handleDidPressGIF(_ sender: UIButton) {
         let giphy = GiphyViewController()
         giphy.mediaTypeConfig = [.gifs]
         giphy.theme = GPHTheme(type: .lightBlur)
         giphy.showConfirmationScreen = false
         giphy.rating = .ratedPG
-        giphy.delegate = self.delegate as? LMMessageListViewController
+        giphy.delegate = self.delegate as? LMChatMessageListViewController
         self.window?.rootViewController?.present(giphy, animated: true, completion: nil)
     }
 }
 
-extension LMMessageListViewController: GiphyDelegate {
+extension LMChatMessageListViewController: GiphyDelegate {
     public func didDismiss(controller: GiphyViewController?) {
         
     }

@@ -17,8 +17,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var loginButton: UIButton?
     
     
-//    open private(set) lazy var containerView: LMBottomMessageComposerView = {
-//        let view = LMBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMChatBottomMessageComposerView = {
+//        let view = LMChatBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
 ////        view.backgroundColor = .cyan
 //        return view
 //    }()
@@ -41,8 +41,8 @@ class ViewController: UIViewController {
         return view
     }()
     
-//    open private(set) lazy var containerView: LMMessageReplyPreview = {
-//        let view = LMMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMChatMessageReplyPreview = {
+//        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .cyan
 //        return view
 //    }()
@@ -79,7 +79,7 @@ class ViewController: UIViewController {
         guard let homefeedvc =
 //                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
-//              try? LMMessageListViewModel.createModule(withChatroomId: "88638") else { return }
+//              try? LMChatMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
                 try? LMHomeFeedViewModel.createModule() else { return }

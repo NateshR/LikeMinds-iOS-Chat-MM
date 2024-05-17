@@ -10,8 +10,8 @@ import LMChatUI_iOS
 import UIKit
 
 open class LMChatMediaImagePreview: LMCollectionViewCell {
-    open private(set) lazy var previewImageView: LMZoomImageViewContainer = {
-        let image = LMZoomImageViewContainer()
+    open private(set) lazy var previewImageView: LMChatZoomImageViewContainer = {
+        let image = LMChatZoomImageViewContainer()
         image.translatesAutoresizingMaskIntoConstraints = false
         image.backgroundColor = .black
         return image

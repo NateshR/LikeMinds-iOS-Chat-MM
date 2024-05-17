@@ -102,7 +102,7 @@ struct RouteTriggerProperties {
             completion(nil)
             return
         }
-        guard let chatroomDetails = try? LMMessageListViewModel.createModule(withChatroomId: chatRoomID) else {
+        guard let chatroomDetails = try? LMChatMessageListViewModel.createModule(withChatroomId: chatRoomID) else {
             completion(nil)
             return
         }
@@ -117,7 +117,7 @@ struct RouteTriggerProperties {
             return
         }
         
-        guard let chatroomDetails = try? LMMessageListViewModel.createModule(withChatroomId: chatRoomID) else {
+        guard let chatroomDetails = try? LMChatMessageListViewModel.createModule(withChatroomId: chatRoomID) else {
             completion(nil)
             return
         }

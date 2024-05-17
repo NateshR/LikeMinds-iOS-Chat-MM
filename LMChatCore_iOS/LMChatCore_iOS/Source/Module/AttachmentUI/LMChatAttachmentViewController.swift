@@ -20,8 +20,8 @@ open class LMChatAttachmentViewController: LMViewController {
     let backgroundColor: UIColor = .black
     weak var delegate: LMChatAttachmentViewDelegate?
     
-    open private(set) lazy var bottomMessageBoxView: LMAttachmentBottomMessageView = {
-        let view = LMAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var bottomMessageBoxView: LMChatAttachmentBottomMessageView = {
+        let view = LMChatAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         view.delegate = self
         return view
@@ -39,8 +39,8 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
-    open private(set) lazy var zoomableImageViewContainer: LMZoomImageViewContainer = {
-        let view = LMZoomImageViewContainer()
+    open private(set) lazy var zoomableImageViewContainer: LMChatZoomImageViewContainer = {
+        let view = LMChatZoomImageViewContainer()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = backgroundColor
         return view
@@ -54,8 +54,8 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
-    open private(set) lazy var audioPlayer: LMAudioPlayerView = {
-        let view = LMAudioPlayerView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var audioPlayer: LMChatAudioPlayerView = {
+        let view = LMChatAudioPlayerView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = backgroundColor
         view.isHidden = true
         return view
@@ -107,8 +107,8 @@ open class LMChatAttachmentViewController: LMViewController {
         layout.minimumInteritemSpacing = 1
         let collection = LMCollectionView(frame: .zero, collectionViewLayout: layout)
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.registerCell(type: LMMediaCarouselCell.self)
-        collection.registerCell(type: LMAudioCarouselCell.self)
+        collection.registerCell(type: LMChatMediaCarouselCell.self)
+        collection.registerCell(type: LMChatAudioCarouselCell.self)
         collection.showsVerticalScrollIndicator = false
         collection.showsHorizontalScrollIndicator = false
         collection.backgroundColor = .clear
@@ -342,12 +342,12 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         if let data = viewModel?.mediaCellData[indexPath.row] {
             switch data.mediaType {
             case .audio:
-                if let cell = collectionView.dequeueReusableCell(with: LMAudioCarouselCell.self, for: indexPath) {
+                if let cell = collectionView.dequeueReusableCell(with: LMChatAudioCarouselCell.self, for: indexPath) {
                     cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true, duration: data.duration))
                     return cell
                 }
             default:
-                if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+                if let cell = collectionView.dequeueReusableCell(with: LMChatMediaCarouselCell.self, for: indexPath) {
                     cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true))
                     return cell
                 }
@@ -363,7 +363,7 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if let data = viewModel?.mediaCellData[indexPath.row],
-           let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+           let cell = collectionView.dequeueReusableCell(with: LMChatMediaCarouselCell.self, for: indexPath) {
             setDataToView(data)
         }
     }

@@ -45,7 +45,7 @@ class NavigationScreen: NavigationScreenProtocol {
             guard let homefeedvc = try? LMHomeFeedViewModel.createModule() else { return }
             source.navigationController?.pushViewController(homefeedvc, animated: true)
         case .chatroom(let chatroomId):
-            guard let chatroom = try? LMMessageListViewModel.createModule(withChatroomId: chatroomId) else { return }
+            guard let chatroom = try? LMChatMessageListViewModel.createModule(withChatroomId: chatroomId) else { return }
             source.navigationController?.pushViewController(chatroom, animated: true)
         case .messageAttachment(let delegate, let chatroomId, let sourceType):
             guard let attachment = try? LMChatAttachmentViewModel.createModule(delegate: delegate, chatroomId: chatroomId, sourceType: sourceType) else { return }
@@ -63,7 +63,7 @@ class NavigationScreen: NavigationScreenProtocol {
             source.navigationController?.pushViewController(report, animated: true)
         case .reactionSheet(let reactions, let selected, let conversationId, let chatroomId):
             guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, selected: selected, conversationId: conversationId, chatroomId: chatroomId) else { return }
-            reactions.delegate = (source as? LMMessageListViewController)
+            reactions.delegate = (source as? LMChatMessageListViewController)
             source.present(reactions, animated: true)
         case .exploreFeed:
             guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }
@@ -80,9 +80,9 @@ class NavigationScreen: NavigationScreenProtocol {
             guard let searchScreen = try? SearchListViewModel.createModule() else { return }
             source.navigationController?.pushViewController(searchScreen, animated: false)
         case .emojiPicker(let conversationId):
-            let picker = LMEmojiListViewController()
+            let picker = LMChatEmojiListViewController()
             picker.conversationId = conversationId
-            picker.delegate = source as? LMMessageListViewController
+            picker.delegate = source as? LMChatMessageListViewController
             source.present(picker, animated: true)
 //        case .giphy:
 //            let giphy = GiphyViewController()

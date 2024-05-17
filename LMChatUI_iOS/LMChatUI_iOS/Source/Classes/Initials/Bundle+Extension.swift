@@ -14,3 +14,5 @@ extension Bundle {
         Bundle(for: BundleClass.self)
     }
 }
+
+let LMChatUIBundle = Bundle(for: LMChatMessageContentView.self)
