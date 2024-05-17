@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 public struct LMUIComponents {
     public static var shared = Self()
@@ -17,14 +16,20 @@ public struct LMUIComponents {
     public var taggingTableViewCell: LMChatTaggingUserTableCell.Type = LMChatTaggingUserTableCell.self
     
     //MARK: LMHomeFeed
-    public var homeFeedChatroomCell: LMHomeFeedChatroomCell.Type = LMHomeFeedChatroomCell.self
-    public var homeFeedExploreTabCell: LMHomeFeedExploreTabCell.Type = LMHomeFeedExploreTabCell.self
-    public var homeFeedShimmerCell: LMHomeFeedLoading.Type = LMHomeFeedLoading.self
+    public var homeFeedChatroomCell: LMChatHomeFeedChatroomCell.Type = LMChatHomeFeedChatroomCell.self
+    public var homeFeedExploreTabCell: LMChatHomeFeedExploreTabCell.Type = LMChatHomeFeedExploreTabCell.self
+    public var homeFeedShimmerCellView: LMChatHomeFeedLoading.Type = LMChatHomeFeedLoading.self
+    public var homeFeedListView: LMChatHomeFeedListView.Type = LMChatHomeFeedListView.self
+    public var homeFeedExploreTabView: LMChatHomeFeedExploreTabView.Type = LMChatHomeFeedExploreTabView.self
+    public var homeFeedChatroomView: LMChatHomeFeedChatroomView.Type = LMChatHomeFeedChatroomView.self
+    public var homeFeedShimmerView: LMChatHomeFeedShimmerView.Type = LMChatHomeFeedShimmerView.self
     
-    public var exploreChatroomCell: LMExploreChatroomCell.Type = LMExploreChatroomCell.self 
+    
+    public var exploreChatroomCell: LMChatExploreChatroomCell.Type = LMChatExploreChatroomCell.self
     
     // MARK: Participant List View
-    public var participantListCell: LMParticipantCell.Type = LMParticipantCell.self
+    public var participantListCell: LMChatParticipantCell.Type = LMChatParticipantCell.self
+    public var participantListView: LMChatParticipantListView.Type = LMChatParticipantListView.self
     
     // MARK: Report Screen Components
     public var reportCollectionCell: LMChatReportViewCell.Type = LMChatReportViewCell.self

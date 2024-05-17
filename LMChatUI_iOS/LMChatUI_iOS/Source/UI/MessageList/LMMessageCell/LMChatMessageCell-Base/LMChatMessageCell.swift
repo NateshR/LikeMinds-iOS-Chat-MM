@@ -14,8 +14,10 @@ public protocol LMChatMessageCellDelegate: AnyObject {
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
     func onClickReplyOfMessage(indexPath: IndexPath?)
     func didTappedOnSelectionButton(indexPath: IndexPath?)
+    func onClickOfSeeMore(for messageID: String, indexPath: IndexPath)
     func didCancelAttachmentUploading(indexPath: IndexPath)
     func didRetryAttachmentUploading(indexPath: IndexPath)
+    func didTapOnProfileLink(route: String)
 }
 
 @IBDesignable
@@ -42,14 +44,16 @@ open class LMChatMessageCell: LMTableViewCell {
         return button
     }()
     
-    open override func prepareForReuse() {
-        super.prepareForReuse()
-        chatMessageView.prepareToResuse()
-    }
     weak var delegate: LMChatMessageCellDelegate?
     var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
+    
+    
+    open override func prepareForReuse() {
+        super.prepareForReuse()
+        chatMessageView.prepareToResuse()
+    }
     
     @objc func selectedRowButton(_ sender: UIButton) {
         let isSelected = !sender.isSelected
@@ -130,6 +134,15 @@ extension LMChatMessageCell: LMAttachmentUploadRetryViewDelegate {
 }
 
 extension LMChatMessageCell: LMChatMessageContentViewDelegate {
+    
+    public func didTapOnReplyPreview() {
+        delegate?.onClickReplyOfMessage(indexPath: currentIndexPath)
+    }
+    
+    public func didTapOnProfileLink(route: String) {
+        delegate?.didTapOnProfileLink(route: route)
+    }
+    
     public func clickedOnReaction(_ reaction: String) {
         delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: currentIndexPath)
     }

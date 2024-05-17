@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import LMChatCore_iOS
+import LMChatUI_iOS
 
-class CustomChatroomView: LMHomeFeedChatroomView {
+class CustomChatroomView: LMChatHomeFeedChatroomView {
     
     
     override func setupAppearance() {

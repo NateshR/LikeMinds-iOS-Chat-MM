@@ -1,5 +1,5 @@
 //
-//  LMHomeFeedViewController.swift
+//  LMChatHomeFeedViewController.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 12/02/24.
@@ -8,12 +8,12 @@
 import Foundation
 import LMChatUI_iOS
 
-open class LMHomeFeedViewController: LMViewController {
+open class LMChatHomeFeedViewController: LMViewController {
     
-    var viewModel: LMHomeFeedViewModel?
+    var viewModel: LMChatHomeFeedViewModel?
     
-    open private(set) lazy var feedListView: LMHomeFeedListView = {
-        let view = LMHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var feedListView: LMChatHomeFeedListView = {
+        let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
         view.delegate = self
         return view
@@ -79,18 +79,18 @@ open class LMHomeFeedViewController: LMViewController {
     }
 }
 
-extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
+extension LMChatHomeFeedViewController: LMHomeFeedViewModelProtocol {
     
     public func updateHomeFeedChatroomsData() {
        let chatrooms =  (viewModel?.chatrooms ?? []).compactMap({ chatroom in
-            LMHomeFeedChatroomCell.ContentModel(chatroom: chatroom)
+            LMChatHomeFeedChatroomCell.ContentModel(contentView: viewModel?.chatroomContentView(chatroom: chatroom))
         })
         feedListView.updateChatroomsData(chatroomData: chatrooms)
     }
     
     public func updateHomeFeedExploreCountData() {
         guard let countData = viewModel?.exploreTabCountData else { return }
-        feedListView.updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
+        feedListView.updateExploreTabCount(exploreTabCount: LMChatHomeFeedExploreTabCell.ContentModel(totalChatroomsCount: countData.totalChatroomCount, unseenChatroomsCount: countData.unseenChatroomCount))
     }
     
     
@@ -99,7 +99,7 @@ extension LMHomeFeedViewController: LMHomeFeedViewModelProtocol {
     }
 }
 
-extension LMHomeFeedViewController: LMHomFeedListViewDelegate {
+extension LMChatHomeFeedViewController: LMHomFeedListViewDelegate {
     
     public func didTapOnCell(indexPath: IndexPath) {
         switch feedListView.tableSections[indexPath.section].sectionType {

@@ -1,5 +1,5 @@
 //
-//  LMHomeFeedExploreTabView.swift
+//  LMChatHomeFeedExploreTabView.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 09/02/24.
@@ -10,7 +10,7 @@ import LMChatUI_iOS
 import Kingfisher
 
 @IBDesignable
-open class LMHomeFeedExploreTabView: LMView {
+open class LMChatHomeFeedExploreTabView: LMView {
     
     public struct ContentModel {
         public let tilesName: String

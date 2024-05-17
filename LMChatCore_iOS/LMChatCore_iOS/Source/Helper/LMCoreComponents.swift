@@ -43,20 +43,17 @@ public struct LMCoreComponents {
     */
     
     // MARK: HomeFeed Screen
-    public var homeFeedScreen: LMHomeFeedViewController.Type = LMHomeFeedViewController.self
-    public var homeFeedListView: LMHomeFeedListView.Type = LMHomeFeedListView.self
-    public var homeFeedChatroomView: LMHomeFeedChatroomView.Type = LMHomeFeedChatroomView.self
-    public var homeFeedExploreTabView: LMHomeFeedExploreTabView.Type = LMHomeFeedExploreTabView.self
+    public var homeFeedScreen: LMChatHomeFeedViewController.Type = LMChatHomeFeedViewController.self
+    
+    public var exploreChatroomListScreen: LMExploreChatroomListView.Type = LMExploreChatroomListView.self
     public var exploreChatroomScreen: LMExploreChatroomViewController.Type = LMExploreChatroomViewController.self
-    public var exploreChatroomView: LMExploreChatroomView.Type = LMExploreChatroomView.self
+//    public var exploreChatroomView: LMExploreChatroomView.Type = LMExploreChatroomView.self
     
     // MARK: Report Screen
     public var reportScreen: LMChatReportViewController.Type = LMChatReportViewController.self
     
     // MARK: Participant list Screen
     public var participantListScreen: LMParticipantListViewController.Type = LMParticipantListViewController.self
-    public var participantListView: LMParticipantListView.Type = LMParticipantListView.self
-    public var participantView: LMParticipantView.Type = LMParticipantView.self
     
     // MARK: Attachment message screen
     public var attachmentMessageScreen: LMChatAttachmentViewController.Type = LMChatAttachmentViewController.self

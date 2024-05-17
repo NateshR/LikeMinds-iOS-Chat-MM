@@ -1,21 +1,19 @@
 //
-//  SearchGroupCell.swift
+//  LMChatSearchChatroomCell.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 15/04/24.
 //
 
-import LMChatUI_iOS
 import Kingfisher
 import UIKit
 
-public protocol SearchCellProtocol { 
+public protocol LMChatSearchCellDataProtocol { 
     var chatroomID: String { get }
 }
 
-
-public class SearchGroupCell: LMTableViewCell {
-    public struct ContentModel: SearchCellProtocol {
+public class LMChatSearchChatroomCell: LMTableViewCell {
+    public struct ContentModel: LMChatSearchCellDataProtocol {
         public var chatroomID: String
         public let image: String?
         public let chatroomName: String

@@ -9,7 +9,6 @@ import Foundation
 
 @IBDesignable
 open class LMChatAudioViewCell: LMChatMessageCell {
-    
     open private(set) lazy var audioMessageView: LMChatAudioContentView = {
         let view = LMUIComponents.shared.audioContentView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
@@ -37,6 +36,11 @@ open class LMChatAudioViewCell: LMChatMessageCell {
     // MARK: configure
     open override func setData(with data: ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setData(with: data, delegate: delegate, index: index)
+        
+        audioMessageView.onShowMoreCallback = { [weak self] in
+            self?.updateForSeeMore(for: data.message?.messageId ?? "", index: index)
+        }
+        
         audioMessageView.layoutIfNeeded()
     }
     
@@ -48,9 +52,7 @@ open class LMChatAudioViewCell: LMChatMessageCell {
         audioMessageView.seekSlider(to: position, url: url)
     }
     
-    open override func prepareForReuse() {
-        super.prepareForReuse()
+    open func updateForSeeMore(for messageID: String, index: IndexPath) {
+        delegate?.onClickOfSeeMore(for: messageID, indexPath: index)
     }
-    
 }
-

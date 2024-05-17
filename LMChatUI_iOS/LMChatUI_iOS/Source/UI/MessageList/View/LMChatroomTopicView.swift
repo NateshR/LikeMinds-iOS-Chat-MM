@@ -7,15 +7,21 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 open class LMChatroomTopicView: LMView {
     
-    struct ContentModel {
-        let title: String
-        let createdBy: String
-        let chatroomImageUrl: String
-        let topicId: String
+    public struct ContentModel {
+        public let title: String
+        public let createdBy: String
+        public let chatroomImageUrl: String
+        public let topicId: String
+        
+        public init(title: String, createdBy: String, chatroomImageUrl: String, topicId: String) {
+            self.title = title
+            self.createdBy = createdBy
+            self.chatroomImageUrl = chatroomImageUrl
+            self.topicId = topicId
+        }
     }
     
     /// The `UIImageView` instance that shows the avatar image.
@@ -72,7 +78,7 @@ open class LMChatroomTopicView: LMView {
         return view
     }()
     
-    var onTopicViewClick: ((String) -> Void)?
+    public var onTopicViewClick: ((String) -> Void)?
     var topicData: ContentModel?
     
     override open func layoutSubviews() {
@@ -120,7 +126,7 @@ open class LMChatroomTopicView: LMView {
         onTopicViewClick?(topicData?.topicId ?? "")
     }
     
-    func setData(_ data: ContentModel) {
+    public func setData(_ data: ContentModel) {
         topicData = data
         nameLabel.text = data.createdBy
         topicLabel.text = data.title

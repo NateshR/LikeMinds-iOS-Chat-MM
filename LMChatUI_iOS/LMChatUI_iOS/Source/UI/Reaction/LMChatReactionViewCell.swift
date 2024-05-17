@@ -8,12 +8,19 @@
 import UIKit
 import LMChatUI_iOS
 
-open class LMReactionViewCell: LMTableViewCell {
-    struct ContentModel {
-        let image: String?
-        let username: String
-        let isSelfReaction: Bool
-        let reaction: String
+open class LMChatReactionViewCell: LMTableViewCell {
+    public struct ContentModel {
+        public let image: String?
+        public let username: String
+        public let isSelfReaction: Bool
+        public let reaction: String
+        
+        public init(image: String?, username: String, isSelfReaction: Bool, reaction: String) {
+            self.image = image
+            self.username = username
+            self.isSelfReaction = isSelfReaction
+            self.reaction = reaction
+        }
     }
     
     lazy var userImageView: LMImageView = {
@@ -102,7 +109,7 @@ open class LMReactionViewCell: LMTableViewCell {
         ])
     }
     
-    func configure(with data: ContentModel) {
+    public func configure(with data: ContentModel) {
         userName.text = data.username
         removeLabel.isHidden = !data.isSelfReaction
         reactionImage.text = data.reaction

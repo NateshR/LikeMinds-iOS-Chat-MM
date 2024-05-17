@@ -1,5 +1,5 @@
 //
-//  LMHomeFeedLoading.swift
+//  LMChatHomeFeedLoading.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 30/04/24.
@@ -9,7 +9,7 @@ import Foundation
 import LMChatUI_iOS
 
 @IBDesignable
-open class LMHomeFeedLoading: LMView {
+open class LMChatHomeFeedLoading: LMView {
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {

@@ -5,7 +5,6 @@
 //  Created by Devansh Mohata on 06/05/24.
 //
 
-import LMChatUI_iOS
 import UIKit
 
 open class LMChatSearchShimmerCell: LMView {
@@ -79,7 +78,6 @@ open class LMChatSearchShimmerCell: LMView {
         bodyShimmerView.setWidthConstraint(with: containerView.widthAnchor, multiplier: 0.7)
         bodyShimmerView.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -8).isActive = true
     }
-    
     
     open override func setupAppearance() {
         super.setupAppearance()

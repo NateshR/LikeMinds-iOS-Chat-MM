@@ -49,11 +49,11 @@ public final class LMChatMessageListViewModel {
     }
     
     
-    public static func createModule(withChatroomId chatroomId: String) throws -> LMChatMessageListViewController {
+    public static func createModule(withChatroomId chatroomId: String, conversationId: String?) throws -> LMChatMessageListViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.messageListScreen.init()
-        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, nil, nil))
+        let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationId, nil))
         
         viewcontroller.viewModel = viewmodel
         viewcontroller.delegate = viewmodel
@@ -343,13 +343,13 @@ public final class LMChatMessageListViewModel {
                    attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
                    isDeleted: replyConversation.deletedByMember != nil,
                    createdBy: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID() ? replyConversation.member?.name : "You",
-                   createdByImageUrl: replyConversation.member?.imageUrl,
+                   createdByImageUrl: replyConversation.member?.imageUrl, createdById: replyConversation.member?.sdkClientInfo?.uuid,
                    isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
                    messageType: replyConversation.state.rawValue,
                    createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0),
                    ogTags: createOgTags(replyConversation.ogTags),
                    isEdited: replyConversation.isEdited,
-                   attachmentUploaded: replyConversation.attachmentUploaded)]
+                   attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
@@ -360,8 +360,9 @@ public final class LMChatMessageListViewModel {
                      isDeleted: conversation.deletedByMember != nil,
                      createdBy: conversation.member?.name,
                      createdByImageUrl: conversation.member?.imageUrl,
+                     createdById: conversation.member?.sdkClientInfo?.uuid,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded)
+                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false)
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {

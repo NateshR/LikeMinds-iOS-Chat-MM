@@ -49,7 +49,7 @@ open class LMChatMessageListView: LMView {
         public let section: String
         public let timestamp: Int
         
-        init(data: [Message], section: String, timestamp: Int) {
+        public init(data: [Message], section: String, timestamp: Int) {
             self.data = data
             self.section = section
             self.timestamp = timestamp
@@ -66,18 +66,47 @@ open class LMChatMessageListView: LMView {
             public let isDeleted: Bool?
             public let createdBy: String?
             public let createdByImageUrl: String?
+            public let createdById: String?
             public let isIncoming: Bool?
             public let messageType: Int
             public let createdTime: String?
             public let ogTags: OgTags?
             public let isEdited: Bool?
             public let attachmentUploaded: Bool?
+            public var isShowMore: Bool = false
+            
+            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool) {
+                self.messageId = messageId
+                self.memberTitle = memberTitle
+                self.message = message
+                self.timestamp = timestamp
+                self.reactions = reactions
+                self.attachments = attachments
+                self.replied = replied
+                self.isDeleted = isDeleted
+                self.createdBy = createdBy
+                self.createdByImageUrl = createdByImageUrl
+                self.createdById = createdById
+                self.isIncoming = isIncoming
+                self.messageType = messageType
+                self.createdTime = createdTime
+                self.ogTags = ogTags
+                self.isEdited = isEdited
+                self.attachmentUploaded = attachmentUploaded
+                self.isShowMore = isShowMore
+            }
         }
         
         public struct Reaction {
             public let memberUUID: [String]
             public let reaction: String
             public let count: Int
+            
+            public init(memberUUID: [String], reaction: String, count: Int) {
+                self.memberUUID = memberUUID
+                self.reaction = reaction
+                self.count = count
+            }
         }
         
         public struct Attachment {
@@ -88,6 +117,16 @@ open class LMChatMessageListView: LMView {
             public let duration: Int?
             public let fileType: String?
             public let fileName: String?
+            
+            public init(fileUrl: String?, thumbnailUrl: String?, fileSize: Int?, numberOfPages: Int?, duration: Int?, fileType: String?, fileName: String?) {
+                self.fileUrl = fileUrl
+                self.thumbnailUrl = thumbnailUrl
+                self.fileSize = fileSize
+                self.numberOfPages = numberOfPages
+                self.duration = duration
+                self.fileType = fileType
+                self.fileName = fileName
+            }
         }
         
         public struct OgTags {
@@ -95,6 +134,13 @@ open class LMChatMessageListView: LMView {
             public let thumbnailUrl: String?
             public let title: String?
             public let subtitle: String?
+            
+            public init(link: String?, thumbnailUrl: String?, title: String?, subtitle: String?) {
+                self.link = link
+                self.thumbnailUrl = thumbnailUrl
+                self.title = title
+                self.subtitle = subtitle
+            }
         }
     }
     
@@ -134,16 +180,18 @@ open class LMChatMessageListView: LMView {
     // MARK: Data Variables
     public let cellHeight: CGFloat = 60
     public weak var delegate: LMChatMessageListViewDelegate?
+    public weak var cellDelegate: LMChatMessageCellDelegate?
+    public weak var audioDelegate: LMChatAudioProtocol?
     public var tableSections:[ContentModel] = []
-    public var audioIndex: IndexPath?
+    public var audioIndex: (section: Int, messageID: String)?
     public var currentLoggedInUserTagFormat: String = ""
     public var currentLoggedInUserReplaceTagFormat: String = ""
     
-    let reactionHeight: CGFloat = 50.0
-    let spaceReactionHeight: CGFloat = 10.0
-    let menuHeight: CGFloat = 200
-    var isMultipleSelectionEnable: Bool = false
-    var selectedItems: [ContentModel.Message] = []
+    public let reactionHeight: CGFloat = 50.0
+    public let spaceReactionHeight: CGFloat = 10.0
+    public let menuHeight: CGFloat = 200
+    public var isMultipleSelectionEnable: Bool = false
+    public var selectedItems: [ContentModel.Message] = []
     
     // MARK: setupViews
     open override func setupViews() {
@@ -190,23 +238,23 @@ open class LMChatMessageListView: LMView {
 //        resetAudio()
 //    }
     
-    open func reloadData() {
+    public func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }
     
-    func justReloadData() {
+    public  func justReloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }
     
-    func removeShimmer() {
+    public func removeShimmer() {
         if !tableSections.isEmpty { tableView.backgroundView = nil }
     }
     
-    func scrollToBottom() {
+    public func scrollToBottom() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
@@ -221,7 +269,7 @@ open class LMChatMessageListView: LMView {
         }
     }
     
-    func scrollAtIndexPath(indexPath: IndexPath) {
+    public func scrollAtIndexPath(indexPath: IndexPath) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
             guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
@@ -284,16 +332,16 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
             default:
                 cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
             }
-        } else if let ogTag = item.ogTags {
+        } else if let _ = item.ogTags {
             cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageLinkPreviewCell)
         } else {
             cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatMessageCell)
         }
         guard let cell else { return  LMChatMessageCell() }
         let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
-        cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: nil, index: indexPath)
+        cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: audioDelegate, index: indexPath)
         cell.currentIndexPath = indexPath
-        cell.delegate = self
+        cell.delegate = cellDelegate
         if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
             cell.selectedButton.isHidden = false
         } else {
@@ -365,25 +413,6 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         delegate?.didScrollTableView(scrollView)
     }
     
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    }
-    
-    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-       /*
-        if scrollView.contentOffset.y <= 20 {
-            print("end dragged top!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let firstIndexPath = visibleIndexPaths.first else {return}
-            delegate?.fetchDataOnScroll(indexPath: firstIndexPath, direction: .scroll_UP)
-        } else  if tableView.contentOffset.y >= (tableView.contentSize.height - tableView.frame.size.height) {
-            print("end dragged bottom!$!$")
-            guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows,
-                  let lastIndexPath = visibleIndexPaths.last else {return}
-            delegate?.fetchDataOnScroll(indexPath: lastIndexPath, direction: .scroll_DOWN)
-        }
-        */
-    }
-
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
@@ -392,6 +421,14 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
             return delegate?.getMessageContextMenu(indexPath, item: item)
+        }
+    }
+
+    open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        (cell as? LMChatAudioViewCell)?.resetAudio()
+        if indexPath.section == audioIndex?.section,
+           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
+//            LMChatAudioPlayManager.shared.resetAudioPlayer()
         }
     }
 
@@ -451,7 +488,6 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         
         reactionView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10).isActive = true
         reactionView.bottomAnchor.constraint(equalTo: container.bottomAnchor).isActive = true
-//        reactionView.widthAnchor.constraint(equalToConstant: 50*4).isActive = true
         reactionView.heightAnchor.constraint(equalToConstant: reactionHeight).isActive = true
         
         let centerPoint = CGPoint(x: cell.center.x, y: cell.center.y + 26)
@@ -488,48 +524,3 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-
-extension LMChatMessageListView: LMChatMessageCellDelegate {
-    
-    public func didCancelAttachmentUploading(indexPath: IndexPath) {
-        let item = tableSections[indexPath.section].data[indexPath.row]
-        delegate?.didCancelUploading(messageId: item.messageId)
-    }
-    
-    public func didRetryAttachmentUploading(indexPath: IndexPath) {
-        let item = tableSections[indexPath.section].data[indexPath.row]
-        delegate?.didRetryUploading(messageId: item.messageId)
-    }
-    
-    
-    public func didTappedOnSelectionButton(indexPath: IndexPath?) {
-        guard let indexPath else { return }
-        let item = tableSections[indexPath.section].data[indexPath.row]
-        let itemIndex = selectedItems.firstIndex(where: {$0.messageId == item.messageId})
-        if let itemIndex {
-            self.selectedItems.remove(at: itemIndex)
-        } else {
-            self.selectedItems.append(item)
-        }
-    }
-    
-    public func onClickReplyOfMessage(indexPath: IndexPath?) {
-        guard let indexPath else { return }
-        delegate?.didTappedOnReplyPreviewOfMessage(indexPath: indexPath)
-    }
-    
-    public func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?) {
-        guard let indexPath else { return }
-        delegate?.didTappedOnAttachmentOfMessage(url: url, indexPath: indexPath)
-    }
-    
-    public func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?) {
-        guard let indexPath else { return }
-        delegate?.didTappedOnGalleryOfMessage(attachmentIndex: attachmentIndex, indexPath: indexPath)
-    }
-    
-    public func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?) {
-        guard let indexPath else { return }
-        delegate?.didTappedOnReaction(reaction: reaction, indexPath: indexPath)
-    }
-}

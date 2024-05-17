@@ -237,7 +237,7 @@ open class LMChatBottomMessageComposerView: LMView {
     var sendButtonCenterYConstraint: NSLayoutConstraint?
     var sendButtonLongPressGesture: UILongPressGestureRecognizer!
     var sendButtonPanPressGesture: UIPanGestureRecognizer!
-    var isLinkPreviewCancel: Bool = false
+    public var isLinkPreviewCancel: Bool = false
     
     
     /*
@@ -260,7 +260,7 @@ open class LMChatBottomMessageComposerView: LMView {
     let sendButtonHeightConstant: CGFloat = 40
     var lockContainerViewHeight: CGFloat = 100
     var lockContainerViewHeightConstraint: NSLayoutConstraint?
-    var detectedFirstLink: String?
+    public var detectedFirstLink: String?
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -399,7 +399,7 @@ open class LMChatBottomMessageComposerView: LMView {
         stopAudioRecord.addTarget(self, action: #selector(onTapStopAudioRecording), for: .touchUpInside)
     }
     
-    func enableOrDisableMessageBox(withMessage message: String?, isEnable: Bool) {
+    public func enableOrDisableMessageBox(withMessage message: String?, isEnable: Bool) {
         restrictionLabel.text = message
         restrictionLabel.isHidden = isEnable
         containerView.isUserInteractionEnabled = isEnable
@@ -451,12 +451,12 @@ open class LMChatBottomMessageComposerView: LMView {
         lockContainerView.roundCorners([.layerMinXMinYCorner, .layerMaxXMinYCorner], with: sendButtonHeightConstant / 2)
     }
     
-    func showReplyView(withData data: LMChatMessageReplyPreview.ContentModel) {
+    public func showReplyView(withData data: LMChatMessageReplyPreview.ContentModel) {
         replyMessageView.setData(data)
         replyMessageViewContainer.isHidden = false
     }
     
-    func showEditView(withData data: LMChatMessageReplyPreview.ContentModel) {
+    public func showEditView(withData data: LMChatMessageReplyPreview.ContentModel) {
         replyMessageView.setDataForEdit(data)
         replyMessageViewContainer.isHidden = false
     }
@@ -562,7 +562,7 @@ extension LMChatBottomMessageComposerView {
     }
         
     
-    func updateRecordTime(with seconds: Int, isPlayback: Bool = false) {
+    public func updateRecordTime(with seconds: Int, isPlayback: Bool = false) {
         recordDuration.text = convertSecondsToFormattedTime(seconds: seconds)
         isPlayingAudio = isPlayback
         
@@ -575,7 +575,7 @@ extension LMChatBottomMessageComposerView {
     }
     
     // TODO: Remove this, when moving it to UI Library, same function exists in `LMChatAudioPreview`
-    func convertSecondsToFormattedTime(seconds: Int) -> String {
+    public func convertSecondsToFormattedTime(seconds: Int) -> String {
         let hours = seconds / 3600
         let minutes = (seconds % 3600) / 60
         let seconds = seconds % 60
@@ -601,7 +601,7 @@ extension LMChatBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
 // MARK: Audio Logic
 extension LMChatBottomMessageComposerView {
     // Resets Recording View and shows Text Input View
-    func resetRecordingView() {
+    public func resetRecordingView() {
         sendButton.tag = messageButtonTag
         resetSendButtonConstraints()
         
@@ -624,7 +624,7 @@ extension LMChatBottomMessageComposerView {
     
     
     // Shows Initial Recording View
-    func showRecordingView() {
+    public func showRecordingView() {
         sendButton.tag = audioButtonTag
         
         isLockedIn = false
@@ -642,7 +642,7 @@ extension LMChatBottomMessageComposerView {
     
     
     // Resets Send Button Constraints
-    func resetSendButtonConstraints() {
+    public func resetSendButtonConstraints() {
         sendButtonTrailingConstraint?.constant = sendButtonTrailingConstant
         sendButtonCenterYConstraint?.constant = sendButtonCenterYConstant
     }
@@ -660,7 +660,7 @@ extension LMChatBottomMessageComposerView {
     }
     
     // Sets the visibility of Slide To Cancel, Stop Audio Recording, Delete Audio Recording
-    func setVisibilityOfAudioElements(slideCancel: Bool, stopAudio: Bool, deleteAudio: Bool) {
+    public func setVisibilityOfAudioElements(slideCancel: Bool, stopAudio: Bool, deleteAudio: Bool) {
         deleteAudioRecord.isHidden = !deleteAudio
         stopAudioRecord.isHidden = !stopAudio
         slideToCancel.isHidden = !slideCancel
@@ -668,7 +668,7 @@ extension LMChatBottomMessageComposerView {
     
     
     // When user stops recording, showing user the view of recorded view!
-    func showPlayableRecordView() {
+    public func showPlayableRecordView() {
         resetSendButtonConstraints()
         setVisibilityOfAudioElements(slideCancel: false, stopAudio: false, deleteAudio: true)
         
@@ -685,7 +685,7 @@ extension LMChatBottomMessageComposerView {
     
 
     // When User locks in 🤫🧏‍♂️
-    func setupLockedAudioView() {
+    public func setupLockedAudioView() {
         checkSendButtonGestures()
         resetSendButtonConstraints()
         setVisibilityOfAudioElements(slideCancel: false, stopAudio: true, deleteAudio: true)
@@ -695,11 +695,11 @@ extension LMChatBottomMessageComposerView {
         sendButton.setImage(sendButtonIcon, for: .normal)
     }
     
-    func showHideLockContainer(isShow: Bool) {
+    public func showHideLockContainer(isShow: Bool) {
         lockContainerView.isHidden = !isShow
     }
     
-    func resetAudioDuration(with totalDuration: Int) {
+    public func resetAudioDuration(with totalDuration: Int) {
         recordDuration.text = convertSecondsToFormattedTime(seconds: totalDuration)
         micFlickerButton.setImage(Constants.shared.images.playFill, for: .normal)
         isPlayingAudio = false

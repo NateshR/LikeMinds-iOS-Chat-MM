@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 public protocol LMParticipantListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
@@ -14,8 +13,7 @@ public protocol LMParticipantListViewDelegate: AnyObject {
 }
 
 @IBDesignable
-open class LMParticipantListView: LMView {
-    
+open class LMChatParticipantListView: LMView {
     public struct ContentModel {
         public let userImage: String?
         public let userName: String
@@ -36,7 +34,7 @@ open class LMParticipantListView: LMView {
     
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
-        table.register(LMUIComponents.shared.participantListCell)
+        table.register(LMChatParticipantCell.self)
         table.dataSource = self
         table.delegate = self
         table.showsVerticalScrollIndicator = false
@@ -49,8 +47,9 @@ open class LMParticipantListView: LMView {
     
     // MARK: Data Variables
     public let cellHeight: CGFloat = 60
-    public var data: [LMParticipantCell.ContentModel] = []
+    public var data: [LMChatParticipantCell.ContentModel] = []
     public weak var delegate: LMParticipantListViewDelegate?
+    
     
     // MARK: setupViews
     open override func setupViews() {
@@ -64,17 +63,8 @@ open class LMParticipantListView: LMView {
     open override func setupLayouts() {
         super.setupLayouts()
         
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
+        pinSubView(subView: containerView)
+        containerView.pinSubView(subView: tableView)
     }
     
     
@@ -83,9 +73,6 @@ open class LMParticipantListView: LMView {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         containerView.backgroundColor = Appearance.shared.colors.white
-//        containerView.layer.borderColor = Appearance.shared.colors.gray4.cgColor
-//        containerView.layer.borderWidth = 1
-//        containerView.roundCornerWithShadow(cornerRadius: 16, shadowRadius: .zero, offsetX: .zero, offsetY: .zero, colour: .black, opacity: 0.1, corners: [.layerMinXMinYCorner, .layerMaxXMinYCorner])
         tableView.backgroundColor = Appearance.shared.colors.clear
     }
     
@@ -96,14 +83,13 @@ open class LMParticipantListView: LMView {
 
 
 // MARK: UITableView
-extension LMParticipantListView: UITableViewDataSource, UITableViewDelegate {
-    
+extension LMChatParticipantListView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         data.count
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.participantListCell) {
+        if let cell = tableView.dequeueReusableCell(LMChatParticipantCell.self) {
             let item = data[indexPath.row]
             cell.configure(with: item)
             if indexPath.row >= (data.count - 5) {
@@ -115,15 +101,7 @@ extension LMParticipantListView: UITableViewDataSource, UITableViewDelegate {
         return UITableViewCell()
     }
     
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        //        if taggingCellsData.count - 1 == indexPath.row {
-        //            viewModel?.fetchMoreUsers()
-        //        }
-    }
-    
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         delegate?.didTapOnCell(indexPath: indexPath)
     }
 }
-
-

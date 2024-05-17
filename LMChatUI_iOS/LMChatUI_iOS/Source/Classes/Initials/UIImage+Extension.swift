@@ -1,14 +1,32 @@
 //
 //  UIImage+Extension.swift
-//  LMChatCore_iOS
+//  likeminds-feed-iOS
 //
-//  Created by Pushpendra Singh on 24/04/24.
+//  Created by Devansh Mohata on 22/12/23.
 //
 
-import Foundation
 import UIKit
 
-extension UIImage {
+public extension UIImage {
+    static let circleImage: UIImage = {
+        let size: CGSize = CGSize(width: 24, height: 24)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let circleImage = renderer.image { ctx in
+            ctx.cgContext.setFillColor(UIColor.red.cgColor)
+            
+            let rectangle = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            ctx.cgContext.addEllipse(in: rectangle)
+            ctx.cgContext.drawPath(using: .fillStroke)
+        }
+        return circleImage
+    }()
+    
+    func withSystemImageConfig(pointSize: CGFloat, weight: UIImage.SymbolWeight = .light, scale: UIImage.SymbolScale = .medium) -> UIImage? {
+        let largeConfig = UIImage.SymbolConfiguration(pointSize: pointSize, weight: weight, scale: scale)
+        let image = self.applyingSymbolConfiguration(largeConfig)
+        return image
+    }
+    
     var noir: UIImage? {
         let context = CIContext(options: nil)
         guard let currentFilter = CIFilter(name: "CIPhotoEffectNoir") else { return nil }
@@ -62,7 +80,7 @@ extension UIImage {
         let unicode = Int(str[str.startIndex].value)
         if 65...90 ~= unicode {
             let hex = alphabetColors[unicode - 65]
-            return UIColor(hex: UInt(hex), alpha: 1.0)
+//            return UIColor(hex: UInt(hex), alpha: 1.0)
         }
         return UIColor.black
     }
@@ -99,24 +117,4 @@ extension UIImage {
             FileManager.default.createFile(atPath: imagesDirectoryPath, contents: img, attributes:  nil)
         }
     }
-    
-    static let circleImage: UIImage = {
-        let size: CGSize = CGSize(width: 24, height: 24)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        let circleImage = renderer.image { ctx in
-            ctx.cgContext.setFillColor(UIColor.red.cgColor)
-            
-            let rectangle = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-            ctx.cgContext.addEllipse(in: rectangle)
-            ctx.cgContext.drawPath(using: .fillStroke)
-        }
-        return circleImage
-    }()
-    
-    public func withSystemImageConfig(pointSize: CGFloat, weight: UIImage.SymbolWeight = .light, scale: UIImage.SymbolScale = .medium) -> UIImage? {
-        let largeConfig = UIImage.SymbolConfiguration(pointSize: pointSize, weight: weight, scale: scale)
-        let image = self.applyingSymbolConfiguration(largeConfig)
-        return image
-    }
 }
-

@@ -14,10 +14,13 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     open private(set) lazy var docPreviewContainerStackView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.distribution = .fillProportionally
+        view.distribution = .fill
+        view.alignment = .leading
         view.spacing = 4
         return view
     }()
+    
+    public var onShowMoreCallback: (() -> Void)?
     
     // MARK: setupViews
     open override func setupViews() {
@@ -50,15 +53,28 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
             docPreviewContainerStackView.isHidden = true
             return
         }
-        docPreview(attachments)
+        
+        let updatedAttachments = data.message?.isShowMore == true ? attachments : Array(attachments.prefix(2))
+        
+        docPreview(updatedAttachments)
+        
+        if data.message?.isShowMore != true,
+           attachments.count > 2 {
+            let button = LMButton()
+            button.setTitle("+ \(attachments.count - 2) More", for: .normal)
+            button.setImage(nil, for: .normal)
+            button.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
+            button.setFont(Appearance.shared.fonts.buttonFont1)
+            button.setTitleColor(.blue, for: .normal)
+            docPreviewContainerStackView.addArrangedSubview(button)
+        }
     }
-    
+
     func docPreview(_ attachments: [LMChatMessageListView.ContentModel.Attachment]) {
         guard !attachments.isEmpty else {
             docPreviewContainerStackView.isHidden = true
             return
         }
-        
         attachments.forEach { attachment in
             docPreviewContainerStackView.addArrangedSubview(createDocPreview(.init(fileUrl: attachment.fileUrl, thumbnailUrl: attachment.thumbnailUrl, fileSize: attachment.fileSize, numberOfPages: attachment.numberOfPages, fileType: attachment.fileType, fileName: attachment.fileName)))
         }
@@ -80,6 +96,11 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     override func prepareToResuse() {
         super.prepareToResuse()
         docPreviewContainerStackView.removeAllArrangedSubviews()
+    }
+    
+    @objc
+    open func didTapShowMore() {
+        onShowMoreCallback?()
     }
 }
 

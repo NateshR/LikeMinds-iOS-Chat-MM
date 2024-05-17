@@ -1,16 +1,15 @@
 //
-//  LMHomeFeedChatroomView.swift
+//  LMChatHomeFeedChatroomView.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 08/02/24.
 //
 
 import Foundation
-import LMChatUI_iOS
 import Kingfisher
 
 @IBDesignable
-open class LMHomeFeedChatroomView: LMView {
+open class LMChatHomeFeedChatroomView: LMView {
     
     public struct ContentModel {
         public let userName: String
@@ -296,7 +295,7 @@ open class LMHomeFeedChatroomView: LMView {
             case "link":
                 image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             case "gif":
-                image = UIImage(named: "gifBadge", in: LMChatCoreBundle, with: nil) ?? UIImage()
+                image = UIImage(named: "gifBadge", in: LMChatUIBundle, with: nil) ?? UIImage()
                 initalType = "GIF"
             default:
                 break

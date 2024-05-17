@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import LMChatUI_iOS
 import LMChatCore_iOS
 import LikeMindsChat
 
@@ -23,20 +24,20 @@ class ViewController: UIViewController {
 //        return view
 //    }()
     
-//    open private(set) lazy var containerView: LMHomeFeedChatroomView = {
-//        let view = LMHomeFeedChatroomView().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMChatHomeFeedChatroomView = {
+//        let view = LMChatHomeFeedChatroomView().translatesAutoresizingMaskIntoConstraints()
 ////                view.backgroundColor = .cyan
 //        return view
 //    }()
     
-//    open private(set) lazy var containerView: LMHomeFeedExploreTabView = {
-//        let view = LMHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
+//    open private(set) lazy var containerView: LMChatHomeFeedExploreTabView = {
+//        let view = LMChatHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
 //        view.backgroundColor = .systemGroupedBackground
 //        return view
 //    }()
     
-    open private(set) lazy var containerView: LMHomeFeedListView = {
-        let view = LMHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var containerView: LMChatHomeFeedListView = {
+        let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
         return view
     }()
@@ -82,7 +83,7 @@ class ViewController: UIViewController {
 //              try? LMChatMessageListViewModel.createModule(withChatroomId: "88638") else { return }
 //            try? LMChatAttachmentViewModel.createModule() else { return }
 //            try? LMParticipantListViewModel.createModule(withChatroomId: "36689") else { return }
-                try? LMHomeFeedViewModel.createModule() else { return }
+                try? LMChatHomeFeedViewModel.createModule() else { return }
 //            try? LMChatReportViewModel.createModule(reportContentId: ("36689", nil, nil)) else { return }
 //            self.addChild(homefeedvc)
 //            self.view.addSubview(homefeedvc.view)

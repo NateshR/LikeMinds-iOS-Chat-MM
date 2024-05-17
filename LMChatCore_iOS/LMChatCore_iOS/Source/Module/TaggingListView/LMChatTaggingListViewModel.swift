@@ -6,6 +6,7 @@
 //
 
 import LikeMindsChat
+import LMChatUI_iOS
 
 public protocol LMChatTaggingListViewModelProtocol: AnyObject { 
     func updateList(with users: [LMChatTaggingUserTableCell.ViewModel])

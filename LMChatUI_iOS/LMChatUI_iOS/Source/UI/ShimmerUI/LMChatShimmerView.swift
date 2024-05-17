@@ -5,9 +5,7 @@
 //  Created by Pushpendra Singh on 30/04/24.
 //
 
-import Foundation
 import UIKit
-import LMChatUI_iOS
 
 @IBDesignable
 open class LMChatShimmerView: LMView {

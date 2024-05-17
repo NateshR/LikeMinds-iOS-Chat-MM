@@ -49,6 +49,8 @@ open class LMChatMessageListViewController: LMViewController {
         let view = LMChatMessageListView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
         view.delegate = self
+        view.cellDelegate = self
+        view.audioDelegate = self
         return view
     }()
     
@@ -709,7 +711,7 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     public func audioRecordingStarted() {
         LMChatAudioPlayManager.shared.stopAudio { }
         // If Any Audio is playing, stop audio and reset audio view
-        messageListView.resetAudio()
+        resetAudio()
         
         do {
             let canRecord = try LMChatAudioRecordManager.shared.recordAudio(audioDelegate: self)
@@ -771,14 +773,14 @@ extension LMChatMessageListViewController: UIDocumentPickerDelegate {
             switch MediaPickerManager.shared.fileTypeForDocument {
             case .audio:
                 if let mediaDeatil = FileUtils.getDetail(forVideoUrl: localPath) {
-                    var mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
+                    let mediaModel = MediaPickerModel(with: localPath, type: .audio, thumbnailPath: mediaDeatil.thumbnailUrl)
                     mediaModel.duration = mediaDeatil.duration
                     mediaModel.fileSize = Int(mediaDeatil.fileSize ?? 0)
                     results.append(mediaModel)
                 }
             case .pdf:
                 if let pdfDetail = FileUtils.getDetail(forPDFUrl: localPath) {
-                    var mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
+                    let mediaModel = MediaPickerModel(with: localPath, type: .pdf, thumbnailPath: pdfDetail.thumbnailUrl)
                     mediaModel.numberOfPages = pdfDetail.pageCount
                     mediaModel.fileSize = Int(pdfDetail.fileSize ?? 0)
                     results.append(mediaModel)
@@ -791,8 +793,6 @@ extension LMChatMessageListViewController: UIDocumentPickerDelegate {
                                                                    delegate: self,
                                                                    chatroomId: viewModel?.chatroomId,
                                                                    mediaType: MediaPickerManager.shared.fileTypeForDocument), from: self, params: nil)
-//        guard let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: results, delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: MediaPickerManager.shared.fileTypeForDocument) else { return }
-//        self.present(viewController, animated: true)
     }
 }
 
@@ -860,9 +860,6 @@ extension LMChatMessageListViewController: UIImagePickerControllerDelegate, UINa
         } else if let capturedImage = info[.originalImage] as? UIImage, let localPath = MediaPickerManager.shared.saveImageIntoDirecotry(image: capturedImage) {
             targetUrl = localPath
         }
-        
-//        guard let targetUrl, let viewController =  try? LMChatAttachmentViewModel.createModuleWithData(mediaData: [.init(with: targetUrl, type: .image)], delegate: self, chatroomId: self.viewModel?.chatroomId, mediaType: .image) else { return }
-//        self.present(viewController, animated: true)
         guard let targetUrl else { return }
         NavigationScreen.shared.perform(.messageAttachmentWithData(data: [.init(with: targetUrl, type: .image)],
                                                                    delegate: self,
@@ -893,31 +890,106 @@ extension LMChatMessageListViewController: LMReactionViewControllerDelegate {
 }
 
 // MARK: LMChatAudioProtocol
-extension LMChatMessageListView: LMChatAudioProtocol {
+extension LMChatMessageListViewController: LMChatAudioProtocol {
+    
     public func didTapPlayPauseButton(for url: String, index: IndexPath) {
         resetAudio()
-        audioIndex = index
+        
+        guard messageListView.tableSections.indices.contains(index.section),
+              messageListView.tableSections[index.section].data.indices.contains(index.row) else { return }
+        
+        let messageID = messageListView.tableSections[index.section].data[index.row].messageId
+        
+        messageListView.audioIndex = (index.section, messageID)
         
         LMChatAudioPlayManager.shared.startAudio(url: url) { [weak self] progress in
-            (self?.tableView.cellForRow(at: index) as? LMChatAudioViewCell)?.seekSlider(to: Float(progress), url: url)
+            (self?.messageListView.tableView.cellForRow(at: index) as? LMChatAudioViewCell)?.seekSlider(to: Float(progress), url: url)
         }
     }
+    
     
     public func didSeekTo(_ position: Float, _ url: String, index: IndexPath) {
         LMChatAudioPlayManager.shared.seekAt(position, url: url)
     }
     
     public func resetAudio() {
-        if let audioIndex {
-            (tableView.cellForRow(at: audioIndex) as? LMChatAudioViewCell)?.resetAudio()
+        if let audioIndex = messageListView.audioIndex,
+           messageListView.tableSections.indices.contains(audioIndex.section),
+           let row = messageListView.tableSections[audioIndex.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }) {
+            
+            (messageListView.tableView.cellForRow(at: .init(row: row, section: audioIndex.section)) as? LMChatAudioViewCell)?.resetAudio()
         }
-        audioIndex = nil
+        
+        messageListView.audioIndex = nil
+    }
+    public func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        (cell as? LMChatAudioViewCell)?.resetAudio()
+//        if indexPath == messageListView.audioIndex {
+//            LMChatAudioPlayManager.shared.resetAudioPlayer()
+//        }
+    }
+}
+
+extension LMChatMessageListViewController: LMChatMessageCellDelegate {
+    
+    public func pauseAudioPlayer() {
+        LMChatAudioPlayManager.shared.stopAudio { }
+    }
+
+    public func onClickOfSeeMore(for messageID: String, indexPath: IndexPath) {
+        guard messageListView.tableSections.indices.contains(indexPath.section),
+              let row = messageListView.tableSections[indexPath.section].data.firstIndex(where: { $0.messageId == messageID }) else { return }
+        
+        messageListView.tableSections[indexPath.section].data[row].isShowMore.toggle()
+        messageListView.tableView.beginUpdates()
+        messageListView.tableView.reloadRows(at: [.init(row: row, section: indexPath.section)], with: .none)
+        messageListView.tableView.endUpdates()
     }
     
-    open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        (cell as? LMChatAudioViewCell)?.resetAudio()
-        if indexPath == audioIndex {
-            LMChatAudioPlayManager.shared.resetAudioPlayer()
+    public func didCancelAttachmentUploading(indexPath: IndexPath) {
+        let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        didCancelUploading(messageId: item.messageId)
+    }
+    
+    public func didRetryAttachmentUploading(indexPath: IndexPath) {
+        let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        didRetryUploading(messageId: item.messageId)
+    }
+    
+    
+    public func didTappedOnSelectionButton(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        let itemIndex = messageListView.selectedItems.firstIndex(where: {$0.messageId == item.messageId})
+        if let itemIndex {
+            messageListView.selectedItems.remove(at: itemIndex)
+        } else {
+            messageListView.selectedItems.append(item)
         }
     }
+    
+    public func onClickReplyOfMessage(indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        didTappedOnReplyPreviewOfMessage(indexPath: indexPath)
+    }
+    
+    public func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        didTappedOnAttachmentOfMessage(url: url, indexPath: indexPath)
+    }
+    
+    public func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        didTappedOnGalleryOfMessage(attachmentIndex: attachmentIndex, indexPath: indexPath)
+    }
+    
+    public func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?) {
+        guard let indexPath else { return }
+        didTappedOnReaction(reaction: reaction, indexPath: indexPath)
+    }
+    
+    public func didTapOnProfileLink(route: String) {
+        print(route)
+    }
+
 }

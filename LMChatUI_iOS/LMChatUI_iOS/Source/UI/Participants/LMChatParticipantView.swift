@@ -1,16 +1,15 @@
 //
-//  LMParticipantView.swift
+//  LMChatParticipantView.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 15/02/24.
 //
 
 import Foundation
-import LMChatUI_iOS
 import Kingfisher
 
 @IBDesignable
-open class LMParticipantView: LMView {
+open class LMChatParticipantView: LMView {
     
     public struct ContentModel {
         public let name: String

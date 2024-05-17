@@ -11,11 +11,14 @@ import Kingfisher
 public protocol LMChatMessageContentViewDelegate: AnyObject {
     func clickedOnReaction(_ reaction: String)
     func clickedOnAttachment(_ url: String)
+    func didTapOnProfileLink(route: String)
+    func didTapOnReplyPreview()
 }
 
 extension LMChatMessageContentViewDelegate {
     public func clickedOnReaction(_ reaction: String) {}
     public func clickedOnAttachment(_ url: String) {}
+    func didTapOnProfileLink(route: String) {}
 }
 
 @IBDesignable
@@ -39,6 +42,7 @@ open class LMChatMessageContentView: LMView {
     
     open private(set) lazy var chatProfileImageView: LMChatProfileView = {
         let image = LMUIComponents.shared.senderProfileView.init().translatesAutoresizingMaskIntoConstraints()
+        image.isUserInteractionEnabled = true
         return image
     }()
     
@@ -95,6 +99,7 @@ open class LMChatMessageContentView: LMView {
         label.paddingTop = 2
         label.paddingBottom = 2
         label.text = ""
+        label.isUserInteractionEnabled = true
         return label
     }()
     
@@ -125,6 +130,11 @@ open class LMChatMessageContentView: LMView {
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
     weak var delegate: LMChatMessageContentViewDelegate?
+    var dataView: LMChatMessageCell.ContentModel?
+    
+    @objc func didTapOnProfileLink(_ gesture: UITapGestureRecognizer) {
+        delegate?.didTapOnProfileLink(route: Constants.getProfileRoute(withUUID: self.dataView?.message?.createdById ?? "") )
+    }
     
     // MARK: setupViews
     open override func setupViews() {
@@ -142,6 +152,13 @@ open class LMChatMessageContentView: LMView {
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
         reactionsView.delegate = self
+        
+        let tapImageGesture = UITapGestureRecognizer(target: self, action: #selector(didTapOnProfileLink))
+        tapImageGesture.numberOfTapsRequired = 1
+        let tapNameLabelGesture = UITapGestureRecognizer(target: self, action: #selector(didTapOnProfileLink))
+        tapNameLabelGesture.numberOfTapsRequired = 1
+        chatProfileImageView.addGestureRecognizer(tapImageGesture)
+        usernameLabel.addGestureRecognizer(tapNameLabelGesture)
     }
     
     // MARK: setupLayouts
@@ -178,6 +195,7 @@ open class LMChatMessageContentView: LMView {
     }
     
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
+        dataView = data
         self.textLabel.isUserInteractionEnabled = true
         self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withTextColor: Appearance.Colors.shared.black)
         let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
@@ -235,6 +253,9 @@ open class LMChatMessageContentView: LMView {
             replyMessageView.closeReplyButton.isHidden = true
             let message = repliedMessage.isDeleted == true ? "This message was deleted!" : repliedMessage.message
             replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
+            replyMessageView.onClickReplyPreview = {[weak self] in
+                self?.delegate?.didTapOnReplyPreview()
+            }
         } else {
             replyMessageView.isHidden = true
         }
@@ -253,9 +274,6 @@ open class LMChatMessageContentView: LMView {
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
     }
-    
-    var originalCenter = CGPoint()
-    var replyActionHandler: (() -> Void)?
 }
 
 extension LMChatMessageContentView: LMChatMessageReactionsViewDelegate {

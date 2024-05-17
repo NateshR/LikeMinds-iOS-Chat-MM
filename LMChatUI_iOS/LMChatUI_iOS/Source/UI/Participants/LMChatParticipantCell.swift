@@ -1,5 +1,5 @@
 //
-//  LMParticipantCell.swift
+//  LMChatParticipantCell.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 16/02/24.
@@ -7,10 +7,9 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 @IBDesignable
-open class LMParticipantCell: LMTableViewCell {
+open class LMChatParticipantCell: LMTableViewCell {
     
     public struct ContentModel {
         public let name: String
@@ -18,7 +17,7 @@ open class LMParticipantCell: LMTableViewCell {
         public let profileImageUrl: String?
         public let customTitle: String?
         
-        init(name: String, designationDetail: String?, profileImageUrl: String?, customTitle: String?) {
+        public init(name: String, designationDetail: String?, profileImageUrl: String?, customTitle: String?) {
             self.name = name
             self.designationDetail = designationDetail
             self.profileImageUrl = profileImageUrl
@@ -27,8 +26,8 @@ open class LMParticipantCell: LMTableViewCell {
     }
     
     // MARK: UI Elements
-    open private(set) lazy var participantView: LMParticipantView = {
-        let view = LMCoreComponents.shared.participantView.init().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var participantView: LMChatParticipantView = {
+        let view = LMChatParticipantView().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()

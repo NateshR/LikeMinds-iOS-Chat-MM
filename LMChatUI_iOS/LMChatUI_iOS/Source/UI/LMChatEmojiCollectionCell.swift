@@ -6,12 +6,14 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 open class LMChatEmojiCollectionCell: LMCollectionViewCell {
     
-    struct ContentModel {
+    public struct ContentModel {
         let emojiIcon: String
+        public init(emojiIcon: String) {
+            self.emojiIcon = emojiIcon
+        }
     }
     
     open private(set) lazy var titleLabel: LMLabel = {
@@ -54,7 +56,7 @@ open class LMChatEmojiCollectionCell: LMCollectionViewCell {
         ])
     }
     
-    func configure(data: ContentModel) {
+    public func configure(data: ContentModel) {
         titleLabel.text = data.emojiIcon
     }
 }

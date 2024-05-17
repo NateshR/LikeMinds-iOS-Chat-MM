@@ -1,26 +1,24 @@
 //
-//  SearchMessageCell.swift
+//  LMChatSearchMessageCell.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 16/04/24.
 //
 
-// TODO: Move to UI Library
-
-import LMChatUI_iOS
 import UIKit
 
-public class SearchMessageCell: LMTableViewCell {
-    public struct ContentModel: SearchCellProtocol {
+public class LMChatSearchMessageCell: LMTableViewCell {
+    public struct ContentModel: LMChatSearchCellDataProtocol {
         public var chatroomID: String
         public var messageID: String?
         public let chatroomName: String
         public let message: String
         public let senderName: String
-        public let date: Date
+        public let date: TimeInterval
         public let isJoined: Bool
+        public let highlightedText: String
         
-        public init(chatroomID: String, messageID: String?, chatroomName: String, message: String, senderName: String, date: Date, isJoined: Bool) {
+        public init(chatroomID: String, messageID: String?, chatroomName: String, message: String, senderName: String, date: TimeInterval, isJoined: Bool, highlightedText: String) {
             self.chatroomID = chatroomID
             self.messageID = messageID
             self.chatroomName = chatroomName
@@ -28,6 +26,7 @@ public class SearchMessageCell: LMTableViewCell {
             self.senderName = senderName
             self.date = date
             self.isJoined = isJoined
+            self.highlightedText = highlightedText
         }
     }
     
@@ -114,25 +113,30 @@ public class SearchMessageCell: LMTableViewCell {
         sepratorView.isHidden = true
     }
     
-    func configure(with data: ContentModel) {
+    open func configure(with data: ContentModel) {
         titleLabel.text = data.chatroomName
-        subtitleLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(
-            from: "\(data.senderName): \(data.message)",
+        
+        var attrText = GetAttributedTextWithRoutes.getAttributedText(
+            from: data.message,
             andPrefix: "@",
             allowLink: false,
             allowHashtags: false
         )
+        
+        attrText = GetAttributedTextWithRoutes.detectAndHighlightText(in: attrText, text: data.highlightedText)
+        
+        let senderName = NSAttributedString(
+            string: "\(data.senderName): ",
+            attributes: [
+                .foregroundColor: Appearance.shared.colors.textColor,
+                .font: Appearance.shared.fonts.textFont1
+            ]
+        )
+        
+        attrText.insert(senderName, at: .zero)
+        
+        subtitleLabel.attributedText = attrText
         isJoinedLabel.isHidden = data.isJoined
-        dateLabel.text = data.date.inString(dateFormat: "dd/MM/yy")
-    }
-}
-
-
-// TODO: Move to UI Library
-extension Date {
-    func inString(dateFormat format: String ) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
-        return dateFormatter.string(from: self)
+        dateLabel.text = LMChatDateUtility.formatDate(data.date)
     }
 }

@@ -7,6 +7,7 @@
 
 import UIKit
 import LMChatCore_iOS
+import LMChatUI_iOS
 //import FirebaseMessaging
 //import FirebaseCore
 
@@ -25,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            .userName("DEFCON")
 //            .isGuest(false)
 //            .deviceId(UIDevice.current.identifierForVendor?.uuidString ?? "")
-        LMCoreComponents.shared.homeFeedChatroomView = CustomChatroomView.self
+        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
 //        FirebaseApp.configure()
 //        Messaging.messaging().delegate = self
         registerForPushNotifications(application: application)

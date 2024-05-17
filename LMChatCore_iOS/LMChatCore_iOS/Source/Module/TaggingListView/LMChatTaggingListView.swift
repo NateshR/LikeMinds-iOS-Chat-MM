@@ -148,7 +148,7 @@ extension LMChatTaggingListView: LMChatTaggingProtocol {
 
 extension LMChatMessageListViewController: LMChatTaggedUserFoundProtocol {
     public func userSelected(with route: String, and userName: String) {
-        inputTextView.addTaggedUser(with: userName, route: route)
+        bottomMessageBoxView.inputTextView.addTaggedUser(with: userName, route: route)
         mentionStopped()
     }
     
@@ -189,12 +189,12 @@ extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
         
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks
-        if !isLinkPreviewCancel, !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
-            self.detectedFirstLink = link
-            self.delegate?.linkDetected(link)
+        if !bottomMessageBoxView.isLinkPreviewCancel, !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+            bottomMessageBoxView.detectedFirstLink = link
+            bottomMessageBoxView.delegate?.linkDetected(link)
         } else {
-            linkPreviewView.isHidden = true
-            self.detectedFirstLink = nil
+            bottomMessageBoxView.linkPreviewView.isHidden = true
+            bottomMessageBoxView.detectedFirstLink = nil
         }
     }
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 public protocol LMBottomMessageReplyPreviewDelegate: AnyObject {
     func clearReplyPreview()
@@ -212,16 +211,9 @@ open class LMChatMessageReplyPreview: LMView {
         // Create Attachment
         let imageAttachment = NSTextAttachment()
         imageAttachment.image = image
-        // Set bound to reposition
-//        let imageOffsetY: CGFloat = -5.0
-//        imageAttachment.bounds = CGRect(x: 0, y: imageOffsetY, width: imageAttachment.image!.size.width, height: imageAttachment.image!.size.height)
-        // Create string with attachment
         let attachmentString = NSAttributedString(attachment: imageAttachment)
-        // Initialize mutable string
         let completeText = NSMutableAttributedString(string: "")
-        // Add image to mutable string
         completeText.append(attachmentString)
-        // Add your text to mutable string
         let textAfterIcon = NSAttributedString(string: initalType + " " + (message ?? ""))
         completeText.append(textAfterIcon)
         return completeText

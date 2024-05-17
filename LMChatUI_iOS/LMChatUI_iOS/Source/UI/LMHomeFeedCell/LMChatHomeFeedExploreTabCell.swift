@@ -1,5 +1,5 @@
 //
-//  LMHomeFeedExploreTabCell.swift
+//  LMChatHomeFeedExploreTabCell.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 12/02/24.
@@ -7,24 +7,23 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 @IBDesignable
-open class LMHomeFeedExploreTabCell: LMTableViewCell {
+open class LMChatHomeFeedExploreTabCell: LMTableViewCell {
     
     public struct ContentModel {
         public let totalChatroomsCount: Int?
         public let unseenChatroomsCount: Int?
         
-        init(totalChatroomsCount: Int?, unseenChatroomsCount: Int?) {
+        public init(totalChatroomsCount: Int?, unseenChatroomsCount: Int?) {
             self.totalChatroomsCount = totalChatroomsCount
             self.unseenChatroomsCount = unseenChatroomsCount
         }
     }
     
     // MARK: UI Elements
-    open private(set) lazy var exploreTabView: LMHomeFeedExploreTabView = {
-        let view = LMHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var exploreTabView: LMChatHomeFeedExploreTabView = {
+        let view = LMChatHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -79,7 +78,7 @@ open class LMHomeFeedExploreTabCell: LMTableViewCell {
     
     // MARK: configure
     open func configure(with data: ContentModel) {
-        exploreTabView.setData(LMHomeFeedExploreTabView.ContentModel(tilesName: "Explore", tilesIcon: "", unreadCount: data.unseenChatroomsCount ?? 0, totalCount: data.totalChatroomsCount ?? 0))
+        exploreTabView.setData(LMChatHomeFeedExploreTabView.ContentModel(tilesName: "Explore", tilesIcon: "", unreadCount: data.unseenChatroomsCount ?? 0, totalCount: data.totalChatroomsCount ?? 0))
     }
 }
 

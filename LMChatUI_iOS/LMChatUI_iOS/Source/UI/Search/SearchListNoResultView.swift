@@ -5,11 +5,9 @@
 //  Created by Devansh Mohata on 05/05/24.
 //
 
-import LMChatUI_iOS
 import UIKit
 
-
-open class SearchListNoResultView: LMView {
+open class LMChatSearchNoResultView: LMView {
     open private(set) lazy var containerView: LMView = {
         let view = LMView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -19,7 +17,7 @@ open class SearchListNoResultView: LMView {
     open private(set) lazy var placeholderImage: LMImageView = {
         let image = LMImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(named: "noDataImage", in: Bundle(for: SearchListNoResultView.self), with: nil)
+//        image.image = UIImage(named: "noDataImage", in: Bundle(for: SearchListNoResultView.self), with: nil)
         return image
     }()
     
@@ -46,7 +44,7 @@ open class SearchListNoResultView: LMView {
         super.setupLayouts()
         
         placeholderImage.addConstraint(centerX: (containerView.centerXAnchor, 0),
-                                       centerY: (containerView.centerYAnchor, 0))
+                                       centerY: (containerView.centerYAnchor, -60))
         placeholderImage.setHeightConstraint(with: 64)
         placeholderImage.setWidthConstraint(with: placeholderImage.heightAnchor)
         

@@ -7,9 +7,10 @@
 
 import UIKit
 
-public protocol LMChatAudioProtocol {
+public protocol LMChatAudioProtocol: AnyObject {
     func didTapPlayPauseButton(for url: String, index: IndexPath)
     func didSeekTo(_ position: Float, _ url: String, index: IndexPath)
+    func pauseAudioPlayer()
 }
 
 public struct LMChatAudioContentModel {
@@ -66,7 +67,7 @@ open class LMChatVoiceNotePreview: LMView {
         return label
     }()
     
-    var delegate: LMChatAudioProtocol?
+    weak var delegate: LMChatAudioProtocol?
     var url: String?
     var duration = 0
     var index: IndexPath?

@@ -27,16 +27,18 @@ public struct SearchChatroomDataModel {
 
 
 public struct SearchConversationDataModel {
-    let id: String
-    let chatroomDetails: SearchChatroomDataModel
-    let message: String
-    let createdAt: Double
+    public let id: String
+    public let chatroomDetails: SearchChatroomDataModel
+    public let message: String
+    public let createdAt: Double
+    public let updatedAt: Double
     
-    public init(id: String, chatroomDetails: SearchChatroomDataModel, message: String, createdAt: Double) {
+    public init(id: String, chatroomDetails: SearchChatroomDataModel, message: String, createdAt: Double, updatedAt: Double) {
         self.id = id
         self.chatroomDetails = chatroomDetails
         self.message = message
         self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }
 

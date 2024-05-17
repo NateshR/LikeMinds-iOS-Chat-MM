@@ -1,5 +1,5 @@
 //
-//  LMHomeFeedListView.swift
+//  LMChatHomeFeedListView.swift
 //  LMChatCore_iOS
 //
 //  Created by Pushpendra Singh on 09/02/24.
@@ -21,7 +21,7 @@ public enum HomeFeedSection: String {
 }
 
 @IBDesignable
-open class LMHomeFeedListView: LMView {
+open class LMChatHomeFeedListView: LMView {
     
     public struct ContentModel {
         public let data: [Any]
@@ -41,8 +41,8 @@ open class LMHomeFeedListView: LMView {
         return view
     }()
     
-    open private(set) lazy var loadingView: LMHomeFeedShimmerView = {
-        let view = LMHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var loadingView: LMChatHomeFeedShimmerView = {
+        let view = LMChatHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
         view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
         return view
     }()
@@ -62,7 +62,7 @@ open class LMHomeFeedListView: LMView {
     
     // MARK: Data Variables
     public let cellHeight: CGFloat = 60
-    private var data: [LMHomeFeedChatroomCell.ContentModel] = []
+    private var data: [LMChatHomeFeedChatroomCell.ContentModel] = []
     public weak var delegate: LMHomFeedListViewDelegate?
     public var tableSections:[ContentModel] = []
     
@@ -107,7 +107,7 @@ open class LMHomeFeedListView: LMView {
         self.tableView.reloadData()
     }
     
-    public func updateChatroomsData(chatroomData: [LMHomeFeedChatroomCell.ContentModel]) {
+    public func updateChatroomsData(chatroomData: [LMChatHomeFeedChatroomCell.ContentModel]) {
         if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
             tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
         } else {
@@ -119,7 +119,7 @@ open class LMHomeFeedListView: LMView {
         reloadData()
     }
     
-    public func updateExploreTabCount(exploreTabCount: LMHomeFeedExploreTabCell.ContentModel) {
+    public func updateExploreTabCount(exploreTabCount: LMChatHomeFeedExploreTabCell.ContentModel) {
         if let index = tableSections.firstIndex(where: {$0.sectionType == .exploreTab}) {
             tableSections[index] = .init(data: [exploreTabCount], sectionType: .exploreTab, sectionOrder: 1)
         } else {
@@ -132,7 +132,7 @@ open class LMHomeFeedListView: LMView {
 
 
 // MARK: UITableView
-extension LMHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
+extension LMChatHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
     
 
     open func numberOfSections(in tableView: UITableView) -> Int {
@@ -148,13 +148,13 @@ extension LMHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
         
         switch tableSections[indexPath.section].sectionType {
         case .exploreTab:
-            if let item = items[indexPath.row] as? LMHomeFeedExploreTabCell.ContentModel,
+            if let item = items[indexPath.row] as? LMChatHomeFeedExploreTabCell.ContentModel,
                let cell = tableView.dequeueReusableCell(LMUIComponents.shared.homeFeedExploreTabCell) {
                 cell.configure(with: item)
                 return cell
             }
         case .chatrooms:
-            if let item = items[indexPath.row] as? LMHomeFeedChatroomCell.ContentModel,
+            if let item = items[indexPath.row] as? LMChatHomeFeedChatroomCell.ContentModel,
                let cell = tableView.dequeueReusableCell(LMUIComponents.shared.homeFeedChatroomCell) {
                 cell.configure(with: item)
                 if indexPath.row >= (items.count - 4) {

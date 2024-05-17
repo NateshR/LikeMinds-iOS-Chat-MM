@@ -6,13 +6,17 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
-open class LMReactionTitleCell: LMCollectionViewCell {
-    struct ContentModel {
-        let title: String
-        let count: Int
-        var isSelected: Bool = false
+open class LMChatReactionTitleCell: LMCollectionViewCell {
+    public struct ContentModel {
+        public let title: String
+        public let count: Int
+        public var isSelected: Bool = false
+        public init(title: String, count: Int, isSelected: Bool) {
+            self.title = title
+            self.count = count
+            self.isSelected = isSelected
+        }
     }
  
     lazy var titleLabel: LMLabel = {
@@ -67,7 +71,7 @@ open class LMReactionTitleCell: LMCollectionViewCell {
         ])
     }
     
-    func configure(data: ContentModel) {
+    public func configure(data: ContentModel) {
         if data.title.lowercased() == "all" {
             titleLabel.text = "\(data.title) (\(data.count))"
         } else {
