@@ -7,7 +7,6 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 public protocol LMChatMessageGallaryViewDelegate: AnyObject {
     func onClickAttachment(_ index: Int)

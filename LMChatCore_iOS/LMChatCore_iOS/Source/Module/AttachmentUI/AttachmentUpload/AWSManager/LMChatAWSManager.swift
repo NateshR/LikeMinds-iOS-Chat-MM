@@ -20,7 +20,7 @@ final class LMChatAWSManager {
     private init() { }
     
     public static let shared = LMChatAWSManager()
-    var storedUploadTasks: [String: [AWSTask<AWSS3TransferUtilityUploadTask>]] = [:]
+    var storedUploadTasks: [String: [AWSS3TransferUtilityUploadTask]] = [:]
     
     public static func awsFilePathForConversation(chatroomId: String,
                                                 conversationId: String,
@@ -50,7 +50,7 @@ final class LMChatAWSManager {
         if let tasks = storedUploadTasks[groupId] {
             tasks.forEach { uploadTask in
                 print("Cancelling task......")
-                uploadTask.result?.cancel()
+                uploadTask.suspend()
             }
         }
     }
@@ -59,12 +59,13 @@ final class LMChatAWSManager {
         if let tasks = storedUploadTasks[groupId] {
             tasks.forEach { uploadTask in
                 print("Resuming task......")
-                uploadTask.result?.resume()
+                uploadTask.resume()
             }
         }
     }
     
-    private func addUploadTask(groupId: String, task: AWSTask<AWSS3TransferUtilityUploadTask>) {
+    private func addUploadTask(groupId: String, task: AWSS3TransferUtilityUploadTask) {
+        print("Adding task......")
         if var tasks = storedUploadTasks[groupId] {
             tasks.append(task)
             storedUploadTasks[groupId] = tasks
@@ -121,17 +122,15 @@ final class LMChatAWSManager {
             
             // Start uploading using AWSS3TransferUtility
             let awsTransferUtility = AWSS3TransferUtility.default()
-            let task = awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+            awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith {[weak self] (task) -> Any? in
                 if let error = task.error {
                     print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
                 }
-                if let _ = task.result {
+                if let groupid, let uploadTask = task.result {
                     print("Starting upload...")
+                    self?.addUploadTask(groupId: groupid, task: uploadTask)
                 }
                 return nil
-            }
-            if let groupid, let uploadTask = task as? AWSTask<AWSS3TransferUtilityUploadTask> {
-                addUploadTask(groupId: groupid, task: uploadTask)
             }
         } catch {
             completion?(nil, nil)
@@ -173,17 +172,15 @@ final class LMChatAWSManager {
         
         // Start uploading using AWSS3TransferUtility
         let awsTransferUtility = AWSS3TransferUtility.default()
-        let task = awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+        let task = awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { [weak self] (task) -> Any? in
             if let error = task.error {
                 print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
             }
-            if let _ = task.result {
+            if let groupid, let uploadTask = task.result {
                 print("Starting upload...")
+                self?.addUploadTask(groupId: groupid, task: uploadTask)
             }
             return nil
-        }
-        if let groupid, let uploadTask = task as? AWSTask<AWSS3TransferUtilityUploadTask> {
-            addUploadTask(groupId: groupid, task: uploadTask)
         }
     }
 }

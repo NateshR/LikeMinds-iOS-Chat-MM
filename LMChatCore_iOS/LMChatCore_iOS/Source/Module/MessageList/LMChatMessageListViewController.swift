@@ -923,7 +923,7 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
         messageListView.audioIndex = nil
     }
     public func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        (cell as? LMChatAudioViewCell)?.resetAudio()
+//        (cell as? LMChatAudioViewCell)?.resetAudio()
 //        if indexPath == messageListView.audioIndex {
 //            LMChatAudioPlayManager.shared.resetAudioPlayer()
 //        }

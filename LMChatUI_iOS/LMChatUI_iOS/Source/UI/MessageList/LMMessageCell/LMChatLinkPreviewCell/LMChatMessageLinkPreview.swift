@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 open class LMChatMessageLinkPreview: LMView {
     

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 public protocol LMAttachmentUploadRetryViewDelegate: AnyObject {
     func retryUploadingAttachmentClicked()

@@ -221,7 +221,7 @@ open class LMChatAttachmentViewController: LMViewController {
         NSLayoutConstraint.activate([
             imageActionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageActionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageActionsContainer.heightAnchor.constraint(equalToConstant: 54),
+            imageActionsContainer.heightAnchor.constraint(equalToConstant: 74),
             imageActionsContainer.topAnchor.constraint(equalTo: view.topAnchor),
             rightContainerStackView.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
             rightContainerStackView.trailingAnchor.constraint(equalTo: imageActionsContainer.trailingAnchor, constant: -12),

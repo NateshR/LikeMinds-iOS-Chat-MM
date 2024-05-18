@@ -94,9 +94,7 @@ extension LMChatHomeFeedViewController: LMHomeFeedViewModelProtocol {
     }
     
     
-    public func reloadData() {
-        
-    }
+    public func reloadData() {}
 }
 
 extension LMChatHomeFeedViewController: LMHomFeedListViewDelegate {
