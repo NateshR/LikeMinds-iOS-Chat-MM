@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 public protocol LMFeedTaggingTextViewProtocol: AnyObject {
     func mentionStarted(with text: String, chatroomId: String)

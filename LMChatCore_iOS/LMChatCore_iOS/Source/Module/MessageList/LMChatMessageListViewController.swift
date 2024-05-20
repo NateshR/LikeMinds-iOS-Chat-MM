@@ -133,7 +133,7 @@ open class LMChatMessageListViewController: LMViewController {
         self.view.addSubview(chatroomTopicBar)
         self.view.addSubview(scrollToBottomButton)
         bottomMessageBoxView.addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
-
+        bottomMessageBoxView.inputTextView.placeHolderText = "Type your response"
         chatroomTopicBar.onTopicViewClick = {[weak self] topicId in
             self?.topicBarClicked(topicId: topicId)
         }
@@ -853,19 +853,23 @@ extension LMChatMessageListViewController: UIImagePickerControllerDelegate, UINa
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
-        var targetUrl: URL?
-        if let videoURL = info[.mediaURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: videoURL) {
-            targetUrl = localPath
+        var mediaType: MediaType = .image
+        var mediaData: [MediaPickerModel] = []
+        if let videoURL = info[.mediaURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: videoURL),
+           let videoDetails = FileUtils.getDetail(forVideoUrl: localPath){
+            mediaType = .video
+            mediaData = [.init(with: localPath, type: .video, thumbnailPath: videoDetails.thumbnailUrl)]
         } else if let imageUrl = info[.imageURL] as? URL, let localPath = MediaPickerManager.shared.createLocalURLfromPickedAssetsUrl(url: imageUrl) {
-            targetUrl = localPath
+            mediaType = .image
+            mediaData = [.init(with: localPath, type: .image)]
         } else if let capturedImage = info[.originalImage] as? UIImage, let localPath = MediaPickerManager.shared.saveImageIntoDirecotry(image: capturedImage) {
-            targetUrl = localPath
+            mediaType = .image
+            mediaData = [.init(with: localPath, type: .image)]
         }
-        guard let targetUrl else { return }
-        NavigationScreen.shared.perform(.messageAttachmentWithData(data: [.init(with: targetUrl, type: .image)],
+        NavigationScreen.shared.perform(.messageAttachmentWithData(data: mediaData,
                                                                    delegate: self,
                                                                    chatroomId: viewModel?.chatroomId,
-                                                                   mediaType: .image), from: self, params: nil)
+                                                                   mediaType: mediaType), from: self, params: nil)
     }
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

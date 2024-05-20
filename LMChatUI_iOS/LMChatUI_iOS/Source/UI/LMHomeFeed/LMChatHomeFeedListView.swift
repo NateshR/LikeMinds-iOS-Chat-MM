@@ -120,12 +120,14 @@ open class LMChatHomeFeedListView: LMView {
         } else {
             if !chatroomData.isEmpty {
                 tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
-                tableView.backgroundView = nil
-            } else {
-                let view = LMChatNoResultView(frame: tableView.bounds)
-                view.placeholderText.text = "It's time to participate"
-                tableView.backgroundView = view
             }
+        }
+        if chatroomData.isEmpty {
+            let view = LMChatNoResultView(frame: tableView.bounds)
+            view.placeholderText.text = "It's time to participate"
+            tableView.backgroundView = view
+        } else {
+            tableView.backgroundView = nil
         }
         reloadData()
     }

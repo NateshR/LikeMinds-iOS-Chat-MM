@@ -79,8 +79,6 @@ open class LMChatBottomMessageComposerView: LMView {
     open private(set) lazy var inputTextView: LMChatTaggingTextView = {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = Appearance.shared.colors.white
-        view.placeHolderText = "Write something"
-//        view.mentionDelegate = self
         view.isScrollEnabled = false
         return view
     }()

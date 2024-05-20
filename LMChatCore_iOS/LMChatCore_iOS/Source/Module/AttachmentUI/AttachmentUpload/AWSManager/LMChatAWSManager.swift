@@ -29,7 +29,7 @@ final class LMChatAWSManager {
                                                 isThumbnail: Bool = false) -> String {
         let miliseconds = Int(Date().millisecondsSince1970)
         if isThumbnail {
-            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(miliseconds).\(fileExtension)"
+            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(miliseconds).jpeg"
         } else {
           return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(miliseconds).\(fileExtension)"
         }
@@ -106,7 +106,7 @@ final class LMChatAWSManager {
                 DispatchQueue.main.async(execute: {
                     if error == nil {
                         let url = AWSS3.default().configuration.endpoint.url
-                        let publicURL = url?.appendingPathComponent(ServiceAPI.bucketURL).appendingPathComponent(fileName)
+                        let publicURL = url?.appendingPathComponent(ServiceAPI.bucketURL).appendingPathComponent(awsPath)
                         print("File Uploaded SUCCESSFULLY to:\(String(describing: publicURL))")
                         if let completionBlock = completion {
                             completionBlock(publicURL?.absoluteString, nil)
@@ -122,7 +122,7 @@ final class LMChatAWSManager {
             
             // Start uploading using AWSS3TransferUtility
             let awsTransferUtility = AWSS3TransferUtility.default()
-            awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith {[weak self] (task) -> Any? in
+            awsTransferUtility.uploadData(data, bucket: ServiceAPI.bucketURL, key: awsPath, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith {[weak self] (task) -> Any? in
                 if let error = task.error {
                     print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
                 }
@@ -156,7 +156,7 @@ final class LMChatAWSManager {
             DispatchQueue.main.async(execute: {
                 if error == nil {
                     let url = AWSS3.default().configuration.endpoint.url
-                    let publicURL = url?.appendingPathComponent(ServiceAPI.bucketURL).appendingPathComponent(fileName)
+                    let publicURL = url?.appendingPathComponent(ServiceAPI.bucketURL).appendingPathComponent(awsPath)
                     print("File Uploaded SUCCESSFULLY to:\(String(describing: publicURL))")
                     if let completionBlock = completion {
                         completionBlock(publicURL?.absoluteString, nil)
@@ -172,7 +172,7 @@ final class LMChatAWSManager {
         
         // Start uploading using AWSS3TransferUtility
         let awsTransferUtility = AWSS3TransferUtility.default()
-        let task = awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: fileName, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { [weak self] (task) -> Any? in
+        awsTransferUtility.uploadData(fileData, bucket: ServiceAPI.bucketURL, key: awsPath, contentType: contenType, expression: expression, completionHandler: completionHandler).continueWith { [weak self] (task) -> Any? in
             if let error = task.error {
                 print("Error uploading file: \(error.localizedDescription)\n error: \(error)")
             }

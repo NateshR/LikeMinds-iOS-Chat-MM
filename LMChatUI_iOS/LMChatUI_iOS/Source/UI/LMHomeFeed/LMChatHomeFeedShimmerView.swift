@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 open class LMChatHomeFeedShimmerView: LMView {
     
@@ -34,7 +33,7 @@ open class LMChatHomeFeedShimmerView: LMView {
     
     open override func setupLayouts() {
         super.setupLayouts()
-        for _ in 0..<8 {
+        for _ in 0..<5 {
             let shimmer = LMChatHomeFeedLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             shimmer.setHeightConstraint(with: 80)
