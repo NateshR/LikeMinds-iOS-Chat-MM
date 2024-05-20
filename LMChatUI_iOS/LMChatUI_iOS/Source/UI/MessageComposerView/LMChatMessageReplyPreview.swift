@@ -19,11 +19,13 @@ open class LMChatMessageReplyPreview: LMView {
         public let username: String?
         public let replyMessage: String?
         public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?
+        public let messageType: Int?
         
-        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?) {
+        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?, messageType: Int?) {
             self.username = username
             self.replyMessage = replyMessage
             self.attachmentsUrls = attachmentsUrls
+            self.messageType = messageType
         }
     }
     
@@ -161,7 +163,7 @@ open class LMChatMessageReplyPreview: LMView {
         viewData = data
         self.userNameLabel.text = data.username
         let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
-        self.messageLabel.attributedText = createAttributedString(for: data.attachmentsUrls?.first?.fileType, with: attributedText.string)
+        self.messageLabel.attributedText = createAttributedString(data)
         if let attachmentsUrls = data.attachmentsUrls,
            let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),
            let url = URL(string: firstUrl) {
@@ -175,15 +177,21 @@ open class LMChatMessageReplyPreview: LMView {
     public func setDataForEdit(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = "Edit message"
-        let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
-        self.messageLabel.attributedText = createAttributedString(for: data.attachmentsUrls?.first?.fileType, with: attributedText.string)
+        self.messageLabel.attributedText = createAttributedString(data)
         messageAttachmentImageView.isHidden = true
         
     }
     
-    func createAttributedString(for fileType: String?, with message: String?) -> NSAttributedString {
-        guard let fileType else {
-            return NSAttributedString(string: message ?? "")
+    func createAttributedString(_ data: ContentModel) -> NSAttributedString {
+        let message = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
+        guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
+            let attributedText = NSMutableAttributedString(string: "")
+            if data.messageType == 10 {
+                let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+            }
+            attributedText.append(NSAttributedString(string: " " + (data.replyMessage ?? "")))
+            return attributedText
         }
         var image: UIImage = UIImage()
         var initalType = ""
@@ -198,25 +206,41 @@ open class LMChatMessageReplyPreview: LMView {
             image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Audio"
         case "voice_note":
-            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Voice note"
         case "pdf", "doc":
             image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Document"
         case "link":
             image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+        case "gif":
+            image = Constants.shared.images.gifBadgeIcon
+            initalType = "GIF"
         default:
             break
         }
-        // Create Attachment
-        let imageAttachment = NSTextAttachment()
-        imageAttachment.image = image
-        let attachmentString = NSAttributedString(attachment: imageAttachment)
-        let completeText = NSMutableAttributedString(string: "")
-        completeText.append(attachmentString)
-        let textAfterIcon = NSAttributedString(string: initalType + " " + (message ?? ""))
-        completeText.append(textAfterIcon)
-        return completeText
+        
+        let attributedText = NSMutableAttributedString(string: "")
+        
+        if fileType.lowercased() == "gif" {
+            let textAtt = NSTextAttachment(image: image)
+            textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
+            attributedText.append(NSAttributedString(string: " "))
+            attributedText.append(NSAttributedString(attachment: textAtt))
+            attributedText.append(NSAttributedString(string: " \(initalType) "))
+        } else {
+            if count > 1 {
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                attributedText.append(NSAttributedString(string: " (+\(count - 1) more) "))
+            } else {
+                attributedText.append(NSAttributedString(string: " "))
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                attributedText.append(NSAttributedString(string: " \(initalType) "))
+            }
+        }
+        attributedText.append(message)
+        
+        return attributedText
     }
     
     @objc func cancelReply(_ sender:UIButton) {

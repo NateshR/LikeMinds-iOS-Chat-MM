@@ -475,18 +475,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             deleteMessageConfirmation([message.messageId])
         case .edit:
             viewModel?.editConversation(conversationId: message.messageId)
-            guard let message = viewModel?.editChatMessage?.answer.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "").trimmingCharacters(in: .whitespacesAndNewlines), !message.isEmpty else {
+            guard let messageText = viewModel?.editChatMessage?.answer.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "").trimmingCharacters(in: .whitespacesAndNewlines), !messageText.isEmpty else {
                 viewModel?.editChatMessage = nil
                 return
             }
             bottomMessageBoxView.inputTextView.becomeFirstResponder()
-            bottomMessageBoxView.inputTextView.setAttributedText(from: message)
-            bottomMessageBoxView.showEditView(withData: .init(username: "", replyMessage: message, attachmentsUrls: []))
+            bottomMessageBoxView.inputTextView.setAttributedText(from: messageText)
+            bottomMessageBoxView.showEditView(withData: .init(username: "", replyMessage: messageText
+                                                              , attachmentsUrls: [], messageType: message.messageType))
             break
         case .reply:
             bottomMessageBoxView.inputTextView.becomeFirstResponder()
             viewModel?.replyConversation(conversationId: message.messageId)
-            bottomMessageBoxView.showReplyView(withData: .init(username: message.createdBy, replyMessage: message.message, attachmentsUrls: message.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
+            bottomMessageBoxView.showReplyView(withData: .init(username: message.createdBy, replyMessage: message.message, attachmentsUrls: message.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: message.messageType))
             break
         case .copy:
             viewModel?.copyConversation(conversationIds: [message.messageId])

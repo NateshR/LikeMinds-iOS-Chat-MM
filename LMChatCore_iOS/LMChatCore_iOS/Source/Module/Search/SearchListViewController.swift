@@ -177,7 +177,7 @@ extension SearchListViewController: UISearchBarDelegate {
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
    public func updateSearchList(with data: [ContentModel]) {
-       tableView.backgroundView = data.isEmpty ? LMChatSearchNoResultView(frame: tableView.bounds) : nil
+       tableView.backgroundView = data.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
         showHideFooterLoader(isShow: false)
         self.searchResults = data
         tableView.reloadData()

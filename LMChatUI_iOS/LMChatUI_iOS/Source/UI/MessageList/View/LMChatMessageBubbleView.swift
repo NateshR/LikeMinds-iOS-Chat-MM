@@ -40,6 +40,16 @@ open class LMChatMessageBubbleView: LMView {
         return image
     }()
     
+    open private(set) lazy var timestampLabel: LMLabel = {
+        let label =  LMLabel()
+            .translatesAutoresizingMaskIntoConstraints()
+        label.numberOfLines = 0
+        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.textColor = Appearance.shared.colors.textColor
+        label.text = ""
+        return label
+    }()
+    
     /// A type describing the content of this view.
     public struct ContentModel {
         /// The background color of the bubble.
@@ -86,6 +96,7 @@ open class LMChatMessageBubbleView: LMView {
     private func addContentContainerView() {
         addSubview(imageView)
         addSubview(contentContainer)
+        addSubview(timestampLabel)
         let leading: CGFloat = isIncoming ? 6 : 12
         let trailing: CGFloat = isIncoming ? 12 : 6
         containerViewLeadingConstraint = contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading)
@@ -96,7 +107,11 @@ open class LMChatMessageBubbleView: LMView {
             imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-            contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+//            contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            timestampLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
+            timestampLabel.topAnchor.constraint(equalTo: contentContainer.bottomAnchor, constant: 6),
+            timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -18),
+            timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 10),
         ])
         
         containerViewLeadingConstraint?.isActive = true

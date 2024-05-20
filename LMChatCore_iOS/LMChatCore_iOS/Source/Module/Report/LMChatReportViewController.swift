@@ -109,6 +109,8 @@ open class LMChatReportViewController: LMViewController {
         [reportTitleLabel, reportSubtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
             stackView.addArrangedSubview(subview)
         }
+        
+        self.initializeHideKeyboard(containerScrollView)
     }
     
     

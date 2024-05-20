@@ -32,6 +32,7 @@ open class LMExploreChatroomListView: LMViewController {
         table.register(LMUIComponents.shared.exploreChatroomCell)
         table.dataSource = self
         table.delegate = self
+        table.prefetchDataSource = self
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
@@ -82,10 +83,7 @@ open class LMExploreChatroomListView: LMViewController {
     public func updateChatroomsData(chatroomData: [LMChatExploreChatroomView.ContentModel]) {
         self.chatroomData = chatroomData
         tableView.reloadData()
-        
-        if !chatroomData.isEmpty {
-            tableView.backgroundView = nil
-        } 
+        tableView.backgroundView = chatroomData.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
     }
 }
 
@@ -112,7 +110,7 @@ extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate,
     }
     
     open func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        if indexPaths.contains(where: { $0.row >= chatroomData.count }) {
+        if indexPaths.contains(where: { $0.row >= (chatroomData.count - 1) }) {
             viewModel?.getExploreChatrooms()
         }
     }
@@ -121,6 +119,9 @@ extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate,
 
 extension LMExploreChatroomListView: LMChatExploreChatroomProtocol {
     public func onTapJoinButton(_ value: Bool, _ chatroomId: String) {
+        if let index = chatroomData.firstIndex(where: {$0.chatroomId == chatroomId}) {
+            chatroomData[index].isFollowed = value
+        }
         viewModel?.followUnfollow(chatroomId: chatroomId, status: value)
     }
 }

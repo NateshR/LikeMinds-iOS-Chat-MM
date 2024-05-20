@@ -47,6 +47,13 @@ open class LMChatHomeFeedListView: LMView {
         return view
     }()
     
+    open private(set) lazy var noResultFoundView: LMChatNoResultView = {
+        let view = LMChatNoResultView(frame: UIScreen.main.bounds).translatesAutoresizingMaskIntoConstraints()
+        view.placeholderText.text = "It's time to participate"
+        return view
+    }()
+    
+    
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.homeFeedChatroomCell)
@@ -114,6 +121,10 @@ open class LMChatHomeFeedListView: LMView {
             if !chatroomData.isEmpty {
                 tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
                 tableView.backgroundView = nil
+            } else {
+                let view = LMChatNoResultView(frame: tableView.bounds)
+                view.placeholderText.text = "It's time to participate"
+                tableView.backgroundView = view
             }
         }
         reloadData()

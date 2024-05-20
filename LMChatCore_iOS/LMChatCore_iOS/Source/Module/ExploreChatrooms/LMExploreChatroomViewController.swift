@@ -11,11 +11,6 @@ import LMChatUI_iOS
 open class LMExploreChatroomViewController: LMViewController {
     var viewModel: LMExploreChatroomViewModel?
     
-//    open private(set) lazy var containerView: LMView = {
-//        let view = LMView()
-//        view
-//    }()
-    
     open private(set) lazy var containerView: LMExploreChatroomListView? = {
         if let view = try? LMChatExploreChatroomViewModel.createModule() {
             view.view.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +37,7 @@ open class LMExploreChatroomViewController: LMViewController {
         let image2 = Constants.shared.images.pinCircleFillIcon.withSystemImageConfig(pointSize: 24)
         let button = LMButton.createButton(with: "", image: image1, textColor: Appearance.shared.colors.gray51, textFont: Appearance.shared.fonts.headingFont1, contentSpacing: .init(top: 14, left: 14, bottom: 8, right: 10))
         button.setFont(Appearance.shared.fonts.headingFont1)
-        button.tintColor = Appearance.shared.colors.gray51
+        button.tintColor = Appearance.shared.colors.linkColor
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(image2, for: .selected)
         button.clipsToBounds = true

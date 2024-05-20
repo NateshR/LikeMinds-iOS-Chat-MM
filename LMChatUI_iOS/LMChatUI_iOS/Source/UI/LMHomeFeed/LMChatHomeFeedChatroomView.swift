@@ -287,7 +287,7 @@ open class LMChatHomeFeedChatroomView: LMView {
                 image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
                 initalType = "Audio"
             case "voice_note":
-                image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+                image = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
                 initalType = "Voice note"
             case "pdf", "doc":
                 image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
@@ -295,7 +295,7 @@ open class LMChatHomeFeedChatroomView: LMView {
             case "link":
                 image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 14)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             case "gif":
-                image = UIImage(named: "gifBadge", in: LMChatUIBundle, with: nil) ?? UIImage()
+                image = Constants.shared.images.gifBadgeIcon
                 initalType = "GIF"
             default:
                 break

@@ -83,7 +83,7 @@ open class LMChatMessageContentView: LMView {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
         label.numberOfLines = 0
-        label.font = Appearance.shared.fonts.normalFontSize11
+        label.font = Appearance.shared.fonts.subHeadingFont1
         label.textColor = Appearance.shared.colors.textColor
         label.text = ""
         return label
@@ -147,7 +147,7 @@ open class LMChatMessageContentView: LMView {
         bubble.addArrangeSubview(usernameLabel)
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(textLabel)
-        bubble.addSubview(timestampLabel)
+//        bubble.addSubview(timestampLabel)
         backgroundColor = .clear
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
@@ -175,9 +175,10 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
-            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
-            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
-            timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
+//            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
+//            timestampLabel.topAnchor.constraint(equalTo: bubbleView.contentContainer.bottomAnchor, constant: 4),
+//            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
+//            timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
         
          bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
@@ -198,8 +199,8 @@ open class LMChatMessageContentView: LMView {
         dataView = data
         self.textLabel.isUserInteractionEnabled = true
         self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withTextColor: Appearance.Colors.shared.black)
-        let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
-        self.timestampLabel.text = edited + (data.message?.createdTime ?? "")
+        self.textLabel.isHidden = self.textLabel.text.isEmpty
+        setTimestamps(data)
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
         bubbleLeadingConstraint?.isActive = false
@@ -229,6 +230,20 @@ open class LMChatMessageContentView: LMView {
         bubbleView.layoutIfNeeded()
     }
     
+    func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
+        let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
+        let timestamp = edited + (data.message?.createdTime ?? "")
+        let attributedText = NSMutableAttributedString()
+        attributedText.append(NSAttributedString(string: timestamp + " "))
+        if data.message?.isIncoming == false {
+            let image = Constants.shared.images.checkmarkIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            let textAtt = NSTextAttachment(image: image)
+            textAtt.bounds = CGRect(x: 0, y: -1, width: 11, height: 11)
+            attributedText.append(NSAttributedString(attachment: textAtt))
+        }
+        bubbleView.timestampLabel.attributedText = attributedText
+    }
+    
     func messageByName(_ data: LMChatMessageCell.ContentModel) {
         
         let myAttribute = [ NSAttributedString.Key.font: Appearance.shared.fonts.headingLabel, .foregroundColor: Appearance.shared.colors.red]
@@ -252,7 +267,7 @@ open class LMChatMessageContentView: LMView {
             replyMessageView.isHidden = false
             replyMessageView.closeReplyButton.isHidden = true
             let message = repliedMessage.isDeleted == true ? "This message was deleted!" : repliedMessage.message
-            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)})))
+            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: data.message?.messageType))
             replyMessageView.onClickReplyPreview = {[weak self] in
                 self?.delegate?.didTapOnReplyPreview()
             }

@@ -1,5 +1,5 @@
 //
-//  SearchListNoResultView.swift
+//  LMChatNoResultView.swift
 //  LMChatCore_iOS
 //
 //  Created by Devansh Mohata on 05/05/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-open class LMChatSearchNoResultView: LMView {
+open class LMChatNoResultView: LMView {
     open private(set) lazy var containerView: LMView = {
         let view = LMView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -17,7 +17,7 @@ open class LMChatSearchNoResultView: LMView {
     open private(set) lazy var placeholderImage: LMImageView = {
         let image = LMImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-//        image.image = UIImage(named: "noDataImage", in: Bundle(for: SearchListNoResultView.self), with: nil)
+        image.image = UIImage(named: "noDataImage", in: LMChatUIBundle, with: nil)
         return image
     }()
     
@@ -45,7 +45,7 @@ open class LMChatSearchNoResultView: LMView {
         
         placeholderImage.addConstraint(centerX: (containerView.centerXAnchor, 0),
                                        centerY: (containerView.centerYAnchor, -60))
-        placeholderImage.setHeightConstraint(with: 64)
+        placeholderImage.setHeightConstraint(with: 80)
         placeholderImage.setWidthConstraint(with: placeholderImage.heightAnchor)
         
         placeholderText.addConstraint(top: (placeholderImage.bottomAnchor, 16),
