@@ -9,24 +9,43 @@ import Foundation
 import LMChatUI_iOS
 
 open class LMParticipantListViewController: LMViewController {
-    
-    var viewModel: LMParticipantListViewModel?
+    public var viewModel: LMParticipantListViewModel?
     public var searchController = UISearchController(searchResultsController: nil)
     
-    open private(set) lazy var containerView: LMParticipantListView = {
-        let view = LMCoreComponents.shared.participantListView.init().translatesAutoresizingMaskIntoConstraints()
+    
+    // MARK: UI Elements
+    open private(set) lazy var containerView: LMChatParticipantListView = {
+        let view = LMUIComponents.shared.participantListView.init().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
         view.delegate = self
         return view
     }()
     
+    
+    // MARK: setupViews
+    open override func setupViews() {
+        self.view.addSubview(containerView)
+    }
+    
+    
+    // MARK: setupLayouts
+    open override func setupLayouts() {
+        NSLayoutConstraint.activate([
+            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+        ])
+    }
+    
+    
+    // MARK: viewDidLoad
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
-        self.setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
-        self.setupSearchBar()
+        
+        setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
+        setupSearchBar()
+        
         viewModel?.getParticipants()
         viewModel?.fetchChatroomData()
     }
@@ -37,49 +56,37 @@ open class LMParticipantListViewController: LMViewController {
         navigationController?.navigationBar.prefersLargeTitles = false
         searchController.obscuresBackgroundDuringPresentation = false
     }
-    
-    // MARK: setupViews
-    open override func setupViews() {
-        self.view.addSubview(containerView)
-    }
-    
-    // MARK: setupLayouts
-    open override func setupLayouts() {
-        
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-        ])
-    }
 }
 
 extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
-    
-    public func reloadData() {
-        containerView.data = viewModel?.participantsContentModels ?? []
+    public func reloadData(with data: [LMChatParticipantCell.ContentModel]) {
+        containerView.data = data
         containerView.reloadList()
-        setNavigationTitleAndSubtitle(with: "Participants", subtitle: "\(viewModel?.chatroomActionData?.participantCount ?? 0) participants")
+        
+        var subCount: String? = nil
+        
+        if let count = viewModel?.chatroomActionData?.participantCount,
+           count != 0 {
+            subCount = "\(count) participants"
+        }
+        
+        setNavigationTitleAndSubtitle(with: "Participants", subtitle: subCount)
     }
 }
 
+@objc
 extension LMParticipantListViewController: LMParticipantListViewDelegate {
-    
-    public func didTapOnCell(indexPath: IndexPath) {
+    open func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
     }
     
-    public func loadMoreData() {
+    open func loadMoreData() {
         viewModel?.getParticipants()
     }
 }
 
 extension LMParticipantListViewController: UISearchResultsUpdating {
-    
     public func updateSearchResults(for searchController: UISearchController) {
         viewModel?.searchParticipants(searchController.searchBar.text )
     }
-    
 }
-

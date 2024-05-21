@@ -59,7 +59,7 @@ open class LMChatReportViewController: LMViewController {
         collection.dataSource = self
         collection.delegate = self
         collection.backgroundColor = Appearance.shared.colors.clear
-        collection.registerCell(type: LMUIComponents.shared.reportCollectionCell)
+        collection.registerCell(type: LMChatReportViewCell.self)
         return collection
     }()
     
@@ -109,6 +109,8 @@ open class LMChatReportViewController: LMViewController {
         [reportTitleLabel, reportSubtitleLabel, collectionView, otherReasonTextView, sepratorView].forEach { subview in
             stackView.addArrangedSubview(subview)
         }
+        
+        self.initializeHideKeyboard(containerScrollView)
     }
     
     
@@ -240,7 +242,7 @@ extension LMChatReportViewController: UICollectionViewDataSource, UICollectionVi
     open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { tags.count }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let cell = collectionView.dequeueReusableCell(with: LMUIComponents.shared.reportCollectionCell, for: indexPath) {
+        if let cell = collectionView.dequeueReusableCell(with: LMChatReportViewCell.self, for: indexPath) {
             let name = tags[indexPath.row].0
             let tagID = tags[indexPath.row].1
             

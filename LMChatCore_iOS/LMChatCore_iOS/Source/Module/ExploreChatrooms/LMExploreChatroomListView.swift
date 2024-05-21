@@ -8,34 +8,21 @@
 import Foundation
 import LMChatUI_iOS
 
-public protocol LMExploreChatroomListViewDelegate: AnyObject {
-    func didTapOnCell(indexPath: IndexPath)
-    func followUnfollowStatusUpdate(_ value: Bool, _ chatroomId: String)
-    func fetchMoreData()
+public protocol LMChatExploreChatroomFilterProtocol: AnyObject {
+    func applyFilter(with filter: LMChatExploreChatroomViewModel.Filter)
+    func applyPinnedStatus()
 }
 
-
 @IBDesignable
-open class LMExploreChatroomListView: LMView {
-    
-    public struct ContentModel {
-        public let data: [Any]
-        public let sectionOrder: Int
-        
-        init(data: [Any], sectionOrder: Int) {
-            self.data = data
-            self.sectionOrder = sectionOrder
-        }
-    }
-    
+open class LMExploreChatroomListView: LMViewController {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
-    open private(set) lazy var loadingView: LMHomeFeedShimmerView = {
-        let view = LMHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var loadingView: LMChatHomeFeedShimmerView = {
+        let view = LMChatHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
         view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
         return view
     }()
@@ -45,6 +32,7 @@ open class LMExploreChatroomListView: LMView {
         table.register(LMUIComponents.shared.exploreChatroomCell)
         table.dataSource = self
         table.delegate = self
+        table.prefetchDataSource = self
         table.showsVerticalScrollIndicator = false
         table.clipsToBounds = true
         table.separatorStyle = .none
@@ -56,15 +44,15 @@ open class LMExploreChatroomListView: LMView {
     
     // MARK: Data Variables
     public let cellHeight: CGFloat = 60
-    private var data: [LMHomeFeedChatroomCell.ContentModel] = []
-    public weak var delegate: LMExploreChatroomListViewDelegate?
-    public var tableSections:[ContentModel] = []
+    public var data: [LMChatHomeFeedChatroomCell.ContentModel] = []
+    public var viewModel: LMChatExploreChatroomViewModel?
+    public var chatroomData: [LMChatExploreChatroomView.ContentModel] = []
     
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
-        addSubview(containerView)
+        view.addSubview(containerView)
         containerView.addSubview(tableView)
     }
     
@@ -73,77 +61,86 @@ open class LMExploreChatroomListView: LMView {
     open override func setupLayouts() {
         super.setupLayouts()
         
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
+        view.pinSubView(subView: containerView)
+        containerView.pinSubView(subView: tableView)
     }
     
     
     // MARK: setupAppearance
     open override func setupAppearance() {
         super.setupAppearance()
-        backgroundColor = Appearance.shared.colors.clear
+        view.backgroundColor = Appearance.shared.colors.clear
         containerView.backgroundColor = Appearance.shared.colors.white
         tableView.backgroundColor = Appearance.shared.colors.clear
     }
     
-    open func reloadData() {
-        tableSections.sort(by: {$0.sectionOrder < $1.sectionOrder})
-        if !tableSections.isEmpty { tableView.backgroundView = nil }
+    
+    open override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel?.getExploreChatrooms()
+    }
+    
+    public func updateChatroomsData(chatroomData: [LMChatExploreChatroomView.ContentModel]) {
+        self.chatroomData = chatroomData
         tableView.reloadData()
+        tableView.backgroundView = chatroomData.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
     }
-    
-    public func updateChatroomsData(chatroomData: [LMExploreChatroomCell.ContentModel]) {
-        tableSections = [.init(data: chatroomData, sectionOrder: 1)]
-        reloadData()
-    }
-    
 }
 
 
 // MARK: UITableView
-extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate {
-    
-    
-    open func numberOfSections(in tableView: UITableView) -> Int {
-        tableSections.count
-    }
-    
-    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        tableSections[section].data.count
+extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate, UITableViewDataSourcePrefetching {
+   open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        chatroomData.count
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let items = tableSections[indexPath.section].data
-        if let item = items[indexPath.row] as? LMExploreChatroomCell.ContentModel,
-           let cell = tableView.dequeueReusableCell(LMUIComponents.shared.exploreChatroomCell) {
-            cell.configure(with: item)
-            cell.onJoinButtonClick = {[weak self] (value, chatroomId) in
-                self?.delegate?.followUnfollowStatusUpdate(value, chatroomId)
-            }
-            if indexPath.row >= (items.count - 2) {
-                self.delegate?.fetchMoreData()
-            }
+        let data = chatroomData[indexPath.row]
+        
+        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.exploreChatroomCell) {
+            cell.configure(with: data, delegate: self)
             return cell
         }
         return UITableViewCell()
     }
     
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let chatroom = chatroomData[indexPath.row]
+        NavigationScreen.shared.perform(.chatroom(chatroomId: chatroom.chatroomId), from: self, params: nil)
     }
     
-    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.delegate?.didTapOnCell(indexPath: indexPath)
+    open func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        if indexPaths.contains(where: { $0.row >= (chatroomData.count - 1) }) {
+            viewModel?.getExploreChatrooms()
+        }
     }
 }
 
 
+extension LMExploreChatroomListView: LMChatExploreChatroomProtocol {
+    public func onTapJoinButton(_ value: Bool, _ chatroomId: String) {
+        if let index = chatroomData.firstIndex(where: {$0.chatroomId == chatroomId}) {
+            chatroomData[index].isFollowed = value
+        }
+        viewModel?.followUnfollow(chatroomId: chatroomId, status: value)
+    }
+}
 
+
+extension LMExploreChatroomListView: LMChatExploreChatroomViewModelProtocol {
+    public func updateExploreChatroomsData(with data: [LMChatExploreChatroomView.ContentModel]) {
+       updateChatroomsData(chatroomData: data)
+    }
+}
+
+extension LMExploreChatroomListView: LMChatExploreChatroomFilterProtocol {
+    public func applyFilter(with filter: LMChatExploreChatroomViewModel.Filter) {
+        viewModel?.applyFilter(filter: filter)
+        tableView.backgroundView = loadingView
+    }
+    
+    public func applyPinnedStatus() {
+        viewModel?.applyFilter()
+        tableView.backgroundView = loadingView
+    }
+}
