@@ -85,7 +85,7 @@ public class LMChatSearchChatroomCell: LMTableViewCell {
     open func configure(with data: ContentModel) {
         groupIcon.kf.setImage(
             with: URL(string: data.image ?? ""),
-            placeholder: UIImage.generateLetterImage(name: data.chatroomName)
+            placeholder: UIImage.generateLetterImage(name: data.chatroomName.components(separatedBy: " ").first ?? "")
         )
         titleLabel.text = data.chatroomName
     }

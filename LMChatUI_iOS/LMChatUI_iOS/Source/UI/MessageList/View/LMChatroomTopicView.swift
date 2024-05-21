@@ -130,6 +130,6 @@ open class LMChatroomTopicView: LMView {
         topicData = data
         nameLabel.text = data.createdBy
         topicLabel.text = data.title
-        chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy))
+        chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy.components(separatedBy: " ").first ?? ""))
     }
 }

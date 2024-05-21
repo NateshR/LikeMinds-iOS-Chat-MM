@@ -211,7 +211,7 @@ open class LMChatMessageContentView: LMView {
             bubbleTrailingConstraint?.constant = 0
             usernameLabel.isHidden = true
         } else {
-            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy ?? ""))
+            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy?.components(separatedBy: " ").first ?? ""))
             chatProfileImageView.isHidden = false
             bubbleLeadingConstraint?.constant = 0
             bubbleTrailingConstraint?.constant = -40
