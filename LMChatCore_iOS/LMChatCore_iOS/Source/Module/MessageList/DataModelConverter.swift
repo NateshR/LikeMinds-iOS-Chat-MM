@@ -12,7 +12,7 @@ class DataModelConverter {
     
     static let shared = DataModelConverter()
     
-    func convertConversation(uuid: String, communityId: String, request: PostConversationRequest, fileUrls: [AttachmentMediaData]?) -> Conversation {
+    func convertConversation(uuid: String, communityId: String, request: PostConversationRequest, fileUrls: [LMChatAttachmentMediaData]?) -> Conversation {
         let miliseconds = Int(Date().millisecondsSince1970)
         return Conversation.Builder()
             .id(request.temporaryId)
@@ -37,7 +37,7 @@ class DataModelConverter {
             .build()
     }
     
-    func convertAttachments(_ fileUrls: [AttachmentMediaData]?) -> [Attachment]? {
+    func convertAttachments(_ fileUrls: [LMChatAttachmentMediaData]?) -> [Attachment]? {
         var i = 0
         return fileUrls?.map({ media in
             i += 1
@@ -45,7 +45,7 @@ class DataModelConverter {
         })
     }
     
-    func convertAttachment(mediaData: AttachmentMediaData, index: Int) -> Attachment {
+    func convertAttachment(mediaData: LMChatAttachmentMediaData, index: Int) -> Attachment {
         return Attachment.builder()
             .name(mediaData.mediaName)
             .url(mediaData.url?.absoluteString ?? "")

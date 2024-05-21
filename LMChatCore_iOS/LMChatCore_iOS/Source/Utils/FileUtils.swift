@@ -17,13 +17,12 @@ class FileUtils {
     
     static func fileNameWithoutExtension(_ filename: String) -> String {
         let name = filename as NSString
-        let pathExtention = name.pathExtension
         let pathPrefix = name.deletingPathExtension
         return pathPrefix
     }
     
     static func saveImageToLocalDirectory(image: UIImage, imageName: String?) -> URL? {
-        var fileName = imageName ?? "\(Date().millisecondsSince1970).jpeg"
+        let fileName = imageName ?? "\(Date().millisecondsSince1970).jpeg"
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         guard let targetURL = documentsDirectory?.appendingPathComponent(fileName) else { return nil }
         do {

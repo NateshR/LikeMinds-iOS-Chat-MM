@@ -7,6 +7,7 @@
 
 import LikeMindsChat
 import Foundation
+import LMChatUI_iOS
 
 public protocol SearchListViewProtocol: AnyObject {
     func updateSearchList(with data: [SearchListViewController.ContentModel])
@@ -302,7 +303,7 @@ extension SearchListViewModel {
             let titleNotFollowedData = convertTitleMessageCell(from: titleNotFollowedChatroomData, isJoined: false)
             let notFollowedConversationData = convertMessageCell(from: notFollowedConversationData, isJoined: false)
             
-            var sectionData: [SearchCellProtocol] = []
+            var sectionData: [LMChatSearchCellDataProtocol] = []
             
             sectionData.append(contentsOf: titleFollowedData)
             sectionData.append(contentsOf: followedConversationData)
@@ -315,13 +316,13 @@ extension SearchListViewModel {
         delegate?.updateSearchList(with: dataModel)
     }
     
-    private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [SearchGroupCell.ContentModel] {
+    private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [LMChatSearchChatroomCell.ContentModel] {
         data.map {
             .init(chatroomID: $0.id, image: $0.chatroomImage, chatroomName: $0.chatroomTitle)
         }
     }
     
-    private func convertTitleMessageCell(from data: [SearchChatroomDataModel], isJoined: Bool) -> [SearchMessageCell.ContentModel] {
+    private func convertTitleMessageCell(from data: [SearchChatroomDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.id,
@@ -336,7 +337,7 @@ extension SearchListViewModel {
         }
     }
     
-    private func convertMessageCell(from data: [SearchConversationDataModel], isJoined: Bool) -> [SearchMessageCell.ContentModel] {
+    private func convertMessageCell(from data: [SearchConversationDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.chatroomDetails.id,

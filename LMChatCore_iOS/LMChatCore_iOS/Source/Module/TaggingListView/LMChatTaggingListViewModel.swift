@@ -6,6 +6,7 @@
 //
 
 import LikeMindsChat
+import LMChatUI_iOS
 
 public protocol LMChatTaggingListViewModelProtocol: AnyObject { 
     func updateList(with users: [LMChatTaggingUserTableCell.ViewModel])
@@ -19,7 +20,7 @@ public final class LMChatTaggingListViewModel {
     public var isLastPage: Bool
     public var searchString: String
     public var chatroomId: String
-    public var taggedUsers: [TagUser]
+    public var taggedUsers: [LMChatTagUser]
     public var debounerTimer: Timer?
     public let debounceTime: TimeInterval
     public var shouldFetchNames: Bool
@@ -94,8 +95,8 @@ public final class LMChatTaggingListViewModel {
             guard let users = response.data?.communityMembers else { return }
             isLastPage = users.isEmpty
             
-            let tempUsers: [TagUser] = users.compactMap { user in
-                return TagUser(name: user.name ?? "NA", routeUrl: user.route ?? "", userId: user.uuid ?? "")
+            let tempUsers: [LMChatTagUser] = users.compactMap { user in
+                return LMChatTagUser(name: user.name ?? "NA", routeUrl: user.route ?? "", userId: user.uuid ?? "")
             }
             
             taggedUsers.append(contentsOf: tempUsers)

@@ -7,10 +7,12 @@
 
 import Foundation
 
-private class BundleClass { }
+private class LMChatBundleClass { }
 
 extension Bundle {
     static var LMBundleIdentifier: Bundle {
-        Bundle(for: BundleClass.self)
+        return Bundle(for: LMChatBundleClass.self)
+            .url(forResource: "LMChatUI_iOS", withExtension: "bundle")
+            .flatMap(Bundle.init(url:)) ?? Bundle(for: LMChatBundleClass.self)
     }
 }

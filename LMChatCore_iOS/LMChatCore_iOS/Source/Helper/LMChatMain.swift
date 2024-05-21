@@ -20,7 +20,7 @@ public class LMChatMain {
     var deviceId: String?
     public func configure(apiKey: String) {
         self.apiKey = apiKey
-        LMAWSManager.shared.initialize()
+        LMChatAWSManager.shared.initialize()
         GiphyAPIConfiguration.configure()
     }
     
