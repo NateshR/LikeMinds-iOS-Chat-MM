@@ -106,8 +106,6 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.retryView.delegate = self
         updateSelection(data: data)
         chatMessageView.delegate = self
-        chatMessageView.loaderView.delegate = self
-        chatMessageView.retryView.delegate = self
     }
     
     func updateSelection(data: ContentModel) {

@@ -119,6 +119,12 @@ open class LMChatMessageContentView: LMView {
     
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
+    
+    var outgoingbubbleLeadingConstraint: NSLayoutConstraint?
+    var outgoingbubbleTrailingConstraint: NSLayoutConstraint?
+    
+    var replyViewWidthConstraint: NSLayoutConstraint?
+    
     weak var delegate: LMChatMessageContentViewDelegate?
     var dataView: LMChatMessageCell.ContentModel?
     
@@ -164,10 +170,18 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
+            replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120),
+//            replyMessageView.leadingAnchor.constraint(equalTo: bubbleView.contentContainer.leadingAnchor),
+//            replyMessageView.trailingAnchor.constraint(equalTo: bubbleView.contentContainer.trailingAnchor)
         ])
         
-         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
-         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor)
+         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -40)
+        
+        outgoingbubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
+        outgoingbubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        
+//        replyViewWidthConstraint = replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
         
     }
     
@@ -188,23 +202,6 @@ open class LMChatMessageContentView: LMView {
         setTimestamps(data)
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
-        bubbleLeadingConstraint?.isActive = false
-        bubbleTrailingConstraint?.isActive = false
-        if !isIncoming {
-            chatProfileImageView.isHidden = true
-            bubbleLeadingConstraint?.constant = 40
-            bubbleTrailingConstraint?.constant = 0
-            usernameLabel.isHidden = true
-        } else {
-            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy?.components(separatedBy: " ").first ?? ""))
-            chatProfileImageView.isHidden = false
-            bubbleLeadingConstraint?.constant = 0
-            bubbleTrailingConstraint?.constant = -40
-            messageByName(data)
-            usernameLabel.isHidden = false
-        }
-        bubbleLeadingConstraint?.isActive = true
-        bubbleTrailingConstraint?.isActive = true
         
         if data.message?.isDeleted == true {
             deletedConversationView(data)
@@ -212,6 +209,25 @@ open class LMChatMessageContentView: LMView {
             replyView(data)
             reactionsView(data)
         }
+        
+        if !isIncoming {
+            chatProfileImageView.isHidden = true
+            usernameLabel.isHidden = true
+            bubbleLeadingConstraint?.isActive = false
+            bubbleTrailingConstraint?.isActive = false
+            outgoingbubbleLeadingConstraint?.isActive = true
+            outgoingbubbleTrailingConstraint?.isActive = true
+        } else {
+            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy?.components(separatedBy: " ").first ?? ""))
+            chatProfileImageView.isHidden = false
+            messageByName(data)
+            usernameLabel.isHidden = false
+            bubbleLeadingConstraint?.isActive = true
+            bubbleTrailingConstraint?.isActive = true
+            outgoingbubbleLeadingConstraint?.isActive = false
+            outgoingbubbleTrailingConstraint?.isActive = false
+        }
+        bubbleView.layoutIfNeeded()
     }
     
     func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
@@ -240,21 +256,24 @@ open class LMChatMessageContentView: LMView {
     }
     
     func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
-        self.textLabel.font = UIFont.italicSystemFont(ofSize: 16)
+        self.textLabel.font = Appearance.shared.fonts.italicFont16
         self.textLabel.textColor = Appearance.Colors.shared.textColor
-        self.textLabel.text = "This message was deleted!"
+        self.textLabel.text = Constants.shared.strings.messageDeleteText
         self.textLabel.isUserInteractionEnabled = false
+        self.textLabel.isHidden = false
     }
 
     func replyView(_ data: LMChatMessageCell.ContentModel) {
         if let repliedMessage = data.message?.replied?.first {
             replyMessageView.isHidden = false
             replyMessageView.closeReplyButton.isHidden = true
-            let message = repliedMessage.isDeleted == true ? "This message was deleted!" : repliedMessage.message
-            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: data.message?.messageType))
+            let message = repliedMessage.isDeleted == true ? Constants.shared.strings.messageDeleteText : repliedMessage.message
+            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: data.message?.messageType, isDeleted: repliedMessage.isDeleted ?? false))
             replyMessageView.onClickReplyPreview = {[weak self] in
                 self?.delegate?.didTapOnReplyPreview()
             }
+//            replyViewWidthConstraint?.constant = max(120, bubbleView.bounds.width)
+//            replyViewWidthConstraint?.isActive = true
         } else {
             replyMessageView.isHidden = true
         }

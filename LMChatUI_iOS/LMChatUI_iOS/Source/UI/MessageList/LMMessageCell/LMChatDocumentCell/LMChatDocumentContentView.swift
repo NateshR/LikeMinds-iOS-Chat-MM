@@ -44,7 +44,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
         } else {
             attachmentView(data, index: index)
         }
-        
+        bubbleView.layoutIfNeeded()
     }
     
     func attachmentView(_ data: LMChatMessageCell.ContentModel, index: IndexPath) {

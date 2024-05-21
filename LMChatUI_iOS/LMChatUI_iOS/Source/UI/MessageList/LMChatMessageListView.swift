@@ -316,6 +316,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
                 tableViewCell =  cell
             }
         }
+        tableViewCell.setNeedsDisplay()
         return tableViewCell
     }
     

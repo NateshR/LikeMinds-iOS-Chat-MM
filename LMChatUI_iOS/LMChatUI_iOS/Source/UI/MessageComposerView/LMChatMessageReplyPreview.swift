@@ -20,12 +20,14 @@ open class LMChatMessageReplyPreview: LMView {
         public let replyMessage: String?
         public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?
         public let messageType: Int?
+        public let isDeleted: Bool
         
-        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?, messageType: Int?) {
+        public init(username: String?, replyMessage: String?, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?, messageType: Int?, isDeleted: Bool = false) {
             self.username = username
             self.replyMessage = replyMessage
             self.attachmentsUrls = attachmentsUrls
             self.messageType = messageType
+            self.isDeleted = isDeleted
         }
     }
     
@@ -48,7 +50,7 @@ open class LMChatMessageReplyPreview: LMView {
     open private(set) lazy var userNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Username"
-        label.font = Appearance.shared.fonts.headingFont3
+        label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.red
         label.numberOfLines = 1
         label.paddingTop = 2
@@ -58,8 +60,8 @@ open class LMChatMessageReplyPreview: LMView {
     
     open private(set) lazy var messageLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Message Message "
-        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.text = ""
+        label.font = Appearance.shared.fonts.subHeadingFont2
         label.numberOfLines = 2
         label.textColor = Appearance.shared.colors.textColor
         return label
@@ -166,6 +168,13 @@ open class LMChatMessageReplyPreview: LMView {
     public func setData(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = data.username
+        messageLabel.font = Appearance.shared.fonts.subHeadingFont2
+        if data.isDeleted == true {
+            messageLabel.text = data.replyMessage
+            messageLabel.font = Appearance.shared.fonts.italicFont13
+            messageAttachmentImageView.isHidden = true
+            return
+        }
         self.messageLabel.attributedText = createAttributedString(data)
         if let attachmentsUrls = data.attachmentsUrls,
            let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),
@@ -187,10 +196,11 @@ open class LMChatMessageReplyPreview: LMView {
     
     func createAttributedString(_ data: ContentModel) -> NSAttributedString {
         let message = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
+        let pointSize: CGFloat = 14
         guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
             let attributedText = NSMutableAttributedString(string: "")
             if data.messageType == 10 {
-                let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+                let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
             }
             attributedText.append(NSAttributedString(string: (data.replyMessage ?? "")))
@@ -200,22 +210,22 @@ open class LMChatMessageReplyPreview: LMView {
         var initalType = ""
         switch fileType.lowercased() {
         case "image":
-            image = Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Photo"
         case "video":
-            image = Constants.shared.images.videoSystemIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.videoSystemIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Video"
         case "audio":
-            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Audio"
         case "voice_note":
-            image = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Voice note"
         case "pdf", "doc":
-            image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
             initalType = "Document"
         case "link":
-            image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
         case "gif":
             image = Constants.shared.images.gifBadgeIcon
             initalType = "GIF"
@@ -240,7 +250,6 @@ open class LMChatMessageReplyPreview: LMView {
             }
         }
         attributedText.append(message)
-        
         return attributedText
     }
     

@@ -44,6 +44,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
         } else {
             attachmentView(data, delegate: delegate, index: index)
         }
+        bubbleView.layoutIfNeeded()
     }
     
     func attachmentView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {

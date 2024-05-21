@@ -31,5 +31,7 @@ public extension Appearance {
         public var normalFontSize11: UIFont = .systemFont(ofSize: 11)
         public var emojiTrayFont: UIFont = .systemFont(ofSize: 30)
         public var headingLabel: UIFont = .systemFont(ofSize: 16, weight: .bold)
+        public var italicFont16:UIFont = .italicSystemFont(ofSize: 16)
+        public var italicFont13:UIFont = .italicSystemFont(ofSize: 13)
     }
 }

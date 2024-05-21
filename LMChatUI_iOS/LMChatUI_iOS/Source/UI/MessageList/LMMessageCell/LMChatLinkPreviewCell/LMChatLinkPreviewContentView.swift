@@ -38,7 +38,7 @@ open class LMChatLinkPreviewContentView: LMChatMessageContentView {
         } else {
             linkPreview(data)
         }
-        
+        bubbleView.layoutIfNeeded()
     }
     
     func linkPreview(_ data: LMChatMessageCell.ContentModel) {

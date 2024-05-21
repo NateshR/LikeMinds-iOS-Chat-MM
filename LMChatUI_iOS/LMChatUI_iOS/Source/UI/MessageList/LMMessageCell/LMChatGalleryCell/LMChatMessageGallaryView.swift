@@ -142,7 +142,7 @@ open class LMChatMessageGallaryView: LMView {
         let imagePreview = ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
-        imagePreview.addSubviewWithDefaultConstraints(moreItemsOverlay)
+//        imagePreview.addSubviewWithDefaultConstraints(moreItemsOverlay)
         imagePreview.cornerRadius(with: 12)
         imagePreview.tag = 3
         imagePreview.isUserInteractionEnabled = true
@@ -163,7 +163,7 @@ open class LMChatMessageGallaryView: LMView {
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
         label.font = Appearance.shared.fonts.headingFont
-        label.backgroundColor = .gray.withAlphaComponent(0.8)
+        label.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         label.text = "+2"
         return label
     }()
@@ -245,13 +245,29 @@ open class LMChatMessageGallaryView: LMView {
         } else {
             topPreviewsContainerView.isHidden = false
         }
-        bottomPreviewsContainerView.isHidden = data.count < 3
+        bottomPreviewsContainerView.isHidden = data.count <= 3
         for (index, item) in data.enumerated() {
-            if index > 3 {
-                moreItemsOverlay.isHidden = false
-                moreItemsOverlay.text =  "+\(data.count - 3)"
-                break
+            if data.count > 4 {
+                if index > 3 {
+                    itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
+                    moreItemsOverlay.isHidden = false
+                    moreItemsOverlay.text =  "+\(data.count - 3)"
+                    break
+                }
+            } else if data.count > 2 && data.count < 4 {
+                if index > 1 {
+                    itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
+                    moreItemsOverlay.isHidden = false
+                    moreItemsOverlay.text =  "+\(data.count - 1)"
+                    break
+                }
             }
+//            if (data.count > 2 && index > 1) || (data.count > 3 && index > 3) {
+//                itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
+//                moreItemsOverlay.isHidden = false
+//                moreItemsOverlay.text =  "+\(data.count - 3)"
+//                break
+//            }
             moreItemsOverlay.isHidden = true
            loadImageData(item: item, imagePreview: itemSpots[index])
         }

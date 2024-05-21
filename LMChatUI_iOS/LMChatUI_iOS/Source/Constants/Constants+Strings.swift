@@ -22,6 +22,7 @@ public extension Constants {
         public let delete = "Delete"
         public let reply = "Reply"
         public let dot = "•"
+        public let messageDeleteText = "This message was deleted!"
         public let restrictForAnnouncement = "Only community managers can respond here."
         public let restrictByManager = "Restricted to respond in this chatroom by community manager."
         public let warningMessageForDeletion = "Are you sure you want to delete this message? This action can not be reversed."

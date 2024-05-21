@@ -26,7 +26,7 @@ open class LMChatMessageBubbleView: LMView {
     open private(set) lazy var contentContainer: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.alignment = .fill
+        view.alignment = .leading
         view.distribution = .fill
         view.spacing = 4
         view.backgroundColor = Appearance.shared.colors.clear
@@ -70,10 +70,6 @@ open class LMChatMessageBubbleView: LMView {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        
-//        layer.borderColor = Appearance.Colors.shared.gray4.cgColor//appearance.colorPalette.border3.cgColor
-//        layer.cornerRadius = 18
-//        layer.borderWidth = 1
         backgroundColor = Appearance.shared.colors.clear
     }
     
@@ -89,8 +85,6 @@ open class LMChatMessageBubbleView: LMView {
     }
     
     func updateContentData() {
-//        layer.maskedCorners = content?.roundedCorners ?? []
-//        backgroundColor = content?.backgroundColor ?? .clear
     }
     
     private func addContentContainerView() {
