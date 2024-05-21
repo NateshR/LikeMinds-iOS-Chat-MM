@@ -7,7 +7,6 @@
 
 import Kingfisher
 import UIKit
-import LMChatUI_iOS
 
 @IBDesignable
 open class LMChatTaggingUserTableCell: LMTableViewCell {

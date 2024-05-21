@@ -94,7 +94,7 @@ open class LMChatReactionPopupView: LMView {
             .translatesAutoresizingMaskIntoConstraints()
         button.setFont(Appearance.shared.fonts.emojiTrayFont)
         button.setTitleColor(.black, for: .normal)
-        button.setBackgroundImage(UIImage(named: "addMoreEmoticons", in: LMChatUIBundle, with: nil), for: .normal)
+        button.setBackgroundImage(UIImage(named: "addMoreEmoticons", in: Bundle.LMBundleIdentifier, with: nil), for: .normal)
         button.addTarget(self, action: #selector(moreEmojiSelected), for: .touchUpInside)
         button.setWidthConstraint(with: 40)
         button.setHeightConstraint(with: 44)

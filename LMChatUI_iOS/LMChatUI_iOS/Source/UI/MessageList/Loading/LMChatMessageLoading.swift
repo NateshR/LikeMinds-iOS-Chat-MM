@@ -16,11 +16,8 @@ open class LMChatMessageLoading: LMView {
         return view
     }()
     
-    let receivedBubble = UIImage(named: "bubble_received", in: LMChatUIBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
-        .withRenderingMode(.alwaysTemplate)
-    
-    let sentBubble = UIImage(named: "bubble_sent", in: LMChatUIBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
-        .withRenderingMode(.alwaysTemplate)
+    var receivedBubble = Constants.shared.images.bubbleReceived
+    var sentBubble = Constants.shared.images.bubbleSent
     
     var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.4)
     var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 0.4)
@@ -30,7 +27,6 @@ open class LMChatMessageLoading: LMView {
         image.image = sentBubble
         image.tintColor = outgoingColor
         image.backgroundColor = Appearance.shared.colors.clear
-//        image.setWidthConstraint(with: 150)
         image.setHeightConstraint(with: 40)
         return image
     }()
@@ -40,7 +36,6 @@ open class LMChatMessageLoading: LMView {
         image.image = receivedBubble
         image.backgroundColor = Appearance.shared.colors.clear
         image.tintColor = incomingColor
-//        image.setWidthConstraint(with: 150)
         image.setHeightConstraint(with: 40)
         return image
     }()
@@ -92,6 +87,7 @@ open class LMChatMessageLoading: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        
         NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -118,5 +114,9 @@ open class LMChatMessageLoading: LMView {
             sentmessageTitleView.trailingAnchor.constraint(equalTo: outgoingImageView.trailingAnchor, constant: -16),
             sentmessageTitleView.topAnchor.constraint(equalTo: outgoingImageView.topAnchor,constant: 12),
         ])
+        
+        receivedBubble = receivedBubble.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
+        
+        sentBubble = sentBubble.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
     }
 }

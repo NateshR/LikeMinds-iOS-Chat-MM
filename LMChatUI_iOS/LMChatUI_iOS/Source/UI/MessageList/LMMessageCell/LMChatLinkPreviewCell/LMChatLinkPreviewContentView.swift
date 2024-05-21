@@ -5,8 +5,7 @@
 //  Created by Pushpendra Singh on 12/05/24.
 //
 
-import Foundation
-import LMChatUI_iOS
+import UIKit
 
 @IBDesignable
 open class LMChatLinkPreviewContentView: LMChatMessageContentView {
@@ -23,7 +22,6 @@ open class LMChatLinkPreviewContentView: LMChatMessageContentView {
     open override func setupViews() {
         super.setupViews()
         bubbleView.addArrangeSubview(linkPreview, atIndex: 2)
-        
     }
     
     // MARK: setupLayouts

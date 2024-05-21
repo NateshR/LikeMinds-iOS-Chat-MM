@@ -17,7 +17,7 @@ open class LMChatNoResultView: LMView {
     open private(set) lazy var placeholderImage: LMImageView = {
         let image = LMImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(named: "noDataImage", in: LMChatUIBundle, with: nil)
+        image.image = Constants.shared.images.noDataImage
         return image
     }()
     

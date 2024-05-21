@@ -12,10 +12,10 @@ open class LMChatMessageBubbleView: LMView {
     
     var isIncoming = true
     
-    let receivedBubble = UIImage(named: "bubble_received", in: LMChatUIBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+    let receivedBubble = UIImage(named: "bubble_received", in: Bundle.LMBundleIdentifier, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
         .withRenderingMode(.alwaysTemplate)
     
-    let sentBubble = UIImage(named: "bubble_sent", in: LMChatUIBundle, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+    let sentBubble = UIImage(named: "bubble_sent", in: Bundle.LMBundleIdentifier, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
         .withRenderingMode(.alwaysTemplate)
     
     var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
@@ -63,17 +63,9 @@ open class LMChatMessageBubbleView: LMView {
         }
     }
     
-    /// The content this view is rendered based on.
-    open var content: ContentModel? {
-        didSet { updateContentData() }
-    }
     
     open override func setupAppearance() {
         super.setupAppearance()
-        
-//        layer.borderColor = Appearance.Colors.shared.gray4.cgColor//appearance.colorPalette.border3.cgColor
-//        layer.cornerRadius = 18
-//        layer.borderWidth = 1
         backgroundColor = Appearance.shared.colors.clear
     }
     
@@ -86,11 +78,6 @@ open class LMChatMessageBubbleView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-    }
-    
-    func updateContentData() {
-//        layer.maskedCorners = content?.roundedCorners ?? []
-//        backgroundColor = content?.backgroundColor ?? .clear
     }
     
     private func addContentContainerView() {

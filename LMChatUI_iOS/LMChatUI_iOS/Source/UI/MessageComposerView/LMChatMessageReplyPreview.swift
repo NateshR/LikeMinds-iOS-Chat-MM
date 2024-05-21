@@ -76,7 +76,6 @@ open class LMChatMessageReplyPreview: LMView {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
         image.backgroundColor = .clear
-//        image.cornerRadius(with: 8)
         return image
     }()
     
@@ -162,7 +161,6 @@ open class LMChatMessageReplyPreview: LMView {
     public func setData(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = data.username
-        let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
         self.messageLabel.attributedText = createAttributedString(data)
         if let attachmentsUrls = data.attachmentsUrls,
            let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),

@@ -5,7 +5,6 @@
 //  Created by Devansh Mohata on 06/05/24.
 //
 
-import LMChatUI_iOS
 import UIKit
 
 open class LMChatSearchShimmerView: LMView {

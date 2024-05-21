@@ -80,7 +80,7 @@ public extension UIImage {
         let unicode = Int(str[str.startIndex].value)
         if 65...90 ~= unicode {
             let hex = alphabetColors[unicode - 65]
-//            return UIColor(hex: UInt(hex), alpha: 1.0)
+            return UIColor(hex: UInt(hex), alpha: 1.0)
         }
         return UIColor.black
     }

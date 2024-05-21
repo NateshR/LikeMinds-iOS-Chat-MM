@@ -5,9 +5,8 @@
 //  Created by Pushpendra Singh on 31/01/24.
 //
 
-import Foundation
-import LMChatUI_iOS
 import Kingfisher
+import UIKit
 
 public protocol LMBottomMessageLinkPreviewDelete: AnyObject {
     func closeLinkPreview()
@@ -120,21 +119,19 @@ open class LMChatBottomMessageLinkPreview: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        
+        pinSubView(subView: containerView)
+        
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
             linkPreviewImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             linkPreviewImageView.widthAnchor.constraint(equalToConstant: 50),
             linkPreviewImageView.heightAnchor.constraint(equalToConstant: 50),
             linkPreviewImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            
             horizontalReplyStackView.leadingAnchor.constraint(equalTo: linkPreviewImageView.trailingAnchor, constant: 10),
             horizontalReplyStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -10),
             horizontalReplyStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
             horizontalReplyStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
-            
         ])
     }
     
@@ -142,16 +139,12 @@ open class LMChatBottomMessageLinkPreview: LMView {
         linkLabel.text = data.link
         linkTitleLabel.text = data.title
         linkSubtitleLabel.text = data.description
+        
         let placeholder = Constants.Images.shared.brokenLink
-        if let imageUrl = data.imageUrl, let url = URL(string: imageUrl) {
-            linkPreviewImageView.kf.setImage(with: url, placeholder: placeholder)
-        } else {
-            linkPreviewImageView.image = placeholder
-        }
+        linkPreviewImageView.kf.setImage(with: URL(string: data.imageUrl ?? ""), placeholder: placeholder)
     }
     
     @objc func closeButtonClicked(_ sender:UIButton) {
         delegate?.closeLinkPreview()
     }
-    
 }

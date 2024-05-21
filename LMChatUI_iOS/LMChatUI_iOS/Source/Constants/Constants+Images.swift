@@ -104,5 +104,9 @@ public extension Constants {
         public var clockIcon = loadSystemImage(with: "clock")
         public var checkmarkIcon = loadSystemImage(with: "checkmark")
         
+        public var noDataImage = loadImage(with: "noDataImage")
+        public var bubbleReceived = loadImage(with: "bubble_received")
+        public var bubbleSent = loadImage(with: "bubble_sent")
+        public var gifBadge = loadImage(with: "gifBadge")
     }
 }
