@@ -101,7 +101,10 @@ final public  class LMReactionViewModel {
     }
     
     func deleteConversationReaction() {
-        guard let conversationId else { return }
+        guard let conversationId else {
+            deleteChatroomReaction()
+            return
+        }
         let request = DeleteReactionRequest.builder()
             .conversationId(conversationId)
             .build()
@@ -119,6 +122,7 @@ final public  class LMReactionViewModel {
         let request = DeleteReactionRequest.builder()
             .chatroomId(chatroomId)
             .build()
+        self.delegate?.reactionDeleted()
         LMChatClient.shared.deleteReaction(request: request) {[weak self] response in
             guard response.success else {
                 return

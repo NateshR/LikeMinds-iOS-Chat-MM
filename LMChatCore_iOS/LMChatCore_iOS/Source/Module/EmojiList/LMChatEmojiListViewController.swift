@@ -9,7 +9,7 @@ import Foundation
 import LMChatUI_iOS
 
 protocol LMChatEmojiListViewDelegate: AnyObject {
-    func emojiSelected(emoji: String, conversationId: String?)
+    func emojiSelected(emoji: String, conversationId: String?, chatroomId: String?)
 }
 
 open class LMChatEmojiListViewController: LMViewController {
@@ -27,6 +27,7 @@ open class LMChatEmojiListViewController: LMViewController {
     
     let maxDimmedAlpha: CGFloat = 0.6
     var conversationId: String?
+    var chatroomId: String?
     
     lazy var dimmedView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -194,7 +195,7 @@ extension LMChatEmojiListViewController: UICollectionViewDataSource, UICollectio
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.dismiss(animated: true) {[weak self] in
             guard let self else { return }
-            self.delegate?.emojiSelected(emoji: self.emojiList[indexPath.section][indexPath.item], conversationId: self.conversationId)
+            self.delegate?.emojiSelected(emoji: self.emojiList[indexPath.section][indexPath.item], conversationId: conversationId, chatroomId: chatroomId)
         }
     }
 }

@@ -43,6 +43,7 @@ open class LMReactionViewController: LMViewController {
         table.delegate = self
         table.register(LMChatReactionViewCell.self)
         table.separatorStyle = .none
+        table.backgroundColor = Appearance.shared.colors.white
         return table
     }()
     
@@ -52,6 +53,7 @@ open class LMReactionViewController: LMViewController {
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
         collection.registerCell(type: LMChatReactionTitleCell.self)
+        collection.backgroundColor = Appearance.shared.colors.white
         return collection
     }()
     
@@ -59,6 +61,7 @@ open class LMReactionViewController: LMViewController {
         let label = LMLabel()
         label.text = "Reactions"
         label.font = Appearance.shared.fonts.textFont1
+        label.textColor = Appearance.shared.colors.black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

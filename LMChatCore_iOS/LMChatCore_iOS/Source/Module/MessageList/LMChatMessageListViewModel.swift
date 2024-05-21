@@ -36,6 +36,7 @@ public final class LMChatMessageListViewModel {
     var contentDownloadSettings: [ContentDownloadSetting]?
     var currentDetectedOgTags: LinkOGTags?
     var replyChatMessage: Conversation?
+    var replyChatroom: String?
     var editChatMessage: Conversation?
     var chatroomTopic: Conversation?
     var loggedInUserTagValue: String = ""
@@ -92,72 +93,69 @@ public final class LMChatMessageListViewModel {
         loggedInUserTag()
         
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
-        LMChatClient.shared.getChatroom(request: chatroomRequest) {[weak self] response in
-            //1st case -> chatroom is not present, if yes return
-            guard let chatroom = response.data?.chatroom, let self else {
-                self?.chatroomWasNotLoaded = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    self?.getInitialData()
-                }
-                return
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+            chatroomWasNotLoaded = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
+                self?.getInitialData()
             }
-            //2nd case -> chatroom is deleted, if yes return
-            if chatroom.deletedBy != nil {
-                (delegate as? LMChatMessageListViewController)?.navigationController?.popViewController(animated: true)
-                return
-            }
-            chatroomViewData = chatroom
-            chatroomTopic = chatroom.topic
-            if chatroomTopic == nil, let topicId = chatroom.topicId {
-                chatroomTopic = LMChatClient.shared.getConversation(request: GetConversationRequest.builder().conversationId(topicId).build())?.data?.conversation
-            }
-            delegate?.updateTopicBar()
-            var medianConversationId: String?
-            if let conId = self.chatroomDetailsExtra.conversationId {
-                medianConversationId = conId
-            } else if let reportedConId = self.chatroomDetailsExtra.reportedConversationId {
-                medianConversationId = reportedConId
-            } else {
-                medianConversationId = nil
-            }
-            //3rd case -> open a conversation directly through search/deep links
-            if let medianConversationId {
-                // fetch list from searched or specific conversationid
-                fetchIntermediateConversations(chatroom: chatroom, conversationId: medianConversationId)
-            }
-            //4th case -> chatroom is present and conversation is not present
-            else  if chatroom.totalAllResponseCount == 0 {
-                // Convert chatroom data into first conversation and display
-//                chatroomDataToHeaderConversation(chatroom)
-                fetchBottomConversations()
-            }
-            //5th case -> chatroom is opened through deeplink/explore feed, which is open for the first time
-            else if chatroomWasNotLoaded {
-                fetchBottomConversations()
-                chatroomWasNotLoaded = false
-            }
-            //6th case -> chatroom is present and conversation is present, chatroom opened for the first time from home feed
-            else if chatroom.lastSeenConversation == nil {
-                // showshimmer
-            }
-            //7th case -> chatroom is present but conversations are not stored in chatroom
-            else if !chatroom.isConversationStored {
-                // showshimmer
-            }
-            //8th case -> chatroom is present and conversation is present, chatroom has no unseen conversations
-            else if chatroom.unseenCount == 0 {
-                fetchBottomConversations()
-            }
-            //9th case -> chatroom is present and conversation is present, chatroom has unseen conversations
-            else {
-                fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
-            }
-            
-            fetchChatroomActions()
-            markChatroomAsRead()
-            fetchMemberState()
-            observeConversations(chatroomId: chatroom.id)
+            return
         }
+        //2nd case -> chatroom is deleted, if yes return
+        if chatroom.deletedBy != nil {
+            (delegate as? LMChatMessageListViewController)?.navigationController?.popViewController(animated: true)
+            return
+        }
+        chatroomViewData = chatroom
+        chatroomTopic = chatroom.topic
+        if chatroomTopic == nil, let topicId = chatroom.topicId {
+            chatroomTopic = LMChatClient.shared.getConversation(request: GetConversationRequest.builder().conversationId(topicId).build())?.data?.conversation
+        }
+        delegate?.updateTopicBar()
+        var medianConversationId: String?
+        if let conId = self.chatroomDetailsExtra.conversationId {
+            medianConversationId = conId
+        } else if let reportedConId = self.chatroomDetailsExtra.reportedConversationId {
+            medianConversationId = reportedConId
+        } else {
+            medianConversationId = nil
+        }
+        //3rd case -> open a conversation directly through search/deep links
+        if let medianConversationId {
+            // fetch list from searched or specific conversationid
+            fetchIntermediateConversations(chatroom: chatroom, conversationId: medianConversationId)
+        }
+        //4th case -> chatroom is present and conversation is not present
+        else  if chatroom.totalAllResponseCount == 0 {
+            // Convert chatroom data into first conversation and display
+            //                chatroomDataToHeaderConversation(chatroom)
+            fetchBottomConversations()
+        }
+        //5th case -> chatroom is opened through deeplink/explore feed, which is open for the first time
+        else if chatroomWasNotLoaded {
+            fetchBottomConversations()
+            chatroomWasNotLoaded = false
+        }
+        //6th case -> chatroom is present and conversation is present, chatroom opened for the first time from home feed
+        else if chatroom.lastSeenConversation == nil {
+            // showshimmer
+        }
+        //7th case -> chatroom is present but conversations are not stored in chatroom
+        else if !chatroom.isConversationStored {
+            // showshimmer
+        }
+        //8th case -> chatroom is present and conversation is present, chatroom has no unseen conversations
+        else if chatroom.unseenCount == 0 {
+            fetchBottomConversations()
+        }
+        //9th case -> chatroom is present and conversation is present, chatroom has unseen conversations
+        else {
+            fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
+        }
+        
+        fetchChatroomActions()
+        markChatroomAsRead()
+        fetchMemberState()
+        observeConversations(chatroomId: chatroom.id)
     }
     
     func syncLatestConversations(withConversationId conversationId: String) {
@@ -322,19 +320,21 @@ public final class LMChatMessageListViewModel {
     
     func syncConversation() {
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
-        LMChatClient.shared.getChatroom(request: chatroomRequest) {[weak self] response in
-            guard let self else { return }
-            if response.data?.chatroom?.isConversationStored == true{
-                LMChatClient.shared.loadConversations(withChatroomId: chatroomId, loadType: .reopen)
-            } else {
-                LMChatClient.shared.loadConversations(withChatroomId: chatroomId, loadType: .firstTime)
-            }
+        let response = LMChatClient.shared.getChatroom(request: chatroomRequest)
+        if response?.data?.chatroom?.isConversationStored == true{
+            LMChatClient.shared.loadConversations(withChatroomId: chatroomId, loadType: .reopen)
+        } else {
+            LMChatClient.shared.loadConversations(withChatroomId: chatroomId, loadType: .firstTime)
         }
     }
     
     func convertConversation(_ conversation: Conversation) -> LMChatMessageListView.ContentModel.Message {
         var replies: [LMChatMessageListView.ContentModel.Message] = []
-        if let replyConversation = conversation.replyConversation {
+        var replyConversation: Conversation? = conversation.replyConversation
+        if let chatroomid = conversation.replyChatroomId, let chatroom = LMChatClient.shared.getChatroom(request: .Builder().chatroomId(chatroomid).build())?.data?.chatroom {
+            replyConversation = chatroomDataToConversation(chatroom)
+        }
+        if let replyConversation {
             replies =
             [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                    message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
@@ -441,9 +441,11 @@ public final class LMChatMessageListViewModel {
             .date(chatroom.date)
             .answer(chatroom.title)
             .member(chatroom.member)
-            .state(111)
+            .state(LMChatMessageListView.chatroomHeader)
             .createdEpoch(chatroom.dateEpoch)
             .id(chatroomId)
+            .reactions(chatroom.reactions)
+            .hasReactions(chatroom.hasReactions)
             .build()
         return conversation
     }
@@ -792,7 +794,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func putConversationReaction(conversationId: String, reaction: String) {
-        updateReactionsForUI(reaction: reaction, conversationId: conversationId)
+        updateReactionsForUI(reaction: reaction, conversationId: conversationId, chatroomId: nil)
         let request = PutReactionRequest.builder()
             .conversationId(conversationId)
             .reaction(reaction)
@@ -805,7 +807,20 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         }
     }
     
-    private func updateReactionsForUI(reaction: String, conversationId: String) {
+    private func updateReactionsForUI(reaction: String, conversationId: String?, chatroomId: String?) {
+        if chatroomId != nil, let chatroomViewData {
+            var reactions = self.chatroomViewData?.reactions ?? []
+            reactions = updatedReactionsFor(existingReactions: reactions, currentReaction: reaction)
+            let updatedChatroom = chatroomViewData.toBuilder()
+                .reactions(reactions)
+                .hasReactions(!reactions.isEmpty)
+                .build()
+            self.chatroomViewData = updatedChatroom
+            let message = chatroomDataToConversation(updatedChatroom)
+            insertOrUpdateConversationIntoList(message)
+            delegate?.reloadChatMessageList()
+            return
+        }
         guard let conIndex = chatMessages.firstIndex(where: {$0.id == conversationId})
                else {
             return
@@ -827,14 +842,28 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         delegate?.reloadChatMessageList()
     }
     
+    private func updatedReactionsFor(existingReactions: [Reaction], currentReaction: String) -> [Reaction] {
+        var reactions = existingReactions
+        if let index = reactions.firstIndex(where: {$0.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()}) {
+            reactions.remove(at: index)
+        }
+        let member = LMChatClient.shared.getMember(request: GetMemberRequest.builder().uuid(UserPreferences.shared.getClientUUID() ?? "").build())?.data?.member
+        let reactionData = Reaction.builder()
+            .reaction(currentReaction)
+            .member(member)
+            .build()
+        reactions.append(reactionData)
+        return reactions
+    }
+    
     func putChatroomReaction(chatroomId: String, reaction: String) {
+        updateReactionsForUI(reaction: reaction, conversationId: nil, chatroomId: chatroomId)
         let request = PutReactionRequest.builder()
             .chatroomId(chatroomId)
             .reaction(reaction)
             .build()
         LMChatClient.shared.putReaction(request: request) { response in
             guard response.success else {
-                print(response.errorMessage)
                 return
             }
         }
@@ -861,8 +890,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         delegate?.reloadChatMessageList()
     }
     
-    func updateDeletedReactionConversation(conversationId: String) {
-        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
+    func updateDeletedReaction(conversationId: String?, chatroomId: String?) {
+        guard let conversationId, let conversation = chatMessages.first(where: {$0.id == conversationId}) else {
+            updateDeletedReactionChatroom(chatroomId: chatroomId)
+            return
+        }
         var reactions = conversation.reactions ?? []
         reactions.removeAll(where: {$0.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()})
         let updatedConversation = conversation.toBuilder()
@@ -870,6 +902,21 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .hasReactions(!reactions.isEmpty)
             .build()
         insertOrUpdateConversationIntoList(updatedConversation)
+        delegate?.reloadChatMessageList()
+    }
+    
+    func updateDeletedReactionChatroom(chatroomId: String?) {
+        guard chatroomId != nil, let chatroomViewData else { return }
+        var reactions = chatroomViewData.reactions ?? []
+        reactions.removeAll(where: {$0.member?.sdkClientInfo?.uuid == UserPreferences.shared.getClientUUID()})
+        
+        let updatedChatroom = chatroomViewData.toBuilder()
+            .reactions(reactions)
+            .hasReactions(!reactions.isEmpty)
+            .build()
+        self.chatroomViewData = updatedChatroom
+        let message = chatroomDataToConversation(updatedChatroom)
+        insertOrUpdateConversationIntoList(message)
         delegate?.reloadChatMessageList()
     }
     
@@ -896,7 +943,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func replyConversation(conversationId: String) {
-        self.replyChatMessage = chatMessages.first(where: {$0.id == conversationId})
+        if let conversation = chatMessages.first(where: {$0.id == conversationId && $0.state != .chatroomDataHeader}) {
+            self.replyChatMessage = conversation
+        } else {
+            self.replyChatroom = conversationId
+        }
     }
     
     func setAsCurrentTopic(conversationId: String) {

@@ -6,7 +6,10 @@
 //
 
 import Foundation
-import LMChatUI_iOS
+
+public protocol LMChatroomHeaderMessageCellDelegate: AnyObject {
+    func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
+}
 
 @IBDesignable
 open class LMChatroomHeaderMessageCell: LMTableViewCell {
@@ -24,6 +27,21 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
         return view
     }()
     
+    open private(set) lazy var reactionsView: LMChatMessageReactionsView = {
+        let view = LMUIComponents.shared.messageReactionView.init().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
+    open private(set) lazy var reactionContainerStackView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .horizontal
+        view.distribution = .fill
+        view.spacing = 0
+        view.addArrangedSubview(reactionsView)
+        return view
+    }()
+    
+    
     open override func prepareForReuse() {
         super.prepareForReuse()
     }
@@ -31,12 +49,15 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
     var currentIndexPath: IndexPath?
     var originalCenter = CGPoint()
     var replyActionHandler: (() -> Void)?
+    weak var delegate: LMChatroomHeaderMessageCellDelegate?
     
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
+        containerView.addSubview(reactionContainerStackView)
+        reactionsView.delegate = self
     }
     
     // MARK: setupLayouts
@@ -52,7 +73,10 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
             chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
             chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             chatMessageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8)
+            reactionContainerStackView.topAnchor.constraint(equalTo: chatMessageView.bottomAnchor, constant: 2),
+            reactionContainerStackView.leadingAnchor.constraint(equalTo: chatMessageView.leadingAnchor),
+            reactionContainerStackView.trailingAnchor.constraint(lessThanOrEqualTo: chatMessageView.trailingAnchor),
+            reactionContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8)
         ])
     }
     
@@ -62,12 +86,30 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         contentView.backgroundColor = Appearance.shared.colors.clear
-        containerView.backgroundColor = Appearance.shared.colors.backgroundColor
+        containerView.backgroundColor = Appearance.shared.colors.clear
     }
     
     
     // MARK: configure
     open func setData(with data: ContentModel, index: IndexPath) {
         chatMessageView.setData(.init(title: data.message?.message, createdBy: data.message?.createdBy, chatroomImageUrl: data.message?.createdByImageUrl, messageId: data.message?.messageId, customTitle: data.message?.memberTitle, createdTime: data.message?.createdTime))
+        reactionsView(data)
+    }
+    
+    
+    func reactionsView(_ data: ContentModel?) {
+        if let reactions = data?.message?.reactions, reactions.count > 0 {
+            reactionsView.isHidden = false
+            reactionsView.setData(reactions)
+        } else {
+            reactionsView.isHidden = true
+        }
+    }
+}
+
+extension LMChatroomHeaderMessageCell: LMChatMessageReactionsViewDelegate {
+    
+    public func clickedOnReaction(_ reaction: String) {
+        delegate?.onClickReactionOfMessage(reaction: reaction, indexPath: currentIndexPath)
     }
 }

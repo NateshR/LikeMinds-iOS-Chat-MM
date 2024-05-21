@@ -44,6 +44,8 @@ public enum LMMessageActionType: String {
 @IBDesignable
 open class LMChatMessageListView: LMView {
     
+    public static var chatroomHeader = 111
+    
     public struct ContentModel {
         public var data: [Message]
         public let section: String
@@ -165,7 +167,6 @@ open class LMChatMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-//        table.keyboardDismissMode = .interactive
         table.contentInset = .init(top: 0, left: 0, bottom: 14, right: 0)
         return table
     }()
@@ -181,6 +182,7 @@ open class LMChatMessageListView: LMView {
     public let cellHeight: CGFloat = 60
     public weak var delegate: LMChatMessageListViewDelegate?
     public weak var cellDelegate: LMChatMessageCellDelegate?
+    public weak var chatroomHeaderCellDelegate: LMChatroomHeaderMessageCellDelegate?
     public weak var audioDelegate: LMChatAudioProtocol?
     public var tableSections:[ContentModel] = []
     public var audioIndex: (section: Int, messageID: String)?
@@ -301,10 +303,11 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         switch item.messageType {
         case 0, 10:
             tableViewCell =  cellFor(rowAt: indexPath, tableView: tableView)
-        case 111:
+        case Self.chatroomHeader:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatroomHeaderMessageCell) {
                 cell.setData(with: .init(message: item), index: indexPath)
                 cell.currentIndexPath = indexPath
+                cell.delegate = chatroomHeaderCellDelegate
                 tableViewCell = cell
             }
         default:
@@ -416,7 +419,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10) && (item.isDeleted != true) else { return nil }
+        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10 || item.messageType == Self.chatroomHeader) && (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }
@@ -454,7 +457,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         guard let row = Int(values.first ?? "0") else { return nil }
         guard let section = Int(values.last ?? "0") else { return nil }
         let indexPath = IndexPath(row: row, section: section)
-        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
+        let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
+        let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
+        let cell = messageCell ?? chatroomCell
+        guard let cell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,

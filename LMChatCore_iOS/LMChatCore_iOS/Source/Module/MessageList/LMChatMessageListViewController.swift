@@ -51,6 +51,7 @@ open class LMChatMessageListViewController: LMViewController {
         view.delegate = self
         view.cellDelegate = self
         view.audioDelegate = self
+        view.chatroomHeaderCellDelegate = self
         return view
     }()
     
@@ -391,14 +392,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     }
 
     public func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu {
+        
+        if item.messageType == LMChatMessageListView.chatroomHeader {
+            return contextMenuForChatroomData(indexPath, item: item)
+        }
+        
         var actions: [UIAction] = []
-        let replyAction = UIAction(title: NSLocalizedString("Reply", comment: ""),
+        let replyAction = UIAction(title: Constants.shared.strings.reply,
                                    image: Constants.shared.images.replyIcon) { [weak self] action in
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         actions.append(replyAction)
         if let message = item.message, !message.isEmpty {
-            let copyAction = UIAction(title: NSLocalizedString("Copy", comment: ""),
+            let copyAction = UIAction(title: Constants.shared.strings.copy,
                                       image: Constants.shared.images.copyIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
             }
@@ -406,38 +412,56 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         }
         
         if viewModel?.isAdmin() == true {
-            let copyAction = UIAction(title: NSLocalizedString("Set as current topic", comment: ""),
+            let setTopicAction = UIAction(title: Constants.shared.strings.setTopic,
                                       image: Constants.shared.images.documentsIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .setTopic, atIndex: indexPath, message: item)
             }
-            actions.append(copyAction)
+            actions.append(setTopicAction)
         }
         
         if item.isIncoming == false, viewModel?.checkMemberRight(.respondsInChatRoom) == true {
             if item.message?.isEmpty == false {
-                let editAction = UIAction(title: NSLocalizedString("Edit", comment: ""),
+                let editAction = UIAction(title: Constants.shared.strings.edit,
                                           image:Constants.shared.images.pencilIcon) { [weak self] action in
                     self?.contextMenuItemClicked(withType: .edit, atIndex: indexPath, message: item)
                 }
                 actions.append(editAction)
             }
             
-            let deleteAction = UIAction(title: NSLocalizedString("Delete", comment: ""),
+            let deleteAction = UIAction(title: Constants.shared.strings.delete,
                                         image: Constants.shared.images.trashIcon,
                                         attributes: .destructive) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
             }
-            let selectAction = UIAction(title: NSLocalizedString("Select", comment: ""),
+            let selectAction = UIAction(title: Constants.shared.strings.select,
                                         image: Constants.shared.images.checkmarkCircleIcon) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
             }
             actions.append(deleteAction)
             actions.append(selectAction)
         } else {
-            let reportAction = UIAction(title: NSLocalizedString("Report message", comment: "")) { [weak self] action in
+            let reportAction = UIAction(title: Constants.shared.strings.reportMessage) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
             }
             actions.append(reportAction)
+        }
+        
+        return UIMenu(title: "", children: actions)
+    }
+    
+    public func contextMenuForChatroomData(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu {
+        var actions: [UIAction] = []
+        let replyAction = UIAction(title: Constants.shared.strings.reply,
+                                   image: Constants.shared.images.replyIcon) { [weak self] action in
+            self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
+        }
+        actions.append(replyAction)
+        if let message = item.message, !message.isEmpty {
+            let copyAction = UIAction(title: Constants.shared.strings.copy,
+                                      image: Constants.shared.images.copyIcon) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
+            }
+            actions.append(copyAction)
         }
         
         return UIMenu(title: "", children: actions)
@@ -462,10 +486,15 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         if reaction == "more" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
                 guard let self else { return }
-                NavigationScreen.shared.perform(.emojiPicker(conversationId: message.messageId), from: self, params: nil)
+                let emojiPicker: NavigationActions = message.messageType == LMChatMessageListView.chatroomHeader ? .emojiPicker(conversationId: nil, chatroomId: message.messageId) : .emojiPicker(conversationId: message.messageId, chatroomId: nil)
+                NavigationScreen.shared.perform(emojiPicker, from: self, params: nil)
             }
         } else {
-            viewModel?.putConversationReaction(conversationId: message.messageId, reaction: reaction)
+            if message.messageType == LMChatMessageListView.chatroomHeader { 
+                viewModel?.putChatroomReaction(chatroomId: message.messageId, reaction: reaction)
+            } else {
+                viewModel?.putConversationReaction(conversationId: message.messageId, reaction: reaction)
+            }
         }
     }
     
@@ -548,6 +577,10 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        if message.messageType == LMChatMessageListView.chatroomHeader {
+            NavigationScreen.shared.perform(.reactionSheet(reactions: (viewModel?.chatroomViewData?.reactions ?? []).reversed(), selectedReaction: reaction, conversation: nil, chatroomId: message.messageId), from: self, params: nil)
+            return
+        }
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
               let reactions = conversation.reactions else { return }
         NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
@@ -599,6 +632,7 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
+        viewModel?.replyChatMessage = nil
         viewModel?.editChatMessage = nil
         bottomMessageBoxView.replyMessageViewContainer.isHidden = true
     }
@@ -614,7 +648,7 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
         } else {
-            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
+            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom)
         }
         cancelReply()
         cancelLinkPreview()
@@ -833,7 +867,7 @@ extension LMChatMessageListViewController: LMChatAttachmentViewDelegate {
             return mediaData.build()
         }
         
-        viewModel?.postMessage(message: message, filesUrls: attachmentMedia, shareLink: self.viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: nil)
+        viewModel?.postMessage(message: message, filesUrls: attachmentMedia, shareLink: self.viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom)
         cancelReply()
         cancelLinkPreview()
     }
@@ -879,17 +913,19 @@ extension LMChatMessageListViewController: UIImagePickerControllerDelegate, UINa
 }
 
 extension LMChatMessageListViewController: LMChatEmojiListViewDelegate {
-    func emojiSelected(emoji: String, conversationId: String?) {
-        guard let conversationId else { return }
-        viewModel?.putConversationReaction(conversationId: conversationId, reaction: emoji)
+    func emojiSelected(emoji: String, conversationId: String?, chatroomId: String?) {
+        if let conversationId {
+            viewModel?.putConversationReaction(conversationId: conversationId, reaction: emoji)
+        } else if let chatroomId {
+            viewModel?.putChatroomReaction(chatroomId: chatroomId, reaction: emoji)
+        }
     }
 }
 
 extension LMChatMessageListViewController: LMReactionViewControllerDelegate {
     public func reactionDeleted(chatroomId: String?, conversationId: String?) {
-        guard let conversationId else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {[weak self] in
-            self?.viewModel?.updateDeletedReactionConversation(conversationId: conversationId)
+            self?.viewModel?.updateDeletedReaction(conversationId: conversationId, chatroomId: chatroomId)
         }
     }
 }
@@ -935,7 +971,7 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
     }
 }
 
-extension LMChatMessageListViewController: LMChatMessageCellDelegate {
+extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroomHeaderMessageCellDelegate {
     
     public func pauseAudioPlayer() {
         LMChatAudioPlayManager.shared.stopAudio { }

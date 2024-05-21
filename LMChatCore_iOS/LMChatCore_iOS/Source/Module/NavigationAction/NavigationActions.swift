@@ -24,7 +24,7 @@ enum NavigationActions {
     case browser(url: URL)
     case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
     case searchScreen
-    case emojiPicker(conversationId: String)
+    case emojiPicker(conversationId: String?, chatroomId: String?)
 //    case giphy
     
 }
@@ -79,9 +79,10 @@ class NavigationScreen: NavigationScreenProtocol {
         case .searchScreen:
             guard let searchScreen = try? SearchListViewModel.createModule() else { return }
             source.navigationController?.pushViewController(searchScreen, animated: false)
-        case .emojiPicker(let conversationId):
+        case .emojiPicker(let conversationId, let chatroomId):
             let picker = LMChatEmojiListViewController()
             picker.conversationId = conversationId
+            picker.chatroomId = chatroomId
             picker.delegate = source as? LMChatMessageListViewController
             source.present(picker, animated: true)
 //        case .giphy:

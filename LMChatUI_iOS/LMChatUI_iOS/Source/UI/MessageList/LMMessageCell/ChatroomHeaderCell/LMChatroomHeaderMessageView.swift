@@ -7,7 +7,6 @@
 
 import Foundation
 import Kingfisher
-import LMChatUI_iOS
 
 open class LMChatroomHeaderMessageView: LMView {
     

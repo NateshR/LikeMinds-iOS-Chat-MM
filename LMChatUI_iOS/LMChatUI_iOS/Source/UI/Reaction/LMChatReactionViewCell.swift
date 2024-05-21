@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 open class LMChatReactionViewCell: LMTableViewCell {
     public struct ContentModel {
@@ -45,6 +44,7 @@ open class LMChatReactionViewCell: LMTableViewCell {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = ""
         label.font = Appearance.shared.fonts.textFont1
+        label.textColor = Appearance.shared.colors.black
         return label
     }()
     
