@@ -45,6 +45,5 @@ open class LMChatDocumentViewCell: LMChatMessageCell {
         documentMessageView.onShowMoreCallback = { [weak self] in
             self?.delegate?.onClickOfSeeMore(for: data.message?.messageId ?? "", indexPath: index)
         }
-        documentMessageView.layoutIfNeeded()
     }
 }

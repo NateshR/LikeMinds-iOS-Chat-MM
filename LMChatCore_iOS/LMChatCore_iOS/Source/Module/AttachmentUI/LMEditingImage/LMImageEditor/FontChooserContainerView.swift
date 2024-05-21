@@ -102,13 +102,6 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
         self.baseView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
         self.baseView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         self.baseView.heightAnchor.constraint(equalToConstant: FontChooserContainerView.baseViewH).isActive = true
-        
-//        self.baseView.snp.makeConstraints { (make) in
-//            make.left.right.equalTo(self)
-//            make.bottom.equalTo(self.snp.bottom).offset(FontChooserContainerView.baseViewH)
-//            make.height.equalTo(FontChooserContainerView.baseViewH)
-//        }
-
         let visualView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
             visualView.translatesAutoresizingMaskIntoConstraints = false
         self.baseView.addSubview(visualView)
@@ -118,21 +111,10 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
         visualView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         visualView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         
-        
-//        visualView.snp.makeConstraints { (make) in
-//            make.edges.equalTo(self.baseView)
-//        }
-
         let toolView = UIView()
         toolView.backgroundColor = UIColor(white: 0.4, alpha: 0.4)
             toolView.translatesAutoresizingMaskIntoConstraints = false
         self.baseView.addSubview(toolView)
-        
-//        toolView.snp.makeConstraints { (make) in
-//            make.top.left.right.equalTo(self.baseView)
-//            make.height.equalTo(50)
-//        }
-        
         toolView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor).isActive = true
         toolView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor).isActive = true
         toolView.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -149,12 +131,6 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
         hideBtn.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: -20).isActive = true
         hideBtn.centerYAnchor.constraint(equalTo: toolView.centerYAnchor).isActive = true
         hideBtn.sizeThatFits(CGSize(width: 40, height: 40))
-        
-//        hideBtn.snp.makeConstraints { (make) in
-//            make.centerY.equalTo(toolView)
-//            make.right.equalTo(toolView).offset(-20)
-//            make.size.equalTo(CGSize(width: 40, height: 40))
-//        }
 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -173,11 +149,6 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
         collectionView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor).isActive = true
         collectionView.topAnchor.constraint(equalTo: toolView.bottomAnchor).isActive = true
         
-//        self.collectionView.snp.makeConstraints { (make) in
-//            make.top.equalTo(toolView.snp.bottom)
-//            make.left.right.bottom.equalTo(self.baseView)
-//        }
-
         self.collectionView.register(FontCell.self, forCellWithReuseIdentifier: NSStringFromClass(FontCell.classForCoder()))
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(hideBtnClick))
@@ -201,19 +172,11 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
             self.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
             self.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
             
-//            self.snp.makeConstraints { (make) in
-//                make.edges.equalTo(view)
-//            }
             view.layoutIfNeeded()
         }
 
         self.isHidden = false
         UIView.animate(withDuration: 0.25) {
-            
-//            self.baseView.upd
-//            self.baseView.snp.updateConstraints { (make) in
-//                make.bottom.equalTo(self.snp.bottom)
-//            }
             view.layoutIfNeeded()
         }
     }
@@ -222,9 +185,6 @@ class FontChooserContainerView: UIView, LMTextFontChooserDelegate {
         self.hideBlock?()
 
         UIView.animate(withDuration: 0.25) {
-//            self.baseView.snp.updateConstraints { (make) in
-//                make.bottom.equalTo(self.snp.bottom).offset(FontChooserContainerView.baseViewH)
-//            }
             self.superview?.layoutIfNeeded()
         } completion: { (_) in
             self.isHidden = true
@@ -289,9 +249,6 @@ class FontCell: UICollectionViewCell {
         self.label.textAlignment = .center
         self.label.textColor = .white
         self.contentView.addSubview(self.label)
-//        self.label.snp.makeConstraints { (make) in
-//            make.center.equalTo(self.contentView)
-//        }
         self.label.center = self.contentView.center
     }
 

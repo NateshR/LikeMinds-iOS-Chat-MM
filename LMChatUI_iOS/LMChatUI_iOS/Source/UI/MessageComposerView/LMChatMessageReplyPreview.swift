@@ -39,13 +39,6 @@ open class LMChatMessageReplyPreview: LMView {
         return view
     }()
     
-    open private(set) lazy var subviewContainer: LMView = {
-        let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 8)
-        view.backgroundColor = Appearance.shared.colors.previewBackgroundColor
-        return view
-    }()
-    
     open private(set) lazy var sidePannelColorView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = Appearance.shared.colors.red
@@ -76,7 +69,6 @@ open class LMChatMessageReplyPreview: LMView {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
         image.backgroundColor = .clear
-//        image.cornerRadius(with: 8)
         return image
     }()
     
@@ -103,9 +95,14 @@ open class LMChatMessageReplyPreview: LMView {
     open private(set) lazy var verticleUsernameAndMessageContainerStackView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.alignment = .top
-        view.spacing = 0
-        view.directionalLayoutMargins = .init(top: 6, leading: 0, bottom: 6, trailing:10)
+        view.alignment = .leading
+        view.spacing = 4
+        return view
+    }()
+    
+    open private(set) lazy var subviewContainer: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -121,8 +118,10 @@ open class LMChatMessageReplyPreview: LMView {
         containerView.addSubview(sidePannelColorView)
         containerView.addSubview(horizontalReplyStackView)
         containerView.addSubview(closeReplyButton)
-        horizontalReplyStackView.addArrangedSubview(verticleUsernameAndMessageContainerStackView)
+        horizontalReplyStackView.addArrangedSubview(subviewContainer)
         horizontalReplyStackView.addArrangedSubview(messageAttachmentImageView)
+        
+        subviewContainer.addSubview(verticleUsernameAndMessageContainerStackView)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(userNameLabel)
         verticleUsernameAndMessageContainerStackView.addArrangedSubview(messageLabel)
         isUserInteractionEnabled = true
@@ -154,15 +153,19 @@ open class LMChatMessageReplyPreview: LMView {
             horizontalReplyStackView.bottomAnchor.constraint(equalTo: sidePannelColorView.bottomAnchor),
             
             messageAttachmentImageView.widthAnchor.constraint(equalToConstant: 60),
-            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 60)
+            messageAttachmentImageView.heightAnchor.constraint(equalToConstant: 60),
             
+            verticleUsernameAndMessageContainerStackView.leadingAnchor.constraint(equalTo: subviewContainer.leadingAnchor),
+            verticleUsernameAndMessageContainerStackView.trailingAnchor.constraint(equalTo: subviewContainer.trailingAnchor, constant: -6),
+            verticleUsernameAndMessageContainerStackView.topAnchor.constraint(greaterThanOrEqualTo: subviewContainer.topAnchor, constant: 2),
+            verticleUsernameAndMessageContainerStackView.bottomAnchor.constraint(lessThanOrEqualTo: subviewContainer.bottomAnchor, constant: -2),
+            verticleUsernameAndMessageContainerStackView.centerYAnchor.constraint(equalTo: subviewContainer.centerYAnchor)
             ])
     }
     
     public func setData(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = data.username
-        let attributedText = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
         self.messageLabel.attributedText = createAttributedString(data)
         if let attachmentsUrls = data.attachmentsUrls,
            let firstUrl = (attachmentsUrls.first?.thumbnailUrl ?? attachmentsUrls.first?.fileUrl),
@@ -190,7 +193,7 @@ open class LMChatMessageReplyPreview: LMView {
                 let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
             }
-            attributedText.append(NSAttributedString(string: " " + (data.replyMessage ?? "")))
+            attributedText.append(NSAttributedString(string: (data.replyMessage ?? "")))
             return attributedText
         }
         var image: UIImage = UIImage()
@@ -225,7 +228,6 @@ open class LMChatMessageReplyPreview: LMView {
         if fileType.lowercased() == "gif" {
             let textAtt = NSTextAttachment(image: image)
             textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
-            attributedText.append(NSAttributedString(string: " "))
             attributedText.append(NSAttributedString(attachment: textAtt))
             attributedText.append(NSAttributedString(string: " \(initalType) "))
         } else {
@@ -233,7 +235,6 @@ open class LMChatMessageReplyPreview: LMView {
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
                 attributedText.append(NSAttributedString(string: " (+\(count - 1) more) "))
             } else {
-                attributedText.append(NSAttributedString(string: " "))
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
                 attributedText.append(NSAttributedString(string: " \(initalType) "))
             }

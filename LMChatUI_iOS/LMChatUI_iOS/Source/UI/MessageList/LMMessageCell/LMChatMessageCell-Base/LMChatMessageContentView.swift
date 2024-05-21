@@ -79,16 +79,6 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
-    open private(set) lazy var timestampLabel: LMLabel = {
-        let label =  LMLabel()
-            .translatesAutoresizingMaskIntoConstraints()
-        label.numberOfLines = 0
-        label.font = Appearance.shared.fonts.subHeadingFont1
-        label.textColor = Appearance.shared.colors.textColor
-        label.text = ""
-        return label
-    }()
-    
     open private(set) lazy var usernameLabel: LMLabel = {
         let label =  LMLabel()
             .translatesAutoresizingMaskIntoConstraints()
@@ -147,7 +137,6 @@ open class LMChatMessageContentView: LMView {
         bubble.addArrangeSubview(usernameLabel)
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(textLabel)
-//        bubble.addSubview(timestampLabel)
         backgroundColor = .clear
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
@@ -175,10 +164,6 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
-//            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
-//            timestampLabel.topAnchor.constraint(equalTo: bubbleView.contentContainer.bottomAnchor, constant: 4),
-//            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
-//            timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
         ])
         
          bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
@@ -227,7 +212,6 @@ open class LMChatMessageContentView: LMView {
             replyView(data)
             reactionsView(data)
         }
-        bubbleView.layoutIfNeeded()
     }
     
     func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
