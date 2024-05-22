@@ -132,8 +132,8 @@ final class LMChatAWSManager {
                 }
                 return nil
             }
-        } catch {
-            completion?(nil, nil)
+        } catch let error {
+            completion?(nil, error)
         }
     }
     

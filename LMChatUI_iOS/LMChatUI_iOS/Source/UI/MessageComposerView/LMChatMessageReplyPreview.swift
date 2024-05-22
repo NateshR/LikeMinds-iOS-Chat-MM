@@ -195,8 +195,8 @@ open class LMChatMessageReplyPreview: LMView {
     }
     
     func createAttributedString(_ data: ContentModel) -> NSAttributedString {
-        let message = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "")
-        let pointSize: CGFloat = 14
+        let message = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "", font: Appearance.shared.fonts.subHeadingFont2)
+        let pointSize: CGFloat = Appearance.shared.fonts.subHeadingFont2.pointSize
         guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
             let attributedText = NSMutableAttributedString(string: "")
             if data.messageType == 10 {

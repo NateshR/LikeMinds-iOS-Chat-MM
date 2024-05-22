@@ -76,8 +76,9 @@ open class LMChatMessageListView: LMView {
             public let isEdited: Bool?
             public let attachmentUploaded: Bool?
             public var isShowMore: Bool = false
+            public var isSent: Bool?
             
-            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool) {
+            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, isSent: Bool?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -96,6 +97,7 @@ open class LMChatMessageListView: LMView {
                 self.isEdited = isEdited
                 self.attachmentUploaded = attachmentUploaded
                 self.isShowMore = isShowMore
+                self.isSent = isSent
             }
         }
         
@@ -168,6 +170,7 @@ open class LMChatMessageListView: LMView {
         table.separatorStyle = .none
         table.backgroundView = loadingView
         table.contentInset = .init(top: 0, left: 0, bottom: 14, right: 0)
+//        table.bounces = false
         return table
     }()
     
@@ -374,7 +377,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     //Swipe to reply
     public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false && !isMultipleSelectionEnable else { return nil }
+        guard (item.messageType == 0 || item.messageType == 10) &&
+                item.isDeleted == false &&
+                item.isSent == true &&
+                !isMultipleSelectionEnable else { return nil }
         guard let replyAction = delegate?.trailingSwipeAction(forRowAtIndexPath: indexPath) else { return nil }
         let swipeConfig = UISwipeActionsConfiguration(actions: [replyAction])
         swipeConfig.performsFirstActionWithFullSwipe = true
@@ -420,7 +426,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10 || item.messageType == Self.chatroomHeader) && (item.isDeleted != true) else { return nil }
+        guard !self.isMultipleSelectionEnable,
+              (item.messageType == 0 || item.messageType == 10 || item.messageType == Self.chatroomHeader) &&
+                item.isSent == true &&
+                (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
             guard let self = self else { return UIMenu() }

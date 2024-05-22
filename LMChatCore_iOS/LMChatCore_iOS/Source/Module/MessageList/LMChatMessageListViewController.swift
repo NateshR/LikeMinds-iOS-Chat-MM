@@ -328,12 +328,14 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         }
     }
     
-    public func scrollToBottom() {
+    public func scrollToBottom(forceToBottom: Bool = true) {
         reloadChatMessageList()
-        messageListView.scrollToBottom()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         updateChatroomSubtitles()
-        self.scrollToBottomButton.isHidden = true
+        if forceToBottom || self.scrollToBottomButton.isHidden {
+            messageListView.scrollToBottom()
+            self.scrollToBottomButton.isHidden = true
+        }
     }
     
     public func updateTopicBar() {
@@ -354,7 +356,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     }
     
     public func didRetryUploading(messageId: String) {
-        LMChatAWSManager.shared.resumeAllTaskFor(groupId: messageId)
+        viewModel?.retryUploadConversation(messageId)
     }
     
     public func didScrollTableView(_ scrollView: UIScrollView) {
@@ -845,19 +847,19 @@ extension LMChatMessageListViewController: LMChatAttachmentViewDelegate {
             case .video, .audio, .voice_note:
                 if let url = media.url, let videoDeatil = FileUtils.getDetail(forVideoUrl: url) {
                     mediaData = mediaData.duration(videoDeatil.duration)
-                        .size(Int64(videoDeatil.fileSize ?? 0))
+                        .size(Int(videoDeatil.fileSize ?? 0))
                         .thumbnailurl(videoDeatil.thumbnailUrl)
                 }
             case .pdf:
                 if let url = media.url, let pdfDetail = FileUtils.getDetail(forPDFUrl: url) {
                     mediaData = mediaData.pdfPageCount(pdfDetail.pageCount)
-                        .size(Int64(pdfDetail.fileSize ?? 0))
+                        .size(Int(pdfDetail.fileSize ?? 0))
                         .thumbnailurl(pdfDetail.thumbnailUrl)
                 }
             case .image, .gif:
                 if let url = media.url {
                     let dimension = FileUtils.imageDimensions(with: url)
-                    mediaData = mediaData.size(Int64(FileUtils.fileSizeInByte(url: media.url) ?? 0))
+                    mediaData = mediaData.size(Int(FileUtils.fileSizeInByte(url: media.url) ?? 0))
                         .width(dimension?.width)
                         .height(dimension?.height)
                 }

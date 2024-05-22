@@ -40,7 +40,7 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        updateRetryButton(data)
         if data.message?.isDeleted == true {
             galleryView.isHidden = true
         } else {
@@ -71,6 +71,21 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
             galleryView.setData(data)
         } else {
             galleryView.isHidden = true
+        }
+    }
+    
+    func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
+        guard let messageSent = data.message?.isSent else {
+            loaderView.isHidden = true
+            retryView.isHidden = false
+            return
+        }
+        if  messageSent {
+            loaderView.isHidden = true
+            retryView.isHidden = true
+        } else {
+            loaderView.isHidden = true
+            retryView.isHidden = false
         }
     }
     
