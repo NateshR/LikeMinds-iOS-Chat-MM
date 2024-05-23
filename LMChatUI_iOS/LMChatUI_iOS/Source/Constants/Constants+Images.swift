@@ -105,6 +105,7 @@ public extension Constants {
         public var docPlusIcon = loadSystemImage(with: "doc.badge.plus")
         public var clockIcon = loadSystemImage(with: "clock")
         public var checkmarkIcon = loadSystemImage(with: "checkmark")
+        public var retryIcon = loadSystemImage(with: "exclamationmark.circle.fill")
         
     }
 }

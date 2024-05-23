@@ -15,7 +15,7 @@ protocol LMChatMessageListControllerDelegate: AnyObject {
                      filesUrls: [LMChatAttachmentMediaData]?,
                      shareLink: String?,
                      replyConversationId: String?,
-                     replyChatRoomId: String?)
+                     replyChatRoomId: String?, temporaryId: String?)
     func postMessageWithAttachment()
     func postMessageWithGifAttachment()
     func postMessageWithAudioAttachment(with url: URL)
@@ -311,7 +311,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
     public func reloadData(at: ScrollDirection) {
         if at == .scroll_UP {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {[weak self] in
                 guard let self else { return }
                 messageListView.tableSections = viewModel?.messagesList ?? []
                 messageListView.reloadData()
@@ -356,6 +356,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     }
     
     public func didRetryUploading(messageId: String) {
+        
         viewModel?.retryUploadConversation(messageId)
     }
     
@@ -650,7 +651,7 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
         } else {
-            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom)
+            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom, temporaryId: nil)
         }
         cancelReply()
         cancelLinkPreview()

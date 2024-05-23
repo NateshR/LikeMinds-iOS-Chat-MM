@@ -582,8 +582,10 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
-        self.markChatroomAsRead()
+        if !conversations.isEmpty {
+            delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
+        }
     }
     
     public func getChangedConversations(conversations: [Conversation]?) {
@@ -592,8 +594,10 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
-        self.markChatroomAsRead()
+        if !conversations.isEmpty {
+            delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
+        }
     }
     
     public func getNewConversations(conversations: [Conversation]?) {
@@ -610,8 +614,8 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         }
         if !conversations.isEmpty {
             delegate?.scrollToBottom(forceToBottom: false)
+            self.markChatroomAsRead()
         }
-        self.markChatroomAsRead()
     }
     
 }
@@ -622,10 +626,10 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                      filesUrls: [LMChatAttachmentMediaData]?,
                      shareLink: String?,
                      replyConversationId: String?,
-                     replyChatRoomId: String?) {
+                     replyChatRoomId: String?, temporaryId: String? = nil) {
         guard let communityId = chatroomViewData?.communityId,
               let chatroomId = chatroomViewData?.id else { return }
-        let temporaryId = ValueUtils.getTemporaryId()
+        let temporaryId = temporaryId ?? ValueUtils.getTemporaryId()
         var requestBuilder = PostConversationRequest.Builder()
             .chatroomId(self.chatroomId)
             .text(message ?? "")
@@ -764,7 +768,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .conversationId(messageId)
             .build()
         guard let conversation = LMChatClient.shared.getConversation(request: request)?.data?.conversation,
-              let communityId = chatroomViewData?.communityId,
               let _ = chatroomViewData?.id else {
             return
         }
@@ -788,7 +791,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             onConversationPosted(response: conversation, updatedFileUrls: fileUrls)
         } else {
             self.currentDetectedOgTags = conversation.ogTags
-            postMessage(message: conversation.answer, filesUrls: fileUrls, shareLink: conversation.ogTags?.url, replyConversationId: conversation.replyConversationId, replyChatRoomId: conversation.replyChatroomId)
+            postMessage(message: conversation.answer, filesUrls: fileUrls, shareLink: conversation.ogTags?.url, replyConversationId: conversation.replyConversationId, replyChatRoomId: conversation.replyChatroomId, temporaryId: conversation.temporaryId)
         }
     }
     

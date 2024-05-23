@@ -10,7 +10,7 @@ import LMChatUI_iOS
 import LMChatCore_iOS
 import LikeMindsChat
 
-class ViewController: UIViewController {
+class ViewController: LMViewController {
     
     @IBOutlet weak var apiKeyField: UITextField?
     @IBOutlet weak var userIdField: UITextField?
@@ -77,6 +77,7 @@ class ViewController: UIViewController {
     }
     
     func moveToNextScreen() {
+        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
         guard let homefeedvc =
 //                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
@@ -95,12 +96,12 @@ class ViewController: UIViewController {
     }
     
     // MARK: setupViews
-    open func setupViews() {
+    open override func setupViews() {
         self.view.addSubview(containerView)
     }
     
     // MARK: setupLayouts
-    open func setupLayouts() {
+    open override func setupLayouts() {
         
         NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -141,6 +142,7 @@ class ViewController: UIViewController {
     
     func callInitiateApi(userId: String, username: String, apiKey: String) {
         LMChatMain.shared.configure(apiKey: apiKey)
+        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
         try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
             guard success else { return }
             self?.moveToNextScreen()
