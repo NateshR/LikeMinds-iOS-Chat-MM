@@ -38,7 +38,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        updateRetryButton(data)
         if data.message?.isDeleted == true {
             docPreviewContainerStackView.isHidden = true
         } else {
@@ -101,6 +101,11 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     @objc
     open func didTapShowMore() {
         onShowMoreCallback?()
+    }
+    
+    func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
+        loaderView.isHidden = !(data.message?.messageStatus == .sending)
+        retryView.isHidden = !(data.message?.messageStatus == .failed)
     }
 }
 

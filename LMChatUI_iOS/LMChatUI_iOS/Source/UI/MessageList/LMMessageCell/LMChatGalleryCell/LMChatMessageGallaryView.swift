@@ -26,8 +26,8 @@ open class LMChatMessageGallaryView: LMView {
     /// Content the gallery should display.
     public var content: [UIView] = []
     
-    let heightViewSize = UIScreen.main.bounds.width * 0.6
-    let widthViewSize = UIScreen.main.bounds.width * 0.7
+    let heightViewSize = UIScreen.main.bounds.width * 0.5
+    let widthViewSize = UIScreen.main.bounds.width * 0.6
     
     // Previews indices locations:
     // When one item available:

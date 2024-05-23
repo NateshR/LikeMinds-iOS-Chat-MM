@@ -10,7 +10,7 @@ import LMChatUI_iOS
 import LMChatCore_iOS
 import LikeMindsChat
 
-class ViewController: UIViewController {
+class ViewController: LMViewController {
     
     @IBOutlet weak var apiKeyField: UITextField?
     @IBOutlet weak var userIdField: UITextField?
@@ -36,11 +36,11 @@ class ViewController: UIViewController {
 //        return view
 //    }()
     
-    open private(set) lazy var containerView: LMChatHomeFeedListView = {
-        let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = .systemGroupedBackground
-        return view
-    }()
+//    open private(set) lazy var containerView: LMChatHomeFeedListView = {
+//        let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
+//        view.backgroundColor = .systemGroupedBackground
+//        return view
+//    }()
     
 //    open private(set) lazy var containerView: LMChatMessageReplyPreview = {
 //        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
@@ -82,7 +82,7 @@ class ViewController: UIViewController {
     }
     
     func moveToNextScreen() {
-//        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
+        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
         guard let homefeedvc =
 //                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
@@ -101,21 +101,23 @@ class ViewController: UIViewController {
     }
     
     // MARK: setupViews
-    open func setupViews() {
-        self.view.addSubview(containerView)
+    open override func setupViews() {
     }
     
     // MARK: setupLayouts
-    open func setupLayouts() {
-        
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-//            containerView.heightAnchor.constraint(equalToConstant: 40),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-        ])
+    open override func setupLayouts() {
+    }
+    
+    @IBAction func loginAsCMButtonClicked(_ sender: UIButton) {
+        apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
+        userIdField?.text = "loki123"
+        userNameField?.text = "Loki"
+    }
+    
+    @IBAction func loginAsMemberButtonClicked(_ sender: UIButton) {
+        apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
+        userIdField?.text = "333333"
+        userNameField?.text = "Push User"
     }
 
     @IBAction func loginButtonClicked(_ sender: UIButton) {
@@ -147,7 +149,7 @@ class ViewController: UIViewController {
     
     func callInitiateApi(userId: String, username: String, apiKey: String) {
         LMChatMain.shared.configure(apiKey: apiKey)
-//        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
+        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
         try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
             guard success else { return }
             self?.moveToNextScreen()

@@ -296,6 +296,10 @@ open class LMChatMessageListViewController: LMViewController {
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
+    public func showToastMessage(message: String?) {
+        self.showToast(message: message ?? "", font: Appearance.shared.fonts.buttonFont1)
+    }
+    
     public func scrollToSpecificConversation(indexPath: IndexPath) {
         reloadChatMessageList()
         self.messageListView.scrollAtIndexPath(indexPath: indexPath)
@@ -353,11 +357,31 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     
     public func didCancelUploading(messageId: String) {
         LMChatAWSManager.shared.cancelAllTaskFor(groupId: messageId)
+        viewModel?.updateConversationUploadingStatus(messageId: messageId, withStatus: .failed)
     }
     
     public func didRetryUploading(messageId: String) {
         
-        viewModel?.retryUploadConversation(messageId)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let tryAction = UIAlertAction(title: "Try again", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
+            guard let self else { return }
+            viewModel?.retryUploadConversation(messageId)
+        }
+        let retryIcon = Constants.shared.images.retryIcon
+        tryAction.setValue(retryIcon, forKey: "image")
+        
+//        let delete = UIAlertAction(title: "Delete", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
+//            guard let self else { return }
+//            viewModel?.deleteTempConversation(conversationId: messageId)
+//        }
+//        delete.setValue(Constants.shared.images.trashIcon, forKey: "image")
+        
+        let cancel = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel)
+        
+        alert.addAction(tryAction)
+//        alert.addAction(delete)
+        alert.addAction(cancel)
+        self.present(alert, animated: true, completion: nil)
     }
     
     public func didScrollTableView(_ scrollView: UIScrollView) {

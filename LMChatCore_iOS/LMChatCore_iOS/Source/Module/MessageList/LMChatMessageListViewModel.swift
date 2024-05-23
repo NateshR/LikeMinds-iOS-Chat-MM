@@ -17,6 +17,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func updateTopicBar()
     func scrollToSpecificConversation(indexPath: IndexPath)
     func memberRightsCheck()
+    func showToastMessage(message: String?)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -349,7 +350,7 @@ public final class LMChatMessageListViewModel {
                    createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0),
                    ogTags: createOgTags(replyConversation.ogTags),
                    isEdited: replyConversation.isEdited,
-                   attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, isSent: replyConversation.isSent)]
+                   attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(replyConversation.conversationStatus))]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
@@ -362,7 +363,21 @@ public final class LMChatMessageListViewModel {
                      createdByImageUrl: conversation.member?.imageUrl,
                      createdById: conversation.member?.sdkClientInfo?.uuid,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, isSent: conversation.isSent)
+                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus))
+    }
+    
+    func messageStatus(_ status: ConversationStatus?) -> LMMessageStatus {
+        guard let status else { return .sending }
+        switch status {
+        case .sent:
+            return .sent
+        case .sending:
+            return .sending
+        case .failed:
+            return .failed
+        default:
+            return .sending
+        }
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
@@ -446,7 +461,7 @@ public final class LMChatMessageListViewModel {
             .id(chatroomId)
             .reactions(chatroom.reactions)
             .hasReactions(chatroom.hasReactions)
-            .isSent(true)
+            .conversationStatus(.sent)
             .build()
         return conversation
     }
@@ -651,7 +666,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         delegate?.scrollToBottom(forceToBottom: false)
         
         LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
-            guard let self, let conversation = response.data else { return }
+            guard let self, let conversation = response.data else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                self?.updateConversationUploadingStatus(messageId: temporaryId, withStatus: .failed)
+                return
+            }
             onConversationPosted(response: conversation.conversation, updatedFileUrls: filesUrls)
             print(response)
         }
@@ -788,10 +807,13 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                                              livePhoto: nil)
         }
         if let conId = Int(conversation.id ?? "NA"), conId > 0, fileUrls.count > 0 {
+            updateConversationUploadingStatus(messageId: conversation.id ?? "", withStatus: .sending)
             onConversationPosted(response: conversation, updatedFileUrls: fileUrls)
         } else {
-            self.currentDetectedOgTags = conversation.ogTags
-            postMessage(message: conversation.answer, filesUrls: fileUrls, shareLink: conversation.ogTags?.url, replyConversationId: conversation.replyConversationId, replyChatRoomId: conversation.replyChatroomId, temporaryId: conversation.temporaryId)
+            if Int(conversation.id ?? "NA") == nil {
+                self.currentDetectedOgTags = conversation.ogTags
+                postMessage(message: conversation.answer, filesUrls: fileUrls, shareLink: conversation.ogTags?.url, replyConversationId: conversation.replyConversationId, replyChatRoomId: conversation.replyChatroomId, temporaryId: conversation.temporaryId)
+            }
         }
     }
     
@@ -912,6 +934,15 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         }
     }
     
+    func deleteTempConversation(conversationId: String) {
+//        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
+//        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
+//            var section = messagesList[sectionIndex]
+//            section.data.removeAll(where: {$0.messageId == conversationId})
+//        }
+//        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
+    }
+    
     func fetchConversation(withId conversationId: String) {
         let request = GetConversationRequest.builder()
             .conversationId(conversationId)
@@ -949,6 +980,10 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         let message = chatroomDataToConversation(updatedChatroom)
         insertOrUpdateConversationIntoList(message)
         delegate?.reloadChatMessageList()
+    }
+    
+    func updateConversationUploadingStatus(messageId: String, withStatus status: ConversationStatus) {
+        LMChatClient.shared.updateConversationUploadingStatus(withId: messageId, withStatus: status)
     }
     
     private func onDeleteConversation(ids: [String]) {

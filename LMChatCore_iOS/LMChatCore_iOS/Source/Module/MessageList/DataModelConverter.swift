@@ -36,7 +36,7 @@ class DataModelConverter {
             .isEdited(false)
             .replyChatroomId(request.repliedChatroomId)
             .attachmentUploaded(false)
-            .isSent(false)
+            .conversationStatus(.sending)
             .build()
     }
     

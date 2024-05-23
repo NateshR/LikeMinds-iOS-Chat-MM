@@ -75,18 +75,8 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
     }
     
     func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
-        guard let messageSent = data.message?.isSent else {
-            loaderView.isHidden = true
-            retryView.isHidden = false
-            return
-        }
-        if  messageSent {
-            loaderView.isHidden = true
-            retryView.isHidden = true
-        } else {
-            loaderView.isHidden = true
-            retryView.isHidden = false
-        }
+        loaderView.isHidden = !(data.message?.messageStatus == .sending)
+        retryView.isHidden = !(data.message?.messageStatus == .failed)
     }
     
     override func prepareToResuse() {

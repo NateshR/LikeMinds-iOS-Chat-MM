@@ -3,7 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22684"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -45,13 +45,36 @@
                                     </button>
                                 </subviews>
                             </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zxl-pe-UMt">
+                                <rect key="frame" x="41.333333333333343" y="128.66666666666666" width="310.66666666666663" height="34.333333333333343"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OQM-KZ-92L">
+                                        <rect key="frame" x="0.0" y="0.0" width="155.33333333333334" height="34.333333333333336"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Login as CM"/>
+                                        <connections>
+                                            <action selector="loginAsCMButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hpT-N6-VxN"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0lH-Xr-JBN">
+                                        <rect key="frame" x="155.33333333333331" y="0.0" width="155.33333333333331" height="34.333333333333336"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Login as Member"/>
+                                        <connections>
+                                            <action selector="loginAsMemberButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="czW-lL-fK4"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="Tsb-7u-ajF" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="H7k-La-uWf"/>
                             <constraint firstItem="Tsb-7u-ajF" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="Kge-tU-LA8"/>
+                            <constraint firstItem="Zxl-pe-UMt" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Kr1-GU-Xri"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Tsb-7u-ajF" secondAttribute="trailing" constant="40" id="TlA-tm-M2T"/>
+                            <constraint firstItem="Tsb-7u-ajF" firstAttribute="top" secondItem="Zxl-pe-UMt" secondAttribute="bottom" constant="40" id="kIP-Bk-WiJ"/>
                             <constraint firstItem="Tsb-7u-ajF" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="neF-QL-HTy"/>
                         </constraints>
                     </view>

@@ -236,7 +236,7 @@ open class LMChatMessageContentView: LMView {
         let attributedText = NSMutableAttributedString()
         attributedText.append(NSAttributedString(string: timestamp + " "))
         if data.message?.isIncoming == false {
-            let image = ((data.message?.isSent ?? false) ? Constants.shared.images.checkmarkIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor) :  Constants.shared.images.clockIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor)) ?? UIImage()
+            let image = ((data.message?.messageStatus == .sent) ? Constants.shared.images.checkmarkIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor) :  Constants.shared.images.clockIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor)) ?? UIImage()
             let textAtt = NSTextAttachment(image: image)
             textAtt.bounds = CGRect(x: 0, y: -1, width: 11, height: 11)
             attributedText.append(NSAttributedString(attachment: textAtt))

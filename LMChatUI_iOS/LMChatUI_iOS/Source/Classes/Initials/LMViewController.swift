@@ -277,6 +277,29 @@ open class LMViewController: UIViewController {
             loaderScreen.removeFromSuperview()
         }
     }
+    
+    public func showToast(message : String, font: UIFont) {
+        let toastLabel = LMLabel()
+        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        toastLabel.textColor = UIColor.white
+        toastLabel.font = font
+        toastLabel.textAlignment = .center;
+        toastLabel.text = message
+        toastLabel.alpha = 1.0
+        toastLabel.paddingTop = 8
+        toastLabel.paddingBottom = 8
+        toastLabel.paddingLeft = 10
+        toastLabel.paddingRight = 10
+        toastLabel.center = self.view.center
+        toastLabel.layer.cornerRadius = 8;
+        toastLabel.clipsToBounds  =  true
+        self.view.addSubview(toastLabel)
+        UIView.animate(withDuration: 4.0, delay: 0.1, options: .curveEaseOut, animations: {
+            toastLabel.alpha = 0.0
+        }, completion: {(isCompleted) in
+            toastLabel.removeFromSuperview()
+        })
+    }
 }
 
 

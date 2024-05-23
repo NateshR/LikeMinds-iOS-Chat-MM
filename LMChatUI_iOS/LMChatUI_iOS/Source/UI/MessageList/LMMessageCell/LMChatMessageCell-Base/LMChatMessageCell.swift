@@ -75,6 +75,7 @@ open class LMChatMessageCell: LMTableViewCell {
     
     open override func prepareForReuse() {
         super.prepareForReuse()
+        retryButton.isHidden = true
         chatMessageView.prepareToResuse()
     }
     
@@ -133,7 +134,8 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.retryView.delegate = self
         updateSelection(data: data)
         chatMessageView.delegate = self
-        retryButton.isHidden = (data.message?.isSent ?? false)
+        print("message status on send: \(data.message?.messageStatus)")
+        retryButton.isHidden = data.message?.messageStatus != .failed
     }
     
     func updateSelection(data: ContentModel) {
