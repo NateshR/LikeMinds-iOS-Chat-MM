@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import LMChatUI_iOS
 import UIKit
 
 public protocol LMChatBottomMessageComposerDelegate: AnyObject {
@@ -21,6 +20,7 @@ public protocol LMChatBottomMessageComposerDelegate: AnyObject {
     func playRecording()
     func stopRecording(_ onStop: (() -> Void))
     func deleteRecording()
+    func askForMicrophoneAccess()
     
     func cancelReply()
     func cancelLinkPreview()
@@ -253,7 +253,7 @@ open class LMChatBottomMessageComposerView: LMView {
     let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
     let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
     let attachmentButtonIcon = Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 24)
-    let gifBadgeIcon = UIImage(named: "gifBadge", in: LMChatUIBundle, with: nil)
+    let gifBadgeIcon = Constants.shared.images.gifBadgeIcon
     
     let sendButtonHeightConstant: CGFloat = 40
     var lockContainerViewHeight: CGFloat = 100
@@ -477,19 +477,16 @@ extension LMChatBottomMessageComposerView {
         if #available(iOS 17, *) {
             if AVAudioApplication.shared.recordPermission == .granted {
                 handleLongPress(sender)
-            } else if AVAudioApplication.shared.recordPermission == .denied {
-                print("no mic access")
-            } else if AVAudioApplication.shared.recordPermission == .undetermined {
-                AVAudioApplication.requestRecordPermission { _ in }
+            } else if AVAudioApplication.shared.recordPermission == .denied || AVAudioApplication.shared.recordPermission == .undetermined {
+                delegate?.askForMicrophoneAccess()
             }
         } else {
             switch AVAudioSession.sharedInstance().recordPermission {
             case .granted:
                 handleLongPress(sender)
-            case .denied:
-                print("No Access to microphone")
-            case .undetermined:
-                AVAudioSession.sharedInstance().requestRecordPermission { _ in}
+            case .denied,
+                    .undetermined:
+                delegate?.askForMicrophoneAccess()
             default:
                 break
             }

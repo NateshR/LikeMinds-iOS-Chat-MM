@@ -5,8 +5,7 @@
 //  Created by Pushpendra Singh on 09/02/24.
 //
 
-import Foundation
-import LMChatUI_iOS
+import UIKit
 
 protocol BaseContentModel {}
 

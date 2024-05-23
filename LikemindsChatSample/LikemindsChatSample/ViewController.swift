@@ -10,7 +10,7 @@ import LMChatUI_iOS
 import LMChatCore_iOS
 import LikeMindsChat
 
-class ViewController: LMViewController {
+class ViewController: UIViewController {
     
     @IBOutlet weak var apiKeyField: UITextField?
     @IBOutlet weak var userIdField: UITextField?
@@ -54,6 +54,11 @@ class ViewController: LMViewController {
 //        return view
 //    }()
     
+    private(set) lazy var loadingView: LMChatMessageLoadingShimmerView = {
+        let view = LMChatMessageLoadingShimmerView().translatesAutoresizingMaskIntoConstraints()
+        view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,7 +82,7 @@ class ViewController: LMViewController {
     }
     
     func moveToNextScreen() {
-        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
+//        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
         guard let homefeedvc =
 //                    try? LMExploreChatroomViewModel.createModule() else {return }
 //              try? ReactionViewModel.createModule() else { return }
@@ -96,12 +101,12 @@ class ViewController: LMViewController {
     }
     
     // MARK: setupViews
-    open override func setupViews() {
+    open func setupViews() {
         self.view.addSubview(containerView)
     }
     
     // MARK: setupLayouts
-    open override func setupLayouts() {
+    open func setupLayouts() {
         
         NSLayoutConstraint.activate([
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -142,7 +147,7 @@ class ViewController: LMViewController {
     
     func callInitiateApi(userId: String, username: String, apiKey: String) {
         LMChatMain.shared.configure(apiKey: apiKey)
-        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
+//        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
         try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
             guard success else { return }
             self?.moveToNextScreen()

@@ -5,9 +5,8 @@
 //  Created by Pushpendra Singh on 09/02/24.
 //
 
-import Foundation
-import LMChatUI_iOS
 import Kingfisher
+import UIKit
 
 @IBDesignable
 open class LMChatHomeFeedExploreTabView: LMView {

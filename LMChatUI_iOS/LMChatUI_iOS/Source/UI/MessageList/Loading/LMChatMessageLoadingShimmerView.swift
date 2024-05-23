@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 open class LMChatMessageLoadingShimmerView: LMView {
     
@@ -34,7 +33,7 @@ open class LMChatMessageLoadingShimmerView: LMView {
     
     open override func setupLayouts() {
         super.setupLayouts()
-        for _ in 0..<5 {
+        for _ in 0..<2 {
             let shimmer = LMChatMessageLoading()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             stackView.addArrangedSubview(shimmer)
