@@ -25,7 +25,7 @@ public protocol LMChatMessageListViewDelegate: AnyObject {
     func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu?
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
     func didScrollTableView(_ scrollView: UIScrollView)
-    func didCancelUploading(messageId: String)
+    func didCancelUploading(tempId: String, messageId: String)
     func didRetryUploading(messageId: String)
 }
 
@@ -83,8 +83,9 @@ open class LMChatMessageListView: LMView {
             public let attachmentUploaded: Bool?
             public var isShowMore: Bool = false
             public var messageStatus: LMMessageStatus?
+            public var tempId: String?
             
-            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?) {
+            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -104,6 +105,7 @@ open class LMChatMessageListView: LMView {
                 self.attachmentUploaded = attachmentUploaded
                 self.isShowMore = isShowMore
                 self.messageStatus = messageStatus
+                self.tempId = tempId
             }
         }
         

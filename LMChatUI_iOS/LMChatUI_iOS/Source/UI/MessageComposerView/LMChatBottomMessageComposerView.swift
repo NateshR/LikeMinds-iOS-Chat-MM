@@ -419,6 +419,7 @@ open class LMChatBottomMessageComposerView: LMView {
         isLinkPreviewCancel = false
         replyMessageViewContainer.isHidden = true
         checkSendButtonGestures()
+        inputTextView.mentionDelegate?.contentHeightChanged()
     }
     
     @objc func attachmentButtonClicked(_ sender: UIButton) {

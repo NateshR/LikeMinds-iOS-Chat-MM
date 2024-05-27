@@ -93,7 +93,7 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
-    open private(set) lazy var cancelRetryContainerStackView: LMStackView = {
+    open private(set) lazy var cancelRetryContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
@@ -106,7 +106,9 @@ open class LMChatMessageContentView: LMView {
     
     open private(set) lazy var loaderView: LMAttachmentLoaderView = {
         let view = LMUIComponents.shared.attachmentLoaderView.init().translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 24)
+        view.setHeightConstraint(with: 44)
+        view.setWidthConstraint(with: 44)
+        view.cornerRadius(with: 22)
         view.isHidden = true
         return view
     }()
@@ -170,7 +172,7 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
-            replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120),
+//            replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),
 //            replyMessageView.leadingAnchor.constraint(equalTo: bubbleView.contentContainer.leadingAnchor),
 //            replyMessageView.trailingAnchor.constraint(equalTo: bubbleView.contentContainer.trailingAnchor)
         ])
@@ -181,7 +183,7 @@ open class LMChatMessageContentView: LMView {
         outgoingbubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
         outgoingbubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
         
-//        replyViewWidthConstraint = replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
+        replyViewWidthConstraint = replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
         
     }
     
@@ -203,13 +205,6 @@ open class LMChatMessageContentView: LMView {
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
         
-        if data.message?.isDeleted == true {
-            deletedConversationView(data)
-        } else {
-            replyView(data)
-            reactionsView(data)
-        }
-        
         if !isIncoming {
             chatProfileImageView.isHidden = true
             usernameLabel.isHidden = true
@@ -227,7 +222,14 @@ open class LMChatMessageContentView: LMView {
             outgoingbubbleLeadingConstraint?.isActive = false
             outgoingbubbleTrailingConstraint?.isActive = false
         }
-        bubbleView.layoutIfNeeded()
+        
+        if data.message?.isDeleted == true {
+            deletedConversationView(data)
+        } else {
+            replyView(data)
+            reactionsView(data)
+        }
+        bubbleView.updateConstraintsIfNeeded()
     }
     
     func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
@@ -272,8 +274,8 @@ open class LMChatMessageContentView: LMView {
             replyMessageView.onClickReplyPreview = {[weak self] in
                 self?.delegate?.didTapOnReplyPreview()
             }
-//            replyViewWidthConstraint?.constant = max(120, bubbleView.bounds.width)
-//            replyViewWidthConstraint?.isActive = true
+            replyViewWidthConstraint?.constant = max(120, bubbleView.bounds.width)
+            replyViewWidthConstraint?.isActive = true
         } else {
             replyMessageView.isHidden = true
         }

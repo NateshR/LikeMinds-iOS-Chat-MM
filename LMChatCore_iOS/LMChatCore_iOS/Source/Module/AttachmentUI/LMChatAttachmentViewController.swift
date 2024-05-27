@@ -376,11 +376,13 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         audioPlayer.isHidden = true
         switch data.mediaType {
         case .image, .gif:
+            bottomMessageBoxView.attachmentButton.isHidden = data.mediaType == .gif
             editButton.isHidden = data.mediaType == .gif
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
+            bottomMessageBoxView.attachmentButton.isHidden = false
             videoImageViewContainer.isHidden = false
             videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
                 self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
