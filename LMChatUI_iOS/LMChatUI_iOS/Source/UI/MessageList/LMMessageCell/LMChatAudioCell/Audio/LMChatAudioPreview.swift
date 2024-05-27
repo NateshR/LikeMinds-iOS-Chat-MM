@@ -201,7 +201,7 @@ open class LMChatAudioPreview: LMView {
         isPlaying = true
         let percentage = (time / Float(duration)) * 100
         slider.value = self.url == url ? percentage : .zero
-        playPauseButton.image =  self.url == url ?  UIImage(systemName:  "pause.circle.fill") : Constants.shared.images.playCircleFilled
+        playPauseButton.image =  self.url == url ?  Constants.shared.images.pauseCircleFilled : Constants.shared.images.playCircleFilled
         durationLbl.text = convertSecondsToFormattedTime(seconds: Int(time))
     }
     

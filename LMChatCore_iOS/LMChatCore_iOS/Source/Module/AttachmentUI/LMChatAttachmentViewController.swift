@@ -222,7 +222,7 @@ open class LMChatAttachmentViewController: LMViewController {
             imageActionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageActionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageActionsContainer.heightAnchor.constraint(equalToConstant: 74),
-            imageActionsContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            imageActionsContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             rightContainerStackView.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
             rightContainerStackView.trailingAnchor.constraint(equalTo: imageActionsContainer.trailingAnchor, constant: -12),
             cancelButton.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
@@ -443,6 +443,9 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     }
     
     public func sendAttachment(message: String?) {
+        if viewModel?.mediaType == .audio {
+            audioPlayer.stopPlaying()
+        }
         delegate?.postConversationWithAttchments(message: message, attachments: viewModel?.mediaCellData ?? [])
         self.dismissViewController()
     }

@@ -50,7 +50,7 @@ open class LMChatroomTopicView: LMView {
     
     open private(set) lazy var nameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Pushpendra Singh \(Constants.shared.strings.dot)"
+        label.text = ""
         label.numberOfLines = 1
         label.font = Appearance.shared.fonts.textFont2
         label.textColor = Appearance.shared.colors.black
@@ -59,7 +59,7 @@ open class LMChatroomTopicView: LMView {
     
     open private(set) lazy var topicLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatroom description Chatroom description Chatroom description Chatroom description Chatroom description Chatroom description"
+        label.text = ""
         label.numberOfLines = 2
         label.font = Appearance.shared.fonts.subHeadingFont1
         label.textColor = Appearance.shared.colors.previewSubtitleTextColor

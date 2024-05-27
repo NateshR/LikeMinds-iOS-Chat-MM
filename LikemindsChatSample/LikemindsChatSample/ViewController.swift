@@ -109,15 +109,15 @@ class ViewController: LMViewController {
     }
     
     @IBAction func loginAsCMButtonClicked(_ sender: UIButton) {
-        apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
-        userIdField?.text = "loki123"
-        userNameField?.text = "Loki"
+        apiKeyField?.text = "5f567ca1-9d74-4a1b-be8b-a7a81fef796f"
+        userIdField?.text = "99b69c4f-998d-4248-86c1-6eed66e53ad2"
+        userNameField?.text = "og shubh Gupta"
     }
     
     @IBAction func loginAsMemberButtonClicked(_ sender: UIButton) {
-        apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
-        userIdField?.text = "333333"
-        userNameField?.text = "Push User"
+        apiKeyField?.text = "5f567ca1-9d74-4a1b-be8b-a7a81fef796f"
+        userIdField?.text = "53b0176d-246f-4954-a746-9de96a572cc6"
+        userNameField?.text = "DEFCON"
     }
 
     @IBAction func loginButtonClicked(_ sender: UIButton) {

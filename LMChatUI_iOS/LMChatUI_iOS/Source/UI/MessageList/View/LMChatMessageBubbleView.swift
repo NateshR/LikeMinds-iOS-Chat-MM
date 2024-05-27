@@ -12,14 +12,13 @@ open class LMChatMessageBubbleView: LMView {
     
     var isIncoming = true
     
-    let receivedBubble = UIImage(named: "bubble_received", in: Bundle.LMBundleIdentifier, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+    var receivedBubble = Constants.shared.images.bubbleReceived.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
+        .withRenderingMode(.alwaysTemplate)
+    var sentBubble = Constants.shared.images.bubbleSent.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
         .withRenderingMode(.alwaysTemplate)
     
-    let sentBubble = UIImage(named: "bubble_sent", in: Bundle.LMBundleIdentifier, with: nil)?.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
-        .withRenderingMode(.alwaysTemplate)
-    
-    var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-    var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 1)
+    var incomingColor = Appearance.shared.colors.incomingColor
+    var outgoingColor = Appearance.shared.colors.outgoingColor
     var containerViewLeadingConstraint: NSLayoutConstraint?
     var containerViewTrailingConstraint: NSLayoutConstraint?
     
@@ -28,14 +27,13 @@ open class LMChatMessageBubbleView: LMView {
         view.axis = .vertical
         view.alignment = .leading
         view.distribution = .fill
-        view.spacing = 4
+        view.spacing = 6
         view.backgroundColor = Appearance.shared.colors.clear
         return view
     }()
     
     open private(set) var imageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
-//        image.clipsToBounds = true
         image.backgroundColor = Appearance.shared.colors.clear
         return image
     }()
@@ -94,7 +92,6 @@ open class LMChatMessageBubbleView: LMView {
             imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-//            contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
             timestampLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
             timestampLabel.topAnchor.constraint(equalTo: contentContainer.bottomAnchor, constant: 6),
             timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -18),

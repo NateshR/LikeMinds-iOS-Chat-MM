@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 public protocol LMChatMessageDocumentPreviewDelegate: AnyObject {
     func onClickAttachment(_ url: String)

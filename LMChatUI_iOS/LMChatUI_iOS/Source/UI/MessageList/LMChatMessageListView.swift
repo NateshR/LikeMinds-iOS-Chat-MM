@@ -22,7 +22,7 @@ public protocol LMChatMessageListViewDelegate: AnyObject {
     func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
     func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMChatMessageListView.ContentModel.Message)
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
-    func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu
+    func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu?
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
     func didScrollTableView(_ scrollView: UIScrollView)
     func didCancelUploading(messageId: String)
@@ -160,7 +160,7 @@ open class LMChatMessageListView: LMView {
         return view
     }()
     
-    open private(set) lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
@@ -266,7 +266,8 @@ open class LMChatMessageListView: LMView {
     }
     
     public func scrollToBottom() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            guard let self else { return }
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
@@ -281,7 +282,8 @@ open class LMChatMessageListView: LMView {
     }
     
     public func scrollAtIndexPath(indexPath: IndexPath) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
             self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
             guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
             cell.containerView.backgroundColor = Appearance.shared.colors.linkColor.withAlphaComponent(0.4)
@@ -438,7 +440,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
                 (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
-            guard let self = self else { return UIMenu() }
+            guard let self = self else { return nil }
             return delegate?.getMessageContextMenu(indexPath, item: item)
         }
     }

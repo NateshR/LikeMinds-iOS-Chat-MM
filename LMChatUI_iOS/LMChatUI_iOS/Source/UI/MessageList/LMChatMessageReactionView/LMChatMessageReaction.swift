@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 public protocol LMChatMessageReactionDelegate: AnyObject {
     func clickedOnReaction(_ reaction: String)

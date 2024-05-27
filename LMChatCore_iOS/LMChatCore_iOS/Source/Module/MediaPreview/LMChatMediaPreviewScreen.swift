@@ -10,7 +10,7 @@ import LMChatUI_iOS
 import UIKit
 
 open class LMChatMediaPreviewScreen: LMViewController {
-    open private(set) lazy var mediaCollectionView: LMCollectionView = {
+    open private(set) lazy var mediaCollectionView: LMCollectionView = { [unowned self] in
         let collectionView = LMCollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.dataSource = self
@@ -24,7 +24,7 @@ open class LMChatMediaPreviewScreen: LMViewController {
         return collectionView
     }()
     
-    lazy var layout = UICollectionViewCompositionalLayout { (sectionIndex, environment) -> NSCollectionLayoutSection? in
+    lazy var layout = UICollectionViewCompositionalLayout {[unowned self] (sectionIndex, environment) -> NSCollectionLayoutSection? in
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         

@@ -61,10 +61,10 @@ open class LMChatReportViewCell: LMCollectionViewCell {
         
         containerView.clipsToBounds = true
         containerView.layer.cornerRadius = contentView.bounds.height / 2
-        containerView.layer.borderColor = isCellSelected ? Appearance.shared.colors.appTintColor.cgColor : Appearance.shared.colors.gray155.cgColor
+        containerView.layer.borderColor = isCellSelected ? Appearance.shared.colors.linkColor.cgColor : Appearance.shared.colors.gray155.cgColor
         containerView.layer.borderWidth = 1
         
-        textLabel.textColor = isCellSelected ? Appearance.shared.colors.appTintColor : Appearance.shared.colors.gray102
+        textLabel.textColor = isCellSelected ? Appearance.shared.colors.linkColor : Appearance.shared.colors.gray102
     }
     
     // MARK: configure

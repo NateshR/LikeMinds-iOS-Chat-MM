@@ -20,19 +20,17 @@ open class LMChatMessageLoading: LMView {
         .withRenderingMode(.alwaysTemplate)
     var sentBubble = Constants.shared.images.bubbleSent.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
         .withRenderingMode(.alwaysTemplate)
-    var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.4).withAlphaComponent(0.8)
-    var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 0.4).withAlphaComponent(0.8)
+    var incomingColor = Appearance.shared.colors.incomingColor
+    var outgoingColor = Appearance.shared.colors.outgoingColor
     
     open private(set) lazy var outgoingImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
-//        image.alpha = 0.6
         image.backgroundColor = Appearance.shared.colors.clear
         return image
     }()
     
     open private(set) lazy var incomingImageView: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
-//        image.alpha = 0.6
         image.backgroundColor = Appearance.shared.colors.clear
         return image
     }()

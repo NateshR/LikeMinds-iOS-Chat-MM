@@ -134,8 +134,9 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.retryView.delegate = self
         updateSelection(data: data)
         chatMessageView.delegate = self
-        print("message status on send: \(data.message?.messageStatus)")
-        retryButton.isHidden = data.message?.messageStatus != .failed
+        if data.message?.isIncoming == false {
+            retryButton.isHidden = data.message?.messageStatus != .failed
+        }
     }
     
     func updateSelection(data: ContentModel) {

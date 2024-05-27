@@ -25,7 +25,7 @@ open class LMChatTaggingListView: LMView {
         return view
     }()
     
-    open private(set) lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self

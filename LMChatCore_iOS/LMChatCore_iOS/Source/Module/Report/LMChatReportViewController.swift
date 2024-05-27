@@ -73,7 +73,7 @@ open class LMChatReportViewController: LMViewController {
     
     open private(set) lazy var sepratorView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.backgroundColor = Appearance.shared.colors.appTintColor
+        view.backgroundColor = Appearance.shared.colors.linkColor
         return view
     }()
     

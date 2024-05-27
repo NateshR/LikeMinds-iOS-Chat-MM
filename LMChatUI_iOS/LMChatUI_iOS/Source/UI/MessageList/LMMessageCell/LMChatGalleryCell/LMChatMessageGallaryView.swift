@@ -262,12 +262,6 @@ open class LMChatMessageGallaryView: LMView {
                     break
                 }
             }
-//            if (data.count > 2 && index > 1) || (data.count > 3 && index > 3) {
-//                itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
-//                moreItemsOverlay.isHidden = false
-//                moreItemsOverlay.text =  "+\(data.count - 3)"
-//                break
-//            }
             moreItemsOverlay.isHidden = true
            loadImageData(item: item, imagePreview: itemSpots[index])
         }

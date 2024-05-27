@@ -246,7 +246,8 @@ open class LMChatMessageReplyPreview: LMView {
                 attributedText.append(NSAttributedString(string: " (+\(count - 1) more) "))
             } else {
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
-                attributedText.append(NSAttributedString(string: " \(initalType) "))
+                initalType = !initalType.isEmpty ? " \(initalType) " : " "
+                attributedText.append(NSAttributedString(string: "\(initalType)"))
             }
         }
         attributedText.append(message)
