@@ -15,12 +15,14 @@ open class LMChatroomTopicView: LMView {
         public let createdBy: String
         public let chatroomImageUrl: String
         public let topicId: String
+        public let titleHeader: String
         
-        public init(title: String, createdBy: String, chatroomImageUrl: String, topicId: String) {
+        public init(title: String, createdBy: String, chatroomImageUrl: String, topicId: String, titleHeader: String) {
             self.title = title
             self.createdBy = createdBy
             self.chatroomImageUrl = chatroomImageUrl
             self.topicId = topicId
+            self.titleHeader = titleHeader
         }
     }
     
@@ -52,7 +54,7 @@ open class LMChatroomTopicView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = ""
         label.numberOfLines = 1
-        label.font = Appearance.shared.fonts.textFont2
+        label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.black
         return label
     }()
@@ -128,7 +130,7 @@ open class LMChatroomTopicView: LMView {
     
     public func setData(_ data: ContentModel) {
         topicData = data
-        nameLabel.text = data.createdBy
+        nameLabel.text = data.titleHeader
         topicLabel.text = data.title
         chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy.components(separatedBy: " ").first ?? ""))
     }

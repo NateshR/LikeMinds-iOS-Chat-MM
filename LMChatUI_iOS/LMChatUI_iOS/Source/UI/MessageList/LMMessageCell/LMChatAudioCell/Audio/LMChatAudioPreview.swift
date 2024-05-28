@@ -29,15 +29,15 @@ open class LMChatAudioPreview: LMView {
     
     lazy var headphoneContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 8
-        view.backgroundColor = .black.withAlphaComponent(0.6)
+        view.cornerRadius(with: 12)
+        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
         return view
     }()
     
     lazy var headphoneImage: LMImageView = {
         let imageView = LMImageView().translatesAutoresizingMaskIntoConstraints()
-        imageView.image = Constants.shared.images.audioIcon
+        imageView.image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 30)
+        imageView.contentMode = .center
         imageView.tintColor = .white
         return imageView
     }()

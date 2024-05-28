@@ -57,8 +57,6 @@ open class LMChatMessageListViewController: LMViewController {
     
     open private(set) lazy var chatroomTopicBar: LMChatroomTopicView = {
         let view = LMChatroomTopicView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .systemGroupedBackground
-//        view.delegate = self
         return view
     }()
     
@@ -326,7 +324,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
     public func reloadData(at: ScrollDirection) {
         if at == .scroll_UP {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {[weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {[weak self] in
                 guard let self else { return }
                 messageListView.tableSections = viewModel?.messagesList ?? []
                 messageListView.reloadData()
@@ -355,12 +353,13 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
     public func updateTopicBar() {
         if let topic = viewModel?.chatroomTopic {
-            chatroomTopicBar.setData(.init(title: GetAttributedTextWithRoutes.getAttributedText(from: topic.answer).string, createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: topic.id ?? ""))
+            chatroomTopicBar.setData(.init(title: GetAttributedTextWithRoutes.getAttributedText(from: topic.answer).string, createdBy: topic.member?.name ?? "", chatroomImageUrl: topic.member?.imageUrl ?? "", topicId: topic.id ?? "", titleHeader: "Current Topic"))
         } else {
-            chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? ""))
+            chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? "", titleHeader: viewModel?.chatroomViewData?.member?.name ?? ""))
         }
         
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
+        chatroomTopicBar.isHidden = false
     }
 }
 
@@ -432,6 +431,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu? {
         
         if viewModel?.checkMemberRight(.respondsInChatRoom) == false || viewModel?.chatroomViewData?.memberCanMessage == false {
+            contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
             return nil
         }
         
@@ -475,18 +475,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
                                         attributes: .destructive) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .delete, atIndex: indexPath, message: item)
             }
-            let selectAction = UIAction(title: Constants.shared.strings.select,
-                                        image: Constants.shared.images.checkmarkCircleIcon) { [weak self] action in
-                self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
-            }
             actions.append(deleteAction)
-            actions.append(selectAction)
         } else {
             let reportAction = UIAction(title: Constants.shared.strings.reportMessage) { [weak self] action in
                 self?.contextMenuItemClicked(withType: .report, atIndex: indexPath, message: item)
             }
             actions.append(reportAction)
         }
+        
+        let selectAction = UIAction(title: Constants.shared.strings.select,
+                                    image: Constants.shared.images.checkmarkCircleIcon) { [weak self] action in
+            self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
+        }
+        actions.append(selectAction)
         
         return UIMenu(title: "", children: actions)
     }
@@ -574,7 +575,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             messageListView.justReloadData()
             multipleSelectionEnable()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
-                self?.messageListView.selectedItems.append(message)
+                self?.didTappedOnSelectionButton(indexPath: indexPath)
                 self?.messageListView.tableView.reloadRows(at: [indexPath], with: .none)
             }
         case .setTopic:
@@ -1054,6 +1055,18 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
         } else {
             messageListView.selectedItems.append(item)
         }
+        if messageListView.selectedItems.isEmpty {
+            cancelSelectedMessageAction()
+            return
+        }
+        deleteMessageBarItem.isEnabled = false
+        copySelectedMessagesBarItem.isEnabled = messageListView.selectedItems.contains(where: {!($0.message ?? "").isEmpty})
+        if viewModel?.memberState?.state != 1 {
+            deleteMessageBarItem.isEnabled = !messageListView.selectedItems.contains(where: {$0.isIncoming == true})
+        } else{
+            deleteMessageBarItem.isEnabled = true
+        }
+        
     }
     
     public func onClickReplyOfMessage(indexPath: IndexPath?) {

@@ -66,7 +66,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
             button.setImage(nil, for: .normal)
             button.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
             button.setFont(Appearance.shared.fonts.buttonFont1)
-            button.setTitleColor(.blue, for: .normal)
+            button.setTitleColor(Appearance.shared.colors.linkColor, for: .normal)
             docPreviewContainerStackView.addArrangedSubview(button)
         }
     }

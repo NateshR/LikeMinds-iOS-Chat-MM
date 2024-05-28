@@ -89,12 +89,12 @@ open class LMChatVoiceNotePreview: LMView {
         pinSubView(subView: containerView)
         
         playPauseButton.addConstraint(top: (containerView.topAnchor, 16),
-                                      leading: (containerView.leadingAnchor, 16))
+                                      leading: (containerView.leadingAnchor, 12))
         playPauseButton.setHeightConstraint(with: 36)
         playPauseButton.setWidthConstraint(with: playPauseButton.heightAnchor)
         
-        slider.addConstraint(leading: (playPauseButton.trailingAnchor, 4),
-                             trailing: (containerView.trailingAnchor, -4),
+        slider.addConstraint(leading: (playPauseButton.trailingAnchor, 6),
+                             trailing: (containerView.trailingAnchor, -8),
                              centerY: (playPauseButton.centerYAnchor, 0))
         slider.setHeightConstraint(with: 10)
         

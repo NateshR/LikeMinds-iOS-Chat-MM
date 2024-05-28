@@ -305,7 +305,7 @@ open class LMChatHomeFeedChatroomView: LMView {
                 textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
                 attributedText.append(NSAttributedString(string: " "))
                 attributedText.append(NSAttributedString(attachment: textAtt))
-                attributedText.append(NSAttributedString(string: " \(initalType) "))
+                attributedText.append(NSAttributedString(string: " \(initalType)"))
             } else {
                 if fileAttachmentType.count > 1 {
                     attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
@@ -313,7 +313,7 @@ open class LMChatHomeFeedChatroomView: LMView {
                 } else {
                     attributedText.append(NSAttributedString(string: " "))
                     attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
-                    initalType = !initalType.isEmpty ? " \(initalType) " : ""
+                    initalType = !initalType.isEmpty ? " \(initalType)" : ""
                     attributedText.append(NSAttributedString(string: "\(initalType)"))
                 }
             }

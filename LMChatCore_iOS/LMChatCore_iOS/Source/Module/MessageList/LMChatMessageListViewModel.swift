@@ -1019,6 +1019,8 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func setAsCurrentTopic(conversationId: String) {
+        chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
+        delegate?.updateTopicBar()
         let request = SetChatroomTopicRequest.builder()
             .chatroomId(chatroomId)
             .conversationId(conversationId)
@@ -1027,8 +1029,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard let self, response.success else {
                 return
             }
-            chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
-            delegate?.updateTopicBar()
         }
     }
     

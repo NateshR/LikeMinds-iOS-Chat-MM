@@ -75,7 +75,7 @@ open class LMChatMessageContentView: LMView {
         label.textColor = .black
         label.textAlignment = .left
         label.isEditable = false
-        label.textContainerInset = UIEdgeInsets(top: 4, left: 5, bottom: 0, right: 0)
+        label.textContainerInset = UIEdgeInsets(top: -2, left: 0, bottom: -4, right: 0)
         label.text = ""
         return label
     }()
