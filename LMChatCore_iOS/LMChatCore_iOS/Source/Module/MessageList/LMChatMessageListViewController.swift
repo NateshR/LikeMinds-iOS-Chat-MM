@@ -307,9 +307,13 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         self.showToast(message: message ?? "", font: Appearance.shared.fonts.buttonFont1)
     }
     
-    public func scrollToSpecificConversation(indexPath: IndexPath) {
-        reloadChatMessageList()
-        self.messageListView.scrollAtIndexPath(indexPath: indexPath)
+    public func scrollToSpecificConversation(indexPath: IndexPath, isExistingIndex: Bool = false) {
+        if isExistingIndex {
+            self.messageListView.scrollAtIndexPath(indexPath: indexPath)
+        } else {
+            reloadChatMessageList()
+            self.messageListView.scrollAtIndexPath(indexPath: indexPath)
+        }
     }
     
     public func reloadChatMessageList() {
@@ -590,7 +594,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         if let mediumConversation = viewModel?.chatMessages.first(where: {$0.id == repliedId}) {
             guard let section = messageListView.tableSections.firstIndex(where: {$0.section == mediumConversation.date}),
                   let index = messageListView.tableSections[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
-            scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
+            scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section), isExistingIndex: true)
             return
         }
         

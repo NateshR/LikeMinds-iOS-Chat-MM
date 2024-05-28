@@ -37,7 +37,7 @@ open class LMChatAudioPreview: LMView {
     
     lazy var headphoneImage: LMImageView = {
         let imageView = LMImageView().translatesAutoresizingMaskIntoConstraints()
-        imageView.image = UIImage(systemName: "headphones")
+        imageView.image = Constants.shared.images.audioIcon
         imageView.tintColor = .white
         return imageView
     }()
@@ -64,7 +64,7 @@ open class LMChatAudioPreview: LMView {
     var slider: UISlider = {
         let slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false
-        slider.setThumbImage(UIImage(systemName: "circle.fill"), for: .normal)
+        slider.setThumbImage(Constants.shared.images.circleFill, for: .normal)
         return slider
     }()
     
@@ -128,7 +128,7 @@ open class LMChatAudioPreview: LMView {
                                  trailing: (containerView.trailingAnchor, -8))
         
         playPauseButton.addConstraint(top: (thumbnailImage.topAnchor, 8),
-                                      bottom: (titleLabel.topAnchor, -8),
+                                      bottom: (titleLabel.topAnchor, -6),
                                       leading: (thumbnailImage.trailingAnchor, 8))
         playPauseButton.setHeightConstraint(with: 36)
         playPauseButton.setWidthConstraint(with: playPauseButton.heightAnchor)

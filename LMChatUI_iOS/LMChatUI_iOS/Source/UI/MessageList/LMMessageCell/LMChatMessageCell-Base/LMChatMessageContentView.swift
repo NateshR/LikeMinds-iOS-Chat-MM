@@ -60,8 +60,9 @@ open class LMChatMessageContentView: LMView {
         return view
     }()
 
-    open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {
+    open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {[unowned self] in
         let view = LMUIComponents.shared.messageReplyView.init().translatesAutoresizingMaskIntoConstraints()
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -183,8 +184,6 @@ open class LMChatMessageContentView: LMView {
         outgoingbubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
         outgoingbubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
         
-        replyViewWidthConstraint = replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 120)
-        
     }
     
     open func createBubbleView() -> LMChatMessageBubbleView {
@@ -199,7 +198,7 @@ open class LMChatMessageContentView: LMView {
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         dataView = data
         self.textLabel.isUserInteractionEnabled = true
-        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withTextColor: Appearance.Colors.shared.black)
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withHighlightedColor: Appearance.Colors.shared.linkColor, withTextColor: Appearance.Colors.shared.black)
         self.textLabel.isHidden = self.textLabel.text.isEmpty
         setTimestamps(data)
         let isIncoming = data.message?.isIncoming ?? true
@@ -225,11 +224,17 @@ open class LMChatMessageContentView: LMView {
         
         if data.message?.isDeleted == true {
             deletedConversationView(data)
+            textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         } else {
             replyView(data)
             reactionsView(data)
         }
-        bubbleView.updateConstraintsIfNeeded()
+        if (data.message?.attachments?.isEmpty == false || data.message?.ogTags != nil || data.message?.replied?.first != nil) && data.message?.isDeleted == false {
+            textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        } else {
+            textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        }
+        bubbleView.layoutIfNeeded()
     }
     
     func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
@@ -274,8 +279,6 @@ open class LMChatMessageContentView: LMView {
             replyMessageView.onClickReplyPreview = {[weak self] in
                 self?.delegate?.didTapOnReplyPreview()
             }
-            replyViewWidthConstraint?.constant = max(120, bubbleView.bounds.width)
-            replyViewWidthConstraint?.isActive = true
         } else {
             replyMessageView.isHidden = true
         }
@@ -293,6 +296,7 @@ open class LMChatMessageContentView: LMView {
     func prepareToResuse() {
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
+        textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 }
 

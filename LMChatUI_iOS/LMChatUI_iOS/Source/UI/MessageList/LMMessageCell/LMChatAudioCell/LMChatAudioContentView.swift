@@ -9,12 +9,13 @@ import Foundation
 
 @IBDesignable
 open class LMChatAudioContentView: LMChatMessageContentView {
-    open private(set) lazy var audioPreviewContainerStackView: LMStackView = {
+    open private(set) lazy var audioPreviewContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
         view.alignment = .leading
         view.spacing = 4
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -90,6 +91,8 @@ open class LMChatAudioContentView: LMChatMessageContentView {
             let preview = LMUIComponents.shared.audioView.init()
             preview.translatesAutoresizingMaskIntoConstraints = false
             preview.configure(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index)
+            preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
+            preview.cornerRadius(with: 12)
             preview.setHeightConstraint(with: 72)
             audioPreviewContainerStackView.addArrangedSubview(preview)
         }
@@ -108,7 +111,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     func createAudioPreview(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) -> LMChatVoiceNotePreview {
         let preview =  LMUIComponents.shared.voiceNoteView.init().translatesAutoresizingMaskIntoConstraints()
         preview.translatesAutoresizingMaskIntoConstraints = false
-        preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+        preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.cornerRadius(with: 12)
         preview.configure(with: data, delegate: delegate, index: index)

@@ -33,5 +33,6 @@ public extension Appearance {
         public var headingLabel: UIFont = .systemFont(ofSize: 16, weight: .bold)
         public var italicFont16:UIFont = .italicSystemFont(ofSize: 16)
         public var italicFont13:UIFont = .italicSystemFont(ofSize: 13)
+        public var italicFont14:UIFont = .italicSystemFont(ofSize: 14)
     }
 }

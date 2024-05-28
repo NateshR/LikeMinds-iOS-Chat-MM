@@ -103,6 +103,7 @@ public extension Constants {
         public var pollIcon = loadSystemImage(with: "chart.bar.xaxis")
         public var trashIcon = loadSystemImage(with: "trash")
         
+        
         public var docPlusIcon = loadSystemImage(with: "doc.badge.plus")
         public var clockIcon = loadSystemImage(with: "clock")
         public var checkmarkIcon = loadSystemImage(with: "checkmark")
@@ -113,5 +114,6 @@ public extension Constants {
         public var bubbleSent = loadImage(with: "bubble_sent")
         public var gifBadge = loadImage(with: "gifBadge")
         public var addMoreEmojiIcon = loadImage(with: "addMoreEmoticons")
+        public var circleFill = loadSystemImage(with: "circle.fill")
     }
 }

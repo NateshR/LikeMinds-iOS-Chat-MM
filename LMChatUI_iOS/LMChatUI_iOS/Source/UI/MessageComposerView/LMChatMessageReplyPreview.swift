@@ -97,7 +97,7 @@ open class LMChatMessageReplyPreview: LMView {
     open private(set) lazy var verticleUsernameAndMessageContainerStackView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.alignment = .leading
+        view.alignment = .fill
         view.spacing = 4
         return view
     }()
@@ -171,7 +171,7 @@ open class LMChatMessageReplyPreview: LMView {
         messageLabel.font = Appearance.shared.fonts.subHeadingFont2
         if data.isDeleted == true {
             messageLabel.text = data.replyMessage
-            messageLabel.font = Appearance.shared.fonts.italicFont13
+            messageLabel.font = Appearance.shared.fonts.italicFont14
             messageAttachmentImageView.isHidden = true
             return
         }
@@ -203,7 +203,7 @@ open class LMChatMessageReplyPreview: LMView {
                 let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
                 attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
             }
-            attributedText.append(NSAttributedString(string: (data.replyMessage ?? "")))
+            attributedText.append(message)
             return attributedText
         }
         var image: UIImage = UIImage()

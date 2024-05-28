@@ -11,12 +11,13 @@ import Kingfisher
 @IBDesignable
 open class LMChatDocumentContentView: LMChatMessageContentView {
     
-    open private(set) lazy var docPreviewContainerStackView: LMStackView = {
+    open private(set) lazy var docPreviewContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
         view.alignment = .leading
         view.spacing = 4
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -84,7 +85,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     
     func createDocPreview(_ data: LMChatMessageDocumentPreview.ContentModel) -> LMChatMessageDocumentPreview {
         let preview = LMUIComponents.shared.documentView.init().translatesAutoresizingMaskIntoConstraints()
-        preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+        preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.setHeightConstraint(with: 60)
         preview.cornerRadius(with: 12)

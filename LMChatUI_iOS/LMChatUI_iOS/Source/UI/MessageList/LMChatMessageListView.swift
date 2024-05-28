@@ -449,10 +449,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
 
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         (cell as? LMChatAudioViewCell)?.resetAudio()
-        if indexPath.section == audioIndex?.section,
-           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
+//        if indexPath.section == audioIndex?.section,
+//           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
 //            LMChatAudioPlayManager.shared.resetAudioPlayer()
-        }
+//        }
     }
 
     @available(iOS 13.0, *)

@@ -38,6 +38,7 @@ open class LMChatMessageLinkPreview: LMView {
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         image.tintColor = Appearance.shared.colors.textColor
+        image.backgroundColor = Appearance.shared.colors.white
         image.layer.masksToBounds = true
         return image
     }()
@@ -127,7 +128,7 @@ open class LMChatMessageLinkPreview: LMView {
         viewData = data
         titleLabel.text = data.title
         descriptionLabel.text = data.subtitle
-        let placeholder = UIImage(systemName: "link.icloud")
+        let placeholder = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: 25)
         imageView.kf.setImage(with: URL(string: data.thumbnailUrl ?? ""), placeholder: placeholder)
     }
     

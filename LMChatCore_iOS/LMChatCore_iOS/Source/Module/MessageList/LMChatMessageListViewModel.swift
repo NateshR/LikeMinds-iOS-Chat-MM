@@ -15,7 +15,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func scrollToBottom(forceToBottom: Bool)
     func updateChatroomSubtitles()
     func updateTopicBar()
-    func scrollToSpecificConversation(indexPath: IndexPath)
+    func scrollToSpecificConversation(indexPath: IndexPath, isExistingIndex: Bool)
     func memberRightsCheck()
     func showToastMessage(message: String?)
 }
@@ -76,8 +76,8 @@ public final class LMChatMessageListViewModel {
     }
     
     func checkMemberRight(_ rightState: MemberRightState) -> Bool {
-        guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  false }
-        return right.isSelected ?? false
+        guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  true }
+        return right.isSelected ?? true
     }
     
     func loggedInUserTag() {
@@ -90,7 +90,6 @@ public final class LMChatMessageListViewModel {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
-        self.removeObserveConversations()
     }
     
     func getInitialData() {
@@ -211,7 +210,6 @@ public final class LMChatMessageListViewModel {
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
         guard let conversations = response?.data?.conversations else { return }
-        print("conversations ------> \(conversations)")
         chatMessages = conversations
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
@@ -219,7 +217,7 @@ public final class LMChatMessageListViewModel {
             let message = chatroomDataToConversation(chatroom)
             insertOrUpdateConversationIntoList(message)
         }
-        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0))
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0), isExistingIndex: false)
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
@@ -300,7 +298,7 @@ public final class LMChatMessageListViewModel {
         var allConversations = aboveConversations + [mediumConversation] + belowConversations
         
         if aboveConversations.count < conversationFetchLimit {
-            allConversations.append(chatroomDataToConversation(chatroom))
+            allConversations.insert(chatroomDataToConversation(chatroom), at: 0)
         }
         
         chatMessages = allConversations
@@ -308,7 +306,7 @@ public final class LMChatMessageListViewModel {
         messagesList.sort(by: {$0.timestamp < $1.timestamp})
         guard let section = messagesList.firstIndex(where: {$0.section == mediumConversation.date}),
               let index = messagesList[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
-        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section), isExistingIndex: false)
     }
     
     func syncConversation() {
@@ -379,7 +377,8 @@ public final class LMChatMessageListViewModel {
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-        return message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        let text = message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        return text //GetAttributedTextWithRoutes.getAttributedText(from: text).string
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMChatMessageListView.ContentModel.OgTags? {
