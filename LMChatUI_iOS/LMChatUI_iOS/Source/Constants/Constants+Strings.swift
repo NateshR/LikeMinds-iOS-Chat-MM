@@ -28,5 +28,6 @@ public extension Constants {
         public let warningMessageForDeletion = "Are you sure you want to delete this message? This action can not be reversed."
         public let followedMessage = "Added to your joined chatrooms"
         public let unfollowedMessage = "Removed from your joined chatrooms"
+        public let secretChatroomRestrictionMessage = "Join this chatroom to participate in this chatroom."
     }
 }

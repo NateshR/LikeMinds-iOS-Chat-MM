@@ -93,8 +93,8 @@ open class LMChatMessageBubbleView: LMView {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             timestampLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
-            timestampLabel.topAnchor.constraint(equalTo: contentContainer.bottomAnchor, constant: 6),
-            timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -18),
+            timestampLabel.topAnchor.constraint(equalTo: contentContainer.bottomAnchor, constant: 4),
+            timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 10),
         ])
         

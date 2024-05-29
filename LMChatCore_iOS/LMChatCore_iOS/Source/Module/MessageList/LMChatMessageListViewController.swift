@@ -275,10 +275,15 @@ open class LMChatMessageListViewController: LMViewController {
         
         if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
-        } else {
+        } else if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
+        }
+        else {
             if let canMessage = viewModel?.chatroomViewData?.memberCanMessage,
                let hasRight = viewModel?.checkMemberRight(.respondsInChatRoom) {
                 bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: canMessage && hasRight)
+            } else {
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
             }
         }
     }
@@ -291,7 +296,9 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
-        if viewModel?.checkMemberRight(.respondsInChatRoom) == false || viewModel?.chatroomViewData?.memberCanMessage == false {
+        if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
+        } else if viewModel?.checkMemberRight(.respondsInChatRoom) == false || viewModel?.chatroomViewData?.memberCanMessage == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: false)
         }
     }
@@ -354,9 +361,9 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
     public func updateTopicBar() {
         if let topic = viewModel?.chatroomTopic {
-            chatroomTopicBar.setData(.init(title: GetAttributedTextWithRoutes.getAttributedText(from: topic.answer).string, createdBy: topic.member?.name ?? "", chatroomImageUrl: topic.member?.imageUrl ?? "", topicId: topic.id ?? "", titleHeader: "Current Topic"))
+            chatroomTopicBar.setData(.init(title: GetAttributedTextWithRoutes.getAttributedText(from: topic.answer).string, createdBy: topic.member?.name ?? "", chatroomImageUrl: topic.member?.imageUrl ?? "", topicId: topic.id ?? "", titleHeader: "Current Topic", type: topic.state.rawValue, attachmentsUrls: topic.attachments?.compactMap({($0.thumbnailUrl, $0.url, $0.type)})))
         } else {
-            chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? "", titleHeader: viewModel?.chatroomViewData?.member?.name ?? ""))
+            chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? "", titleHeader: viewModel?.chatroomViewData?.member?.name ?? "", type: 1, attachmentsUrls: []))
         }
         
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
@@ -435,8 +442,23 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         if item.messageType == LMChatMessageListView.chatroomHeader {
             return contextMenuForChatroomData(indexPath, item: item)
         }
-        
         var actions: [UIAction] = []
+        if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
+            if let message = item.message, !message.isEmpty {
+                let copyAction = UIAction(title: Constants.shared.strings.copy,
+                                          image: Constants.shared.images.copyIcon) { [weak self] action in
+                    self?.contextMenuItemClicked(withType: .copy, atIndex: indexPath, message: item)
+                }
+                actions.append(copyAction)
+            }
+            let selectAction = UIAction(title: Constants.shared.strings.select,
+                                        image: Constants.shared.images.checkmarkCircleIcon) { [weak self] action in
+                self?.contextMenuItemClicked(withType: .select, atIndex: indexPath, message: item)
+            }
+            actions.append(selectAction)
+            return UIMenu(title: "", children: actions)
+        }
+    
         let replyAction = UIAction(title: Constants.shared.strings.reply,
                                    image: Constants.shared.images.replyIcon) { [weak self] action in
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
@@ -510,6 +532,7 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction? {
         let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard viewModel?.checkMemberRight(.respondsInChatRoom) == true, item.isDeleted == false, viewModel?.chatroomViewData?.memberCanMessage == true else { return nil }
+        if (viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false) { return nil }
         let action = UIContextualAction(style: .normal,
                                         title: "") {[weak self] (contextAction: UIContextualAction, sourceView: UIView, completionHandler: (Bool) -> Void) in
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
@@ -1053,6 +1076,7 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
         }
         deleteMessageBarItem.isEnabled = false
         copySelectedMessagesBarItem.isEnabled = messageListView.selectedItems.contains(where: {!($0.message ?? "").isEmpty})
+        if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false { return }
         if viewModel?.memberState?.state != 1 {
             deleteMessageBarItem.isEnabled = !messageListView.selectedItems.contains(where: {$0.isIncoming == true})
         } else{

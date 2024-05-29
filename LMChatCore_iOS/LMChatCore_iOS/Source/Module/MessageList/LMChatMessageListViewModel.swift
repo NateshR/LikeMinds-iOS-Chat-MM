@@ -269,7 +269,6 @@ public final class LMChatMessageListViewModel {
     }
     
     func fetchIntermediateConversations(chatroom: Chatroom, conversationId: String) {
-     
         let getConversationRequest = GetConversationRequest.builder()
             .conversationId(conversationId)
             .build()
@@ -306,7 +305,11 @@ public final class LMChatMessageListViewModel {
         messagesList.sort(by: {$0.timestamp < $1.timestamp})
         guard let section = messagesList.firstIndex(where: {$0.section == mediumConversation.date}),
               let index = messagesList[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
+        fetchingInitialBottomData = true
         delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section), isExistingIndex: false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
+            self?.fetchingInitialBottomData = false
+        }
     }
     
     func syncConversation() {
@@ -664,7 +667,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         
         let tempConversation = saveTemporaryConversation(uuid: UserPreferences.shared.getClientUUID() ?? "", communityId: communityId, request: postConversationRequest, fileUrls: filesUrls)
         insertOrUpdateConversationIntoList(tempConversation)
-        delegate?.scrollToBottom(forceToBottom: false)
+        delegate?.scrollToBottom(forceToBottom: true)
         
         LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
             guard let self, let conversation = response.data else {
