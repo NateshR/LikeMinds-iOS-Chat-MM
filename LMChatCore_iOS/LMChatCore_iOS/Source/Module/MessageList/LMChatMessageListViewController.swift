@@ -192,7 +192,6 @@ open class LMChatMessageListViewController: LMViewController {
     
     open override func setupObservers() {
         super.setupObservers()
-        
         NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
     }
     
@@ -346,6 +345,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         updateChatroomSubtitles()
         if forceToBottom || self.scrollToBottomButton.isHidden {
+            LMChatAudioPlayManager.shared.resetAudioPlayer()
             messageListView.scrollToBottom()
             self.scrollToBottomButton.isHidden = true
         }
@@ -364,6 +364,9 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
 }
 
 extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
+    public func stopPlayingAudio() {
+        LMChatAudioPlayManager.shared.resetAudioPlayer()
+    }
     
     public func didCancelUploading(tempId: String, messageId: String) {
         LMChatAWSManager.shared.cancelAllTaskFor(groupId: tempId)
@@ -380,16 +383,9 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         let retryIcon = Constants.shared.images.retryIcon
         tryAction.setValue(retryIcon, forKey: "image")
         
-//        let delete = UIAlertAction(title: "Delete", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
-//            guard let self else { return }
-//            viewModel?.deleteTempConversation(conversationId: messageId)
-//        }
-//        delete.setValue(Constants.shared.images.trashIcon, forKey: "image")
-        
         let cancel = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel)
         
         alert.addAction(tryAction)
-//        alert.addAction(delete)
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
     }
@@ -928,6 +924,7 @@ extension LMChatMessageListViewController: AVAudioRecorderDelegate {
     open func audioEnded(_ notification: Notification) {
         let duration: Int = (notification.object as? Int) ?? 0
         bottomMessageBoxView.resetAudioDuration(with: duration)
+        messageListView.resetAudio()
     }
 }
 
@@ -1010,12 +1007,6 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
         }
         
         messageListView.audioIndex = nil
-    }
-    public func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        (cell as? LMChatAudioViewCell)?.resetAudio()
-//        if indexPath == messageListView.audioIndex {
-//            LMChatAudioPlayManager.shared.resetAudioPlayer()
-//        }
     }
 }
 
