@@ -702,7 +702,6 @@ extension LMChatBottomMessageComposerView {
     }
 }
 
-
 @objc
 extension LMChatBottomMessageComposerView {
     open func onTapStopAudioRecording() {

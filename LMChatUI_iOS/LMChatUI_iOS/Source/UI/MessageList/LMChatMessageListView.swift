@@ -27,6 +27,7 @@ public protocol LMChatMessageListViewDelegate: AnyObject {
     func didScrollTableView(_ scrollView: UIScrollView)
     func didCancelUploading(tempId: String, messageId: String)
     func didRetryUploading(messageId: String)
+    func stopPlayingAudio()
 }
 
 public enum LMMessageActionType: String {
@@ -240,17 +241,6 @@ open class LMChatMessageListView: LMView {
         tableView.backgroundColor = Appearance.shared.colors.backgroundColor
     }
     
-    
-    // MARK: setupObservers
-//    open override func setupObservers() {
-//        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
-//    }
-//    
-//    @objc 
-//    open func audioEnded(notification: Notification) {
-//        resetAudio()
-//    }
-    
     public func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
@@ -297,6 +287,14 @@ open class LMChatMessageListView: LMView {
 
     // we set a variable to hold the contentOffSet before scroll view scrolls
     open var lastContentOffset: CGFloat = 0
+    
+    public func resetAudio() {
+        if let audioIndex,
+           tableSections.indices.contains(audioIndex.section),
+           let index = tableSections[audioIndex.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }) {
+            (tableView.cellForRow(at: .init(row: index, section: audioIndex.section)) as? LMChatAudioViewCell)?.resetAudio()
+        }
+    }
 }
 
 
@@ -366,8 +364,6 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         }
         return cell
     }
-    
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if !self.isMultipleSelectionEnable {
@@ -449,10 +445,13 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
 
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         (cell as? LMChatAudioViewCell)?.resetAudio()
-//        if indexPath.section == audioIndex?.section,
-//           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
-//            LMChatAudioPlayManager.shared.resetAudioPlayer()
-//        }
+        if let audioIndex,
+           tableSections.indices.contains(audioIndex.section),
+           indexPath.section == audioIndex.section,
+           let row = tableSections[indexPath.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }),
+           row == indexPath.row {
+            delegate?.stopPlayingAudio()
+        }
     }
 
     @available(iOS 13.0, *)
