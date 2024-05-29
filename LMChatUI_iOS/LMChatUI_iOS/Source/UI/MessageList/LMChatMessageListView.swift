@@ -287,7 +287,10 @@ open class LMChatMessageListView: LMView {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self else { return }
             self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
-            guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
+            let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
+            let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
+            let cell = messageCell ?? chatroomCell
+            guard let cell else { return }
             cell.containerView.backgroundColor = Appearance.shared.colors.linkColor.withAlphaComponent(0.4)
             UIView.animate(withDuration: 2, delay: 1, usingSpringWithDamping: 1,
                            initialSpringVelocity: 1, options: .allowUserInteraction,
@@ -533,7 +536,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         guard let row = Int(values.first ?? "0") else { return nil }
         guard let section = Int(values.last ?? "0") else { return nil }
         let indexPath = IndexPath(row: row, section: section)
-        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
+        let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
+        let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
+        let cell = messageCell ?? chatroomCell
+        guard let cell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,

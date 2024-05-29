@@ -828,8 +828,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .build()
         LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
             guard resposne.success, let _ = resposne.data?.conversation else { return}
-//            self?.insertOrUpdateConversationIntoList(conversation)
-//            self?.delegate?.reloadChatMessageList()
         }
     }
     
@@ -844,7 +842,13 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard response.success else {
                 return
             }
+            if status {
+                self?.delegate?.showToastMessage(message: Constants.shared.strings.followedMessage)
+            } else {
+                self?.delegate?.showToastMessage(message: Constants.shared.strings.unfollowedMessage)
+            }
             self?.fetchChatroomActions()
+            self?.chatroomViewData = LMChatClient.shared.getChatroom(request: .Builder().chatroomId(self?.chatroomId ?? "").build())?.data?.chatroom
         }
     }
     

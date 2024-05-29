@@ -135,7 +135,7 @@ open class LMChatBottomMessageLinkPreview: LMView {
     }
     
     public func setData(_ data: ContentModel) {
-        linkLabel.text = data.link
+        linkLabel.text = data.link?.lowercased()
         linkTitleLabel.text = data.title
         linkSubtitleLabel.text = data.description
         

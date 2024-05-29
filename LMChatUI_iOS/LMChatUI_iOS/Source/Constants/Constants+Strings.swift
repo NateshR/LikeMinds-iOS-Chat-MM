@@ -26,5 +26,7 @@ public extension Constants {
         public let restrictForAnnouncement = "Only community managers can respond here."
         public let restrictByManager = "Restricted to respond in this chatroom by community manager."
         public let warningMessageForDeletion = "Are you sure you want to delete this message? This action can not be reversed."
+        public let followedMessage = "Added to your joined chatrooms"
+        public let unfollowedMessage = "Removed from your joined chatrooms"
     }
 }

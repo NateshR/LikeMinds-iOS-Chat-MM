@@ -302,7 +302,8 @@ open class LMChatMessageListViewController: LMViewController {
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
     public func showToastMessage(message: String?) {
-        self.showToast(message: message ?? "", font: Appearance.shared.fonts.buttonFont1)
+        bottomMessageBoxView.inputTextView.resignFirstResponder()
+        self.displayToast(message ?? "", font: Appearance.shared.fonts.headingFont1)
     }
     
     public func scrollToSpecificConversation(indexPath: IndexPath, isExistingIndex: Bool = false) {
