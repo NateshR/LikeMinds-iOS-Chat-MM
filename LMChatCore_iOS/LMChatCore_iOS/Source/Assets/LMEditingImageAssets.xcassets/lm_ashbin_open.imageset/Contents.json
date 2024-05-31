@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "lm_ashbin_open.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

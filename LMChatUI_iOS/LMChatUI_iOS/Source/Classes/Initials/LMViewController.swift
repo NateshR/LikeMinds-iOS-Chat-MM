@@ -46,6 +46,40 @@ open class LMViewController: UIViewController {
         return view
     }()
     
+    open private(set) lazy var navigationTitleView: LMView = {
+        let view = LMView(frame: view.bounds).translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = .clear
+        return view
+    }()
+    
+    open private(set) lazy var titleStackView: LMStackView =  {
+        let stackView = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        stackView.spacing = 0
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.distribution = .fillProportionally
+        navigationTitleView.addSubview(stackView)
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: navigationTitleView.leadingAnchor),
+            stackView.topAnchor.constraint(equalTo: navigationTitleView.topAnchor),
+            stackView.bottomAnchor.constraint(equalTo: navigationTitleView.bottomAnchor),
+            stackView.trailingAnchor.constraint(equalTo: navigationTitleView.trailingAnchor)
+        ])
+        return stackView
+    }()
+    
+    open private(set) lazy var navigationHeaderTitleLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.white
+        return label
+    }()
+    
+    open private(set) lazy var navigationHeaderSubtitleLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        view.backgroundColor = Appearance.shared.colors.white
+        return label
+    }()
+    
     open private(set) lazy var loaderView: UIActivityIndicatorView = {
         let loader = UIActivityIndicatorView(style: .large)
         loader.translatesAutoresizingMaskIntoConstraints = false
@@ -69,8 +103,20 @@ open class LMViewController: UIViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
+        
+        changeNavBar()
         setupActions()
+        setupObservers()
         setupNavigationBar()
+    }
+    
+    func changeNavBar() {
+        guard let navigationBar = navigationController?.navigationBar else { return }
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = Appearance.shared.colors.navigationBackgroundColor
+        navigationBar.standardAppearance = appearance;
+        navigationBar.scrollEdgeAppearance = navigationBar.standardAppearance
     }
     
     open override func viewDidLayoutSubviews() {
@@ -78,9 +124,95 @@ open class LMViewController: UIViewController {
         setupAppearance()
     }
     
-    open func setupNavigationBar() {
-        navigationController?.navigationBar.isTranslucent = false
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setupKeyboardNotifications()
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        removeKeyboardNotifications()
+    }
+    
+    open func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
         
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+    
+    open func removeKeyboardNotifications() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    open func initializeHideKeyboard(_ givenView: UIView){
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissMyKeyboard))
+        givenView.addGestureRecognizer(tap)
+    }
+    
+    @objc open func dismissMyKeyboard(){
+        view.endEditing(true)
+    }
+    
+    @objc
+    open func keyboardWillShow(_ sender: Notification) {
+        guard let userInfo = sender.userInfo else {
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc
+    open func keyboardWillHide(_ sender: Notification) {
+        self.view.layoutIfNeeded()
+    }
+    
+    open func setBackButtonWithAction() {
+        let backImage = Constants.shared.images.leftArrowIcon
+        self.navigationController?.navigationBar.backIndicatorImage = backImage
+        self.navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
+        let backItem = UIBarButtonItem(image: backImage, style: .plain, target: nil, action: nil)
+        backItem.tintColor = Appearance.shared.colors.linkColor
+        self.navigationItem.backBarButtonItem = backItem
+    }
+    
+    open func setRightNavigationWithAction(title: String?, image: UIImage?, style: UIBarButtonItem.Style, target: Any?, action: Selector?) {
+        let rightItem = title != nil ? UIBarButtonItem(title: title, style: style, target: target, action: action) : UIBarButtonItem(image: image, style: style, target: target, action: action)
+        rightItem.tintColor = Appearance.shared.colors.linkColor
+        var rightItems = self.navigationItem.rightBarButtonItems ?? []
+        rightItems.append(rightItem)
+        
+        self.navigationItem.rightBarButtonItems = rightItems
+    }
+    
+    open func showErrorAlert(_ title: String? = "Error", message: String?) {
+        guard let message = message else { return }
+//        self.presentAlert(title: title, message: message)
+    }
+    
+    @objc open func errorMessage(notification: Notification) {
+        if let errorMessage = notification.object as? String {
+            self.showErrorAlert(message: errorMessage)
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    open func setupNavigationBar() {
+        navigationController?.navigationBar.isTranslucent = true
         if #available(iOS 15, *) {
             let appearance = UINavigationBarAppearance()
             appearance.backgroundColor = Appearance.shared.colors.navigationBackgroundColor
@@ -88,46 +220,36 @@ open class LMViewController: UIViewController {
         }
     }
     
-    open func setNavigationTitleAndSubtitle(with title: String?, subtitle: String?, alignment: UIStackView.Alignment = .leading) {
-        let titleView = LMView().translatesAutoresizingMaskIntoConstraints()
-        let widthConstraint = NSLayoutConstraint.init(item: titleView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width)
+    @objc open func dismissViewController() {
+        guard let _ = self.navigationController?.popViewController(animated: true) else {
+            self.dismiss(animated: true)
+            return
+        }
+    }
+    
+    public func setNavigationTitleAndSubtitle(with title: String?, subtitle: String?, alignment: UIStackView.Alignment = .center) {
+        let widthConstraint = NSLayoutConstraint.init(item: navigationTitleView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width)
         widthConstraint.priority = .defaultLow
         widthConstraint.isActive = true
         
-        let stackView = LMStackView().translatesAutoresizingMaskIntoConstraints()
-        stackView.spacing = 4
-        stackView.axis = .vertical
-        stackView.alignment = alignment
-        stackView.distribution = .fillProportionally
-        
-        titleView.addSubview(stackView)
-        
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
-            stackView.topAnchor.constraint(equalTo: titleView.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: titleView.bottomAnchor),
-            stackView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor)
-        ])
+        titleStackView.alignment = alignment
         
         if let title,
            !title.isEmpty {
-            let titleLabel = LMLabel().translatesAutoresizingMaskIntoConstraints()
-            titleLabel.text = title
-            titleLabel.textColor = Appearance.shared.colors.gray51
-            titleLabel.font = Appearance.shared.fonts.navigationTitleFont
-            stackView.addArrangedSubview(titleLabel)
+            navigationHeaderTitleLabel.text = title
+            navigationHeaderTitleLabel.textColor = Appearance.shared.colors.black
+            navigationHeaderTitleLabel.font = Appearance.shared.fonts.navigationTitleFont
+            titleStackView.addArrangedSubview(navigationHeaderTitleLabel)
         }
-        
         if let subtitle,
            !subtitle.isEmpty {
-            let subtitleLabel = LMLabel().translatesAutoresizingMaskIntoConstraints()
-            subtitleLabel.text = subtitle
-            subtitleLabel.textColor = Appearance.shared.colors.gray51
-            subtitleLabel.font = Appearance.shared.fonts.navigationSubtitleFont
-            stackView.addArrangedSubview(subtitleLabel)
+            navigationHeaderSubtitleLabel.text = subtitle
+            navigationHeaderSubtitleLabel.textColor = Appearance.shared.colors.textColor
+            navigationHeaderSubtitleLabel.font = Appearance.shared.fonts.navigationSubtitleFont
+            titleStackView.addArrangedSubview(navigationHeaderSubtitleLabel)
         }
         
-        navigationItem.titleView = titleView
+        navigationItem.titleView = navigationTitleView
     }
     
     open func showHideLoaderView(isShow: Bool) {
@@ -154,6 +276,51 @@ open class LMViewController: UIViewController {
             loaderView.removeFromSuperview()
             loaderScreen.removeFromSuperview()
         }
+    }
+    
+    public func displayToast(_ message : String, font: UIFont = UIFont.systemFont(ofSize: 16)) {
+        
+        guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow })else {
+            return
+        }
+        if let toast = window.subviews.first(where: { $0 is UILabel && $0.tag == -1001 }) {
+            toast.removeFromSuperview()
+        }
+        
+        let toastView = LMLabel()
+        toastView.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
+        toastView.textColor = Appearance.shared.colors.white
+        toastView.textAlignment = .center
+        toastView.font = font
+        toastView.cornerRadius(with: 8)
+        toastView.text = message
+        toastView.numberOfLines = 0
+        toastView.alpha = 0
+        toastView.translatesAutoresizingMaskIntoConstraints = false
+        toastView.tag = -1001
+        
+        window.addSubview(toastView)
+        
+        let horizontalCenterContraint: NSLayoutConstraint = NSLayoutConstraint(item: toastView, attribute: .centerX, relatedBy: .equal, toItem: window, attribute: .centerX, multiplier: 1, constant: 0)
+        
+        let widthContraint: NSLayoutConstraint = NSLayoutConstraint(item: toastView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1, constant: (self.view.frame.size.width-25) )
+        
+        let verticalContraint: [NSLayoutConstraint] = NSLayoutConstraint.constraints(withVisualFormat: "V:|-(>=200)-[toastView(==50)]-68-|", options: [.alignAllCenterX, .alignAllCenterY], metrics: nil, views: ["toastView": toastView])
+        
+        NSLayoutConstraint.activate([horizontalCenterContraint, widthContraint])
+        NSLayoutConstraint.activate(verticalContraint)
+        
+        UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseIn, animations: {
+            toastView.alpha = 1
+        }, completion: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+            UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseIn, animations: {
+                toastView.alpha = 0
+            }, completion: { finished in
+                toastView.removeFromSuperview()
+            })
+        })
     }
 }
 

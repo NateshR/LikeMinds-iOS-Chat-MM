@@ -52,6 +52,11 @@ public extension UIView {
         ])
     }
     
+    func addSubviewWithDefaultConstraints(_ subView: UIView) {
+        addSubview(subView)
+        pinSubView(subView: subView)
+    }
+    
     func addConstraint(top: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        bottom: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        leading: (anchor: NSLayoutXAxisAnchor, padding: CGFloat)? = nil,
@@ -158,6 +163,17 @@ public extension UIView {
 
 @IBDesignable
 open class LMView: UIView {
+    
+    public static var heightOfScreen: CGFloat { UIScreen.main.bounds.height }
+    public static var widthOfScreen: CGFloat { UIScreen.main.bounds.width }
+    
+    public let heightViewSize = widthOfScreen * 0.55
+    public let widthViewSize = widthOfScreen * 0.65
+    
+    public static var minSizeOfScreen: CGFloat {
+         min(heightOfScreen, widthOfScreen)
+    }
+    
     /// Initializes `UIView` and set up subviews, auto layouts and actions.
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -165,6 +181,7 @@ open class LMView: UIView {
         self.setupViews()
         self.setupLayouts()
         self.setupActions()
+        self.setupObservers()
     }
     
     @available(*, unavailable, renamed: "init(frame:)")
@@ -182,13 +199,24 @@ open class LMView: UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         return self
     }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    public func addShadow() {
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOffset = CGSize(width: -1, height: 2)
+        self.layer.shadowRadius = 1.8
+        self.layer.shadowOpacity = 0.3
+    }
 }
 
 // MARK: LMViewLifeCycle
 // Default Implementation is empty
 extension LMView: LMViewLifeCycle {
-    open func setupObservers() {
-    }
+    open func setupObservers() { }
+    
     open func setupViews() { }
     
     open func setupLayouts() { }

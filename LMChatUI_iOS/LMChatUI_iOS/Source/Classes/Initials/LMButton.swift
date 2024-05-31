@@ -28,33 +28,16 @@ open class LMButton: UIButton {
     }
     
     public static func createButton(with title: String?, image: UIImage?, textColor: UIColor?, textFont: UIFont?, contentSpacing: UIEdgeInsets = .zero, imageSpacing: CGFloat = .zero) -> LMButton {
-        if #available(iOS 15.0, *) {
-            var config: LMButton.Configuration = .plain()
-            
-            config.title = title
-            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                var outgoing = incoming
-                outgoing.font = textFont
-                outgoing.foregroundColor = textColor
-                return outgoing
-            }
-            
-            config.image = image
-            config.contentInsets = .init(top: contentSpacing.top, leading: contentSpacing.left, bottom: contentSpacing.bottom, trailing: contentSpacing.right)
-            config.imagePadding = imageSpacing
-            return LMButton(configuration: config)
-        } else {
-            let button = LMButton()
-            button.setTitle(title, for: .normal)
-            button.setTitleColor(textColor, for: .normal)
-            button.titleLabel?.font =  textFont
-            button.setImage(image, for: .normal)
-            button.contentEdgeInsets = contentSpacing
-            button.setPreferredSymbolConfiguration(.init(font: textFont ?? .systemFont(ofSize: 16)), forImageIn: .normal)
-            button.imageEdgeInsets = .init(top: imageSpacing, left: imageSpacing, bottom: imageSpacing, right: imageSpacing)
-            
-            return button
-        }
+        
+        let button = LMButton()
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(textColor, for: .normal)
+        button.titleLabel?.font =  textFont
+        button.setImage(image, for: .normal)
+        button.contentEdgeInsets = contentSpacing
+        button.setPreferredSymbolConfiguration(.init(font: textFont ?? .systemFont(ofSize: 16)), forImageIn: .normal)
+        button.imageEdgeInsets = .init(top: imageSpacing, left: imageSpacing, bottom: imageSpacing, right: imageSpacing)
+        return button
     }
     
     public func setContentInsets(with insets: UIEdgeInsets) {
@@ -85,5 +68,12 @@ open class LMButton: UIButton {
             titleEdgeInsets = UIEdgeInsets(top: 0, left: insetAmount, bottom: 0, right: -insetAmount)
             contentEdgeInsets = UIEdgeInsets(top: 0, left: insetAmount, bottom: 0, right: insetAmount)
         }
+    }
+    
+    public func addShadow() {
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOffset = CGSize(width: -1, height: 2)
+        self.layer.shadowRadius = 1.8
+        self.layer.shadowOpacity = 0.3
     }
 }

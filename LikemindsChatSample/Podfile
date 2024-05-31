@@ -3,6 +3,8 @@
 
 workspace 'LikemindsChatSample.xcworkspace'
 
+#warn_for_unused_master_specs_repo => false
+
 target 'LikemindsChatSample' do
   project 'LikemindsChatSample.xcodeproj'
 
@@ -10,9 +12,9 @@ target 'LikemindsChatSample' do
   use_frameworks!
 
   # Pods for LikemindsChatSample
- pod 'LikeMindsChat', path: '/Users/pushpendra/likeminds_workspace/GroupChatV2/LikeMindsChat/LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec'
- pod 'LMChatUI_iOS', path: '../LMChatUI_iOS/LMChatUI_iOS.podspec'
- pod 'LMChatCore_iOS', path: '../LMChatCore_iOS/LMChatCore_iOS.podspec'
+ pod 'LikeMindsChat', path: '../../LikeMinds-iOS-Chat-SDK/LikeMindsChat.podspec'
+ pod 'LMChatUI_iOS', path: '../LMChatUI_iOS.podspec'
+ pod 'LMChatCore_iOS', path: '../LMChatCore_iOS.podspec'
 
 end
 
