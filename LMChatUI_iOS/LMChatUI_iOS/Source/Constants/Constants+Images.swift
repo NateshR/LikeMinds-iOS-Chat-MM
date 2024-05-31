@@ -19,11 +19,11 @@ public extension Constants {
         
         /// Need For These Methods - A Develeoper can also set custom images in these variables we need to make sure that dev is not setting these images as nil, so get non-optional value of UIImage without force unwrapping.
         static func loadImage(with imageName: String) -> UIImage {
-            UIImage(named: imageName, in: Bundle.LMBundleIdentifier) ?? .circleImage
+            UIImage(named: imageName, in: Bundle.LMBundleIdentifier) ?? UIImage()
         }
         
         static func loadSystemImage(with imageName: String) -> UIImage {
-            UIImage(systemName: imageName) ?? .circleImage
+            UIImage(systemName: imageName) ?? UIImage()
         }
         
         // Shared Instance

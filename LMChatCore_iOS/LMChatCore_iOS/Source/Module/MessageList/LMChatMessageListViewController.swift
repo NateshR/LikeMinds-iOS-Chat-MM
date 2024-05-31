@@ -200,6 +200,7 @@ open class LMChatMessageListViewController: LMViewController {
         LMChatAudioRecordManager.shared.deleteAudioRecording()
         LMChatAudioPlayManager.shared.resetAudioPlayer()
         viewModel?.removeObserveConversations()
+        viewModel?.markChatroomAsRead()
         self.view.endEditing(true)
     }
     
@@ -223,7 +224,7 @@ open class LMChatMessageListViewController: LMViewController {
     @objc
     open func scrollToBottomClicked(_ sender: UIButton) {
         self.scrollToBottomButton.isHidden = true
-        viewModel?.fetchBottomConversations()
+        viewModel?.fetchBottomConversations(onButtonClicked: true)
     }
     
     @objc
@@ -349,6 +350,9 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     public func scrollToBottom(forceToBottom: Bool = true) {
+        if viewModel?.fetchingInitialBottomData == true {
+            messageListView.tableView.alpha = 0.001
+        }
         reloadChatMessageList()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         updateChatroomSubtitles()
@@ -356,6 +360,32 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             LMChatAudioPlayManager.shared.resetAudioPlayer()
             messageListView.scrollToBottom()
             self.scrollToBottomButton.isHidden = true
+        }
+        if viewModel?.fetchingInitialBottomData == true {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+                self?.messageListView.tableView.alpha = 1
+                self?.chatroomTopicBar.isHidden = false
+            }
+        }
+    }
+    
+    public func insertLastMessageRow(section: String, conversationId: String) {
+        messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        if let sectionIndex = messageListView.tableSections.firstIndex(where: {$0.section == section}),
+           let row = messageListView.tableSections[sectionIndex].data.firstIndex(where: {$0.messageId == conversationId}) {
+            let indexPath = IndexPath(row: row,
+                                      section: sectionIndex)
+            if self.messageListView.tableView.cellForRow(at: indexPath) == nil {
+                self.scrollToBottomButton.isHidden = true
+                self.messageListView.tableView.beginUpdates()
+                self.messageListView.tableView.insertRows(at: [indexPath], with: .bottom)
+                self.messageListView.tableView.endUpdates()
+            } else {
+                self.messageListView.tableView.beginUpdates()
+                self.messageListView.tableView.reloadRows(at: [indexPath], with: .automatic)
+                self.messageListView.tableView.endUpdates()
+            }
         }
     }
     
@@ -410,6 +440,15 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             } else {
                 scrollToBottomButton.isHidden = false
             }
+        }
+        
+        if let firstSection = messageListView.tableSections.first,
+           let message = firstSection.data.first,
+           message.messageType == LMChatMessageListView.chatroomHeader,
+           let _ = messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) {
+            self.chatroomTopicBar.isHidden = true
+        } else {
+            self.chatroomTopicBar.isHidden = false
         }
         
         // Check if user scrolled to the top
@@ -661,11 +700,6 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         viewModel?.getMoreConversations(conversationId: message.messageId, direction: direction)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.isLoadingMoreData = false
-        }
-        if direction == .scroll_UP {
-            chatroomTopicBar.isHidden = true
-        } else {
-            chatroomTopicBar.isHidden = false
         }
     }
     

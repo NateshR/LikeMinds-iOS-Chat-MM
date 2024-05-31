@@ -181,7 +181,7 @@ extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
         let newSize = bottomMessageBoxView.inputTextView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
         
         bottomMessageBoxView.inputTextView.isScrollEnabled = newSize.height > bottomMessageBoxView.maxHeightOfTextView
-        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(newSize.height, bottomMessageBoxView.maxHeightOfTextView)
+        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(max(newSize.height, 36), bottomMessageBoxView.maxHeightOfTextView)
     }
     
     public func textViewDidChange(_ textView: UITextView) {

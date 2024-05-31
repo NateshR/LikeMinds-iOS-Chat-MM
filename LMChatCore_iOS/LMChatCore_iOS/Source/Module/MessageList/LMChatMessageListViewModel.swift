@@ -18,6 +18,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func scrollToSpecificConversation(indexPath: IndexPath, isExistingIndex: Bool)
     func memberRightsCheck()
     func showToastMessage(message: String?)
+    func insertLastMessageRow(section: String, conversationId: String)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -29,7 +30,7 @@ public final class LMChatMessageListViewModel {
     var chatroomDetailsExtra: ChatroomDetailsExtra
     var chatMessages: [Conversation] = []
     var messagesList:[LMChatMessageListView.ContentModel] = []
-    let conversationFetchLimit: Int = 20
+    let conversationFetchLimit: Int = 100
     var chatroomViewData: Chatroom?
     var chatroomWasNotLoaded: Bool = true
     var chatroomActionData: GetChatroomActionsResponse?
@@ -44,6 +45,7 @@ public final class LMChatMessageListViewModel {
     var loggedInUserReplaceTagValue: String = ""
     var fetchingInitialBottomData: Bool = false
     var isConversationSyncCompleted: Bool = false
+    var trackLastConversationExist: Bool = true
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -97,11 +99,8 @@ public final class LMChatMessageListViewModel {
         loggedInUserTag()
         
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
-        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom, (chatroom.isConversationStored) else {
             chatroomWasNotLoaded = true
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
-//                self?.getInitialData()
-//            }
             return
         }
         //2nd case -> chatroom is deleted, if yes return
@@ -177,7 +176,7 @@ public final class LMChatMessageListViewModel {
         return conversationsArray
     }
     
-    func fetchBottomConversations() {
+    func fetchBottomConversations(onButtonClicked: Bool = false) {
         let request = GetConversationsRequest.Builder()
             .chatroomId(chatroomId)
             .limit(conversationFetchLimit)
@@ -194,12 +193,13 @@ public final class LMChatMessageListViewModel {
                 insertOrUpdateConversationIntoList(message)
             }
         }
-        fetchingInitialBottomData = true
+        fetchingInitialBottomData = !onButtonClicked
         LMChatClient.shared.observeLiveConversation(withChatroomId: chatroomId)
         delegate?.scrollToBottom(forceToBottom: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.fetchingInitialBottomData = false
         }
+        trackLastConversationExist = true
     }
     
     func fetchTopConversations() {
@@ -216,6 +216,11 @@ public final class LMChatMessageListViewModel {
         if  let chatroom = chatroomViewData {
             let message = chatroomDataToConversation(chatroom)
             insertOrUpdateConversationIntoList(message)
+        }
+        if conversations.count < conversationFetchLimit {
+            trackLastConversationExist = true
+        } else {
+            trackLastConversationExist = false
         }
         delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0), isExistingIndex: false)
     }
@@ -242,7 +247,10 @@ public final class LMChatMessageListViewModel {
             .type(type)
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
-        guard var conversations = response?.data?.conversations, conversations.count > 0 else { return }
+        guard var conversations = response?.data?.conversations, conversations.count > 0 else {
+            if type == .below { trackLastConversationExist = true }
+            return
+        }
         if type == .above, conversations.count < conversationFetchLimit, let chatroom = self.chatroomViewData {
             conversations.insert(chatroomDataToConversation(chatroom), at: 0)
         }
@@ -309,6 +317,11 @@ public final class LMChatMessageListViewModel {
         delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section), isExistingIndex: false)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.fetchingInitialBottomData = false
+        }
+        if chatMessages.count < conversationFetchLimit {
+            trackLastConversationExist = true
+        } else {
+            trackLastConversationExist = false
         }
     }
     
@@ -648,6 +661,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                      replyConversationId: String?,
                      replyChatRoomId: String?, temporaryId: String? = nil) {
         guard let communityId = chatroomViewData?.communityId else { return }
+        if !trackLastConversationExist {
+            fetchBottomConversations()
+        }
         let temporaryId = temporaryId ?? ValueUtils.getTemporaryId()
         var requestBuilder = PostConversationRequest.Builder()
             .chatroomId(self.chatroomId)

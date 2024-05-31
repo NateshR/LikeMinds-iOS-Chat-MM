@@ -75,7 +75,7 @@ open class LMChatMessageContentView: LMView {
         label.textColor = .black
         label.textAlignment = .left
         label.isEditable = false
-        label.textContainerInset = UIEdgeInsets(top: -2, left: 0, bottom: -4, right: 0)
+        label.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         label.text = ""
         return label
     }()
@@ -130,6 +130,11 @@ open class LMChatMessageContentView: LMView {
     
     weak var delegate: LMChatMessageContentViewDelegate?
     var dataView: LMChatMessageCell.ContentModel?
+    
+    open var textLabelFont: UIFont = Appearance.shared.fonts.textFont1
+    open var deletedTextLabelFont: UIFont = Appearance.shared.fonts.italicFont16
+    open var textLabelColor: UIColor = Appearance.shared.colors.black
+    open var deletedTextLabelColor: UIColor = Appearance.shared.colors.textColor
     
     @objc func didTapOnProfileLink(_ gesture: UITapGestureRecognizer) {
         delegate?.didTapOnProfileLink(route: Constants.getProfileRoute(withUUID: self.dataView?.message?.createdById ?? "") )
@@ -198,7 +203,7 @@ open class LMChatMessageContentView: LMView {
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         dataView = data
         self.textLabel.isUserInteractionEnabled = true
-        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withHighlightedColor: Appearance.Colors.shared.linkColor, withTextColor: Appearance.Colors.shared.black)
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: textLabelFont, withHighlightedColor: Appearance.Colors.shared.linkColor, withTextColor: textLabelColor)
         self.textLabel.isHidden = self.textLabel.text.isEmpty
         setTimestamps(data)
         let isIncoming = data.message?.isIncoming ?? true
@@ -249,6 +254,7 @@ open class LMChatMessageContentView: LMView {
             attributedText.append(NSAttributedString(attachment: textAtt))
         }
         bubbleView.timestampLabel.attributedText = attributedText
+        bubbleView.updateTimestampLabelTopConstraint(withConstant: textLabel.isHidden ? 6 : 0)
     }
     
     func messageByName(_ data: LMChatMessageCell.ContentModel) {
@@ -263,8 +269,8 @@ open class LMChatMessageContentView: LMView {
     }
     
     func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
-        self.textLabel.font = Appearance.shared.fonts.italicFont16
-        self.textLabel.textColor = Appearance.Colors.shared.textColor
+        self.textLabel.font = deletedTextLabelFont
+        self.textLabel.textColor = deletedTextLabelColor
         self.textLabel.text = Constants.shared.strings.messageDeleteText
         self.textLabel.isUserInteractionEnabled = false
         self.textLabel.isHidden = false
