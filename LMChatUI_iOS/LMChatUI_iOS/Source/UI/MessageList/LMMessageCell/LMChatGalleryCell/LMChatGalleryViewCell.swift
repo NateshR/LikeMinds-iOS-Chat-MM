@@ -39,7 +39,6 @@ open class LMChatGalleryViewCell: LMChatMessageCell {
     open override func setData(with data: ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setData(with: data, delegate: delegate, index: index)
         galleryMessageView.galleryView.delegate = self
-        galleryMessageView.layoutIfNeeded()
     }
 
     open override func prepareForReuse() {

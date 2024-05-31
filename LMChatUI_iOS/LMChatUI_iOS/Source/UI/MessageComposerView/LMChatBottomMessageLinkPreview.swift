@@ -34,7 +34,6 @@ open class LMChatBottomMessageLinkPreview: LMView {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = Appearance.shared.colors.gray3
         return view
     }()
     
@@ -136,11 +135,11 @@ open class LMChatBottomMessageLinkPreview: LMView {
     }
     
     public func setData(_ data: ContentModel) {
-        linkLabel.text = data.link
+        linkLabel.text = data.link?.lowercased()
         linkTitleLabel.text = data.title
         linkSubtitleLabel.text = data.description
         
-        let placeholder = Constants.Images.shared.brokenLink
+        let placeholder = Constants.Images.shared.linkIcon
         linkPreviewImageView.kf.setImage(with: URL(string: data.imageUrl ?? ""), placeholder: placeholder)
     }
     

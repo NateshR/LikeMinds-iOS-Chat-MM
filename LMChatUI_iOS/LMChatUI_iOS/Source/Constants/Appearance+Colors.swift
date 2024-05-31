@@ -32,6 +32,9 @@ public extension Appearance {
         public var previewBackgroundColor: UIColor = UIColor(hex: 0xD0D8E2)
         public var previewSubtitleTextColor: UIColor = UIColor(r: 60, g: 60, b: 67, a: 0.6)
         
+        public var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        public var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 1)
+        
         // UIKit Colors
         public var appTintColor: UIColor = .purple
         public var white: UIColor = .white

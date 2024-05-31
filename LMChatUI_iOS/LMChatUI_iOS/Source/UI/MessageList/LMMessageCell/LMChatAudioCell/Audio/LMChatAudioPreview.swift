@@ -29,15 +29,15 @@ open class LMChatAudioPreview: LMView {
     
     lazy var headphoneContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 8
-        view.backgroundColor = .black.withAlphaComponent(0.6)
+        view.cornerRadius(with: 12)
+        view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
         return view
     }()
     
     lazy var headphoneImage: LMImageView = {
         let imageView = LMImageView().translatesAutoresizingMaskIntoConstraints()
-        imageView.image = UIImage(systemName: "headphones")
+        imageView.image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 30)
+        imageView.contentMode = .center
         imageView.tintColor = .white
         return imageView
     }()
@@ -64,7 +64,7 @@ open class LMChatAudioPreview: LMView {
     var slider: UISlider = {
         let slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false
-        slider.setThumbImage(UIImage(systemName: "circle.fill"), for: .normal)
+        slider.setThumbImage(Constants.shared.images.circleFill, for: .normal)
         return slider
     }()
     
@@ -128,7 +128,7 @@ open class LMChatAudioPreview: LMView {
                                  trailing: (containerView.trailingAnchor, -8))
         
         playPauseButton.addConstraint(top: (thumbnailImage.topAnchor, 8),
-                                      bottom: (titleLabel.topAnchor, -8),
+                                      bottom: (titleLabel.topAnchor, -6),
                                       leading: (thumbnailImage.trailingAnchor, 8))
         playPauseButton.setHeightConstraint(with: 36)
         playPauseButton.setWidthConstraint(with: playPauseButton.heightAnchor)
@@ -201,7 +201,7 @@ open class LMChatAudioPreview: LMView {
         isPlaying = true
         let percentage = (time / Float(duration)) * 100
         slider.value = self.url == url ? percentage : .zero
-        playPauseButton.image =  self.url == url ?  UIImage(systemName:  "pause.circle.fill") : Constants.shared.images.playCircleFilled
+        playPauseButton.image =  self.url == url ?  Constants.shared.images.pauseCircleFilled : Constants.shared.images.playCircleFilled
         durationLbl.text = convertSecondsToFormattedTime(seconds: Int(time))
     }
     

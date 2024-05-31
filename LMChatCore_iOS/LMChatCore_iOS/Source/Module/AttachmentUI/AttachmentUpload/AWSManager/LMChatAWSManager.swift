@@ -26,12 +26,14 @@ final class LMChatAWSManager {
                                                 conversationId: String,
                                                 attachmentType: String,
                                                   fileExtension: String,
+                                                  filename: String,
                                                 isThumbnail: Bool = false) -> String {
+        let name = filename.replacingOccurrences(of: " ", with: "_")
         let miliseconds = Int(Date().millisecondsSince1970)
         if isThumbnail {
-            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(attachmentType)_\(miliseconds).jpeg"
+            return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/thumb_\(name)_\(attachmentType)_\(miliseconds).jpeg"
         } else {
-          return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(miliseconds).\(fileExtension)"
+          return   "files/collabcard/\(chatroomId)/conversation/\(conversationId)/\(attachmentType)_\(name)_\(miliseconds).\(fileExtension)"
         }
     }
     
@@ -132,8 +134,8 @@ final class LMChatAWSManager {
                 }
                 return nil
             }
-        } catch {
-            completion?(nil, nil)
+        } catch let error {
+            completion?(nil, error)
         }
     }
     

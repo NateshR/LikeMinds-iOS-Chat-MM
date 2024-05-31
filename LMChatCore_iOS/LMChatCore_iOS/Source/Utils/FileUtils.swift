@@ -21,10 +21,23 @@ class FileUtils {
         return pathPrefix
     }
     
+    static func imageUrl(_ urlString: String?) -> String? {
+        let url = URL(string: urlString ?? "")
+        if url?.isFileURL == true {
+            return Self.getFilePath(withFileName: url?.lastPathComponent ?? "")?.absoluteString
+        }
+        return url?.absoluteString
+    }
+    
+    static func getFilePath(withFileName fileName: String?) -> URL? {
+        guard let fileName, !fileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        return documentsDirectory?.appendingPathComponent(fileName)
+    }
+    
     static func saveImageToLocalDirectory(image: UIImage, imageName: String?) -> URL? {
         let fileName = imageName ?? "\(Date().millisecondsSince1970).jpeg"
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        guard let targetURL = documentsDirectory?.appendingPathComponent(fileName) else { return nil }
+        guard let targetURL = Self.getFilePath(withFileName: fileName) else { return nil }
         do {
             if FileManager.default.fileExists(atPath: targetURL.path) {
                 try FileManager.default.removeItem(at: targetURL)

@@ -113,6 +113,6 @@ open class LMChatReactionViewCell: LMTableViewCell {
         userName.text = data.username
         removeLabel.isHidden = !data.isSelfReaction
         reactionImage.text = data.reaction
-        userImageView.kf.setImage(with: URL(string: data.image ?? ""), placeholder: UIImage.generateLetterImage(name: data.username))
+        userImageView.kf.setImage(with: URL(string: data.image ?? ""), placeholder: UIImage.generateLetterImage(name: data.username.components(separatedBy: " ").first ?? ""))
     }
 }

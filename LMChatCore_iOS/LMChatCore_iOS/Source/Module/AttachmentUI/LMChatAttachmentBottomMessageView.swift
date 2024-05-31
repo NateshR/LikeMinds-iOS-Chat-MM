@@ -98,9 +98,9 @@ open class LMChatAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var attachmentButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
-        button.setImage(Constants.shared.images.photoPlusIcon.withSystemImageConfig(pointSize: 25), for: .normal)
+        button.setImage(Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: 30), for: .normal)
         button.tintColor = Appearance.shared.colors.white
-        button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 50.0).isActive = true
         button.addTarget(self, action: #selector(addMoreAttachmentButtonClicked), for: .touchUpInside)
         return button
     }()

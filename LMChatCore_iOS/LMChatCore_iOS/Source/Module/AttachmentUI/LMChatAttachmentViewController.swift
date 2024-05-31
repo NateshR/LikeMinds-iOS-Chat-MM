@@ -222,7 +222,7 @@ open class LMChatAttachmentViewController: LMViewController {
             imageActionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageActionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageActionsContainer.heightAnchor.constraint(equalToConstant: 74),
-            imageActionsContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            imageActionsContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             rightContainerStackView.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
             rightContainerStackView.trailingAnchor.constraint(equalTo: imageActionsContainer.trailingAnchor, constant: -12),
             cancelButton.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
@@ -376,11 +376,13 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         audioPlayer.isHidden = true
         switch data.mediaType {
         case .image, .gif:
+            bottomMessageBoxView.attachmentButton.isHidden = data.mediaType == .gif
             editButton.isHidden = data.mediaType == .gif
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
+            bottomMessageBoxView.attachmentButton.isHidden = false
             videoImageViewContainer.isHidden = false
             videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
                 self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
@@ -443,6 +445,9 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     }
     
     public func sendAttachment(message: String?) {
+        if viewModel?.mediaType == .audio {
+            audioPlayer.stopPlaying()
+        }
         delegate?.postConversationWithAttchments(message: message, attachments: viewModel?.mediaCellData ?? [])
         self.dismissViewController()
     }

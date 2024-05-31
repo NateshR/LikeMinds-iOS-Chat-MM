@@ -94,7 +94,7 @@ open class LMChatExploreChatroomView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Chatname"
         label.font = Appearance.shared.fonts.headingFont1
-        label.textColor = Appearance.shared.colors.textColor
+        label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label

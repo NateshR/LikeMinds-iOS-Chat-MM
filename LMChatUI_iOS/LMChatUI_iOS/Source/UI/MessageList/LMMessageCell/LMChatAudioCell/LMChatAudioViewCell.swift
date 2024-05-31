@@ -41,7 +41,6 @@ open class LMChatAudioViewCell: LMChatMessageCell {
             self?.updateForSeeMore(for: data.message?.messageId ?? "", index: index)
         }
         
-        audioMessageView.layoutIfNeeded()
     }
     
     open func resetAudio() {

@@ -45,7 +45,7 @@ open class LMChatHomeFeedViewController: LMViewController {
         }
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
-        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name ?? ""))
+        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name?.components(separatedBy: " ").first ?? ""))
         viewModel?.getExploreTabCount()
     }
     

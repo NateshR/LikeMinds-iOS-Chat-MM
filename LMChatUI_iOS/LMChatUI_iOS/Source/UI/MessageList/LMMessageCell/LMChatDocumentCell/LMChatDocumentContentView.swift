@@ -11,12 +11,13 @@ import Kingfisher
 @IBDesignable
 open class LMChatDocumentContentView: LMChatMessageContentView {
     
-    open private(set) lazy var docPreviewContainerStackView: LMStackView = {
+    open private(set) lazy var docPreviewContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
         view.alignment = .leading
         view.spacing = 4
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -38,13 +39,13 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        updateRetryButton(data)
         if data.message?.isDeleted == true {
             docPreviewContainerStackView.isHidden = true
         } else {
             attachmentView(data, index: index)
         }
-        
+        bubbleView.layoutIfNeeded()
     }
     
     func attachmentView(_ data: LMChatMessageCell.ContentModel, index: IndexPath) {
@@ -65,7 +66,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
             button.setImage(nil, for: .normal)
             button.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
             button.setFont(Appearance.shared.fonts.buttonFont1)
-            button.setTitleColor(.blue, for: .normal)
+            button.setTitleColor(Appearance.shared.colors.linkColor, for: .normal)
             docPreviewContainerStackView.addArrangedSubview(button)
         }
     }
@@ -84,7 +85,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     
     func createDocPreview(_ data: LMChatMessageDocumentPreview.ContentModel) -> LMChatMessageDocumentPreview {
         let preview = LMUIComponents.shared.documentView.init().translatesAutoresizingMaskIntoConstraints()
-        preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+        preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.setHeightConstraint(with: 60)
         preview.cornerRadius(with: 12)
@@ -101,6 +102,11 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     @objc
     open func didTapShowMore() {
         onShowMoreCallback?()
+    }
+    
+    func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
+        loaderView.isHidden = !(data.message?.messageStatus == .sending)
+        retryView.isHidden = !(data.message?.messageStatus == .failed)
     }
 }
 

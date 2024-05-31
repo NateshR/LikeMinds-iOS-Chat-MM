@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import LMChatUI_iOS
 
 public protocol LMChatMessageDocumentPreviewDelegate: AnyObject {
     func onClickAttachment(_ url: String)
@@ -64,8 +63,7 @@ open class LMChatMessageDocumentPreview: LMView {
         image.clipsToBounds = true
         image.setWidthConstraint(with: 40)
         image.setHeightConstraint(with: 50)
-        image.image = Constants.shared.images.documentsIcon
-        image.tintColor = .systemRed
+        image.image = Constants.shared.images.pdfIcon
         return image
     }()
     

@@ -60,8 +60,9 @@ open class LMChatMessageContentView: LMView {
         return view
     }()
 
-    open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {
+    open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {[unowned self] in
         let view = LMUIComponents.shared.messageReplyView.init().translatesAutoresizingMaskIntoConstraints()
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -74,17 +75,7 @@ open class LMChatMessageContentView: LMView {
         label.textColor = .black
         label.textAlignment = .left
         label.isEditable = false
-        label.textContainerInset = UIEdgeInsets(top: 4, left: 5, bottom: 0, right: 0)
-        label.text = ""
-        return label
-    }()
-    
-    open private(set) lazy var timestampLabel: LMLabel = {
-        let label =  LMLabel()
-            .translatesAutoresizingMaskIntoConstraints()
-        label.numberOfLines = 0
-        label.font = Appearance.shared.fonts.subHeadingFont1
-        label.textColor = Appearance.shared.colors.textColor
+        label.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         label.text = ""
         return label
     }()
@@ -103,7 +94,7 @@ open class LMChatMessageContentView: LMView {
         return label
     }()
     
-    open private(set) lazy var cancelRetryContainerStackView: LMStackView = {
+    open private(set) lazy var cancelRetryContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
@@ -116,7 +107,9 @@ open class LMChatMessageContentView: LMView {
     
     open private(set) lazy var loaderView: LMAttachmentLoaderView = {
         let view = LMUIComponents.shared.attachmentLoaderView.init().translatesAutoresizingMaskIntoConstraints()
-        view.cornerRadius(with: 24)
+        view.setHeightConstraint(with: 44)
+        view.setWidthConstraint(with: 44)
+        view.cornerRadius(with: 22)
         view.isHidden = true
         return view
     }()
@@ -129,8 +122,19 @@ open class LMChatMessageContentView: LMView {
     
     var bubbleLeadingConstraint: NSLayoutConstraint?
     var bubbleTrailingConstraint: NSLayoutConstraint?
+    
+    var outgoingbubbleLeadingConstraint: NSLayoutConstraint?
+    var outgoingbubbleTrailingConstraint: NSLayoutConstraint?
+    
+    var replyViewWidthConstraint: NSLayoutConstraint?
+    
     weak var delegate: LMChatMessageContentViewDelegate?
     var dataView: LMChatMessageCell.ContentModel?
+    
+    open var textLabelFont: UIFont = Appearance.shared.fonts.textFont1
+    open var deletedTextLabelFont: UIFont = Appearance.shared.fonts.italicFont16
+    open var textLabelColor: UIColor = Appearance.shared.colors.black
+    open var deletedTextLabelColor: UIColor = Appearance.shared.colors.textColor
     
     @objc func didTapOnProfileLink(_ gesture: UITapGestureRecognizer) {
         delegate?.didTapOnProfileLink(route: Constants.getProfileRoute(withUUID: self.dataView?.message?.createdById ?? "") )
@@ -147,7 +151,6 @@ open class LMChatMessageContentView: LMView {
         bubble.addArrangeSubview(usernameLabel)
         bubble.addArrangeSubview(replyMessageView)
         bubble.addArrangeSubview(textLabel)
-//        bubble.addSubview(timestampLabel)
         backgroundColor = .clear
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
@@ -175,14 +178,16 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
-//            timestampLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -6),
-//            timestampLabel.topAnchor.constraint(equalTo: bubbleView.contentContainer.bottomAnchor, constant: 4),
-//            timestampLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -18),
-//            timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: 10),
+//            replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),
+//            replyMessageView.leadingAnchor.constraint(equalTo: bubbleView.contentContainer.leadingAnchor),
+//            replyMessageView.trailingAnchor.constraint(equalTo: bubbleView.contentContainer.trailingAnchor)
         ])
         
-         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
-         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
+         bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor)
+         bubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -40)
+        
+        outgoingbubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(greaterThanOrEqualTo: chatProfileImageContainerStackView.trailingAnchor, constant: 40)
+        outgoingbubbleTrailingConstraint = bubbleView.trailingAnchor.constraint(equalTo: trailingAnchor)
         
     }
     
@@ -198,34 +203,41 @@ open class LMChatMessageContentView: LMView {
     open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         dataView = data
         self.textLabel.isUserInteractionEnabled = true
-        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: Appearance.Fonts.shared.textFont2, withTextColor: Appearance.Colors.shared.black)
+        self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: textLabelFont, withHighlightedColor: Appearance.Colors.shared.linkColor, withTextColor: textLabelColor)
         self.textLabel.isHidden = self.textLabel.text.isEmpty
         setTimestamps(data)
         let isIncoming = data.message?.isIncoming ?? true
         bubbleView.bubbleFor(isIncoming)
-        bubbleLeadingConstraint?.isActive = false
-        bubbleTrailingConstraint?.isActive = false
+        
         if !isIncoming {
             chatProfileImageView.isHidden = true
-            bubbleLeadingConstraint?.constant = 40
-            bubbleTrailingConstraint?.constant = 0
             usernameLabel.isHidden = true
+            bubbleLeadingConstraint?.isActive = false
+            bubbleTrailingConstraint?.isActive = false
+            outgoingbubbleLeadingConstraint?.isActive = true
+            outgoingbubbleTrailingConstraint?.isActive = true
         } else {
-            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy ?? ""))
+            chatProfileImageView.imageView.kf.setImage(with: URL(string: data.message?.createdByImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: data.message?.createdBy?.components(separatedBy: " ").first ?? ""))
             chatProfileImageView.isHidden = false
-            bubbleLeadingConstraint?.constant = 0
-            bubbleTrailingConstraint?.constant = -40
             messageByName(data)
             usernameLabel.isHidden = false
+            bubbleLeadingConstraint?.isActive = true
+            bubbleTrailingConstraint?.isActive = true
+            outgoingbubbleLeadingConstraint?.isActive = false
+            outgoingbubbleTrailingConstraint?.isActive = false
         }
-        bubbleLeadingConstraint?.isActive = true
-        bubbleTrailingConstraint?.isActive = true
         
         if data.message?.isDeleted == true {
             deletedConversationView(data)
+            textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         } else {
             replyView(data)
             reactionsView(data)
+        }
+        if (data.message?.attachments?.isEmpty == false || data.message?.ogTags != nil || data.message?.replied?.first != nil) && data.message?.isDeleted == false {
+            textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        } else {
+            textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         }
         bubbleView.layoutIfNeeded()
     }
@@ -236,12 +248,13 @@ open class LMChatMessageContentView: LMView {
         let attributedText = NSMutableAttributedString()
         attributedText.append(NSAttributedString(string: timestamp + " "))
         if data.message?.isIncoming == false {
-            let image = Constants.shared.images.checkmarkIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            let image = ((data.message?.messageStatus == .sent) ? Constants.shared.images.checkmarkIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor) :  Constants.shared.images.clockIcon.withSystemImageConfig(pointSize: 9)?.withTintColor(Appearance.shared.colors.textColor)) ?? UIImage()
             let textAtt = NSTextAttachment(image: image)
             textAtt.bounds = CGRect(x: 0, y: -1, width: 11, height: 11)
             attributedText.append(NSAttributedString(attachment: textAtt))
         }
         bubbleView.timestampLabel.attributedText = attributedText
+        bubbleView.updateTimestampLabelTopConstraint(withConstant: textLabel.isHidden ? 6 : 0)
     }
     
     func messageByName(_ data: LMChatMessageCell.ContentModel) {
@@ -256,18 +269,19 @@ open class LMChatMessageContentView: LMView {
     }
     
     func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
-        self.textLabel.font = UIFont.italicSystemFont(ofSize: 16)
-        self.textLabel.textColor = Appearance.Colors.shared.textColor
-        self.textLabel.text = "This message was deleted!"
+        self.textLabel.font = deletedTextLabelFont
+        self.textLabel.textColor = deletedTextLabelColor
+        self.textLabel.text = Constants.shared.strings.messageDeleteText
         self.textLabel.isUserInteractionEnabled = false
+        self.textLabel.isHidden = false
     }
 
     func replyView(_ data: LMChatMessageCell.ContentModel) {
         if let repliedMessage = data.message?.replied?.first {
             replyMessageView.isHidden = false
             replyMessageView.closeReplyButton.isHidden = true
-            let message = repliedMessage.isDeleted == true ? "This message was deleted!" : repliedMessage.message
-            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: data.message?.messageType))
+            let message = repliedMessage.isDeleted == true ? Constants.shared.strings.messageDeleteText : repliedMessage.message
+            replyMessageView.setData(.init(username: repliedMessage.createdBy, replyMessage: message, attachmentsUrls: repliedMessage.attachments?.compactMap({($0.thumbnailUrl, $0.fileUrl, $0.fileType)}), messageType: data.message?.messageType, isDeleted: repliedMessage.isDeleted ?? false))
             replyMessageView.onClickReplyPreview = {[weak self] in
                 self?.delegate?.didTapOnReplyPreview()
             }
@@ -288,6 +302,7 @@ open class LMChatMessageContentView: LMView {
     func prepareToResuse() {
         reactionsView.isHidden = true
         replyMessageView.isHidden = true
+        textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 }
 

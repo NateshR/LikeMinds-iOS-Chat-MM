@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 @IBDesignable
 open class LMChatNotificationCell: LMTableViewCell {
@@ -21,7 +20,7 @@ open class LMChatNotificationCell: LMTableViewCell {
         let label =  LMTextView()
             .translatesAutoresizingMaskIntoConstraints()
         label.isScrollEnabled = false
-        label.font = Appearance.shared.fonts.subHeadingFont2
+        label.font = Appearance.shared.fonts.textFont1
         label.backgroundColor = Appearance.shared.colors.notificationBackgroundColor
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
@@ -34,6 +33,8 @@ open class LMChatNotificationCell: LMTableViewCell {
         label.text = ""
         return label
     }()
+    
+    open var infoLabelTextFont: UIFont = Appearance.shared.fonts.textFont1
     
     open override func prepareForReuse() {
         super.prepareForReuse()
@@ -78,7 +79,7 @@ open class LMChatNotificationCell: LMTableViewCell {
     // MARK: configure
     open func setData(with data: ContentModel) {
         let message = (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: data.loggedInUserTag, with: data.loggedInUserReplaceTag)
-        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: message, font: Appearance.shared.fonts.subHeadingFont2, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
+        infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: message, font: infoLabelTextFont, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
         self.layoutIfNeeded()
     }
 }

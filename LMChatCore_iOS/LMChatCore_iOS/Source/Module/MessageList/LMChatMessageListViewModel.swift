@@ -12,11 +12,13 @@ import LikeMindsChat
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func reloadChatMessageList()
     func reloadData(at: ScrollDirection)
-    func scrollToBottom()
+    func scrollToBottom(forceToBottom: Bool)
     func updateChatroomSubtitles()
     func updateTopicBar()
-    func scrollToSpecificConversation(indexPath: IndexPath)
+    func scrollToSpecificConversation(indexPath: IndexPath, isExistingIndex: Bool)
     func memberRightsCheck()
+    func showToastMessage(message: String?)
+    func insertLastMessageRow(section: String, conversationId: String)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -28,7 +30,7 @@ public final class LMChatMessageListViewModel {
     var chatroomDetailsExtra: ChatroomDetailsExtra
     var chatMessages: [Conversation] = []
     var messagesList:[LMChatMessageListView.ContentModel] = []
-    let conversationFetchLimit: Int = 10
+    let conversationFetchLimit: Int = 100
     var chatroomViewData: Chatroom?
     var chatroomWasNotLoaded: Bool = true
     var chatroomActionData: GetChatroomActionsResponse?
@@ -42,6 +44,8 @@ public final class LMChatMessageListViewModel {
     var loggedInUserTagValue: String = ""
     var loggedInUserReplaceTagValue: String = ""
     var fetchingInitialBottomData: Bool = false
+    var isConversationSyncCompleted: Bool = false
+    var trackLastConversationExist: Bool = true
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -61,10 +65,12 @@ public final class LMChatMessageListViewModel {
         return viewcontroller
     }
     
-    @objc func attachmentPostCompleted(_ notification: Notification) {
-        guard let userInfo = notification.userInfo, let conversationId = userInfo[LMChatUploadConversationsAttachmentOperation.postedId] else {
-            return
+    @objc func conversationSyncCompleted(_ notification: Notification) {
+        if chatroomViewData?.isConversationStored == false || chatroomViewData == nil {
+            self.getInitialData()
         }
+        self.isConversationSyncCompleted = true
+        self.addObserveConversations()
     }
     
     func isAdmin() -> Bool {
@@ -72,8 +78,8 @@ public final class LMChatMessageListViewModel {
     }
     
     func checkMemberRight(_ rightState: MemberRightState) -> Bool {
-        guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  false }
-        return right.isSelected ?? false
+        guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  true }
+        return right.isSelected ?? true
     }
     
     func loggedInUserTag() {
@@ -89,15 +95,12 @@ public final class LMChatMessageListViewModel {
     }
     
     func getInitialData() {
-        NotificationCenter.default.addObserver(self, selector: #selector(attachmentPostCompleted), name: LMChatUploadConversationsAttachmentOperation.attachmentPostCompleted, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(conversationSyncCompleted), name: .conversationSyncCompleted, object: nil)
         loggedInUserTag()
         
         let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
-        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom, (chatroom.isConversationStored) else {
             chatroomWasNotLoaded = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
-                self?.getInitialData()
-            }
             return
         }
         //2nd case -> chatroom is deleted, if yes return
@@ -173,7 +176,7 @@ public final class LMChatMessageListViewModel {
         return conversationsArray
     }
     
-    func fetchBottomConversations() {
+    func fetchBottomConversations(onButtonClicked: Bool = false) {
         let request = GetConversationsRequest.Builder()
             .chatroomId(chatroomId)
             .limit(conversationFetchLimit)
@@ -190,12 +193,13 @@ public final class LMChatMessageListViewModel {
                 insertOrUpdateConversationIntoList(message)
             }
         }
-        fetchingInitialBottomData = true
+        fetchingInitialBottomData = !onButtonClicked
         LMChatClient.shared.observeLiveConversation(withChatroomId: chatroomId)
-        delegate?.scrollToBottom()
+        delegate?.scrollToBottom(forceToBottom: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
             self?.fetchingInitialBottomData = false
         }
+        trackLastConversationExist = true
     }
     
     func fetchTopConversations() {
@@ -206,7 +210,6 @@ public final class LMChatMessageListViewModel {
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
         guard let conversations = response?.data?.conversations else { return }
-        print("conversations ------> \(conversations)")
         chatMessages = conversations
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
@@ -214,7 +217,12 @@ public final class LMChatMessageListViewModel {
             let message = chatroomDataToConversation(chatroom)
             insertOrUpdateConversationIntoList(message)
         }
-        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0))
+        if conversations.count < conversationFetchLimit {
+            trackLastConversationExist = true
+        } else {
+            trackLastConversationExist = false
+        }
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: 0, section: 0), isExistingIndex: false)
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
@@ -223,7 +231,14 @@ public final class LMChatMessageListViewModel {
     }
     
     func fetchConversationsOnScroll(conversationId: String, type: GetConversationType) {
-        guard let conversation = chatMessages.first(where: {($0.id ?? "") == conversationId }) else { return }
+        var conversation: Conversation?
+        if let message = chatMessages.first(where: {($0.id ?? "") == conversationId }) {
+            conversation = message
+        } else if let message = LMChatClient.shared.getConversation(request: .builder().conversationId(conversationId).build())?.data?.conversation {
+            conversation = message
+        } else {
+            return
+        }
         let request = GetConversationsRequest.Builder()
             .chatroomId(chatroomId)
             .limit(conversationFetchLimit)
@@ -232,33 +247,17 @@ public final class LMChatMessageListViewModel {
             .type(type)
             .build()
         let response = LMChatClient.shared.getConversations(withRequest: request)
-        guard var conversations = response?.data?.conversations, conversations.count > 0 else { return }
+        guard var conversations = response?.data?.conversations, conversations.count > 0 else {
+            if type == .below { trackLastConversationExist = true }
+            return
+        }
         if type == .above, conversations.count < conversationFetchLimit, let chatroom = self.chatroomViewData {
             conversations.insert(chatroomDataToConversation(chatroom), at: 0)
         }
-        chatMessages.append(contentsOf: conversations)
-        let dictionary = Dictionary(grouping: conversations, by: { $0.date })
-        for key in dictionary.keys {
-            if let index = messagesList.firstIndex(where: {$0.section == (key ?? "")}) {
-                guard let messages = dictionary[key]?.sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({ self.convertConversation($0)}) else { return}
-                var messageSectionData = messagesList[index]
-                if type == .below {
-                    messageSectionData.data.append(contentsOf: messages)
-                } else {
-                    messageSectionData.data.insert(contentsOf: messages, at: 0)
-                }
-                messagesList[index] = messageSectionData
-            } else {
-                if type == .below {
-                    messagesList.append((.init(data: (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)}), section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))))
-                } else {
-                    let data = (dictionary[key] ?? []).sorted(by: {($0.createdEpoch ?? 0) < ($1.createdEpoch ?? 0)}).compactMap({self.convertConversation($0)})
-                    messagesList.insert((.init(data: data, section: key ?? "", timestamp: convertDateStringToInterval(key ?? ""))), at: 0)
-                }
-            }
+        for item in conversations {
+            insertOrUpdateConversationIntoList(item)
         }
         messagesList.sort(by: {$0.timestamp < $1.timestamp})
-        
         let direction: ScrollDirection = type == .above ? .scroll_UP : .scroll_DOWN
         delegate?.reloadData(at: direction)
     }
@@ -278,7 +277,6 @@ public final class LMChatMessageListViewModel {
     }
     
     func fetchIntermediateConversations(chatroom: Chatroom, conversationId: String) {
-     
         let getConversationRequest = GetConversationRequest.builder()
             .conversationId(conversationId)
             .build()
@@ -307,7 +305,7 @@ public final class LMChatMessageListViewModel {
         var allConversations = aboveConversations + [mediumConversation] + belowConversations
         
         if aboveConversations.count < conversationFetchLimit {
-            allConversations.append(chatroomDataToConversation(chatroom))
+            allConversations.insert(chatroomDataToConversation(chatroom), at: 0)
         }
         
         chatMessages = allConversations
@@ -315,7 +313,16 @@ public final class LMChatMessageListViewModel {
         messagesList.sort(by: {$0.timestamp < $1.timestamp})
         guard let section = messagesList.firstIndex(where: {$0.section == mediumConversation.date}),
               let index = messagesList[section].data.firstIndex(where: {$0.messageId == mediumConversation.id}) else { return }
-        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section))
+        fetchingInitialBottomData = true
+        delegate?.scrollToSpecificConversation(indexPath: IndexPath(row: index, section: section), isExistingIndex: false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {[weak self] in
+            self?.fetchingInitialBottomData = false
+        }
+        if chatMessages.count < conversationFetchLimit {
+            trackLastConversationExist = true
+        } else {
+            trackLastConversationExist = false
+        }
     }
     
     func syncConversation() {
@@ -331,16 +338,21 @@ public final class LMChatMessageListViewModel {
     func convertConversation(_ conversation: Conversation) -> LMChatMessageListView.ContentModel.Message {
         var replies: [LMChatMessageListView.ContentModel.Message] = []
         var replyConversation: Conversation? = conversation.replyConversation
+        
+        if (conversation.replyConversation == nil), let replyConId = conversation.replyConversationId, let replyCon = LMChatClient.shared.getConversation(request: .builder().conversationId(replyConId).build())?.data?.conversation{
+            replyConversation = replyCon
+        }
         if let chatroomid = conversation.replyChatroomId, let chatroom = LMChatClient.shared.getChatroom(request: .Builder().chatroomId(chatroomid).build())?.data?.chatroom {
             replyConversation = chatroomDataToConversation(chatroom)
         }
+        
         if let replyConversation {
             replies =
             [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                    message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
-                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
+                   attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
                    isDeleted: replyConversation.deletedByMember != nil,
                    createdBy: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID() ? replyConversation.member?.name : "You",
                    createdByImageUrl: replyConversation.member?.imageUrl, createdById: replyConversation.member?.sdkClientInfo?.uuid,
@@ -349,24 +361,40 @@ public final class LMChatMessageListViewModel {
                    createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0),
                    ogTags: createOgTags(replyConversation.ogTags),
                    isEdited: replyConversation.isEdited,
-                   attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false)]
+                   attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(replyConversation.conversationStatus),
+                   tempId: replyConversation.temporaryId)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
                      message: ignoreGiphyUnsupportedMessage(conversation.answer),
                      timestamp: conversation.createdEpoch,
                      reactions: reactionGrouping(conversation.reactions?.reversed() ?? []),
-                     attachments: conversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).map({.init(fileUrl: $0.url, thumbnailUrl: $0.thumbnailUrl, fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
+                     attachments: conversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).map({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
                      replied: replies,
                      isDeleted: conversation.deletedByMember != nil,
                      createdBy: conversation.member?.name,
                      createdByImageUrl: conversation.member?.imageUrl,
                      createdById: conversation.member?.sdkClientInfo?.uuid,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false)
+                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus), tempId: conversation.temporaryId)
+    }
+    
+    func messageStatus(_ status: ConversationStatus?) -> LMMessageStatus {
+        guard let status else { return .sending }
+        switch status {
+        case .sent:
+            return .sent
+        case .sending:
+            return .sending
+        case .failed:
+            return .failed
+        default:
+            return .sending
+        }
     }
     
     func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-        return message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        let text = message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        return text //GetAttributedTextWithRoutes.getAttributedText(from: text).string
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMChatMessageListView.ContentModel.OgTags? {
@@ -403,7 +431,7 @@ public final class LMChatMessageListViewModel {
     }
     
     func insertOrUpdateConversationIntoList(_ conversation: Conversation) {
-        if let firstIndex = chatMessages.firstIndex(where: {($0.id == conversation.id) || ($0.temporaryId != nil && $0.temporaryId == conversation.temporaryId)}) {
+        if let firstIndex = chatMessages.firstIndex(where: {($0.id == conversation.id) || ($0.id == conversation.temporaryId) || ($0.temporaryId != nil && $0.temporaryId == conversation.temporaryId)}) {
             chatMessages[firstIndex] = conversation
             updateConversationIntoList(conversation)
         } else {
@@ -446,6 +474,7 @@ public final class LMChatMessageListViewModel {
             .id(chatroomId)
             .reactions(chatroom.reactions)
             .hasReactions(chatroom.hasReactions)
+            .conversationStatus(.sent)
             .build()
         return conversation
     }
@@ -575,14 +604,23 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         LMChatClient.shared.observeConversations(request: request)
     }
     
+    func removeObserveConversations() {
+        LMChatClient.shared.removeObserverConversation(self)
+    }
+    
+    func addObserveConversations() {
+        LMChatClient.shared.addObserverConversation(self)
+    }
+    
     public func getPostedConversations(conversations: [Conversation]?) {
         print("getPostedConversations -- \(conversations)")
         guard let conversations else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
-        self.markChatroomAsRead()
+        if !conversations.isEmpty {
+            delegate?.reloadChatMessageList()
+        }
     }
     
     public func getChangedConversations(conversations: [Conversation]?) {
@@ -591,8 +629,9 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
-        delegate?.reloadChatMessageList()
-        self.markChatroomAsRead()
+        if !conversations.isEmpty {
+            delegate?.reloadChatMessageList()
+        }
     }
     
     public func getNewConversations(conversations: [Conversation]?) {
@@ -608,9 +647,8 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
             }
         }
         if !conversations.isEmpty {
-            delegate?.scrollToBottom()
+            delegate?.scrollToBottom(forceToBottom: false)
         }
-        self.markChatroomAsRead()
     }
     
 }
@@ -621,10 +659,12 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                      filesUrls: [LMChatAttachmentMediaData]?,
                      shareLink: String?,
                      replyConversationId: String?,
-                     replyChatRoomId: String?) {
-        guard let communityId = chatroomViewData?.communityId,
-              let chatroomId = chatroomViewData?.id else { return }
-        let temporaryId = ValueUtils.getTemporaryId()
+                     replyChatRoomId: String?, temporaryId: String? = nil) {
+        guard let communityId = chatroomViewData?.communityId else { return }
+        if !trackLastConversationExist {
+            fetchBottomConversations()
+        }
+        let temporaryId = temporaryId ?? ValueUtils.getTemporaryId()
         var requestBuilder = PostConversationRequest.Builder()
             .chatroomId(self.chatroomId)
             .text(message ?? "")
@@ -637,24 +677,28 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         if let shareLink, !shareLink.isEmpty, self.currentDetectedOgTags?.url == shareLink {
             requestBuilder = requestBuilder.shareLink(shareLink)
                 .ogTags(currentDetectedOgTags)
+            currentDetectedOgTags = nil
         }
         let postConversationRequest = requestBuilder.build()
         
         let tempConversation = saveTemporaryConversation(uuid: UserPreferences.shared.getClientUUID() ?? "", communityId: communityId, request: postConversationRequest, fileUrls: filesUrls)
         insertOrUpdateConversationIntoList(tempConversation)
-        delegate?.scrollToBottom()
+        delegate?.scrollToBottom(forceToBottom: true)
         
         LMChatClient.shared.postConversation(request: postConversationRequest) {[weak self] response in
-            guard let self, let conversation = response.data else { return }
-            onConversationPosted(response: conversation, updatedFileUrls: filesUrls, tempConversation: tempConversation, replyConversationId: replyConversationId, replyChatRoomId: replyChatRoomId)
-            print(response)
+            guard let self, let conversation = response.data else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                self?.updateConversationUploadingStatus(messageId: temporaryId, withStatus: .failed)
+                return
+            }
+            onConversationPosted(response: conversation.conversation, updatedFileUrls: filesUrls)
         }
     }
     private func saveTemporaryConversation(uuid: String,
                                            communityId: String,
                                            request: PostConversationRequest,
                                            fileUrls: [LMChatAttachmentMediaData]?) -> Conversation {
-        var conversation = DataModelConverter.shared.convertConversation(uuid: uuid, communityId: communityId, request: request, fileUrls: fileUrls)
+        var conversation = DataModelConverter.shared.convertPostConversation(uuid: uuid, communityId: communityId, request: request, fileUrls: fileUrls)
         
         let saveConversationRequest = SaveConversationRequest.builder()
             .conversation(conversation)
@@ -668,22 +712,16 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                     .build()
             }
         }
-        let memberRequest = GetMemberRequest.builder()
-            .uuid(uuid)
-            .build()
-        let member = LMChatClient.shared.getMember(request: memberRequest)?.data?.member
+        let member = LMChatClient.shared.getCurrentMember()?.data?.member
         conversation = conversation.toBuilder()
             .member(member)
             .build()
         return conversation
     }
     
-    func onConversationPosted(response: PostConversationResponse?,
-                              updatedFileUrls: [LMChatAttachmentMediaData]?,
-                              tempConversation: Conversation?,
-                              replyConversationId: String?,
-                              replyChatRoomId: String?) {
-        guard let conversation = response?.conversation , let conversId = conversation.id else {
+    func onConversationPosted(response: Conversation?,
+                              updatedFileUrls: [LMChatAttachmentMediaData]?, isRetry: Bool = false) {
+        guard let conversation = response, let conversId = conversation.id else {
             return
         }
         var requestFiles:[LMChatAttachmentUploadRequest] = []
@@ -691,9 +729,10 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
             LMChatConversationAttachmentUpload.shared.uploadConversationAttchment(withAttachments: requestFiles, conversationId: conversId, convTempId: conversation.temporaryId ?? "")
         }
-        guard let response else { return }
-        savePostedConversation(requestList: requestFiles, response: response)
-        followUnfollow()
+        if !isRetry {
+            savePostedConversation(requestList: requestFiles, conversation: conversation)
+            followUnfollow()
+        }
     }
     
     func getUploadFileRequestList(fileUrls: [LMChatAttachmentMediaData], conversationId: String, chatroomId: String) -> [LMChatAttachmentUploadRequest] {
@@ -706,14 +745,14 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 .build()
             let attachmentDataRequest = LMChatAttachmentUploadRequest.builder()
                 .name(attachment.mediaName)
-                .fileUrl(attachment.url)
-                .localFilePath(attachment.url?.absoluteString)
+                .fileUrl(FileUtils.getFilePath(withFileName: attachment.url?.lastPathComponent))
+                .localFilePath(FileUtils.getFilePath(withFileName: attachment.url?.lastPathComponent)?.absoluteString)
                 .fileType(attachment.fileType.rawValue)
                 .width(attachment.width)
                 .height(attachment.height)
-                .awsFolderPath(LMChatAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? ""))
-                .thumbnailAWSFolderPath(LMChatAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? "", isThumbnail: true))
-                .thumbnailLocalFilePath(attachment.thumbnailurl?.absoluteString ?? "")
+                .awsFolderPath(LMChatAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? "", filename: attachment.mediaName ?? "no_name_\(Int.random(in: 1...100))"))
+                .thumbnailAWSFolderPath(LMChatAWSManager.awsFilePathForConversation(chatroomId: chatroomId, conversationId: conversationId, attachmentType: attachment.fileType.rawValue, fileExtension: attachment.url?.pathExtension ?? "", filename: attachment.mediaName ?? "no_name_\(Int.random(in: 1...100))", isThumbnail: true))
+                .thumbnailLocalFilePath(FileUtils.getFilePath(withFileName: attachment.thumbnailurl?.lastPathComponent)?.absoluteString ?? "")
                 .meta(attachmentMetaDataRequest)
                 .index(index + 1)
                 .build()
@@ -724,9 +763,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func savePostedConversation(requestList: [LMChatAttachmentUploadRequest],
-                                response: PostConversationResponse) {
+                                conversation: Conversation) {
         let attachments = requestList.map { request in
+            let tempId = "\(conversation.temporaryId ?? "")-\(request.index)"
             return Attachment.builder()
+                .id(tempId)
                 .name(request.name)
                 .url(request.fileUrl?.absoluteString ?? "")
                 .type(request.fileType)
@@ -745,11 +786,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 .build()
         }
         
-        guard let conversation = response.conversation,
-              let updatedConversation = response.conversation?.toBuilder()
-            .attachments(attachments)
-            .build()
-        else { return }
+        let updatedConversation = conversation.toBuilder()
+        .attachments(attachments)
+        .build()
         let request = SavePostedConversationRequest.builder()
             .conversation(updatedConversation)
             .build()
@@ -764,6 +803,41 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         }
     }
     
+    func retryUploadConversation(_ messageId: String) {
+        let request = GetConversationRequest.builder()
+            .conversationId(messageId)
+            .build()
+        guard let conversation = LMChatClient.shared.getConversation(request: request)?.data?.conversation,
+              let _ = chatroomViewData?.id else {
+            return
+        }
+        let fileUrls: [LMChatAttachmentMediaData] = (conversation.attachments ?? []).map { attachment in
+            return LMChatAttachmentMediaData(url: FileUtils.getFilePath(withFileName: URL(string: attachment.url ?? "")?.lastPathComponent),
+                                             fileType: MediaType(rawValue: attachment.type ?? "image") ?? .image,
+                                             width: attachment.width,
+                                             height: attachment.height,
+                                             thumbnailurl: FileUtils.getFilePath(withFileName: URL(string: attachment.thumbnailUrl ?? "")?.lastPathComponent),
+                                             size: attachment.meta?.size,
+                                             mediaName: attachment.name,
+                                             pdfPageCount: attachment.meta?.numberOfPage,
+                                             duration: attachment.meta?.duration,
+                                             awsFolderPath: attachment.awsFolderPath,
+                                             thumbnailAwsPath: attachment.thumbnailAWSFolderPath,
+                                             format: attachment.type,
+                                             image: nil,
+                                             livePhoto: nil)
+        }
+        if let conId = Int(conversation.id ?? "NA"), conId > 0, fileUrls.count > 0 {
+            updateConversationUploadingStatus(messageId: conversation.id ?? "", withStatus: .sending)
+            onConversationPosted(response: conversation, updatedFileUrls: fileUrls, isRetry: true)
+        } else {
+            if Int(conversation.id ?? "NA") == nil {
+                self.currentDetectedOgTags = conversation.ogTags
+                postMessage(message: conversation.answer, filesUrls: fileUrls, shareLink: conversation.ogTags?.url, replyConversationId: conversation.replyConversationId, replyChatRoomId: conversation.replyChatroomId, temporaryId: conversation.temporaryId)
+            }
+        }
+    }
+    
     func postEditedConversation(text: String, shareLink: String?, conversation: Conversation?) {
         guard !text.isEmpty, let conversationId = conversation?.id else { return }
         let request = EditConversationRequest.builder()
@@ -773,8 +847,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .build()
         LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
             guard resposne.success, let _ = resposne.data?.conversation else { return}
-//            self?.insertOrUpdateConversationIntoList(conversation)
-//            self?.delegate?.reloadChatMessageList()
         }
     }
     
@@ -789,7 +861,13 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard response.success else {
                 return
             }
+            if status {
+                self?.delegate?.showToastMessage(message: Constants.shared.strings.followedMessage)
+            } else {
+                self?.delegate?.showToastMessage(message: Constants.shared.strings.unfollowedMessage)
+            }
             self?.fetchChatroomActions()
+            self?.chatroomViewData = LMChatClient.shared.getChatroom(request: .Builder().chatroomId(self?.chatroomId ?? "").build())?.data?.chatroom
         }
     }
     
@@ -881,6 +959,15 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         }
     }
     
+    func deleteTempConversation(conversationId: String) {
+//        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
+//        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
+//            var section = messagesList[sectionIndex]
+//            section.data.removeAll(where: {$0.messageId == conversationId})
+//        }
+//        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
+    }
+    
     func fetchConversation(withId conversationId: String) {
         let request = GetConversationRequest.builder()
             .conversationId(conversationId)
@@ -920,6 +1007,10 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         delegate?.reloadChatMessageList()
     }
     
+    func updateConversationUploadingStatus(messageId: String, withStatus status: ConversationStatus) {
+        LMChatClient.shared.updateConversationUploadingStatus(withId: messageId, withStatus: status)
+    }
+    
     private func onDeleteConversation(ids: [String]) {
         for conId in ids {
             if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
@@ -951,6 +1042,8 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func setAsCurrentTopic(conversationId: String) {
+        chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
+        delegate?.updateTopicBar()
         let request = SetChatroomTopicRequest.builder()
             .chatroomId(chatroomId)
             .conversationId(conversationId)
@@ -959,8 +1052,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard let self, response.success else {
                 return
             }
-            chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
-            delegate?.updateTopicBar()
         }
     }
     

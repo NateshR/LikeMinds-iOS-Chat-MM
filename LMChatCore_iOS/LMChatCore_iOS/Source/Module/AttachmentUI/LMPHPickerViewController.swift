@@ -131,12 +131,14 @@ class MediaPickerManager: NSObject {
     
     func presentCamera(viewController: UIViewController, delegate: (UIImagePickerControllerDelegate & UINavigationControllerDelegate)?) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            let imagePicker = UIImagePickerController()
-            imagePicker.delegate = delegate
-            imagePicker.sourceType = .camera
-            imagePicker.mediaTypes = [kUTTypeImage as String] // Only Photos
-            imagePicker.allowsEditing = false
-            viewController.present(imagePicker, animated: true, completion: nil)
+            DispatchQueue.main.async {
+                let imagePicker = UIImagePickerController()
+                imagePicker.delegate = delegate
+                imagePicker.sourceType = .camera
+                imagePicker.mediaTypes = [kUTTypeImage as String, kUTTypeVideo as String] // Only Photos
+                imagePicker.allowsEditing = false
+                viewController.present(imagePicker, animated: true, completion: nil)
+            }
         }
     }
     

@@ -15,12 +15,18 @@ open class LMChatroomTopicView: LMView {
         public let createdBy: String
         public let chatroomImageUrl: String
         public let topicId: String
+        public let titleHeader: String
+        public let type: Int
+        public let attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?
         
-        public init(title: String, createdBy: String, chatroomImageUrl: String, topicId: String) {
+        public init(title: String, createdBy: String, chatroomImageUrl: String, topicId: String, titleHeader: String, type: Int, attachmentsUrls: [(thumbnailUrl: String?, fileUrl: String?, fileType: String?)]?) {
             self.title = title
             self.createdBy = createdBy
             self.chatroomImageUrl = chatroomImageUrl
             self.topicId = topicId
+            self.titleHeader = titleHeader
+            self.type = type
+            self.attachmentsUrls = attachmentsUrls
         }
     }
     
@@ -50,16 +56,16 @@ open class LMChatroomTopicView: LMView {
     
     open private(set) lazy var nameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Pushpendra Singh \(Constants.shared.strings.dot)"
+        label.text = ""
         label.numberOfLines = 1
-        label.font = Appearance.shared.fonts.textFont2
+        label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.black
         return label
     }()
     
     open private(set) lazy var topicLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatroom description Chatroom description Chatroom description Chatroom description Chatroom description Chatroom description"
+        label.text = ""
         label.numberOfLines = 2
         label.font = Appearance.shared.fonts.subHeadingFont1
         label.textColor = Appearance.shared.colors.previewSubtitleTextColor
@@ -128,8 +134,68 @@ open class LMChatroomTopicView: LMView {
     
     public func setData(_ data: ContentModel) {
         topicData = data
-        nameLabel.text = data.createdBy
-        topicLabel.text = data.title
-        chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy))
+        nameLabel.text = data.titleHeader
+        topicLabel.attributedText = createAttributedString(data)
+        chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy.components(separatedBy: " ").first ?? ""))
+    }
+    
+    func createAttributedString(_ data: ContentModel) -> NSAttributedString {
+        let message = GetAttributedTextWithRoutes.getAttributedText(from: data.title, font: Appearance.shared.fonts.subHeadingFont2)
+        let pointSize: CGFloat = Appearance.shared.fonts.subHeadingFont2.pointSize
+        guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
+            let attributedText = NSMutableAttributedString(string: "")
+            if data.type == 10 {
+                let image = Constants.shared.images.pollIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+            }
+            attributedText.append(message)
+            return attributedText
+        }
+        var image: UIImage = UIImage()
+        var initalType = ""
+        switch fileType.lowercased() {
+        case "image":
+            image = Constants.shared.images.galleryIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Photo"
+        case "video":
+            image = Constants.shared.images.videoSystemIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Video"
+        case "audio":
+            image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Audio"
+        case "voice_note":
+            image = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Voice note"
+        case "pdf", "doc":
+            image = Constants.shared.images.documentsIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+            initalType = "Document"
+        case "link":
+            image = Constants.shared.images.linkIcon.withSystemImageConfig(pointSize: pointSize)?.withTintColor(Appearance.shared.colors.textColor) ?? UIImage()
+        case "gif":
+            image = Constants.shared.images.gifBadgeIcon
+            initalType = "GIF"
+        default:
+            break
+        }
+        
+        let attributedText = NSMutableAttributedString(string: "")
+        
+        if fileType.lowercased() == "gif" {
+            let textAtt = NSTextAttachment(image: image)
+            textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
+            attributedText.append(NSAttributedString(attachment: textAtt))
+            attributedText.append(NSAttributedString(string: " \(initalType) "))
+        } else {
+            if count > 1 {
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                attributedText.append(NSAttributedString(string: " (+\(count - 1) more) "))
+            } else {
+                attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+                initalType = !initalType.isEmpty ? " \(initalType) " : " "
+                attributedText.append(NSAttributedString(string: "\(initalType)"))
+            }
+        }
+        attributedText.append(message)
+        return attributedText
     }
 }

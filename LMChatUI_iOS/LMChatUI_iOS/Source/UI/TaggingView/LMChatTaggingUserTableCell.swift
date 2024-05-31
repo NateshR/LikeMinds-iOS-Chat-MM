@@ -97,6 +97,6 @@ open class LMChatTaggingUserTableCell: LMTableViewCell {
     // MARK: configure
     open func configure(with data: ViewModel) {
         userNameLabel.text = data.userName
-        userImage.kf.setImage(with: URL(string: data.userImage ?? ""), placeholder: LMImageView.generateLetterImage(name: data.userName))
+        userImage.kf.setImage(with: URL(string: data.userImage ?? ""), placeholder: UIImage.generateLetterImage(name: data.userName.components(separatedBy: " ").first ?? ""))
     }
 }

@@ -30,14 +30,12 @@ public struct LMChatAudioContentModel {
 open class LMChatVoiceNotePreview: LMView {
     // MARK: UI Elements
     var containerView: LMView = {
-        let view = LMView()
-        view.translatesAutoresizingMaskIntoConstraints = false
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
     var playPauseButton: LMImageView = {
-        let button = LMImageView()
-        button.translatesAutoresizingMaskIntoConstraints = false
+        let button = LMImageView().translatesAutoresizingMaskIntoConstraints()
         button.image = Constants.shared.images.playCircleFilled
         button.contentMode = .scaleAspectFill
         button.isUserInteractionEnabled = true
@@ -53,16 +51,15 @@ open class LMChatVoiceNotePreview: LMView {
     
     
     var img: LMImageView = {
-        let image = LMImageView()
-        image.image = UIImage(systemName: "mic.fill")
-        image.translatesAutoresizingMaskIntoConstraints = false
+        let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
+        image.image = Constants.shared.images.micFillIcon
         return image
     }()
     
     var durationLbl: LMLabel = {
-        let label = LMLabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "00:00"
+        label.textColor = Appearance.shared.colors.black
         label.font = .systemFont(ofSize: 10)
         return label
     }()
@@ -92,12 +89,12 @@ open class LMChatVoiceNotePreview: LMView {
         pinSubView(subView: containerView)
         
         playPauseButton.addConstraint(top: (containerView.topAnchor, 16),
-                                      leading: (containerView.leadingAnchor, 16))
+                                      leading: (containerView.leadingAnchor, 12))
         playPauseButton.setHeightConstraint(with: 36)
         playPauseButton.setWidthConstraint(with: playPauseButton.heightAnchor)
         
-        slider.addConstraint(leading: (playPauseButton.trailingAnchor, 4),
-                             trailing: (containerView.trailingAnchor, -4),
+        slider.addConstraint(leading: (playPauseButton.trailingAnchor, 6),
+                             trailing: (containerView.trailingAnchor, -8),
                              centerY: (playPauseButton.centerYAnchor, 0))
         slider.setHeightConstraint(with: 10)
         
@@ -173,7 +170,7 @@ open class LMChatVoiceNotePreview: LMView {
         isPlaying = true
         let percentage = (time / Float(duration)) * 100
         slider.value = self.url == url ? percentage : .zero
-        playPauseButton.image = self.url == url ? UIImage(systemName: "pause.circle.fill") : Constants.shared.images.playCircleFilled
+        playPauseButton.image = self.url == url ? Constants.shared.images.pauseCircleFilled : Constants.shared.images.playCircleFilled
         durationLbl.text = convertSecondsToFormattedTime(seconds: Int(time))
     }
     

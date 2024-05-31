@@ -112,6 +112,7 @@ public class LMChatHomeFeedViewModel {
         for atType in attachmentTypes {
             typeArray.append((atType, groupedBy[atType]?.count ?? 0))
         }
+        typeArray = ((typeArray.count) > 0) ? typeArray : ((chatroom?.lastConversation?.ogTags != nil) ? [("link", 0)] : [] )
         return typeArray
     }
     

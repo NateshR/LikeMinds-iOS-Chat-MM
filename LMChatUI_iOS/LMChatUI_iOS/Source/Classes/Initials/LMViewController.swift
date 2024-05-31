@@ -277,6 +277,51 @@ open class LMViewController: UIViewController {
             loaderScreen.removeFromSuperview()
         }
     }
+    
+    public func displayToast(_ message : String, font: UIFont = UIFont.systemFont(ofSize: 16)) {
+        
+        guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow })else {
+            return
+        }
+        if let toast = window.subviews.first(where: { $0 is UILabel && $0.tag == -1001 }) {
+            toast.removeFromSuperview()
+        }
+        
+        let toastView = LMLabel()
+        toastView.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
+        toastView.textColor = Appearance.shared.colors.white
+        toastView.textAlignment = .center
+        toastView.font = font
+        toastView.cornerRadius(with: 8)
+        toastView.text = message
+        toastView.numberOfLines = 0
+        toastView.alpha = 0
+        toastView.translatesAutoresizingMaskIntoConstraints = false
+        toastView.tag = -1001
+        
+        window.addSubview(toastView)
+        
+        let horizontalCenterContraint: NSLayoutConstraint = NSLayoutConstraint(item: toastView, attribute: .centerX, relatedBy: .equal, toItem: window, attribute: .centerX, multiplier: 1, constant: 0)
+        
+        let widthContraint: NSLayoutConstraint = NSLayoutConstraint(item: toastView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1, constant: (self.view.frame.size.width-25) )
+        
+        let verticalContraint: [NSLayoutConstraint] = NSLayoutConstraint.constraints(withVisualFormat: "V:|-(>=200)-[toastView(==50)]-68-|", options: [.alignAllCenterX, .alignAllCenterY], metrics: nil, views: ["toastView": toastView])
+        
+        NSLayoutConstraint.activate([horizontalCenterContraint, widthContraint])
+        NSLayoutConstraint.activate(verticalContraint)
+        
+        UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseIn, animations: {
+            toastView.alpha = 1
+        }, completion: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+            UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseIn, animations: {
+                toastView.alpha = 0
+            }, completion: { finished in
+                toastView.removeFromSuperview()
+            })
+        })
+    }
 }
 
 

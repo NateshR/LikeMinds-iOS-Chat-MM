@@ -26,9 +26,6 @@ open class LMChatMessageGallaryView: LMView {
     /// Content the gallery should display.
     public var content: [UIView] = []
     
-    let heightViewSize = UIScreen.main.bounds.width * 0.6
-    let widthViewSize = UIScreen.main.bounds.width * 0.7
-    
     // Previews indices locations:
     // When one item available:
     // -------
@@ -36,20 +33,10 @@ open class LMChatMessageGallaryView: LMView {
     // |  0  |
     // |     |
     // -------
-    // When two items available:
+    // When two items available or When three items available:
     // -------------
     // |     |     |
     // |  0  |  1  |
-    // |     |     |
-    // -------------
-    // When three items available:
-    // -------------
-    // |     |     |
-    // |  0  |     |
-    // |     |     |
-    // ------|  1  |
-    // |     |     |
-    // |  2  |     |
     // |     |     |
     // -------------
     // When four and more items available:
@@ -70,7 +57,7 @@ open class LMChatMessageGallaryView: LMView {
         itemSpot3
     ]
     
-    open private(set) lazy var singleImage: ImagePreview = {
+    open private(set) lazy var singleImage: ImagePreview = {[unowned self] in
         let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
@@ -87,7 +74,7 @@ open class LMChatMessageGallaryView: LMView {
         return imagePreview
     }()
     
-    open private(set) lazy var itemSpot0: ImagePreview = {
+    open private(set) lazy var itemSpot0: ImagePreview = {[unowned self] in
         let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
@@ -104,7 +91,7 @@ open class LMChatMessageGallaryView: LMView {
         return imagePreview
     }()
     
-    open private(set) lazy var itemSpot1: ImagePreview = {
+    open private(set) lazy var itemSpot1: ImagePreview = {[unowned self] in
         let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
@@ -121,7 +108,7 @@ open class LMChatMessageGallaryView: LMView {
         return imagePreview
     }()
     
-    open private(set) lazy var itemSpot2: ImagePreview = {
+    open private(set) lazy var itemSpot2: ImagePreview = {[unowned self] in
         let imagePreview =  ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
@@ -138,11 +125,10 @@ open class LMChatMessageGallaryView: LMView {
         return imagePreview
     }()
     
-    open private(set) lazy var itemSpot3: ImagePreview = {
+    open private(set) lazy var itemSpot3: ImagePreview = {[unowned self] in
         let imagePreview = ImagePreview()
             .translatesAutoresizingMaskIntoConstraints()
         imagePreview.backgroundColor = .black
-        imagePreview.addSubviewWithDefaultConstraints(moreItemsOverlay)
         imagePreview.cornerRadius(with: 12)
         imagePreview.tag = 3
         imagePreview.isUserInteractionEnabled = true
@@ -163,7 +149,7 @@ open class LMChatMessageGallaryView: LMView {
         label.textColor = Appearance.shared.colors.white
         label.textAlignment = .center
         label.font = Appearance.shared.fonts.headingFont
-        label.backgroundColor = .gray.withAlphaComponent(0.8)
+        label.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         label.text = "+2"
         return label
     }()
@@ -176,7 +162,6 @@ open class LMChatMessageGallaryView: LMView {
         view.alignment = .fill
         view.spacing = 4
         view.isLayoutMarginsRelativeArrangement = true
-//        view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
         return view
     }()
     
@@ -245,12 +230,22 @@ open class LMChatMessageGallaryView: LMView {
         } else {
             topPreviewsContainerView.isHidden = false
         }
-        bottomPreviewsContainerView.isHidden = data.count < 3
+        bottomPreviewsContainerView.isHidden = data.count <= 3
         for (index, item) in data.enumerated() {
-            if index > 3 {
-                moreItemsOverlay.isHidden = false
-                moreItemsOverlay.text =  "+\(data.count - 3)"
-                break
+            if data.count > 4 {
+                if index > 3 {
+                    itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
+                    moreItemsOverlay.isHidden = false
+                    moreItemsOverlay.text =  "+\(data.count - 3)"
+                    break
+                }
+            } else if data.count > 2 && data.count < 4 {
+                if index > 1 {
+                    itemSpots[index - 1].addSubviewWithDefaultConstraints(moreItemsOverlay)
+                    moreItemsOverlay.isHidden = false
+                    moreItemsOverlay.text =  "+\(data.count - 1)"
+                    break
+                }
             }
             moreItemsOverlay.isHidden = true
            loadImageData(item: item, imagePreview: itemSpots[index])

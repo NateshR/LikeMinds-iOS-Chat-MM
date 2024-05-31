@@ -38,7 +38,7 @@ open class LMChatHomeFeedExploreTabView: LMView {
         return view
     }()
     
-    open private(set) lazy var exploreContainerStackView: LMStackView = {
+    open private(set) lazy var exploreContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillProportionally
@@ -49,7 +49,7 @@ open class LMChatHomeFeedExploreTabView: LMView {
         return view
     }()
 
-    open private(set) lazy var exploreNameContainerStackView: LMStackView = {
+    open private(set) lazy var exploreNameContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillProportionally

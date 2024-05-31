@@ -22,11 +22,12 @@ public protocol LMChatMessageListViewDelegate: AnyObject {
     func didTappedOnReplyPreviewOfMessage(indexPath: IndexPath)
     func contextMenuItemClicked(withType type: LMMessageActionType, atIndex indexPath: IndexPath, message: LMChatMessageListView.ContentModel.Message)
     func didReactOnMessage(reaction: String, indexPath: IndexPath)
-    func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu
+    func getMessageContextMenu(_ indexPath: IndexPath, item: LMChatMessageListView.ContentModel.Message) -> UIMenu?
     func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction?
     func didScrollTableView(_ scrollView: UIScrollView)
-    func didCancelUploading(messageId: String)
+    func didCancelUploading(tempId: String, messageId: String)
     func didRetryUploading(messageId: String)
+    func stopPlayingAudio()
 }
 
 public enum LMMessageActionType: String {
@@ -38,6 +39,12 @@ public enum LMMessageActionType: String {
     case invite
     case report
     case setTopic
+}
+
+public enum LMMessageStatus: String {
+    case sending
+    case sent
+    case failed
 }
 
 
@@ -76,8 +83,10 @@ open class LMChatMessageListView: LMView {
             public let isEdited: Bool?
             public let attachmentUploaded: Bool?
             public var isShowMore: Bool = false
+            public var messageStatus: LMMessageStatus?
+            public var tempId: String?
             
-            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool) {
+            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -96,6 +105,8 @@ open class LMChatMessageListView: LMView {
                 self.isEdited = isEdited
                 self.attachmentUploaded = attachmentUploaded
                 self.isShowMore = isShowMore
+                self.messageStatus = messageStatus
+                self.tempId = tempId
             }
         }
         
@@ -152,7 +163,7 @@ open class LMChatMessageListView: LMView {
         return view
     }()
     
-    open private(set) lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.register(LMUIComponents.shared.chatMessageCell)
         table.register(LMUIComponents.shared.chatNotificationCell)
@@ -167,7 +178,7 @@ open class LMChatMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-        table.contentInset = .init(top: 0, left: 0, bottom: 14, right: 0)
+        table.contentInset = .init(top: 0, left: 0, bottom: 12, right: 0)
         return table
     }()
     
@@ -229,17 +240,6 @@ open class LMChatMessageListView: LMView {
         tableView.backgroundColor = Appearance.shared.colors.backgroundColor
     }
     
-    
-    // MARK: setupObservers
-//    open override func setupObservers() {
-//        NotificationCenter.default.addObserver(self, selector: #selector(audioEnded), name: .LMChatAudioEnded, object: nil)
-//    }
-//    
-//    @objc 
-//    open func audioEnded(notification: Notification) {
-//        resetAudio()
-//    }
-    
     public func reloadData() {
         tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
@@ -257,7 +257,8 @@ open class LMChatMessageListView: LMView {
     }
     
     public func scrollToBottom() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
+            guard let self else { return }
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
@@ -272,9 +273,13 @@ open class LMChatMessageListView: LMView {
     }
     
     public func scrollAtIndexPath(indexPath: IndexPath) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
             self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
-            guard let cell = self.tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return }
+            let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
+            let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
+            let cell = messageCell ?? chatroomCell
+            guard let cell else { return }
             cell.containerView.backgroundColor = Appearance.shared.colors.linkColor.withAlphaComponent(0.4)
             UIView.animate(withDuration: 2, delay: 1, usingSpringWithDamping: 1,
                            initialSpringVelocity: 1, options: .allowUserInteraction,
@@ -284,6 +289,14 @@ open class LMChatMessageListView: LMView {
 
     // we set a variable to hold the contentOffSet before scroll view scrolls
     open var lastContentOffset: CGFloat = 0
+    
+    public func resetAudio() {
+        if let audioIndex,
+           tableSections.indices.contains(audioIndex.section),
+           let index = tableSections[audioIndex.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }) {
+            (tableView.cellForRow(at: .init(row: index, section: audioIndex.section)) as? LMChatAudioViewCell)?.resetAudio()
+        }
+    }
 }
 
 
@@ -316,6 +329,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
                 tableViewCell =  cell
             }
         }
+        tableViewCell.setNeedsDisplay()
         return tableViewCell
     }
     
@@ -345,15 +359,13 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         cell.setData(with: .init(message: item, isSelected: isSelected != nil), delegate: audioDelegate, index: indexPath)
         cell.currentIndexPath = indexPath
         cell.delegate = cellDelegate
-        if self.isMultipleSelectionEnable, !(item.isIncoming ?? false), item.isDeleted == false {
+        if self.isMultipleSelectionEnable, item.isDeleted == false {
             cell.selectedButton.isHidden = false
         } else {
             cell.selectedButton.isHidden = true
         }
         return cell
     }
-    
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) { }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if !self.isMultipleSelectionEnable {
@@ -373,7 +385,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     //Swipe to reply
     public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard (item.messageType == 0 || item.messageType == 10) && item.isDeleted == false && !isMultipleSelectionEnable else { return nil }
+        guard (item.messageType == 0 || item.messageType == 10) &&
+                item.isDeleted == false &&
+                item.messageStatus == .sent &&
+                !isMultipleSelectionEnable else { return nil }
         guard let replyAction = delegate?.trailingSwipeAction(forRowAtIndexPath: indexPath) else { return nil }
         let swipeConfig = UISwipeActionsConfiguration(actions: [replyAction])
         swipeConfig.performsFirstActionWithFullSwipe = true
@@ -419,19 +434,25 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
     @available(iOS 13.0, *)
     public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         let item = tableSections[indexPath.section].data[indexPath.row]
-        guard !self.isMultipleSelectionEnable, (item.messageType == 0 || item.messageType == 10 || item.messageType == Self.chatroomHeader) && (item.isDeleted != true) else { return nil }
+        guard !self.isMultipleSelectionEnable,
+              (item.messageType == 0 || item.messageType == 10 || item.messageType == Self.chatroomHeader) &&
+                item.messageStatus == .sent &&
+                (item.isDeleted != true) else { return nil }
         let identifier = NSString(string: "\(indexPath.row),\(indexPath.section)")
         return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
-            guard let self = self else { return UIMenu() }
+            guard let self = self else { return nil }
             return delegate?.getMessageContextMenu(indexPath, item: item)
         }
     }
 
     open func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         (cell as? LMChatAudioViewCell)?.resetAudio()
-        if indexPath.section == audioIndex?.section,
-           tableSections[indexPath.section].data[indexPath.row].messageId == audioIndex?.messageID {
-//            LMChatAudioPlayManager.shared.resetAudioPlayer()
+        if let audioIndex,
+           tableSections.indices.contains(audioIndex.section),
+           indexPath.section == audioIndex.section,
+           let row = tableSections[indexPath.section].data.firstIndex(where: { $0.messageId == audioIndex.messageID }),
+           row == indexPath.row {
+            delegate?.stopPlayingAudio()
         }
     }
 
@@ -513,7 +534,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         guard let row = Int(values.first ?? "0") else { return nil }
         guard let section = Int(values.last ?? "0") else { return nil }
         let indexPath = IndexPath(row: row, section: section)
-        guard let cell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell else { return nil }
+        let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
+        let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
+        let cell = messageCell ?? chatroomCell
+        guard let cell else { return nil }
         guard let snapshot = cell.resizableSnapshotView(from: CGRect(origin: .zero,
                                                                      size: CGSize(width: cell.bounds.width, height: min(cell.bounds.height, UIScreen.main.bounds.height - reactionHeight - spaceReactionHeight - menuHeight))),
                                                         afterScreenUpdates: false,

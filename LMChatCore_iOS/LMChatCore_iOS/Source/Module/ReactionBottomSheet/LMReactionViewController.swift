@@ -37,7 +37,7 @@ open class LMReactionViewController: LMViewController {
         view.frame.height * 0.3
     }()
     
-    lazy var tableView: LMTableView = {
+    lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
@@ -47,7 +47,7 @@ open class LMReactionViewController: LMViewController {
         return table
     }()
     
-    lazy var collectionView: LMCollectionView = {
+    lazy var collectionView: LMCollectionView = {[unowned self] in
         let collection = LMCollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         collection.dataSource = self
         collection.delegate = self

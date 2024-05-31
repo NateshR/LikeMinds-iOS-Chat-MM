@@ -13,10 +13,6 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
 
     open private(set) lazy var galleryView: LMChatMessageGallaryView = {
         let image = LMUIComponents.shared.galleryView.init().translatesAutoresizingMaskIntoConstraints()
-        //        image.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
-        //        let aspectRatioConstraints = NSLayoutConstraint(item: image, attribute: .width, relatedBy: .lessThanOrEqual, toItem: image, attribute: .height, multiplier: 1.4, constant: 0)
-        //        image.addConstraint(aspectRatioConstraints)
-        //        image.heightAnchor.constraint(equalToConstant:  UIScreen.main.bounds.width * 0.6).isActive = true
         image.backgroundColor = .clear
         image.cornerRadius(with: 12)
         return image
@@ -28,7 +24,6 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
         super.setupViews()
         bubbleView.addArrangeSubview(galleryView, atIndex: 2)
         galleryView.addSubview(cancelRetryContainerStackView)
-        galleryView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
@@ -40,13 +35,14 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        updateRetryButton(data)
         if data.message?.isDeleted == true {
             galleryView.isHidden = true
         } else {
             attachmentView(data, index: index)
         }
-        
+        galleryView.bringSubviewToFront(cancelRetryContainerStackView)
+        bubbleView.layoutIfNeeded()
     }
     
     func attachmentView(_ data: LMChatMessageCell.ContentModel, index: IndexPath) {
@@ -72,6 +68,11 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
         } else {
             galleryView.isHidden = true
         }
+    }
+    
+    func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
+        loaderView.isHidden = !(data.message?.messageStatus == .sending)
+        retryView.isHidden = !(data.message?.messageStatus == .failed)
     }
     
     override func prepareToResuse() {

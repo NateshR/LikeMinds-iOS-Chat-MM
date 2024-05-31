@@ -34,6 +34,29 @@ open class LMChatMessageCell: LMTableViewCell {
         view.clipsToBounds = true
         return view
     }()
+    
+    open private(set) lazy var retryContainerStackView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .horizontal
+        view.alignment = .center
+        view.distribution = .fill
+        view.spacing = 0
+        view.addArrangedSubview(retryButton)
+        return view
+    }()
+    
+    open private(set) lazy var retryButton: LMButton = {
+        let button =  LMButton()
+            .translatesAutoresizingMaskIntoConstraints()
+        button.addTarget(self, action: #selector(retrySendMessage), for: .touchUpInside)
+        button.setImage(Constants.shared.images.retryIcon.withSystemImageConfig(pointSize: 25), for: .normal)
+        button.backgroundColor = Appearance.shared.colors.clear
+        button.tintColor = Appearance.shared.colors.red
+        button.setWidthConstraint(with: 30)
+        button.setHeightConstraint(with: 30)
+        button.isHidden = true
+        return button
+    }()
 
     open private(set) lazy var selectedButton: LMButton = {
         let button =  LMButton()
@@ -52,6 +75,7 @@ open class LMChatMessageCell: LMTableViewCell {
     
     open override func prepareForReuse() {
         super.prepareForReuse()
+        retryButton.isHidden = true
         chatMessageView.prepareToResuse()
     }
     
@@ -67,6 +91,7 @@ open class LMChatMessageCell: LMTableViewCell {
         super.setupViews()
         contentView.addSubview(containerView)
         containerView.addSubview(chatMessageView)
+        containerView.addSubview(retryContainerStackView)
         contentView.addSubview(selectedButton)
     }
     
@@ -80,9 +105,12 @@ open class LMChatMessageCell: LMTableViewCell {
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
+            retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            retryContainerStackView.centerYAnchor.constraint(equalTo: chatMessageView.centerYAnchor),
+            
             chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
             chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            chatMessageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            chatMessageView.trailingAnchor.constraint(equalTo: retryContainerStackView.leadingAnchor, constant: -8),
             chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
         contentView.pinSubView(subView: selectedButton)
@@ -106,15 +134,22 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.retryView.delegate = self
         updateSelection(data: data)
         chatMessageView.delegate = self
-        chatMessageView.loaderView.delegate = self
-        chatMessageView.retryView.delegate = self
-        chatMessageView.layoutIfNeeded()
+        if data.message?.isIncoming == false {
+            retryButton.isHidden = data.message?.messageStatus != .failed
+        }
     }
     
     func updateSelection(data: ContentModel) {
         let isSelected = data.isSelected
         selectedButton.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
         selectedButton.isSelected = isSelected
+    }
+    
+    @objc func retrySendMessage(_ sender: UIButton) {
+        guard let currentIndexPath else { return }
+        retryButton.isHidden = true
+        layoutIfNeeded()
+        delegate?.didRetryAttachmentUploading(indexPath: currentIndexPath )
     }
 }
 

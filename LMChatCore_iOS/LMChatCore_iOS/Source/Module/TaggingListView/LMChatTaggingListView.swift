@@ -25,7 +25,7 @@ open class LMChatTaggingListView: LMView {
         return view
     }()
     
-    open private(set) lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
@@ -181,7 +181,7 @@ extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
         let newSize = bottomMessageBoxView.inputTextView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
         
         bottomMessageBoxView.inputTextView.isScrollEnabled = newSize.height > bottomMessageBoxView.maxHeightOfTextView
-        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(newSize.height, bottomMessageBoxView.maxHeightOfTextView)
+        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(max(newSize.height, 36), bottomMessageBoxView.maxHeightOfTextView)
     }
     
     public func textViewDidChange(_ textView: UITextView) {

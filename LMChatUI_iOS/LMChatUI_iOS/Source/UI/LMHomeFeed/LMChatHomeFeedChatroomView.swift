@@ -55,7 +55,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var chatroomContainerStackView: LMStackView = {
+    open private(set) lazy var chatroomContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillProportionally
@@ -66,7 +66,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var chatroomNameAndMessageContainerStackView: LMStackView = {
+    open private(set) lazy var chatroomNameAndMessageContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fillProportionally
@@ -76,7 +76,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var chatroomNameContainerStackView: LMStackView = {
+    open private(set) lazy var chatroomNameContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillProportionally
@@ -88,7 +88,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var chatroomMessageContainerStackView: LMStackView = {
+    open private(set) lazy var chatroomMessageContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillProportionally
@@ -139,7 +139,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return image
     }()
     
-    open private(set) lazy var lockAndAnnouncementIconContainerStackView: LMStackView = {
+    open private(set) lazy var lockAndAnnouncementIconContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fill
@@ -149,7 +149,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var lockIconImageView: LMImageView = {
+    open private(set) lazy var lockIconImageView: LMImageView = { [unowned self] in
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.clipsToBounds = true
         image.setWidthConstraint(with: 18)
@@ -175,7 +175,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         return view
     }()
     
-    open private(set) lazy var muteAndBadgeIconContainerStackView: LMStackView = {
+    open private(set) lazy var muteAndBadgeIconContainerStackView: LMStackView = { [unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fill
@@ -305,7 +305,7 @@ open class LMChatHomeFeedChatroomView: LMView {
                 textAtt.bounds = CGRect(x: 0, y: -4, width: 24, height: 16)
                 attributedText.append(NSAttributedString(string: " "))
                 attributedText.append(NSAttributedString(attachment: textAtt))
-                attributedText.append(NSAttributedString(string: " \(initalType) "))
+                attributedText.append(NSAttributedString(string: " \(initalType)"))
             } else {
                 if fileAttachmentType.count > 1 {
                     attributedText.append(NSAttributedString(string: " \(fileAttachmentType.count) "))
@@ -313,7 +313,8 @@ open class LMChatHomeFeedChatroomView: LMView {
                 } else {
                     attributedText.append(NSAttributedString(string: " "))
                     attributedText.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
-                    attributedText.append(NSAttributedString(string: " \(initalType) "))
+                    initalType = !initalType.isEmpty ? " \(initalType)" : ""
+                    attributedText.append(NSAttributedString(string: "\(initalType)"))
                 }
             }
         }

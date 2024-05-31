@@ -141,6 +141,8 @@ open class LMChatAudioPlayerView: LMView {
         return view
     }()
     
+    var periodicTypeObserver: Any?
+    
     var url: String = "" {
         didSet {
             setupPlayer(url)
@@ -164,7 +166,6 @@ open class LMChatAudioPlayerView: LMView {
     }
     
     func setupPlayer(_ urlString: String) {
-//        "https://s3.amazonaws.com/kargopolov/kukushka.mp3"
         ButtonPlay.setImage(playIcon, for: .normal)
         guard let url = URL(string: urlString) else { return }
         fileNameLable.text = url.lastPathComponent
@@ -186,7 +187,8 @@ open class LMChatAudioPlayerView: LMView {
         playbackSlider.isContinuous = true
         playbackSlider.tintColor = viewTintColor
         
-        player!.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main) { (CMTime) -> Void in
+        self.periodicTypeObserver = player!.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main) {[weak self] (CMTime) -> Void in
+            guard let self else { return }
             if self.player!.currentItem?.status == .readyToPlay {
                 let time : Float64 = CMTimeGetSeconds(self.player!.currentTime());
                 self.playbackSlider.value = Float ( time );
@@ -197,13 +199,10 @@ open class LMChatAudioPlayerView: LMView {
             let playbackLikelyToKeepUp = self.player?.currentItem?.isPlaybackLikelyToKeepUp
             if playbackLikelyToKeepUp == false{
                 print("IsBuffering")
-//                self.ButtonPlay.isHidden = true
-                //                self.loadingView.isHidden = false
             } else {
                 //stop the activity indicator
                 print("Buffering completed")
                 self.ButtonPlay.isHidden = false
-                //                self.loadingView.isHidden = true
             }
             
         }
@@ -212,6 +211,14 @@ open class LMChatAudioPlayerView: LMView {
     @objc
     func ButtonGoToBack(_ sender: UIButton) {
         
+    }
+    
+    public func stopPlaying() {
+        player?.pause()
+        player?.replaceCurrentItem(with: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
+        guard let periodicTypeObserver else { return }
+        player?.removeTimeObserver(periodicTypeObserver)
     }
     
     @objc
@@ -228,15 +235,12 @@ open class LMChatAudioPlayerView: LMView {
     
     @objc
     func buttonPlay(_ sender: UIButton) {
-        print("play Button")
         if player?.rate == 0
         {
-            player!.play()
-//            self.ButtonPlay.isHidden = true
-//            self.loadingView.isHidden = false
+            player?.play()
             ButtonPlay.setImage(pauseIcon, for: .normal)
         } else {
-            player!.pause()
+            player?.pause()
             ButtonPlay.setImage(playIcon, for: .normal)
         }
     }
@@ -244,7 +248,7 @@ open class LMChatAudioPlayerView: LMView {
     @objc
     func buttonForwardSec(_ sender: UIButton) {
         if player == nil { return }
-        if let duration  = player!.currentItem?.duration {
+        if let duration  = player?.currentItem?.duration {
             let playerCurrentTime = CMTimeGetSeconds(player!.currentTime())
             let newTime = playerCurrentTime + seekDuration
             if newTime < CMTimeGetSeconds(duration)

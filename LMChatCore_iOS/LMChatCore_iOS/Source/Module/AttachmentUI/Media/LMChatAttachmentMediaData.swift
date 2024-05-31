@@ -14,11 +14,12 @@ public struct LMChatAttachmentMediaData {
     let width: Int?
     let height: Int?
     let thumbnailurl: URL?
-    let size: Int64?
+    let size: Int?
     let mediaName: String?
     let pdfPageCount: Int?
     let duration: Int?
     let awsFolderPath: String?
+    let thumbnailAwsPath: String?
     let format: String?
     let image: UIImage?
     let livePhoto: PHLivePhoto?
@@ -28,11 +29,12 @@ public struct LMChatAttachmentMediaData {
          width: Int?,
          height: Int?,
          thumbnailurl: URL?,
-         size: Int64?,
+         size: Int?,
          mediaName: String?,
          pdfPageCount: Int?,
          duration: Int?,
          awsFolderPath: String?,
+         thumbnailAwsPath: String?,
          format: String?,
          image: UIImage?,
          livePhoto: PHLivePhoto?) {
@@ -49,6 +51,7 @@ public struct LMChatAttachmentMediaData {
         self.format = format
         self.image = image
         self.livePhoto = livePhoto
+        self.thumbnailAwsPath = thumbnailAwsPath
     }
     
     static func builder() -> Builder {
@@ -61,11 +64,12 @@ public struct LMChatAttachmentMediaData {
         private var width: Int?
         private var height: Int?
         private var thumbnailurl: URL?
-        private var size: Int64?
+        private var size: Int?
         private var mediaName: String?
         private var pdfPageCount: Int?
         private var duration: Int?
         private var awsFolderPath: String?
+        private var thumbnailAwsPath: String?
         private var format: String?
         private var image: UIImage?
         private var livePhoto: PHLivePhoto?
@@ -95,7 +99,7 @@ public struct LMChatAttachmentMediaData {
             return self
         }
         
-        func size(_ size: Int64?) -> Builder {
+        func size(_ size: Int?) -> Builder {
             self.size = size
             return self
         }
@@ -120,6 +124,11 @@ public struct LMChatAttachmentMediaData {
             return self
         }
         
+        func thumbnailAwsPath(_ thumbnailAwsPath: String?) -> Builder {
+            self.thumbnailAwsPath = thumbnailAwsPath
+            return self
+        }
+        
         func format(_ format: String?) -> Builder {
             self.format = format
             return self
@@ -137,18 +146,19 @@ public struct LMChatAttachmentMediaData {
         
         func build() -> LMChatAttachmentMediaData {
             return LMChatAttachmentMediaData(url: url!,
-                                       fileType: fileType,
-                                       width: width,
-                                       height: height,
-                                       thumbnailurl: thumbnailurl,
-                                       size: size,
-                                       mediaName: mediaName,
-                                       pdfPageCount: pdfPageCount,
-                                       duration: duration,
-                                       awsFolderPath: awsFolderPath,
-                                       format: format,
-                                       image: image,
-                                       livePhoto: livePhoto)
+                                             fileType: fileType,
+                                             width: width,
+                                             height: height,
+                                             thumbnailurl: thumbnailurl,
+                                             size: size,
+                                             mediaName: mediaName,
+                                             pdfPageCount: pdfPageCount,
+                                             duration: duration,
+                                             awsFolderPath: awsFolderPath,
+                                             thumbnailAwsPath: thumbnailAwsPath,
+                                             format: format,
+                                             image: image,
+                                             livePhoto: livePhoto)
         }
     }
 }

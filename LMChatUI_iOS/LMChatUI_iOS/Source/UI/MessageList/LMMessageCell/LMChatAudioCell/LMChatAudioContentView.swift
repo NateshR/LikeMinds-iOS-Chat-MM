@@ -6,16 +6,16 @@
 //
 
 import Foundation
-import LMChatUI_iOS
 
 @IBDesignable
 open class LMChatAudioContentView: LMChatMessageContentView {
-    open private(set) lazy var audioPreviewContainerStackView: LMStackView = {
+    open private(set) lazy var audioPreviewContainerStackView: LMStackView = {[unowned self] in
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.distribution = .fill
         view.alignment = .leading
         view.spacing = 4
+        view.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         return view
     }()
     
@@ -26,7 +26,6 @@ open class LMChatAudioContentView: LMChatMessageContentView {
         super.setupViews()
         bubbleView.addArrangeSubview(audioPreviewContainerStackView, atIndex: 2)
         audioPreviewContainerStackView.addSubview(cancelRetryContainerStackView)
-        audioPreviewContainerStackView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
@@ -38,12 +37,14 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     
     open override func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
         super.setDataView(data, delegate: delegate, index: index)
-        loaderView.isHidden = data.message?.attachmentUploaded ?? true
+        updateRetryButton(data)
         if data.message?.isDeleted == true {
             audioPreviewContainerStackView.isHidden = true
         } else {
             attachmentView(data, delegate: delegate, index: index)
         }
+        audioPreviewContainerStackView.bringSubviewToFront(cancelRetryContainerStackView)
+        bubbleView.layoutIfNeeded()
     }
     
     func attachmentView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
@@ -73,7 +74,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
             button.setImage(nil, for: .normal)
             button.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
             button.setFont(Appearance.shared.fonts.buttonFont1)
-            button.setTitleColor(.blue, for: .normal)
+            button.setTitleColor(Appearance.shared.colors.linkColor, for: .normal)
             audioPreviewContainerStackView.addArrangedSubview(button)
         }
         
@@ -90,6 +91,8 @@ open class LMChatAudioContentView: LMChatMessageContentView {
             let preview = LMUIComponents.shared.audioView.init()
             preview.translatesAutoresizingMaskIntoConstraints = false
             preview.configure(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index)
+            preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
+            preview.cornerRadius(with: 12)
             preview.setHeightConstraint(with: 72)
             audioPreviewContainerStackView.addArrangedSubview(preview)
         }
@@ -108,7 +111,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     func createAudioPreview(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) -> LMChatVoiceNotePreview {
         let preview =  LMUIComponents.shared.voiceNoteView.init().translatesAutoresizingMaskIntoConstraints()
         preview.translatesAutoresizingMaskIntoConstraints = false
-        preview.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7).isActive = true
+        preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.cornerRadius(with: 12)
         preview.configure(with: data, delegate: delegate, index: index)
@@ -123,6 +126,11 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     @objc
     open func didTapShowMore() {
         onShowMoreCallback?()
+    }
+    
+    func updateRetryButton(_ data: LMChatMessageCell.ContentModel) {
+        loaderView.isHidden = !(data.message?.messageStatus == .sending)
+        retryView.isHidden = !(data.message?.messageStatus == .failed)
     }
 }
 
