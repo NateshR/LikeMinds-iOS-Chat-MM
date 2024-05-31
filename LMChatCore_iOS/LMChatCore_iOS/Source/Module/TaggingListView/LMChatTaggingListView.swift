@@ -25,7 +25,7 @@ open class LMChatTaggingListView: LMView {
         return view
     }()
     
-    open private(set) lazy var tableView: LMTableView = {
+    open private(set) lazy var tableView: LMTableView = {[unowned self] in
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
@@ -141,5 +141,60 @@ extension LMChatTaggingListView: LMChatTaggingListViewModelProtocol {
 extension LMChatTaggingListView: LMChatTaggingProtocol {
     public func fetchUsers(for searchString: String, chatroomId: String) {
         viewModel?.fetchUsers(with: searchString, chatroomId: chatroomId)
+    }
+}
+
+
+
+extension LMChatMessageListViewController: LMChatTaggedUserFoundProtocol {
+    public func userSelected(with route: String, and userName: String) {
+        bottomMessageBoxView.inputTextView.addTaggedUser(with: userName, route: route)
+        mentionStopped()
+    }
+    
+    public func updateHeight(with height: CGFloat) {
+        
+        //        self.taggingViewHeightConstraints?.isActive = false
+        //        self.taggingViewHeightConstraints?.constant = height
+        //        self.taggingViewHeightConstraints?.isActive = true
+        //        UIView.animate(withDuration: 0.3) {[weak self] in
+        //            self?.taggingListView.layoutIfNeeded()
+        //        }
+        taggingViewHeightConstraints?.constant = height
+    }
+}
+
+extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
+    
+    public func mentionStarted(with text: String, chatroomId: String) {
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
+    }
+    
+    public func mentionStopped() {
+        taggingListView.stopFetchingUsers()
+    }
+    
+    
+    public func contentHeightChanged() {
+        let width = bottomMessageBoxView.inputTextView.frame.size.width
+        
+        let newSize = bottomMessageBoxView.inputTextView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        
+        bottomMessageBoxView.inputTextView.isScrollEnabled = newSize.height > bottomMessageBoxView.maxHeightOfTextView
+        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(max(newSize.height, 36), bottomMessageBoxView.maxHeightOfTextView)
+    }
+    
+    public func textViewDidChange(_ textView: UITextView) {
+        bottomMessageBoxView.checkSendButtonGestures()
+        
+        // Find first url link here and ignore email
+        let links = textView.text.detectedLinks
+        if !bottomMessageBoxView.isLinkPreviewCancel, !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+            bottomMessageBoxView.detectedFirstLink = link
+            bottomMessageBoxView.delegate?.linkDetected(link)
+        } else {
+            bottomMessageBoxView.linkPreviewView.isHidden = true
+            bottomMessageBoxView.detectedFirstLink = nil
+        }
     }
 }

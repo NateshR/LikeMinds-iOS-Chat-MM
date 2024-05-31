@@ -123,7 +123,3 @@ public final class LMChatAudioRecordManager {
     }
 }
 
-
-public extension Notification.Name {
-    static let audioDurationUpdate = Notification.Name("Audio Duration Updated")
-}

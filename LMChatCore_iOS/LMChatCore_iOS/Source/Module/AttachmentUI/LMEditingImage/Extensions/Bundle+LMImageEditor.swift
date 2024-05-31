@@ -39,8 +39,14 @@ extension Bundle {
         return Bundle(for: LMEditorManager.self)
     }()
     
+    static var lmBundle: Bundle? = {
+        Bundle(for: LMEditorManager.self)
+            .url(forResource: "LMChatCore_iOS", withExtension: "bundle")
+            .flatMap(Bundle.init(url:)) ?? Bundle(for: LMEditorManager.self)
+    }()
+    
     static var LMImageEditorBundle: Bundle? {
-        return normal_module ?? spm_module
+        return lmBundle ?? (normal_module ?? spm_module)
     }
 
 }

@@ -7,6 +7,7 @@
 
 import LikeMindsChat
 import Foundation
+import LMChatUI_iOS
 
 public protocol SearchListViewProtocol: AnyObject {
     func updateSearchList(with data: [SearchListViewController.ContentModel])
@@ -96,16 +97,14 @@ final public class SearchListViewModel {
     func searchList(with searchString: String) {
         self.searchString = searchString.trimmingCharacters(in: .whitespacesAndNewlines)
         
+        headerChatroomData.removeAll(keepingCapacity: true)
+        titleFollowedChatroomData.removeAll(keepingCapacity: true)
+        titleNotFollowedChatroomData.removeAll(keepingCapacity: true)
+        followedConversationData.removeAll(keepingCapacity: true)
+        notFollowedConversationData.removeAll(keepingCapacity: true)
+        
         guard !self.searchString.isEmpty else {
-            // Empty String, so showing emptying UI
-            headerChatroomData.removeAll(keepingCapacity: true)
-            titleFollowedChatroomData.removeAll(keepingCapacity: true)
-            titleNotFollowedChatroomData.removeAll(keepingCapacity: true)
-            followedConversationData.removeAll(keepingCapacity: true)
-            notFollowedConversationData.removeAll(keepingCapacity: true)
-            
             delegate?.showHideFooterLoader(isShow: false)
-            
             return
         }
         
@@ -190,7 +189,7 @@ final public class SearchListViewModel {
             currentPage += 1
             
             let chatroomData: [SearchChatroomDataModel] = chatrooms.compactMap { chatroom in
-                self.convertToChatroomData(form: chatroom.chatroom)
+                self.convertToChatroomData(from: chatroom.chatroom, member: chatroom.member)
             }
             
             switch currentAPIStatus {
@@ -205,7 +204,7 @@ final public class SearchListViewModel {
                 break
             }
             
-            if chatrooms.isEmpty || chatrooms.count < pageSize {
+            if chatrooms.count < pageSize {
                 setNewAPIStatus()
             } else {
                 convertToContentModel()
@@ -213,18 +212,18 @@ final public class SearchListViewModel {
         }
     }
     
-    private func convertToChatroomData(form chatroom: _Chatroom_?) -> SearchChatroomDataModel? {
+    private func convertToChatroomData(from chatroom: _Chatroom_?, member: Member?) -> SearchChatroomDataModel? {
         guard let chatroom,
               let id = chatroom.id,
-              let user = generateUserDetails(from: chatroom.member) else { return .none }
+              let user = generateUserDetails(from: member) else { return .none }
         
         return .init(
             id: id,
             chatroomTitle: chatroom.header ?? "",
             chatroomImage: chatroom.chatroomImageUrl,
-            isFollowed: chatroom.followStatus ?? false, 
-            title: chatroom.title, 
-            createdAt: Double(chatroom.createdAt ?? "") ?? 0, 
+            isFollowed: chatroom.followStatus ?? false,
+            title: chatroom.title,
+            createdAt: Double(chatroom.createdAt ?? "") ?? 0,
             user: user
         )
     }
@@ -250,9 +249,15 @@ final public class SearchListViewModel {
             currentPage += 1
             
             let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
-                guard let chatroomData = self.convertToChatroomData(form: conversation.chatroom) else { return .none }
+                guard let chatroomData = self.convertToChatroomData(from: conversation.chatroom, member: conversation.member) else { return .none }
 
-                return .init(id: "\(conversation.id)", chatroomDetails: chatroomData, message: conversation.answer, createdAt: conversation.createdAt)
+                return .init(
+                    id: "\(conversation.id)",
+                    chatroomDetails: chatroomData,
+                    message: conversation.answer,
+                    createdAt: conversation.createdAt,
+                    updatedAt: conversation.lastUpdated
+                )
             }
                         
             switch currentAPIStatus {
@@ -264,7 +269,7 @@ final public class SearchListViewModel {
                 break
             }
             
-            if conversations.isEmpty || conversations.count < pageSize {
+            if conversations.count < pageSize {
                 setNewAPIStatus()
             } else {
                 convertToContentModel()
@@ -293,12 +298,12 @@ extension SearchListViewModel {
         
         if !titleFollowedChatroomData.isEmpty || !titleNotFollowedChatroomData.isEmpty || !followedConversationData.isEmpty || !notFollowedConversationData.isEmpty {
             
-            let titleFollowedData = convertTitleMessageCell(from: titleFollowedChatroomData)
-            let followedConversationData = convertMessageCell(from: followedConversationData)
-            let titleNotFollowedData = convertTitleMessageCell(from: titleNotFollowedChatroomData)
-            let notFollowedConversationData = convertMessageCell(from: notFollowedConversationData)
+            let titleFollowedData = convertTitleMessageCell(from: titleFollowedChatroomData, isJoined: true)
+            let followedConversationData = convertMessageCell(from: followedConversationData, isJoined: true)
+            let titleNotFollowedData = convertTitleMessageCell(from: titleNotFollowedChatroomData, isJoined: false)
+            let notFollowedConversationData = convertMessageCell(from: notFollowedConversationData, isJoined: false)
             
-            var sectionData: [SearchCellProtocol] = []
+            var sectionData: [LMChatSearchCellDataProtocol] = []
             
             sectionData.append(contentsOf: titleFollowedData)
             sectionData.append(contentsOf: followedConversationData)
@@ -311,13 +316,13 @@ extension SearchListViewModel {
         delegate?.updateSearchList(with: dataModel)
     }
     
-    private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [SearchGroupCell.ContentModel] {
+    private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [LMChatSearchChatroomCell.ContentModel] {
         data.map {
             .init(chatroomID: $0.id, image: $0.chatroomImage, chatroomName: $0.chatroomTitle)
         }
     }
     
-    private func convertTitleMessageCell(from data: [SearchChatroomDataModel]) -> [SearchMessageCell.ContentModel] {
+    private func convertTitleMessageCell(from data: [SearchChatroomDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.id,
@@ -325,13 +330,14 @@ extension SearchListViewModel {
                 chatroomName: $0.chatroomTitle,
                 message: $0.title ?? "",
                 senderName: $0.user.firstName,
-                date: Date(timeIntervalSince1970: $0.createdAt),
-                isJoined: $0.isFollowed
+                date: $0.createdAt,
+                isJoined: isJoined,
+                highlightedText: searchString
             )
         }
     }
     
-    private func convertMessageCell(from data: [SearchConversationDataModel]) -> [SearchMessageCell.ContentModel] {
+    private func convertMessageCell(from data: [SearchConversationDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.chatroomDetails.id,
@@ -339,8 +345,9 @@ extension SearchListViewModel {
                 chatroomName: $0.chatroomDetails.chatroomTitle,
                 message: $0.message,
                 senderName: $0.chatroomDetails.user.firstName,
-                date: Date(timeIntervalSince1970: $0.createdAt),
-                isJoined: $0.chatroomDetails.isFollowed
+                date: $0.updatedAt,
+                isJoined: isJoined,
+                highlightedText: searchString
             )
         }
     }

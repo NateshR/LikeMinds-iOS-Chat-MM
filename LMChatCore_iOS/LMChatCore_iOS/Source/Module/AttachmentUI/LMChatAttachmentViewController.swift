@@ -20,8 +20,8 @@ open class LMChatAttachmentViewController: LMViewController {
     let backgroundColor: UIColor = .black
     weak var delegate: LMChatAttachmentViewDelegate?
     
-    open private(set) lazy var bottomMessageBoxView: LMAttachmentBottomMessageView = {
-        let view = LMAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var bottomMessageBoxView: LMChatAttachmentBottomMessageView = {
+        let view = LMChatAttachmentBottomMessageView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.7)
         view.delegate = self
         return view
@@ -39,8 +39,8 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
-    open private(set) lazy var zoomableImageViewContainer: LMZoomImageViewContainer = {
-        let view = LMZoomImageViewContainer()
+    open private(set) lazy var zoomableImageViewContainer: LMChatZoomImageViewContainer = {
+        let view = LMChatZoomImageViewContainer()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = backgroundColor
         return view
@@ -54,8 +54,8 @@ open class LMChatAttachmentViewController: LMViewController {
         return view
     }()
     
-    open private(set) lazy var audioPlayer: LMAudioPlayerView = {
-        let view = LMAudioPlayerView().translatesAutoresizingMaskIntoConstraints()
+    open private(set) lazy var audioPlayer: LMChatAudioPlayerView = {
+        let view = LMChatAudioPlayerView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = backgroundColor
         view.isHidden = true
         return view
@@ -107,8 +107,8 @@ open class LMChatAttachmentViewController: LMViewController {
         layout.minimumInteritemSpacing = 1
         let collection = LMCollectionView(frame: .zero, collectionViewLayout: layout)
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.registerCell(type: LMMediaCarouselCell.self)
-        collection.registerCell(type: LMAudioCarouselCell.self)
+        collection.registerCell(type: LMChatMediaCarouselCell.self)
+        collection.registerCell(type: LMChatAudioCarouselCell.self)
         collection.showsVerticalScrollIndicator = false
         collection.showsHorizontalScrollIndicator = false
         collection.backgroundColor = .clear
@@ -121,7 +121,6 @@ open class LMChatAttachmentViewController: LMViewController {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
         view.alignment = .center
-        view.spacing = 4
         view.addArrangedSubview(fileNameLabel)
         view.addArrangedSubview(fileDetailLabel)
         view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.8)
@@ -130,9 +129,13 @@ open class LMChatAttachmentViewController: LMViewController {
     
     open private(set) lazy var fileNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.font = Appearance.shared.fonts.headingFont
+        label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.white
         label.numberOfLines = 1
+        label.paddingTop = 8
+        label.paddingRight = 16
+        label.paddingLeft = 16
+        label.paddingBottom = 4
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
     }()
@@ -140,9 +143,13 @@ open class LMChatAttachmentViewController: LMViewController {
     open private(set) lazy var fileDetailLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = nil
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.headingFont3
         label.textColor = Appearance.shared.colors.white
         label.numberOfLines = 1
+        label.paddingTop = 4
+        label.paddingRight = 16
+        label.paddingLeft = 16
+        label.paddingBottom = 8
         label.setContentHuggingPriority(.required, for: .horizontal)
         return label
     }()
@@ -214,8 +221,8 @@ open class LMChatAttachmentViewController: LMViewController {
         NSLayoutConstraint.activate([
             imageActionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageActionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageActionsContainer.heightAnchor.constraint(equalToConstant: 54),
-            imageActionsContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            imageActionsContainer.heightAnchor.constraint(equalToConstant: 74),
+            imageActionsContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             rightContainerStackView.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
             rightContainerStackView.trailingAnchor.constraint(equalTo: imageActionsContainer.trailingAnchor, constant: -12),
             cancelButton.centerYAnchor.constraint(equalTo: imageActionsContainer.centerYAnchor),
@@ -335,12 +342,12 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         if let data = viewModel?.mediaCellData[indexPath.row] {
             switch data.mediaType {
             case .audio:
-                if let cell = collectionView.dequeueReusableCell(with: LMAudioCarouselCell.self, for: indexPath) {
+                if let cell = collectionView.dequeueReusableCell(with: LMChatAudioCarouselCell.self, for: indexPath) {
                     cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true, duration: data.duration))
                     return cell
                 }
             default:
-                if let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+                if let cell = collectionView.dequeueReusableCell(with: LMChatMediaCarouselCell.self, for: indexPath) {
                     cell.setData(with: .init(image: data.photo, fileUrl: data.localPath, fileType: data.mediaType.rawValue, thumbnailUrl: data.thumnbailLocalPath, isSelected: true))
                     return cell
                 }
@@ -356,7 +363,7 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if let data = viewModel?.mediaCellData[indexPath.row],
-           let cell = collectionView.dequeueReusableCell(with: LMMediaCarouselCell.self, for: indexPath) {
+           let cell = collectionView.dequeueReusableCell(with: LMChatMediaCarouselCell.self, for: indexPath) {
             setDataToView(data)
         }
     }
@@ -369,11 +376,13 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
         audioPlayer.isHidden = true
         switch data.mediaType {
         case .image, .gif:
+            bottomMessageBoxView.attachmentButton.isHidden = data.mediaType == .gif
             editButton.isHidden = data.mediaType == .gif
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
             self.zoomableImageViewContainer.configure(with: data.photo)
         case .video:
+            bottomMessageBoxView.attachmentButton.isHidden = false
             videoImageViewContainer.isHidden = false
             videoImageViewContainer.configure(with: .init(mediaURL: data.url?.absoluteString ?? "", thumbnailURL: data.thumnbailLocalPath?.absoluteString ?? "", isVideo: true)) { [weak self] in
                 self?.navigateToVideoPlayer(with: data.url?.absoluteString ?? "")
@@ -436,6 +445,9 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
     }
     
     public func sendAttachment(message: String?) {
+        if viewModel?.mediaType == .audio {
+            audioPlayer.stopPlaying()
+        }
         delegate?.postConversationWithAttchments(message: message, attachments: viewModel?.mediaCellData ?? [])
         self.dismissViewController()
     }

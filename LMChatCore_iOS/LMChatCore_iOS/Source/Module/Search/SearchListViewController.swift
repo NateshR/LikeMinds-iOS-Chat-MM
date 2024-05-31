@@ -11,9 +11,9 @@ import UIKit
 public class SearchListViewController: LMViewController {
     public struct ContentModel {
         let title: String?
-        let data: [SearchCellProtocol]
+        let data: [LMChatSearchCellDataProtocol]
         
-        public init(title: String?, data: [SearchCellProtocol]) {
+        public init(title: String?, data: [LMChatSearchCellDataProtocol]) {
             self.title = title
             self.data = data
         }
@@ -21,8 +21,8 @@ public class SearchListViewController: LMViewController {
     
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView(frame: .zero, style: .grouped).translatesAutoresizingMaskIntoConstraints()
-        table.register(SearchMessageCell.self)
-        table.register(SearchGroupCell.self)
+        table.register(LMChatSearchMessageCell.self)
+        table.register(LMChatSearchChatroomCell.self)
         table.dataSource = self
         table.delegate = self
         table.estimatedSectionHeaderHeight = .leastNonzeroMagnitude
@@ -49,7 +49,7 @@ public class SearchListViewController: LMViewController {
     open override func setupLayouts() {
         super.setupLayouts()
         
-        tableView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 0),
+        tableView.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 8),
                                 bottom: (view.safeAreaLayoutGuide.bottomAnchor, 0),
                                 leading: (view.safeAreaLayoutGuide.leadingAnchor, 0),
                                 trailing: (view.safeAreaLayoutGuide.trailingAnchor, 0))
@@ -67,6 +67,9 @@ public class SearchListViewController: LMViewController {
         
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
+        
+        let textFieldInsideSearchBar = searchController.searchBar.value(forKey: "searchField") as? UITextField
+        textFieldInsideSearchBar?.textColor = .black
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -87,12 +90,12 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchMessageCell.ContentModel,
-           let cell = tableView.dequeueReusableCell(SearchMessageCell.self) {
+        if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel,
+           let cell = tableView.dequeueReusableCell(LMChatSearchMessageCell.self) {
             cell.configure(with: data)
             return cell
-        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? SearchGroupCell.ContentModel,
-                  let cell = tableView.dequeueReusableCell(SearchGroupCell.self) {
+        } else if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel,
+                  let cell = tableView.dequeueReusableCell(LMChatSearchChatroomCell.self) {
             cell.configure(with: data)
             return cell
         }
@@ -125,7 +128,15 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(indexPath)
+        if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel {
+            NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: nil), from: self, params: nil)
+        } else if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel {
+            NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: cell.messageID), from: self, params: nil)
+        }
+    }
+    
+    open func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        (view as? UITableViewHeaderFooterView)?.textLabel?.textColor = .black
     }
 }
 
@@ -133,7 +144,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
 // MARK: UISearchResultsUpdating
 extension SearchListViewController: UISearchBarDelegate {
     open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        guard let text = searchBar.text,
+        guard let text = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else {
             resetSearchData()
             return
@@ -166,7 +177,7 @@ extension SearchListViewController: UISearchBarDelegate {
 // MARK: SearchListViewProtocol
 extension SearchListViewController: SearchListViewProtocol {
    public func updateSearchList(with data: [ContentModel]) {
-       tableView.backgroundView = data.isEmpty ? SearchListNoResultView(frame: tableView.bounds) : nil
+       tableView.backgroundView = data.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
         showHideFooterLoader(isShow: false)
         self.searchResults = data
         tableView.reloadData()

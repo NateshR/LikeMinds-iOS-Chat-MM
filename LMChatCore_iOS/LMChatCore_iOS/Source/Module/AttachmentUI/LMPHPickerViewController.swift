@@ -119,23 +119,26 @@ class MediaPickerManager: NSObject {
             picker.isModalInPresentation = true
             viewController.present(picker, animated: true)
         } else {
-            let imagePicker = UIImagePickerController()
-//            imagePicker.delegate = self
-            imagePicker.sourceType = .photoLibrary
-            imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String] // Only videos
-            imagePicker.allowsEditing = false
-            viewController.present(imagePicker, animated: true, completion: nil)
+            if LMChatCheckMediaAccess.checkForPhotoLibraryAccess(from: viewController) {
+                let imagePicker = UIImagePickerController()
+                imagePicker.sourceType = .photoLibrary
+                imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String] // Only videos
+                imagePicker.allowsEditing = false
+                viewController.present(imagePicker, animated: true, completion: nil)
+            }
         }
     }
     
     func presentCamera(viewController: UIViewController, delegate: (UIImagePickerControllerDelegate & UINavigationControllerDelegate)?) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            let imagePicker = UIImagePickerController()
-            imagePicker.delegate = delegate
-            imagePicker.sourceType = .camera
-            imagePicker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String] // Only videos
-            imagePicker.allowsEditing = false
-            viewController.present(imagePicker, animated: true, completion: nil)
+            DispatchQueue.main.async {
+                let imagePicker = UIImagePickerController()
+                imagePicker.delegate = delegate
+                imagePicker.sourceType = .camera
+                imagePicker.mediaTypes = [kUTTypeImage as String, kUTTypeVideo as String] // Only Photos
+                imagePicker.allowsEditing = false
+                viewController.present(imagePicker, animated: true, completion: nil)
+            }
         }
     }
     
@@ -322,3 +325,74 @@ extension MediaPickerManager: UIDocumentPickerDelegate {
     }
 }
 
+
+
+public class LMChatCheckMediaAccess {
+    class func checkCameraAccess(viewController: UIViewController, delegate: (UIImagePickerControllerDelegate & UINavigationControllerDelegate)?) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .denied:
+            presentMediaSettings(from: viewController, message: "Camera access is denied")
+        case .authorized:
+            MediaPickerManager.shared.presentCamera(viewController: viewController, delegate: delegate)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { success in
+                if success {
+                    MediaPickerManager.shared.presentCamera(viewController: viewController, delegate: delegate)
+                }
+            }
+        default:
+            break
+        }
+    }
+    
+    class func presentMediaSettings(from vc: UIViewController, message: String) {
+        let alertController = UIAlertController(title: "Error",
+                                                message: message,
+                                                preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .default))
+        
+        alertController.addAction(UIAlertAction(title: "Settings", style: .cancel) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:]) { _ in }
+            }
+        })
+        
+        vc.present(alertController, animated: true)
+    }
+    
+    class func askForMicrophoneAccess(from vc: UIViewController) {
+        if #available(iOS 17, *) {
+            if AVAudioApplication.shared.recordPermission == .denied {
+                presentMediaSettings(from: vc, message: "Microphone access is denied")
+            } else if AVAudioApplication.shared.recordPermission == .undetermined {
+                AVAudioApplication.requestRecordPermission { _ in }
+            }
+        } else {
+            switch AVAudioSession.sharedInstance().recordPermission {
+            case .denied:
+                presentMediaSettings(from: vc, message: "Microphone access is denied")
+            case .undetermined:
+                AVAudioSession.sharedInstance().requestRecordPermission { _ in}
+            default:
+                break
+            }
+        }
+    }
+    
+    class func checkForPhotoLibraryAccess(from vc: UIViewController) -> Bool {
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { status in }
+            return false
+        case .denied:
+            presentMediaSettings(from: vc, message: "Photo Library access is denied")
+            return false
+        default:
+            break
+        }
+        
+        return true
+    }
+}

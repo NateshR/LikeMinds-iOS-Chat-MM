@@ -19,11 +19,11 @@ public extension Constants {
         
         /// Need For These Methods - A Develeoper can also set custom images in these variables we need to make sure that dev is not setting these images as nil, so get non-optional value of UIImage without force unwrapping.
         static func loadImage(with imageName: String) -> UIImage {
-            UIImage(named: imageName, in: Bundle.LMBundleIdentifier) ?? .circleImage
+            UIImage(named: imageName, in: Bundle.LMBundleIdentifier) ?? UIImage()
         }
         
         static func loadSystemImage(with imageName: String) -> UIImage {
-            UIImage(systemName: imageName) ?? .circleImage
+            UIImage(systemName: imageName) ?? UIImage()
         }
         
         // Shared Instance
@@ -37,12 +37,14 @@ public extension Constants {
         public var bookmarkFilled = loadSystemImage(with: "bookmark.fill")
         public var shareIcon = loadSystemImage(with: "arrowshape.turn.up.right")
         public var xmarkIcon = loadSystemImage(with: "xmark")
+        public var cloudIcon = loadSystemImage(with: "cloud")
         public var crossIcon = loadSystemImage(with: "xmark.circle")
         public var ellipsisIcon = loadSystemImage(with: "ellipsis")
         public var ellipsisCircleIcon = loadSystemImage(with: "ellipsis.circle")
         public var paperplaneFilled = loadSystemImage(with: "paperplane.fill")
         public var paperplaneIcon = loadSystemImage(with: "paperplane")
         public var micIcon = loadSystemImage(with: "mic")
+        public var micFillIcon = loadSystemImage(with: "mic.fill")
         public var audioIcon = loadSystemImage(with: "headphones")
         public var pencilIcon = loadSystemImage(with: "pencil")
         public var downArrow = loadSystemImage(with: "arrow.down")
@@ -50,14 +52,14 @@ public extension Constants {
         public var personIcon = loadSystemImage(with: "person")
         public var checkmarkIconFilled = loadSystemImage(with: "checkmark.circle.fill")
         public var plusIcon = loadSystemImage(with: "plus")
-        public var photoPlusIcon = loadSystemImage(with: "photo.badge.plus")
+        public var photoPlusIcon = loadImage(with: "photo.badge.plus")
         public var notificationBell = loadSystemImage(with: "bell.fill")
         public var documentsIcon = loadSystemImage(with: "doc.fill")
         public var galleryIcon = loadSystemImage(with: "photo")
         public var videoSystemIcon = loadSystemImage(with: "video.fill")
         public var copyIcon = loadSystemImage(with: "doc.on.doc")
         
-        public var pdfIcon = loadImage(with: "pdfIcon")
+        public var pdfIcon = loadImage(with: "pdf_icon")
         public var placeholderImage = loadImage(with: "placeholderImage")
         public var brokenLink = loadImage(with: "brokenLink")
         public var videoIcon = loadImage(with: "videoIcon")
@@ -73,6 +75,8 @@ public extension Constants {
         public var rightArrowIcon = loadSystemImage(with: "chevron.right")
         public var checkmarkCircleIcon = loadSystemImage(with: "checkmark.circle")
         public var leftArrowIcon = loadSystemImage(with: "chevron.left")
+        public var downChevronArrowIcon = loadSystemImage(with: "chevron.down")
+        public var upChevronArrowIcon = loadSystemImage(with: "chevron.up")
         
         public var cameraIcon = loadSystemImage(with: "camera")
         public var playIcon = loadSystemImage(with: "play.circle")
@@ -81,7 +85,8 @@ public extension Constants {
         public var goBackwardIcon = loadSystemImage(with: "gobackward.10")
         public var playFill = loadSystemImage(with: "play.fill")
         public var pauseIcon = loadSystemImage(with: "pause.fill")
-        public var linkIcon = loadSystemImage(with: "link.circle.fill")
+        public var linkCircleFillIcon = loadSystemImage(with: "link.circle.fill")
+        public var linkIcon = loadSystemImage(with: "link")
         public var messageIcon = loadSystemImage(with: "message")
         public var person2Icon = loadSystemImage(with: "person.2")
         public var pinCircleFillIcon = loadSystemImage(with: "pin.circle.fill")
@@ -92,11 +97,23 @@ public extension Constants {
         public var deleteIcon = loadSystemImage(with: "trash.fill")
         public var playFilled = loadSystemImage(with: "play.fill")
         public var playCircleFilled = loadSystemImage(with: "play.circle.fill")
+        public var pauseCircleFilled = loadSystemImage(with: "pause.circle.fill")
         public var replyIcon = loadSystemImage(with: "arrowshape.turn.up.backward.fill")
         public var searchIcon = loadSystemImage(with: "magnifyingglass")
         public var pollIcon = loadSystemImage(with: "chart.bar.xaxis")
         public var trashIcon = loadSystemImage(with: "trash")
         
+        
         public var docPlusIcon = loadSystemImage(with: "doc.badge.plus")
+        public var clockIcon = loadSystemImage(with: "clock")
+        public var checkmarkIcon = loadSystemImage(with: "checkmark")
+        public var retryIcon = loadSystemImage(with: "exclamationmark.circle.fill")
+        
+        public var noDataImage = loadImage(with: "noDataImage")
+        public var bubbleReceived = loadImage(with: "bubble_received")
+        public var bubbleSent = loadImage(with: "bubble_sent")
+        public var gifBadge = loadImage(with: "gifBadge")
+        public var addMoreEmojiIcon = loadImage(with: "addMoreEmoticons")
+        public var circleFill = loadSystemImage(with: "circle.fill")
     }
 }

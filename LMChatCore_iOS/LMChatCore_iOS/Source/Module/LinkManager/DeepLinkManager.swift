@@ -75,10 +75,11 @@ import Foundation
                         LMSharedPreferences.setString(routeUrl, forKey: .tempDeeplinkUrl)
                         return
                     }
-                    if let vc = topMostController as? UINavigationController, let homeFeedVC = vc.topViewController as? LMHomeFeedViewController {
+                    if let vc = topMostController as? UINavigationController, let homeFeedVC = vc.topViewController as? LMChatHomeFeedViewController {
                         homeFeedVC.navigationController?.pushViewController(viewController, animated: true)
                     } else {
                         let chatMessageViewController = UINavigationController(rootViewController: viewController)
+                        chatMessageViewController.modalPresentationStyle = .fullScreen
                         topMostController.present(chatMessageViewController, animated: false)
                     }
                 }
