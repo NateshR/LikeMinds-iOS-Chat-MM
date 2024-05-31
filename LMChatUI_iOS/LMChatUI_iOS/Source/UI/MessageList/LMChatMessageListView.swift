@@ -178,8 +178,7 @@ open class LMChatMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-        table.contentInset = .init(top: 0, left: 0, bottom: 20, right: 0)
-//        table.bounces = false
+        table.contentInset = .init(top: 0, left: 0, bottom: 12, right: 0)
         return table
     }()
     

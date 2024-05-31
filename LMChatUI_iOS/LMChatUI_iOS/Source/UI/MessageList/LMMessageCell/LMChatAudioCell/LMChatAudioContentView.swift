@@ -26,7 +26,6 @@ open class LMChatAudioContentView: LMChatMessageContentView {
         super.setupViews()
         bubbleView.addArrangeSubview(audioPreviewContainerStackView, atIndex: 2)
         audioPreviewContainerStackView.addSubview(cancelRetryContainerStackView)
-        audioPreviewContainerStackView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
@@ -44,6 +43,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
         } else {
             attachmentView(data, delegate: delegate, index: index)
         }
+        audioPreviewContainerStackView.bringSubviewToFront(cancelRetryContainerStackView)
         bubbleView.layoutIfNeeded()
     }
     

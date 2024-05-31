@@ -24,7 +24,6 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
         super.setupViews()
         bubbleView.addArrangeSubview(galleryView, atIndex: 2)
         galleryView.addSubview(cancelRetryContainerStackView)
-        galleryView.bringSubviewToFront(cancelRetryContainerStackView)
     }
     
     // MARK: setupLayouts
@@ -42,6 +41,7 @@ open class LMChatGalleryContentView: LMChatMessageContentView {
         } else {
             attachmentView(data, index: index)
         }
+        galleryView.bringSubviewToFront(cancelRetryContainerStackView)
         bubbleView.layoutIfNeeded()
     }
     

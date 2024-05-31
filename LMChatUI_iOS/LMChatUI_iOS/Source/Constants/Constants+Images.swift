@@ -59,7 +59,7 @@ public extension Constants {
         public var videoSystemIcon = loadSystemImage(with: "video.fill")
         public var copyIcon = loadSystemImage(with: "doc.on.doc")
         
-        public var pdfIcon = loadImage(with: "pdfIcon")
+        public var pdfIcon = loadImage(with: "pdf_icon")
         public var placeholderImage = loadImage(with: "placeholderImage")
         public var brokenLink = loadImage(with: "brokenLink")
         public var videoIcon = loadImage(with: "videoIcon")

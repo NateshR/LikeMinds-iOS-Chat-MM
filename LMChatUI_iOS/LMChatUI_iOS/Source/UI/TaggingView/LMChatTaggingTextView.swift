@@ -43,7 +43,7 @@ open class LMChatTaggingTextView: LMTextView {
     
     public weak var mentionDelegate: LMFeedTaggingTextViewProtocol?
     
-    public var textAttributes: [NSAttributedString.Key: Any] { [.font: self.font ?? .systemFont(ofSize: 16),
+    public var textAttributes: [NSAttributedString.Key: Any] { [.font: Appearance.shared.fonts.textFont1,
                                                                 .foregroundColor: typingTextColor]
     }
     
@@ -175,7 +175,11 @@ open class LMChatTaggingTextView: LMTextView {
 extension LMChatTaggingTextView: UITextViewDelegate {
     
     open func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-      /*  if text.isEmpty {
+        #if DEBUG
+            mentionDelegate?.contentHeightChanged()
+            return true
+        #endif
+       if text.isEmpty {
             if isMentioning {
                 if range.length <= characters.count {
                     characters.removeLast(range.length)
@@ -210,7 +214,7 @@ extension LMChatTaggingTextView: UITextViewDelegate {
             mentionDelegate?.contentHeightChanged()
             return false
         }
-        */
+
         mentionDelegate?.contentHeightChanged()
         return true
     }
