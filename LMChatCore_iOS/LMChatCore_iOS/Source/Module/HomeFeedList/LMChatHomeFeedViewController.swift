@@ -1,12 +1,12 @@
 //
 //  LMChatHomeFeedViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 12/02/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 open class LMChatHomeFeedViewController: LMViewController {
     

@@ -1,6 +1,6 @@
 //
 //  LMWeakProxy.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 18/03/24.
 //

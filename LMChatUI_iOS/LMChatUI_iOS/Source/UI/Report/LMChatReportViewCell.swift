@@ -1,6 +1,6 @@
 //
 //  LMChatReportViewCell.swift
-//  LMChatUI_iOS
+//  LikeMindsChatUI
 //
 //  Created by Pushpendra Singh on 06/03/24.
 //

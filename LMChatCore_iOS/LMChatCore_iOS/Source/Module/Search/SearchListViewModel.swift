@@ -1,13 +1,13 @@
 //
 //  SearchListViewModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 16/04/24.
 //
 
 import LikeMindsChat
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public protocol SearchListViewProtocol: AnyObject {
     func updateSearchList(with data: [SearchListViewController.ContentModel])

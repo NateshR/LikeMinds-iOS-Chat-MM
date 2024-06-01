@@ -7,7 +7,7 @@
 
 import Foundation
 import LikeMindsChat
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 protocol ReactionViewModelProtocol: AnyObject {
     func showData(with collection: [LMChatReactionTitleCell.ContentModel], cells: [LMChatReactionViewCell.ContentModel])

@@ -12,7 +12,7 @@ private class LMChatBundleClass { }
 extension Bundle {
     static var LMBundleIdentifier: Bundle {
         return Bundle(for: LMChatBundleClass.self)
-            .url(forResource: "LMChatUI_iOS", withExtension: "bundle")
+            .url(forResource: "LikeMindsChatUI", withExtension: "bundle")
             .flatMap(Bundle.init(url:)) ?? Bundle(for: LMChatBundleClass.self)
     }
 }

@@ -1,6 +1,6 @@
 //
 //  SearchChatroomDataModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 02/05/24.
 //

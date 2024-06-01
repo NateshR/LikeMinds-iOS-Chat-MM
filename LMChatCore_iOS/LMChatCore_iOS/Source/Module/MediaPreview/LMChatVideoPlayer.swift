@@ -1,12 +1,12 @@
 //
 //  LMChatVideoPlayer.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 20/04/24.
 //
 
 import AVFoundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 import AVKit
 
 public final class LMChatVideoPlayer: LMView {

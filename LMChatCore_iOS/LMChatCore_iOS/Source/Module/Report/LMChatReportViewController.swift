@@ -1,12 +1,12 @@
 //
 //  LMChatReportViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 06/03/24.
 //
 
 import UIKit
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public protocol LMChatReportViewModelProtocol: LMBaseViewControllerProtocol {
     func updateView(with tags: [(name: String, tagID: Int)], selectedTag: Int, showTextView: Bool)

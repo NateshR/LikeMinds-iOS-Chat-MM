@@ -1,12 +1,12 @@
 //
 //  LMExploreChatroomViewModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 19/04/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 import LikeMindsChat
 
 

@@ -1,6 +1,6 @@
 //
 //  LMChatAudioRecordManager.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 19/04/24.
 //

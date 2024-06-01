@@ -1,6 +1,6 @@
 //
 //  LMChatSearchShimmerView.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 06/05/24.
 //

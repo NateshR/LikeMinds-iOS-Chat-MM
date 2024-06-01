@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import LMChatCore_iOS
+import LikeMindsChatCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 

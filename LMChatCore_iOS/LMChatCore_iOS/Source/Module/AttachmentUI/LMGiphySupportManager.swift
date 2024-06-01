@@ -1,6 +1,6 @@
 //
 //  LMGiphySupportManager.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 22/04/24.
 //
@@ -8,7 +8,7 @@
 import Foundation
 //import SwiftyGif
 import GiphyUISDK
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 @objc class GiphyAPIConfiguration: NSObject {
     static let gifMessage = "* This is a gif message. Please update your app *"

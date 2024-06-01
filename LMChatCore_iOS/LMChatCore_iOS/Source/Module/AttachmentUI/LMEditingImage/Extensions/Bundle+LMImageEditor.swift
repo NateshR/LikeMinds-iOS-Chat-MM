@@ -41,7 +41,7 @@ extension Bundle {
     
     static var lmBundle: Bundle? = {
         Bundle(for: LMEditorManager.self)
-            .url(forResource: "LMChatCore_iOS", withExtension: "bundle")
+            .url(forResource: "LikeMindsChatCore", withExtension: "bundle")
             .flatMap(Bundle.init(url:)) ?? Bundle(for: LMEditorManager.self)
     }()
     

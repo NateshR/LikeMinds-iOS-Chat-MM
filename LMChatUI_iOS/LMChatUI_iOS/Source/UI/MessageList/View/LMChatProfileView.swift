@@ -1,12 +1,11 @@
 //
 //  LMChatProfileView.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 02/04/24.
 //
 
-import Foundation
-import LMChatUI_iOS
+import UIKit
 
 open class LMChatProfileView: LMView {
     /// The `UIImageView` instance that shows the avatar image.

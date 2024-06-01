@@ -1,12 +1,12 @@
 //
 //  LMChatAttachmentBottomMessageView.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 14/03/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public protocol LMAttachmentBottomMessageDelegate: AnyObject {
     func addMoreAttachment()

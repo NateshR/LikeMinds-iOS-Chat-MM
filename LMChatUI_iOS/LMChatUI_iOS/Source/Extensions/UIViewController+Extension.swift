@@ -1,6 +1,6 @@
 //
 //  UIViewController+Extension.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 03/05/24.
 //

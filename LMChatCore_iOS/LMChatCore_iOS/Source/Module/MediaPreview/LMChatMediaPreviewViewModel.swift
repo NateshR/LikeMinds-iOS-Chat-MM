@@ -1,6 +1,6 @@
 //
 //  LMChatMediaPreviewViewModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 20/04/24.
 //

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public protocol LMReactionViewControllerDelegate: AnyObject {
     func reactionDeleted(chatroomId: String?, conversationId: String?)

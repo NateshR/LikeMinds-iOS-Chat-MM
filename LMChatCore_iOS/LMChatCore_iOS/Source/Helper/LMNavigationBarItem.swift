@@ -1,13 +1,13 @@
 //
 //  LMNavigationBarItem.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 15/02/24.
 //
 
 import Foundation
 import UIKit
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public class LMBarButtonItem: UIBarButtonItem {
     

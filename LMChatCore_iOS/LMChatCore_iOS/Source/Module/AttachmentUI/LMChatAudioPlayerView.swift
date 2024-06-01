@@ -1,13 +1,13 @@
 //
 //  LMChatAudioPlayerView.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 12/05/24.
 //
 
 import UIKit
 import AVFoundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 open class LMChatAudioPlayerView: LMView {
     

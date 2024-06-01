@@ -1,6 +1,6 @@
 //
 //  NSAttributedString+Extension.swift
-//  LMChatUI_iOS
+//  LikeMindsChatUI
 //
 //  Created by Pushpendra Singh on 11/04/24.
 //

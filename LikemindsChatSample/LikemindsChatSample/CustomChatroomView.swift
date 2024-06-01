@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 class CustomChatroomView: LMChatHomeFeedChatroomView {
     

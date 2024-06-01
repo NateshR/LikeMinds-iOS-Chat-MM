@@ -1,6 +1,6 @@
 //
 //  LMChatHomeFeedChatroomView.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 08/02/24.
 //

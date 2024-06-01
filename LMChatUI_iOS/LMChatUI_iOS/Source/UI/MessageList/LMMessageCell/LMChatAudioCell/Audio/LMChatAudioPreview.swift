@@ -1,6 +1,6 @@
 //
 //  LMChatAudioPreview.swift
-//  LMChatUI_iOS
+//  LikeMindsChatUI
 //
 //  Created by Devansh Mohata on 17/04/24.
 //

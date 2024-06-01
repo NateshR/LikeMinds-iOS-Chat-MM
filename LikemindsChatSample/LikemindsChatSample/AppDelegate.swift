@@ -6,10 +6,8 @@
 //
 
 import UIKit
-import LMChatCore_iOS
-import LMChatUI_iOS
-//import FirebaseMessaging
-//import FirebaseCore
+import LikeMindsChatCore
+import LikeMindsChatUI
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {

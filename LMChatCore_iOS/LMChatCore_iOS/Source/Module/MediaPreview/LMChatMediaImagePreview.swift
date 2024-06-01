@@ -1,12 +1,12 @@
 //
 //  LMChatMediaImagePreview.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 19/04/24.
 //
 
 import Kingfisher
-import LMChatUI_iOS
+import LikeMindsChatUI
 import UIKit
 
 open class LMChatMediaImagePreview: LMCollectionViewCell {

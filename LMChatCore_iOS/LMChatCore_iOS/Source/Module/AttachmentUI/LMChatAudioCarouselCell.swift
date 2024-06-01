@@ -1,12 +1,12 @@
 //
 //  LMChatAudioCarouselCell.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 12/05/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 open class LMChatAudioCarouselCell: LMCollectionViewCell {
     

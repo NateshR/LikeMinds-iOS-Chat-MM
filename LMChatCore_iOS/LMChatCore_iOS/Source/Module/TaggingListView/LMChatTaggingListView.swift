@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 public protocol LMChatTaggedUserFoundProtocol: AnyObject {
     func userSelected(with route: String, and userName: String)

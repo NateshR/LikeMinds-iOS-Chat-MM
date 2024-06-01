@@ -1,12 +1,12 @@
 //
 //  LMParticipantListViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 16/02/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 open class LMParticipantListViewController: LMViewController {
     public var viewModel: LMParticipantListViewModel?

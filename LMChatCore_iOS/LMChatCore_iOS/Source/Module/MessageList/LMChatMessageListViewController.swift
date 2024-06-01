@@ -1,12 +1,12 @@
 //
 //  LMChatMessageListViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 18/03/24.
 //
 
 import AVFoundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 import GiphyUISDK
 import UIKit
 

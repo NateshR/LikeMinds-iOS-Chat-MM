@@ -1,12 +1,12 @@
 //
 //  LMChatEmojiListViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 08/05/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 protocol LMChatEmojiListViewDelegate: AnyObject {
     func emojiSelected(emoji: String, conversationId: String?, chatroomId: String?)

@@ -1,6 +1,6 @@
 //
 //  DateFormatter.swift
-//  LMChatUI_iOS
+//  LikeMindsChatUI
 //
 //  Created by Devansh Mohata on 16/05/24.
 //

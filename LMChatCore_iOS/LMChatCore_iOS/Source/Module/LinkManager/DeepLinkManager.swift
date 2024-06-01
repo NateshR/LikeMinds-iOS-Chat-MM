@@ -1,6 +1,6 @@
 //
 //  DeepLinkManager.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 14/03/24.
 //

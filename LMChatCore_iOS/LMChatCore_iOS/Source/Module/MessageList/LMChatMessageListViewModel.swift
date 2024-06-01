@@ -1,12 +1,12 @@
 //
 //  LMChatMessageListViewModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 18/03/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 import LikeMindsChat
 
 public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {

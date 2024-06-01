@@ -1,12 +1,12 @@
 //
 //  LMChatMediaCarouselCell.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 14/04/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 
 open class LMChatMediaCarouselCell: LMCollectionViewCell {
     

@@ -1,11 +1,11 @@
 //
 //  LMChatExploreChatroomViewModel.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 16/05/24.
 //
 
-import LMChatUI_iOS
+import LikeMindsChatUI
 import LikeMindsChat
 
 public protocol LMChatExploreChatroomViewModelProtocol: AnyObject {

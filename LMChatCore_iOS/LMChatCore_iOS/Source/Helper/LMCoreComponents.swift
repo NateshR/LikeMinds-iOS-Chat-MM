@@ -1,6 +1,6 @@
 //
 //  LMCoreComponents.swift
-//  LMChatUI_iOS
+//  LikeMindsChatUI
 //
 //  Created by Pushpendra Singh on 07/03/24.
 //

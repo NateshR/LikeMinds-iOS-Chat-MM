@@ -1,12 +1,12 @@
 //
 //  LMChatAttachmentViewController.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 13/03/24.
 //
 
 import Foundation
-import LMChatUI_iOS
+import LikeMindsChatUI
 import AVFoundation
 import AVKit
 import CoreServices

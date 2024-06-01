@@ -1,11 +1,11 @@
 //
 //  LMChatMediaVideoPreview.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 20/04/24.
 //
 
-import LMChatUI_iOS
+import LikeMindsChatUI
 import UIKit
 
 public struct LMChatMediaPreviewContentModel {

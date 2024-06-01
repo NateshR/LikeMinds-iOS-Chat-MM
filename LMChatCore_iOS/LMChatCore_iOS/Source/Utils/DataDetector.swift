@@ -1,6 +1,6 @@
 //
 //  DataDetector.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 11/04/24.
 //

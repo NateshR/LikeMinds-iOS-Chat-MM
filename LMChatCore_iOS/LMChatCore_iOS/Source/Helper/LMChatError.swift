@@ -1,6 +1,6 @@
 //
 //  LMChatError.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 06/03/24.
 //

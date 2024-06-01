@@ -1,12 +1,11 @@
 //
 //  LMChatHomeFeedLoading.swift
-//  LMChatCore_iOS
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 30/04/24.
 //
 
-import Foundation
-import LMChatUI_iOS
+import UIKit
 
 @IBDesignable
 open class LMChatHomeFeedLoading: LMView {
