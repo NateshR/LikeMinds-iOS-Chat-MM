@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		E1E1C3CC57AA3908306EC2AD /* Pods_LikemindsChatSample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60261E572A6530F3A415E384 /* Pods_LikemindsChatSample.framework */; };
+		E5A045372C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A045362C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift */; };
+		E5A045392C0AF0690086C431 /* CustomMessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A045382C0AF0690086C431 /* CustomMessageBubbleView.swift */; };
 		F45B8AAE2B999F4900AB95E4 /* CustomChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */; };
 		F4A82F312BE3B53100217D1B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F4A82F302BE3B53000217D1B /* GoogleService-Info.plist */; };
 		F4C790D92B296EA90084823E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C790D82B296EA90084823E /* AppDelegate.swift */; };
@@ -21,6 +23,8 @@
 /* Begin PBXFileReference section */
 		4AD09C6A9AAF3DC9083F534D /* Pods-LikemindsChatSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.debug.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.debug.xcconfig"; sourceTree = "<group>"; };
 		60261E572A6530F3A415E384 /* Pods_LikemindsChatSample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LikemindsChatSample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A045362C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomHomeFeedExploreTabView.swift; sourceTree = "<group>"; };
+		E5A045382C0AF0690086C431 /* CustomMessageBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomMessageBubbleView.swift; sourceTree = "<group>"; };
 		F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomChatroomView.swift; sourceTree = "<group>"; };
 		F4A82F302BE3B53000217D1B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F4A82F342BE4170400217D1B /* LikemindsChatSample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LikemindsChatSample.entitlements; sourceTree = "<group>"; };
@@ -64,6 +68,16 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		E5A045352C0AEBC00086C431 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */,
+				E5A045362C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift */,
+				E5A045382C0AF0690086C431 /* CustomMessageBubbleView.swift */,
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
 		F4C790CC2B296EA80084823E = {
 			isa = PBXGroup;
 			children = (
@@ -85,16 +99,16 @@
 		F4C790D72B296EA90084823E /* LikemindsChatSample */ = {
 			isa = PBXGroup;
 			children = (
+				E5A045352C0AEBC00086C431 /* CustomViews */,
 				F4A82F342BE4170400217D1B /* LikemindsChatSample.entitlements */,
 				F4A82F302BE3B53000217D1B /* GoogleService-Info.plist */,
+				F4C790E62B296EAE0084823E /* Info.plist */,
 				F4C790D82B296EA90084823E /* AppDelegate.swift */,
 				F4C790DA2B296EA90084823E /* SceneDelegate.swift */,
 				F4C790DC2B296EA90084823E /* ViewController.swift */,
-				F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */,
-				F4C790DE2B296EA90084823E /* Main.storyboard */,
 				F4C790E12B296EAE0084823E /* Assets.xcassets */,
 				F4C790E32B296EAE0084823E /* LaunchScreen.storyboard */,
-				F4C790E62B296EAE0084823E /* Info.plist */,
+				F4C790DE2B296EA90084823E /* Main.storyboard */,
 			);
 			path = LikemindsChatSample;
 			sourceTree = "<group>";
@@ -216,6 +230,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4C790DD2B296EA90084823E /* ViewController.swift in Sources */,
+				E5A045392C0AF0690086C431 /* CustomMessageBubbleView.swift in Sources */,
+				E5A045372C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift in Sources */,
 				F4C790D92B296EA90084823E /* AppDelegate.swift in Sources */,
 				F45B8AAE2B999F4900AB95E4 /* CustomChatroomView.swift in Sources */,
 				F4C790DB2B296EA90084823E /* SceneDelegate.swift in Sources */,

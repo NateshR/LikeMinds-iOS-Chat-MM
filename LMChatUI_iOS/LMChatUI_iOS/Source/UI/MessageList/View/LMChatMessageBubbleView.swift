@@ -17,8 +17,14 @@ open class LMChatMessageBubbleView: LMView {
     var sentBubble = Constants.shared.images.bubbleSent.resizableImage(withCapInsets: UIEdgeInsets(top: 17, left: 21, bottom: 17, right: 21), resizingMode: .stretch)
         .withRenderingMode(.alwaysTemplate)
     
-    var incomingColor = Appearance.shared.colors.incomingColor
-    var outgoingColor = Appearance.shared.colors.outgoingColor
+    open var incomingColor: UIColor {
+        Appearance.shared.colors.incomingColor
+    }
+    
+    open var outgoingColor: UIColor {
+        Appearance.shared.colors.outgoingColor
+    }
+    
     var containerViewLeadingConstraint: NSLayoutConstraint?
     var containerViewTrailingConstraint: NSLayoutConstraint?
     
@@ -72,18 +78,15 @@ open class LMChatMessageBubbleView: LMView {
     // MARK: setupViews
     open override func setupViews() {
         super.setupViews()
-        addContentContainerView()
+        addSubview(imageView)
+        addSubview(contentContainer)
+        addSubview(timestampLabel)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-    }
-
-    private func addContentContainerView() {
-        addSubview(imageView)
-        addSubview(contentContainer)
-        addSubview(timestampLabel)
+        
         let leading: CGFloat = isIncoming ? 6 : 12
         let trailing: CGFloat = isIncoming ? 12 : 6
         containerViewLeadingConstraint = contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading)
@@ -121,12 +124,12 @@ open class LMChatMessageBubbleView: LMView {
         containerViewLeadingConstraint?.isActive = false
         containerViewTrailingConstraint?.isActive = false
         if isInComing {
-            imageView.image = receivedBubble
+            imageView.image = receivedBubble.withTintColor(incomingColor, renderingMode: .alwaysTemplate)
             imageView.tintColor = incomingColor
             containerViewLeadingConstraint?.constant = 12
             containerViewTrailingConstraint?.constant = -6
         } else {
-            imageView.image = sentBubble
+            imageView.image = sentBubble.withTintColor(outgoingColor, renderingMode: .alwaysTemplate)
             imageView.tintColor = outgoingColor
             containerViewLeadingConstraint?.constant = 6
             containerViewTrailingConstraint?.constant = -12
@@ -134,5 +137,4 @@ open class LMChatMessageBubbleView: LMView {
         containerViewLeadingConstraint?.isActive = true
         containerViewTrailingConstraint?.isActive = true
     }
-    
 }

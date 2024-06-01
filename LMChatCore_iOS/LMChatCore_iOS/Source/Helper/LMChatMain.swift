@@ -84,6 +84,7 @@ public class LMChatMain {
         DeepLinkManager.sharedInstance.deeplinkRoute(routeUrl: routeUrl, fromNotification: false, fromDeeplink: true)
     }
     
+    @discardableResult
     public func didReceieveNotification(userInfo: [AnyHashable: Any]) -> Bool {
         guard let route = userInfo["route"] as? String, UIApplication.shared.applicationState == .inactive else {return false }
         DeepLinkManager.sharedInstance.didReceivedRemoteNotification(route)

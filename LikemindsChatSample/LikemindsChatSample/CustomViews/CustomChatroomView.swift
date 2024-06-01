@@ -9,18 +9,14 @@ import Foundation
 import LikeMindsChatUI
 
 class CustomChatroomView: LMChatHomeFeedChatroomView {
-    
-    
     override func setupAppearance() {
         super.setupAppearance()
-//        self.containerView.backgroundColor = .systemYellow
+        chatroomImageView.cornerRadius(with: 8)
+        self.backgroundColor = .giphyYellow
         self.chatroomCountBadgeLabel.backgroundColor = .red
-//        self.chatroomCountBadgeLabel.cornerRadius(with: 2)
     }
     
     override func setupLayouts() {
         super.setupLayouts()
     }
-    
-    
 }

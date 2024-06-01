@@ -127,21 +127,12 @@ open class LMChatHomeFeedExploreTabView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            exploreContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            exploreContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            exploreContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-            exploreContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
-            
-        ])
+        
+        pinSubView(subView: containerView)
+        containerView.pinSubView(subView: exploreContainerStackView, padding: .init(top: 16, left: 16, bottom: -16, right: -16))
     }
     
-    public func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel) {
         exploreTitleLabel.text = data.tilesName
         if data.unreadCount <= 0 {
             chatroomCountBadgeLabel.text = data.totalCount > 99 ? "99+" : "\(data.totalCount) Chatrooms"
@@ -150,4 +141,3 @@ open class LMChatHomeFeedExploreTabView: LMView {
         }
     }
 }
-

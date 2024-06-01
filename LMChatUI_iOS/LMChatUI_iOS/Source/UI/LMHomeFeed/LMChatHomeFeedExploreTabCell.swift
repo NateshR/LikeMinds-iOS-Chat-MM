@@ -23,7 +23,7 @@ open class LMChatHomeFeedExploreTabCell: LMTableViewCell {
     
     // MARK: UI Elements
     open private(set) lazy var exploreTabView: LMChatHomeFeedExploreTabView = {
-        let view = LMChatHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.homeFeedExploreTabView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -48,12 +48,9 @@ open class LMChatHomeFeedExploreTabCell: LMTableViewCell {
     open override func setupLayouts() {
         super.setupLayouts()
         
+        contentView.pinSubView(subView: containerView)
+        
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             exploreTabView.topAnchor.constraint(equalTo: containerView.topAnchor),
             exploreTabView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             exploreTabView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
@@ -81,5 +78,3 @@ open class LMChatHomeFeedExploreTabCell: LMTableViewCell {
         exploreTabView.setData(LMChatHomeFeedExploreTabView.ContentModel(tilesName: "Explore", tilesIcon: "", unreadCount: data.unseenChatroomsCount ?? 0, totalCount: data.totalChatroomsCount ?? 0))
     }
 }
-
-
