@@ -137,13 +137,8 @@ open class LMChatMessageLoading: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
+        pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
             profileMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             profileMessageView.bottomAnchor.constraint(equalTo: incomingImageView.bottomAnchor),
             

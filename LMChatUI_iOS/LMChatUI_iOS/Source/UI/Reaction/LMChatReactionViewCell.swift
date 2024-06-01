@@ -89,12 +89,8 @@ open class LMChatReactionViewCell: LMTableViewCell {
     
     open override func setupLayouts() {
         super.setupLayouts()
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             userImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             userImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
@@ -109,7 +105,7 @@ open class LMChatReactionViewCell: LMTableViewCell {
         ])
     }
     
-    public func configure(with data: ContentModel) {
+    open func configure(with data: ContentModel) {
         userName.text = data.username
         removeLabel.isHidden = !data.isSelfReaction
         reactionImage.text = data.reaction

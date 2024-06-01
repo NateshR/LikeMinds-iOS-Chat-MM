@@ -41,7 +41,7 @@ open class LMChatMessageContentView: LMView {
     }()
     
     open private(set) lazy var chatProfileImageView: LMChatProfileView = {
-        let image = LMUIComponents.shared.senderProfileView.init().translatesAutoresizingMaskIntoConstraints()
+        let image = LMUIComponents.shared.chatProfileView.init().translatesAutoresizingMaskIntoConstraints()
         image.isUserInteractionEnabled = true
         return image
     }()
@@ -178,9 +178,6 @@ open class LMChatMessageContentView: LMView {
             bubbleView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             bubbleView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
             bubbleView.bottomAnchor.constraint(equalTo: chatProfileImageContainerStackView.bottomAnchor, constant: -2),
-//            replyMessageView.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),
-//            replyMessageView.leadingAnchor.constraint(equalTo: bubbleView.contentContainer.leadingAnchor),
-//            replyMessageView.trailingAnchor.constraint(equalTo: bubbleView.contentContainer.trailingAnchor)
         ])
         
          bubbleLeadingConstraint = bubbleView.leadingAnchor.constraint(equalTo: chatProfileImageContainerStackView.trailingAnchor)
@@ -242,7 +239,7 @@ open class LMChatMessageContentView: LMView {
         bubbleView.layoutIfNeeded()
     }
     
-    func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
+    open func setTimestamps(_ data: LMChatMessageCell.ContentModel) {
         let edited = data.message?.isEdited == true ? "Edited \(Constants.shared.strings.dot) " : ""
         let timestamp = edited + (data.message?.createdTime ?? "")
         let attributedText = NSMutableAttributedString()
@@ -257,7 +254,7 @@ open class LMChatMessageContentView: LMView {
         bubbleView.updateTimestampLabelTopConstraint(withConstant: textLabel.isHidden ? 6 : 0)
     }
     
-    func messageByName(_ data: LMChatMessageCell.ContentModel) {
+    open func messageByName(_ data: LMChatMessageCell.ContentModel) {
         
         let myAttribute = [ NSAttributedString.Key.font: Appearance.shared.fonts.headingLabel, .foregroundColor: Appearance.shared.colors.red]
         let myString = NSMutableAttributedString(string: "\(data.message?.createdBy ?? "")", attributes: myAttribute )
@@ -268,7 +265,7 @@ open class LMChatMessageContentView: LMView {
         usernameLabel.attributedText = myString
     }
     
-    func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
+    open func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
         self.textLabel.font = deletedTextLabelFont
         self.textLabel.textColor = deletedTextLabelColor
         self.textLabel.text = Constants.shared.strings.messageDeleteText
@@ -276,7 +273,7 @@ open class LMChatMessageContentView: LMView {
         self.textLabel.isHidden = false
     }
 
-    func replyView(_ data: LMChatMessageCell.ContentModel) {
+    open func replyView(_ data: LMChatMessageCell.ContentModel) {
         if let repliedMessage = data.message?.replied?.first {
             replyMessageView.isHidden = false
             replyMessageView.closeReplyButton.isHidden = true
@@ -290,7 +287,7 @@ open class LMChatMessageContentView: LMView {
         }
     }
     
-    func reactionsView(_ data: LMChatMessageCell.ContentModel) {
+    open func reactionsView(_ data: LMChatMessageCell.ContentModel) {
         if let reactions = data.message?.reactions, reactions.count > 0 {
             reactionsView.isHidden = false
             reactionsView.setData(reactions)

@@ -49,7 +49,7 @@ open class LMChatMessageReplyPreview: LMView {
     
     open private(set) lazy var userNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Username"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.red
         label.numberOfLines = 1
@@ -135,12 +135,8 @@ open class LMChatMessageReplyPreview: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
             closeReplyButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -2),
             closeReplyButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 2),
             
@@ -165,7 +161,7 @@ open class LMChatMessageReplyPreview: LMView {
             ])
     }
     
-    public func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = data.username
         messageLabel.font = Appearance.shared.fonts.subHeadingFont2
@@ -186,7 +182,7 @@ open class LMChatMessageReplyPreview: LMView {
         }
     }
     
-    public func setDataForEdit(_ data: ContentModel) {
+    open func setDataForEdit(_ data: ContentModel) {
         viewData = data
         self.userNameLabel.text = "Edit message"
         self.messageLabel.attributedText = createAttributedString(data)
@@ -194,7 +190,7 @@ open class LMChatMessageReplyPreview: LMView {
         
     }
     
-    func createAttributedString(_ data: ContentModel) -> NSAttributedString {
+    open func createAttributedString(_ data: ContentModel) -> NSAttributedString {
         let message = GetAttributedTextWithRoutes.getAttributedText(from: data.replyMessage ?? "", font: Appearance.shared.fonts.subHeadingFont2)
         let pointSize: CGFloat = Appearance.shared.fonts.subHeadingFont2.pointSize
         guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
@@ -254,11 +250,11 @@ open class LMChatMessageReplyPreview: LMView {
         return attributedText
     }
     
-    @objc func cancelReply(_ sender:UIButton) {
+    @objc open func cancelReply(_ sender:UIButton) {
         onClickCancelReplyPreview?()
     }
     
-    @objc func onReplyPreviewClicked(_ gesture: UITapGestureRecognizer) {
+    @objc open func onReplyPreviewClicked(_ gesture: UITapGestureRecognizer) {
         onClickReplyPreview?()
     }
 }

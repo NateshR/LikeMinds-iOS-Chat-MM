@@ -45,12 +45,8 @@ open class LMChatHomeFeedChatroomCell: LMTableViewCell {
     open override func setupLayouts() {
         super.setupLayouts()
         
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             chatroomView.topAnchor.constraint(equalTo: containerView.topAnchor),
             chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),

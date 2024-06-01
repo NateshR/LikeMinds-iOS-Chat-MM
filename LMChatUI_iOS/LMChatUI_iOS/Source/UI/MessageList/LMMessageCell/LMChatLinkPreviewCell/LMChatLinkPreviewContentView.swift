@@ -11,7 +11,7 @@ import UIKit
 open class LMChatLinkPreviewContentView: LMChatMessageContentView {
  
     open private(set) lazy var linkPreview: LMChatMessageLinkPreview = {[unowned self] in
-        let preview = LMUIComponents.shared.linkView.init().translatesAutoresizingMaskIntoConstraints()
+        let preview = LMUIComponents.shared.messageLinkPreview.init().translatesAutoresizingMaskIntoConstraints()
         preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.cornerRadius(with: 12)

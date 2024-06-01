@@ -60,7 +60,7 @@ open class LMChatroomHeaderMessageView: LMView {
     }()
     
     open private(set) lazy var creatorProfileImageView: LMChatProfileView = {
-        let image = LMChatProfileView().translatesAutoresizingMaskIntoConstraints()
+        let image = LMUIComponents.shared.chatProfileView.init().translatesAutoresizingMaskIntoConstraints()
         image.imageView.image = Constants.shared.images.placeholderImage
         return image
     }()

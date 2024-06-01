@@ -27,7 +27,7 @@ open class LMChatParticipantCell: LMTableViewCell {
     
     // MARK: UI Elements
     open private(set) lazy var participantView: LMChatParticipantView = {
-        let view = LMChatParticipantView().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.participantView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -51,18 +51,12 @@ open class LMChatParticipantCell: LMTableViewCell {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             participantView.topAnchor.constraint(equalTo: containerView.topAnchor),
             participantView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             participantView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             participantView.bottomAnchor.constraint(equalTo: sepratorView.topAnchor),
-            
             sepratorView.leadingAnchor.constraint(equalTo: participantView.profileImageView.leadingAnchor, constant: 5),
             sepratorView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             sepratorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),

@@ -18,6 +18,8 @@
 		F4C790E02B296EA90084823E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4C790DE2B296EA90084823E /* Main.storyboard */; };
 		F4C790E22B296EAE0084823E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4C790E12B296EAE0084823E /* Assets.xcassets */; };
 		F4C790E52B296EAE0084823E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4C790E32B296EAE0084823E /* LaunchScreen.storyboard */; };
+		F4FB20662C0B5987009C2D73 /* CustomExploreChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FB20652C0B5987009C2D73 /* CustomExploreChatroomView.swift */; };
+		F4FB20682C0B5CA1009C2D73 /* CustomReplyPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FB20672C0B5CA1009C2D73 /* CustomReplyPreview.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		F4C790E12B296EAE0084823E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4C790E42B296EAE0084823E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F4C790E62B296EAE0084823E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F4FB20652C0B5987009C2D73 /* CustomExploreChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomExploreChatroomView.swift; sourceTree = "<group>"; };
+		F4FB20672C0B5CA1009C2D73 /* CustomReplyPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomReplyPreview.swift; sourceTree = "<group>"; };
 		F9273B4FFF9B024657FA31BA /* Pods-LikemindsChatSample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LikemindsChatSample.release.xcconfig"; path = "Target Support Files/Pods-LikemindsChatSample/Pods-LikemindsChatSample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -74,6 +78,8 @@
 				F45B8AAD2B999F4900AB95E4 /* CustomChatroomView.swift */,
 				E5A045362C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift */,
 				E5A045382C0AF0690086C431 /* CustomMessageBubbleView.swift */,
+				F4FB20652C0B5987009C2D73 /* CustomExploreChatroomView.swift */,
+				F4FB20672C0B5CA1009C2D73 /* CustomReplyPreview.swift */,
 			);
 			path = CustomViews;
 			sourceTree = "<group>";
@@ -233,6 +239,8 @@
 				E5A045392C0AF0690086C431 /* CustomMessageBubbleView.swift in Sources */,
 				E5A045372C0AEC880086C431 /* CustomHomeFeedExploreTabView.swift in Sources */,
 				F4C790D92B296EA90084823E /* AppDelegate.swift in Sources */,
+				F4FB20682C0B5CA1009C2D73 /* CustomReplyPreview.swift in Sources */,
+				F4FB20662C0B5987009C2D73 /* CustomExploreChatroomView.swift in Sources */,
 				F45B8AAE2B999F4900AB95E4 /* CustomChatroomView.swift in Sources */,
 				F4C790DB2B296EA90084823E /* SceneDelegate.swift in Sources */,
 			);

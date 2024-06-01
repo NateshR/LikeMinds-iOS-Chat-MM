@@ -43,12 +43,8 @@ open class LMChatEmojiCollectionCell: LMCollectionViewCell {
     
     open override func setupLayouts() {
         super.setupLayouts()
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
@@ -56,7 +52,7 @@ open class LMChatEmojiCollectionCell: LMCollectionViewCell {
         ])
     }
     
-    public func configure(data: ContentModel) {
+    open func configure(data: ContentModel) {
         titleLabel.text = data.emojiIcon
     }
 }

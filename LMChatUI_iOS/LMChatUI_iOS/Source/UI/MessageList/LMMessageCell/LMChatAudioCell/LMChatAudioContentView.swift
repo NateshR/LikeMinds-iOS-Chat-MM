@@ -88,7 +88,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
             return
         }
         attachments.forEach { attachment in
-            let preview = LMUIComponents.shared.audioView.init()
+            let preview = LMUIComponents.shared.audioPreview.init()
             preview.translatesAutoresizingMaskIntoConstraints = false
             preview.configure(with: .init(fileName: attachment.fileName, url: attachment.fileUrl, duration: attachment.duration ?? 0, thumbnail: attachment.thumbnailUrl), delegate: delegate, index: index)
             preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
@@ -109,7 +109,7 @@ open class LMChatAudioContentView: LMChatMessageContentView {
     }
     
     func createAudioPreview(with data: LMChatAudioContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) -> LMChatVoiceNotePreview {
-        let preview =  LMUIComponents.shared.voiceNoteView.init().translatesAutoresizingMaskIntoConstraints()
+        let preview =  LMUIComponents.shared.voiceNotePreview.init().translatesAutoresizingMaskIntoConstraints()
         preview.translatesAutoresizingMaskIntoConstraints = false
         preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear

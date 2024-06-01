@@ -84,7 +84,7 @@ open class LMChatDocumentContentView: LMChatMessageContentView {
     }
     
     func createDocPreview(_ data: LMChatMessageDocumentPreview.ContentModel) -> LMChatMessageDocumentPreview {
-        let preview = LMUIComponents.shared.documentView.init().translatesAutoresizingMaskIntoConstraints()
+        let preview = LMUIComponents.shared.messageDocumentPreview.init().translatesAutoresizingMaskIntoConstraints()
         preview.widthAnchor.constraint(equalToConstant: widthViewSize).isActive = true
         preview.backgroundColor = .clear
         preview.setHeightConstraint(with: 60)

@@ -55,18 +55,8 @@ open class LMChatTaggingListView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
+        pinSubView(subView: containerView)
+        containerView.pinSubView(subView: tableView)
     }
     
     
@@ -153,13 +143,6 @@ extension LMChatMessageListViewController: LMChatTaggedUserFoundProtocol {
     }
     
     public func updateHeight(with height: CGFloat) {
-        
-        //        self.taggingViewHeightConstraints?.isActive = false
-        //        self.taggingViewHeightConstraints?.constant = height
-        //        self.taggingViewHeightConstraints?.isActive = true
-        //        UIView.animate(withDuration: 0.3) {[weak self] in
-        //            self?.taggingListView.layoutIfNeeded()
-        //        }
         taggingViewHeightConstraints?.constant = height
     }
 }

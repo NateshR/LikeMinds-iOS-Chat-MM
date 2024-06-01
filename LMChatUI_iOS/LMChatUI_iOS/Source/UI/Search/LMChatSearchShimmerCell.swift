@@ -16,28 +16,28 @@ open class LMChatSearchShimmerCell: LMView {
     }()
     
     open private(set) lazy var profileShimmerView: LMChatShimmerView = {
-        let view = LMChatShimmerView()
+        let view = LMUIComponents.shared.shimmerView.init()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
         return view
     }()
     
     open private(set) lazy var titleShimmerView: LMChatShimmerView = {
-        let view = LMChatShimmerView()
+        let view = LMUIComponents.shared.shimmerView.init()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
         return view
     }()
     
     open private(set) lazy var subtitleShimmerView: LMChatShimmerView = {
-        let view = LMChatShimmerView()
+        let view = LMUIComponents.shared.shimmerView.init()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
         return view
     }()
     
     open private(set) lazy var bodyShimmerView: LMChatShimmerView = {
-        let view = LMChatShimmerView()
+        let view = LMUIComponents.shared.shimmerView.init()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
         return view

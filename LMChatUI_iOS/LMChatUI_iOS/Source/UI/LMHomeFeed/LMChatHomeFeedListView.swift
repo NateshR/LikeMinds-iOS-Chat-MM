@@ -41,7 +41,7 @@ open class LMChatHomeFeedListView: LMView {
     }()
     
     open private(set) lazy var loadingView: LMChatHomeFeedShimmerView = {
-        let view = LMChatHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.homeFeedShimmerView.init().translatesAutoresizingMaskIntoConstraints()
         view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
         return view
     }()
@@ -85,18 +85,8 @@ open class LMChatHomeFeedListView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            tableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-        ])
+        pinSubView(subView: containerView)
+        containerView.pinSubView(subView: tableView)
     }
     
     

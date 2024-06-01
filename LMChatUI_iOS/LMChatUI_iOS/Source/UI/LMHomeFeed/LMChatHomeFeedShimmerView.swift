@@ -34,7 +34,7 @@ open class LMChatHomeFeedShimmerView: LMView {
     open override func setupLayouts() {
         super.setupLayouts()
         for _ in 0..<5 {
-            let shimmer = LMChatHomeFeedLoading()
+            let shimmer = LMUIComponents.shared.homeFeedLoading.init()
             shimmer.translatesAutoresizingMaskIntoConstraints = false
             shimmer.setHeightConstraint(with: 80)
             stackView.addArrangedSubview(shimmer)

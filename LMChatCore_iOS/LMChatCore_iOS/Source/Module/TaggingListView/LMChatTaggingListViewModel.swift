@@ -40,17 +40,7 @@ public final class LMChatTaggingListViewModel {
         self.delegate = delegate
         self.chatroomId = ""
     }
-  /*
-    public static func createModule(delegate: LMChatTaggedUserFoundProtocol?) -> LMChatTaggingListView {
-        let viewController = Components.shared.taggingListView.init()
-        let viewModel = LMChatTaggingListViewModel(delegate: viewController)
-        
-        viewController.viewModel = viewModel
-        viewController.delegate = delegate
-        return viewController
-    }
-    */
-    
+
     func stopFetchingUsers() {
         isFetching = false
         shouldFetchNames = false
@@ -81,9 +71,6 @@ public final class LMChatTaggingListViewModel {
     
     private func fetchTaggingList(_ searchString: String, _ chatroomId: String) {
         isFetching = true
-//        taggedUsers.append(contentsOf: TagUser.getUsers(search: searchString))
-//        convertToViewModel()
-//        return 
         let request = GetTaggingListRequest.Builder()
             .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
             .chatroomId(chatroomId)
@@ -104,30 +91,6 @@ public final class LMChatTaggingListViewModel {
             currentPage += 1
             isFetching = false
         }
-      /*
-        let request = GetTaggingListRequest.builder()
-            .searchName(searchString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
-            .page(currentPage)
-            .pageSize(pageSize)
-            .build()
-        
-        LMFeedClient.shared.getTaggingList(request) { [weak self] response in
-            guard let self else { return }
-            
-            isFetching = false
-            
-            guard let users = response.data?.members else { return }
-            
-            isLastPage = users.isEmpty
-            
-            let tempUsers: [LMFeedTagListDataModel] = users.compactMap { user in
-                return .init(from: user)
-            }
-            
-            taggedUsers.append(contentsOf: tempUsers)
-            convertToViewModel()
-        }
-        */
     }
     
     private func convertToViewModel() {
@@ -136,7 +99,6 @@ public final class LMChatTaggingListViewModel {
         let convertedUsers: [LMChatTaggingUserTableCell.ViewModel] = taggedUsers.map { user in
                 .init(userImage: user.image, userName: user.name, route: user.route)
         }
-        
         delegate?.updateList(with: convertedUsers)
     }
 }

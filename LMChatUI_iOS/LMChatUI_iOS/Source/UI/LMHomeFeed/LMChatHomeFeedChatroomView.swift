@@ -61,8 +61,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.distribution = .fillProportionally
         view.alignment = .center
         view.spacing = 10
-        view.addArrangedSubview(chatroomImageView)
-        view.addArrangedSubview(chatroomNameAndMessageContainerStackView)
         return view
     }()
     
@@ -71,8 +69,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.axis = .vertical
         view.distribution = .fillProportionally
         view.spacing = 5
-        view.addArrangedSubview(chatroomNameContainerStackView)
-        view.addArrangedSubview(chatroomMessageContainerStackView)
         return view
     }()
     
@@ -81,10 +77,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fillProportionally
         view.spacing = 2
-        view.addArrangedSubview(chatroomNameLabel)
-        view.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
-        view.addArrangedSubview(spacerBetweenLockAndTimestamp)
-        view.addArrangedSubview(timestampLabel)
         return view
     }()
     
@@ -93,8 +85,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fillProportionally
         view.spacing = 2
-        view.addArrangedSubview(lastMessageLabel)
-        view.addArrangedSubview(muteAndBadgeIconContainerStackView)
         return view
     }()
     
@@ -144,8 +134,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fill
         view.spacing = 5
-        view.addArrangedSubview(lockIconImageView)
-        view.addArrangedSubview(announcementIconImageView)
         return view
     }()
     
@@ -180,9 +168,6 @@ open class LMChatHomeFeedChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fill
         view.spacing = 5
-        view.addArrangedSubview(tagIconImageView)
-        view.addArrangedSubview(muteIconImageView)
-        view.addArrangedSubview(chatroomCountBadgeLabel)
         return view
     }()
     
@@ -208,7 +193,7 @@ open class LMChatHomeFeedChatroomView: LMView {
     
     open private(set) lazy var chatroomCountBadgeLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "20+"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont2
         label.numberOfLines = 1
         label.textAlignment = .center
@@ -232,17 +217,28 @@ open class LMChatHomeFeedChatroomView: LMView {
         super.setupViews()
         addSubview(containerView)
         containerView.addSubview(chatroomContainerStackView)
+        muteAndBadgeIconContainerStackView.addArrangedSubview(tagIconImageView)
+        muteAndBadgeIconContainerStackView.addArrangedSubview(muteIconImageView)
+        muteAndBadgeIconContainerStackView.addArrangedSubview(chatroomCountBadgeLabel)
+        lockAndAnnouncementIconContainerStackView.addArrangedSubview(lockIconImageView)
+        lockAndAnnouncementIconContainerStackView.addArrangedSubview(announcementIconImageView)
+        chatroomMessageContainerStackView.addArrangedSubview(lastMessageLabel)
+        chatroomMessageContainerStackView.addArrangedSubview(muteAndBadgeIconContainerStackView)
+        chatroomNameContainerStackView.addArrangedSubview(chatroomNameLabel)
+        chatroomNameContainerStackView.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
+        chatroomNameContainerStackView.addArrangedSubview(spacerBetweenLockAndTimestamp)
+        chatroomNameContainerStackView.addArrangedSubview(timestampLabel)
+        chatroomNameAndMessageContainerStackView.addArrangedSubview(chatroomNameContainerStackView)
+        chatroomNameAndMessageContainerStackView.addArrangedSubview(chatroomMessageContainerStackView)
+        chatroomContainerStackView.addArrangedSubview(chatroomImageView)
+        chatroomContainerStackView.addArrangedSubview(chatroomNameAndMessageContainerStackView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
+        pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
             chatroomContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             chatroomContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             chatroomContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
@@ -269,7 +265,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         }
     }
     
-    func lastMessageLabelSet(_ data: ContentModel) {
+    open func lastMessageLabelSet(_ data: ContentModel) {
         let attributedText = NSMutableAttributedString()
         
         for fileAttachmentType in (data.fileTypeWithCount ?? []) {

@@ -64,9 +64,6 @@ open class LMChatExploreChatroomView: LMView {
         view.axis = .horizontal
         view.alignment = .top
         view.spacing = 10
-        view.addArrangedSubview(chatroomImageView)
-        view.addArrangedSubview(chatroomNameAndCountContainerStackView)
-        view.addArrangedSubview(joinButton)
         return view
     }()
     
@@ -75,8 +72,6 @@ open class LMChatExploreChatroomView: LMView {
         view.axis = .vertical
         view.alignment = .top
         view.spacing = 2
-        view.addArrangedSubview(chatroomNameContainerStackView)
-        view.addArrangedSubview(chatroomParticipantsCountLabel)
         return view
     }()
     
@@ -85,14 +80,12 @@ open class LMChatExploreChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fillProportionally
         view.spacing = 2
-        view.addArrangedSubview(chatroomNameLabel)
-        view.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
         return view
     }()
     
     open private(set) lazy var chatroomNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatname"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
@@ -102,7 +95,7 @@ open class LMChatExploreChatroomView: LMView {
     
     open private(set) lazy var newLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "NEW"
+        label.text = ""
         label.font = Appearance.shared.fonts.textFont2
         label.textColor = Appearance.shared.colors.white
         label.backgroundColor = Appearance.shared.colors.red
@@ -147,8 +140,6 @@ open class LMChatExploreChatroomView: LMView {
         view.axis = .horizontal
         view.distribution = .fill
         view.spacing = 5
-        view.addArrangedSubview(lockIconImageView)
-        view.addArrangedSubview(announcementIconImageView)
         return view
     }()
     
@@ -213,6 +204,15 @@ open class LMChatExploreChatroomView: LMView {
         containerView.addSubview(chatroomTitleLabel)
         containerView.addSubview(pinnedIconImageView)
         containerView.addSubview(newLabel)
+        lockAndAnnouncementIconContainerStackView.addArrangedSubview(lockIconImageView)
+        lockAndAnnouncementIconContainerStackView.addArrangedSubview(announcementIconImageView)
+        chatroomNameContainerStackView.addArrangedSubview(chatroomNameLabel)
+        chatroomNameContainerStackView.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
+        chatroomNameAndCountContainerStackView.addArrangedSubview(chatroomNameContainerStackView)
+        chatroomNameAndCountContainerStackView.addArrangedSubview(chatroomParticipantsCountLabel)
+        chatroomContainerStackView.addArrangedSubview(chatroomImageView)
+        chatroomContainerStackView.addArrangedSubview(chatroomNameAndCountContainerStackView)
+        chatroomContainerStackView.addArrangedSubview(joinButton)
     }
     
     // MARK: setupLayouts
@@ -220,6 +220,7 @@ open class LMChatExploreChatroomView: LMView {
         super.setupLayouts()
         
         pinSubView(subView: containerView)
+        
         
         NSLayoutConstraint.activate([
             chatroomContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
@@ -260,7 +261,7 @@ open class LMChatExploreChatroomView: LMView {
         chatroomImageView.kf.setImage(with: URL(string: data.chatroomImageUrl ?? ""), placeholder: placeholder)
     }
     
-    func getAttachmentText(participantCount: Int, messageCount: Int) {
+    open func getAttachmentText(participantCount: Int, messageCount: Int) {
         let participantsImageAttachment = NSTextAttachment()
         participantsImageAttachment.image = Constants.shared.images.person2Icon.withSystemImageConfig(pointSize: 12)?.withTintColor(Appearance.shared.colors.textColor)
         
@@ -276,7 +277,7 @@ open class LMChatExploreChatroomView: LMView {
         chatroomParticipantsCountLabel.attributedText = fullString
     }
     
-    @objc func joinButtonClicked(_ sender: UIButton) {
+    @objc open func joinButtonClicked(_ sender: UIButton) {
         guard let viewData else { return }
         let updatedStatus = !(viewData.isFollowed ?? false)
         self.viewData?.isFollowed = updatedStatus
@@ -284,7 +285,7 @@ open class LMChatExploreChatroomView: LMView {
         delegate?.onTapJoinButton(updatedStatus, viewData.chatroomId)
     }
     
-    func joinButtonTitle(_ isFollowed: Bool) {
+    open func joinButtonTitle(_ isFollowed: Bool) {
         if isFollowed {
             joinButton.setTitle("Joined", for: .normal)
             joinButton.tintColor = Appearance.shared.colors.linkColor

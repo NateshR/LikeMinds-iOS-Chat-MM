@@ -15,6 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
         LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
         LMUIComponents.shared.messageBubbleView = CustomMessageBubbleView.self
+        LMUIComponents.shared.exploreChatroomView = CustomExploreChatroomView.self
+        LMUIComponents.shared.messageReplyView = CustomReplyPreview.self
         registerForPushNotifications(application: application)
         return true
     }

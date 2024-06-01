@@ -18,17 +18,15 @@ public struct LMUIComponents {
     //MARK: LMHomeFeed
     public var homeFeedChatroomCell: LMChatHomeFeedChatroomCell.Type = LMChatHomeFeedChatroomCell.self
     public var homeFeedExploreTabCell: LMChatHomeFeedExploreTabCell.Type = LMChatHomeFeedExploreTabCell.self
-    public var homeFeedShimmerCellView: LMChatHomeFeedLoading.Type = LMChatHomeFeedLoading.self
+    public var homeFeedLoading: LMChatHomeFeedLoading.Type = LMChatHomeFeedLoading.self
     public var homeFeedListView: LMChatHomeFeedListView.Type = LMChatHomeFeedListView.self
     public var homeFeedExploreTabView: LMChatHomeFeedExploreTabView.Type = LMChatHomeFeedExploreTabView.self
     public var homeFeedChatroomView: LMChatHomeFeedChatroomView.Type = LMChatHomeFeedChatroomView.self
     public var homeFeedShimmerView: LMChatHomeFeedShimmerView.Type = LMChatHomeFeedShimmerView.self
     
-    
-    public var exploreChatroomCell: LMChatExploreChatroomCell.Type = LMChatExploreChatroomCell.self
-    
     // MARK: Participant List View
     public var participantListCell: LMChatParticipantCell.Type = LMChatParticipantCell.self
+    public var participantView: LMChatParticipantView.Type = LMChatParticipantView.self
     public var participantListView: LMChatParticipantListView.Type = LMChatParticipantListView.self
     
     // MARK: Report Screen Components
@@ -36,8 +34,11 @@ public struct LMUIComponents {
     
     public var emojiCollectionCell: LMChatEmojiCollectionCell.Type = LMChatEmojiCollectionCell.self
     
-    // Shimmer view
+    // Explore chatroom
+    public var exploreChatroomView: LMChatExploreChatroomView.Type = LMChatExploreChatroomView.self
+    public var exploreChatroomCell: LMChatExploreChatroomCell.Type = LMChatExploreChatroomCell.self
     
+    // Shimmer view
     public var shimmerView: LMChatShimmerView.Type = LMChatShimmerView.self
     
     // Chat message list
@@ -51,23 +52,22 @@ public struct LMUIComponents {
     public var chatMessageDocumentCell: LMChatDocumentViewCell.Type = LMChatDocumentViewCell.self
     public var chatMessageAudioCell: LMChatAudioViewCell.Type = LMChatAudioViewCell.self
     public var chatMessageLinkPreviewCell: LMChatLinkPreviewCell.Type = LMChatLinkPreviewCell.self
-    public var messageLoadingCell: LMChatMessageLoading.Type = LMChatMessageLoading.self
+    public var messageLoading: LMChatMessageLoading.Type = LMChatMessageLoading.self
     public var attachmentLoaderView: LMAttachmentLoaderView.Type = LMAttachmentLoaderView.self
     public var attachmentRetryView: LMChatAttachmentUploadRetryView.Type = LMChatAttachmentUploadRetryView.self
     public var messageReactionView: LMChatMessageReactionsView.Type = LMChatMessageReactionsView.self
     public var messageReplyView: LMChatMessageReplyPreview.Type = LMChatMessageReplyPreview.self
-    public var senderProfileView: LMChatProfileView.Type = LMChatProfileView.self
+    public var chatProfileView: LMChatProfileView.Type = LMChatProfileView.self
     public var galleryContentView: LMChatGalleryContentView.Type = LMChatGalleryContentView.self
     public var galleryView: LMChatMessageGallaryView.Type = LMChatMessageGallaryView.self
     
     public var documentsContentView: LMChatDocumentContentView.Type = LMChatDocumentContentView.self
-    public var documentView: LMChatMessageDocumentPreview.Type = LMChatMessageDocumentPreview.self
+    public var messageDocumentPreview: LMChatMessageDocumentPreview.Type = LMChatMessageDocumentPreview.self
     
     public var audioContentView: LMChatAudioContentView.Type = LMChatAudioContentView.self
-    public var audioView: LMChatAudioPreview.Type = LMChatAudioPreview.self
-    public var voiceNoteView: LMChatVoiceNotePreview.Type = LMChatVoiceNotePreview.self
+    public var audioPreview: LMChatAudioPreview.Type = LMChatAudioPreview.self
+    public var voiceNotePreview: LMChatVoiceNotePreview.Type = LMChatVoiceNotePreview.self
     public var linkContentView: LMChatLinkPreviewContentView.Type = LMChatLinkPreviewContentView.self
-    public var linkView: LMChatMessageLinkPreview.Type = LMChatMessageLinkPreview.self
-    
+    public var messageLinkPreview: LMChatMessageLinkPreview.Type = LMChatMessageLinkPreview.self
     
 }

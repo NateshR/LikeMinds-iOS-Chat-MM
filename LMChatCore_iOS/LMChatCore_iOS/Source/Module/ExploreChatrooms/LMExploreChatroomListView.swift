@@ -22,7 +22,7 @@ open class LMExploreChatroomListView: LMViewController {
     }()
     
     open private(set) lazy var loadingView: LMChatHomeFeedShimmerView = {
-        let view = LMChatHomeFeedShimmerView().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.homeFeedShimmerView.init().translatesAutoresizingMaskIntoConstraints()
         view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
         return view
     }()

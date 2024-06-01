@@ -12,7 +12,7 @@ import Kingfisher
 open class LMChatExploreChatroomCell: LMTableViewCell {
     // MARK: UI Elements
     open private(set) lazy var chatroomView: LMChatExploreChatroomView = {
-        let view = LMChatExploreChatroomView().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.exploreChatroomView.init().translatesAutoresizingMaskIntoConstraints()
         view.clipsToBounds = true
         return view
     }()
@@ -38,13 +38,9 @@ open class LMChatExploreChatroomCell: LMTableViewCell {
         super.setupLayouts()
         
         contentView.pinSubView(subView: containerView)
+        containerView.pinSubView(subView: chatroomView)
         
         NSLayoutConstraint.activate([
-            chatroomView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            chatroomView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            chatroomView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            chatroomView.bottomAnchor.constraint(equalTo: sepratorView.topAnchor),
-            
             sepratorView.leadingAnchor.constraint(equalTo: chatroomView.chatroomImageView.leadingAnchor, constant: 5),
             sepratorView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             sepratorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),

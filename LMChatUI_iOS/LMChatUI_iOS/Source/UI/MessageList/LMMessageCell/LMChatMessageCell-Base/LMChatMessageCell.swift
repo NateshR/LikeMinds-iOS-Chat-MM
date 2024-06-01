@@ -98,13 +98,8 @@ open class LMChatMessageCell: LMTableViewCell {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
             retryContainerStackView.centerYAnchor.constraint(equalTo: chatMessageView.centerYAnchor),
             
@@ -139,13 +134,13 @@ open class LMChatMessageCell: LMTableViewCell {
         }
     }
     
-    func updateSelection(data: ContentModel) {
+    open func updateSelection(data: ContentModel) {
         let isSelected = data.isSelected
         selectedButton.backgroundColor = isSelected ? Appearance.shared.colors.linkColor.withAlphaComponent(0.4) : Appearance.shared.colors.clear
         selectedButton.isSelected = isSelected
     }
     
-    @objc func retrySendMessage(_ sender: UIButton) {
+    @objc open func retrySendMessage(_ sender: UIButton) {
         guard let currentIndexPath else { return }
         retryButton.isHidden = true
         layoutIfNeeded()

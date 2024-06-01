@@ -45,8 +45,6 @@ open class LMChatParticipantView: LMView {
         view.axis = .horizontal
         view.alignment = .center
         view.spacing = 10
-        view.addArrangedSubview(profileImageView)
-        view.addArrangedSubview(participantNameAndDesignationContainerStackView)
         return view
     }()
     
@@ -55,8 +53,6 @@ open class LMChatParticipantView: LMView {
         view.axis = .vertical
         view.distribution = .fillProportionally
         view.spacing = 5
-        view.addArrangedSubview(participantNameContainerStackView)
-        view.addArrangedSubview(participantDesignationContainerStackView)
         return view
     }()
     
@@ -65,9 +61,6 @@ open class LMChatParticipantView: LMView {
         view.axis = .horizontal
         view.distribution = .fillProportionally
         view.spacing = 4
-        view.addArrangedSubview(nameLabel)
-        view.addArrangedSubview(customTitle)
-        view.addArrangedSubview(spacerForNamesStackView)
         return view
     }()
     
@@ -76,8 +69,6 @@ open class LMChatParticipantView: LMView {
         view.axis = .vertical
         view.distribution = .fillProportionally
         view.spacing = 2
-        view.addArrangedSubview(designationLabel)
-//        view.addArrangedSubview(pendingTextLabel)
         return view
     }()
     
@@ -141,9 +132,6 @@ open class LMChatParticipantView: LMView {
         view.axis = .horizontal
         view.alignment = .center
         view.spacing = 10
-//        view.addArrangedSubview(rejectImageView)
-//        view.addArrangedSubview(approveImageView)
-//        view.addArrangedSubview(moreOptionsImageView)
         return view
     }()
     
@@ -188,26 +176,24 @@ open class LMChatParticipantView: LMView {
         super.setupViews()
         addSubview(containerView)
         containerView.addSubview(participantContainerStackView)
+        participantDesignationContainerStackView.addArrangedSubview(designationLabel)
+        participantNameContainerStackView.addArrangedSubview(nameLabel)
+        participantNameContainerStackView.addArrangedSubview(customTitle)
+        participantNameContainerStackView.addArrangedSubview(spacerForNamesStackView)
+        participantNameAndDesignationContainerStackView.addArrangedSubview(participantNameContainerStackView)
+        participantNameAndDesignationContainerStackView.addArrangedSubview(participantDesignationContainerStackView)
+        participantContainerStackView.addArrangedSubview(profileImageView)
+        participantContainerStackView.addArrangedSubview(participantNameAndDesignationContainerStackView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            participantContainerStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            participantContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            participantContainerStackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
-            participantContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
-            
-        ])
+        pinSubView(subView: containerView)
+        containerView.pinSubView(subView: participantContainerStackView, padding: .init(top: 12, left: 16, bottom: -12, right: -16))
     }
     
-    public func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel) {
         nameLabel.text = data.name
         designationLabel.text = data.designationDetail
         customTitle.text =  data.customTitle != nil ? "\(Constants.Strings.shared.dot) " + (data.customTitle ?? "") : nil

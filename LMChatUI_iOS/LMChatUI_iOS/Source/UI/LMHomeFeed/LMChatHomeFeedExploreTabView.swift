@@ -44,8 +44,6 @@ open class LMChatHomeFeedExploreTabView: LMView {
         view.distribution = .fillProportionally
         view.alignment = .center
         view.spacing = 10
-        view.addArrangedSubview(exploreIconImageView)
-        view.addArrangedSubview(exploreNameContainerStackView)
         return view
     }()
 
@@ -54,10 +52,6 @@ open class LMChatHomeFeedExploreTabView: LMView {
         view.axis = .horizontal
         view.distribution = .fillProportionally
         view.spacing = 10
-        view.addArrangedSubview(exploreTitleLabel)
-        view.addArrangedSubview(spacerBetweenTitleAndArrowIcon)
-        view.addArrangedSubview(chatroomCountBadgeLabel)
-        view.addArrangedSubview(rightArrowIconImageView)
         return view
     }()
     
@@ -102,7 +96,7 @@ open class LMChatHomeFeedExploreTabView: LMView {
     
     open private(set) lazy var chatroomCountBadgeLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "20+"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont2
         label.numberOfLines = 1
         label.textAlignment = .center
@@ -122,12 +116,17 @@ open class LMChatHomeFeedExploreTabView: LMView {
         super.setupViews()
         addSubview(containerView)
         containerView.addSubview(exploreContainerStackView)
+        exploreContainerStackView.addArrangedSubview(exploreIconImageView)
+        exploreContainerStackView.addArrangedSubview(exploreNameContainerStackView)
+        exploreNameContainerStackView.addArrangedSubview(exploreTitleLabel)
+        exploreNameContainerStackView.addArrangedSubview(spacerBetweenTitleAndArrowIcon)
+        exploreNameContainerStackView.addArrangedSubview(chatroomCountBadgeLabel)
+        exploreNameContainerStackView.addArrangedSubview(rightArrowIconImageView)
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
         pinSubView(subView: containerView)
         containerView.pinSubView(subView: exploreContainerStackView, padding: .init(top: 16, left: 16, bottom: -16, right: -16))
     }

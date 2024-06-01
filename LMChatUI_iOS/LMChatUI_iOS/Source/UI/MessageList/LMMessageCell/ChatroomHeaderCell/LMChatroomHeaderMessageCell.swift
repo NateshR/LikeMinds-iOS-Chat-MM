@@ -63,13 +63,8 @@ open class LMChatroomHeaderMessageCell: LMTableViewCell {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        
+        contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
             chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
             chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             chatMessageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),

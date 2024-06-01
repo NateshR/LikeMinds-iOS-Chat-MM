@@ -20,5 +20,6 @@ final class CustomHomeFeedExploreTabView: LMChatHomeFeedExploreTabView {
     
     override func setupAppearance() {
         super.setupAppearance()
+        containerView.backgroundColor = .systemPink
     }
 }

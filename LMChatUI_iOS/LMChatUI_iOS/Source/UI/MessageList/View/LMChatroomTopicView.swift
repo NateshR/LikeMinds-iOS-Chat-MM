@@ -73,7 +73,7 @@ open class LMChatroomTopicView: LMView {
     }()
     
     open private(set) lazy var chatProfileImageView: LMChatProfileView = {
-        let image = LMChatProfileView().translatesAutoresizingMaskIntoConstraints()
+        let image = LMUIComponents.shared.chatProfileView.init().translatesAutoresizingMaskIntoConstraints()
         image.imageView.image = Constants.shared.images.placeholderImage
         return image
     }()
@@ -132,14 +132,14 @@ open class LMChatroomTopicView: LMView {
         onTopicViewClick?(topicData?.topicId ?? "")
     }
     
-    public func setData(_ data: ContentModel) {
+    open func setData(_ data: ContentModel) {
         topicData = data
         nameLabel.text = data.titleHeader
         topicLabel.attributedText = createAttributedString(data)
         chatProfileImageView.imageView.kf.setImage(with: URL(string: data.chatroomImageUrl), placeholder: UIImage.generateLetterImage(name: data.createdBy.components(separatedBy: " ").first ?? ""))
     }
     
-    func createAttributedString(_ data: ContentModel) -> NSAttributedString {
+    open func createAttributedString(_ data: ContentModel) -> NSAttributedString {
         let message = GetAttributedTextWithRoutes.getAttributedText(from: data.title, font: Appearance.shared.fonts.subHeadingFont2)
         let pointSize: CGFloat = Appearance.shared.fonts.subHeadingFont2.pointSize
         guard let count = data.attachmentsUrls?.count, count > 0, let fileType = data.attachmentsUrls?.first?.fileType  else {
