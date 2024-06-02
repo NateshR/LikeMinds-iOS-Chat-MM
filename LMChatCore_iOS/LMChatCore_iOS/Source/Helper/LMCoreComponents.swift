@@ -16,8 +16,8 @@ public struct LMCoreComponents {
     // MARK: HomeFeed Screen
     public var homeFeedScreen: LMChatHomeFeedViewController.Type = LMChatHomeFeedViewController.self
     
-    public var exploreChatroomListScreen: LMChatExploreChatroomListView.Type = LMChatExploreChatroomListView.self
-    public var exploreChatroomScreen: LMChatExploreChatroomViewController.Type = LMChatExploreChatroomViewController.self
+    public var exploreChatroomListScreen: LMExploreChatroomListView.Type = LMExploreChatroomListView.self
+    public var exploreChatroomScreen: LMExploreChatroomViewController.Type = LMExploreChatroomViewController.self
     
     // MARK: Report Screen
     public var reportScreen: LMChatReportViewController.Type = LMChatReportViewController.self

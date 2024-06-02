@@ -1,5 +1,5 @@
 //
-//  LMChatExploreChatroomViewController.swift
+//  LMExploreChatroomViewController.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 19/04/24.
@@ -8,10 +8,10 @@
 import Foundation
 import LikeMindsChatUI
 
-open class LMChatExploreChatroomViewController: LMViewController {
-    var viewModel: LMChatExploreChatroomViewModel?
+open class LMExploreChatroomViewController: LMViewController {
+    var viewModel: LMExploreChatroomViewModel?
     
-    open private(set) lazy var containerView: LMChatExploreChatroomListView? = {
+    open private(set) lazy var containerView: LMExploreChatroomListView? = {
         if let view = try? LMChatExploreChatroomViewModel.createModule() {
             view.view.translatesAutoresizingMaskIntoConstraints = false
             return view

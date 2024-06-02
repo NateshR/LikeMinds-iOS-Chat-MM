@@ -50,7 +50,7 @@ public final class LMChatExploreChatroomViewModel {
         self.isPinnedSelected = false
     }
     
-    public static func createModule() throws -> LMChatExploreChatroomListView {
+    public static func createModule() throws -> LMExploreChatroomListView {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.exploreChatroomListScreen.init()
