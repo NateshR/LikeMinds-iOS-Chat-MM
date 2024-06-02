@@ -56,17 +56,17 @@ class NavigationScreen: NavigationScreenProtocol {
             viewController.modalPresentationStyle = .fullScreen
             source.present(viewController, animated: true)
         case .participants(let chatroomId, let isSecret):
-            guard let participants = try? LMParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
+            guard let participants = try? LMChatParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
             source.navigationController?.pushViewController(participants, animated: true)
         case .report(let chatroomId, let conversationId, let memberId):
             guard let report = try? LMChatReportViewModel.createModule(reportContentId: (chatroomId, conversationId, memberId)) else { return }
             source.navigationController?.pushViewController(report, animated: true)
         case .reactionSheet(let reactions, let selected, let conversationId, let chatroomId):
-            guard let reactions = try? LMReactionViewModel.createModule(reactions: reactions, selected: selected, conversationId: conversationId, chatroomId: chatroomId) else { return }
+            guard let reactions = try? LMChatReactionViewModel.createModule(reactions: reactions, selected: selected, conversationId: conversationId, chatroomId: chatroomId) else { return }
             reactions.delegate = (source as? LMChatMessageListViewController)
             source.present(reactions, animated: true)
         case .exploreFeed:
-            guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }
+            guard let exploreFeed = try? LMChatExploreChatroomViewModel.createModule() else { return }
             source.navigationController?.pushViewController(exploreFeed, animated: true)
         case .browser(let url):
             let config = SFSafariViewController.Configuration()
@@ -77,7 +77,7 @@ class NavigationScreen: NavigationScreenProtocol {
             let mediaPreview = LMChatMediaPreviewViewModel.createModule(with: data, startIndex: startIndex)
             source.navigationController?.pushViewController(mediaPreview, animated: true)
         case .searchScreen:
-            guard let searchScreen = try? SearchListViewModel.createModule() else { return }
+            guard let searchScreen = try? LMChatSearchListViewModel.createModule() else { return }
             source.navigationController?.pushViewController(searchScreen, animated: false)
         case .emojiPicker(let conversationId, let chatroomId):
             let picker = LMChatEmojiListViewController()

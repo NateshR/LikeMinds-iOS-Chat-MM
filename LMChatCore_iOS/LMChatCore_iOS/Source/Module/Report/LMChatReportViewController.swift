@@ -59,14 +59,13 @@ open class LMChatReportViewController: LMViewController {
         collection.dataSource = self
         collection.delegate = self
         collection.backgroundColor = Appearance.shared.colors.clear
-        collection.registerCell(type: LMChatReportViewCell.self)
+        collection.registerCell(type: LMUIComponents.shared.reportCollectionCell)
         return collection
     }()
     
     open private(set) lazy var otherReasonTextView: LMTextView = {
         let textView = LMTextView().translatesAutoresizingMaskIntoConstraints()
         textView.delegate = self
-//        textView.addDoneButtonOnKeyboard()
         textView.backgroundColor = Appearance.shared.colors.clear
         return textView
     }()
@@ -242,7 +241,7 @@ extension LMChatReportViewController: UICollectionViewDataSource, UICollectionVi
     open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { tags.count }
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let cell = collectionView.dequeueReusableCell(with: LMChatReportViewCell.self, for: indexPath) {
+        if let cell = collectionView.dequeueReusableCell(with: LMUIComponents.shared.reportCollectionCell, for: indexPath) {
             let name = tags[indexPath.row].0
             let tagID = tags[indexPath.row].1
             

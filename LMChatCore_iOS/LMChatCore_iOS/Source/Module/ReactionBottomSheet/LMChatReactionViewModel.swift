@@ -1,5 +1,5 @@
 //
-//  LMReactionViewModel.swift
+//  LMChatReactionViewModel.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 15/04/24.
@@ -14,7 +14,7 @@ protocol ReactionViewModelProtocol: AnyObject {
     func reactionDeleted()
 }
 
-final public  class LMReactionViewModel {
+final public class LMChatReactionViewModel {
     var delegate: ReactionViewModelProtocol?
     var reactionsData: [Reaction] = []
     var reactionsByGroup: [String: [Reaction]] = [:]
@@ -37,10 +37,10 @@ final public  class LMReactionViewModel {
         reactionList = []
     }
     
-    public static func createModule(reactions: [Reaction], selected: String?, conversationId: String?, chatroomId: String?) throws -> LMReactionViewController? {
+    public static func createModule(reactions: [Reaction], selected: String?, conversationId: String?, chatroomId: String?) throws -> LMChatReactionViewController? {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
-        let vc = LMReactionViewController()
+        let vc = LMCoreComponents.shared.reactionListScreen.init()
         
         let viewmodel = Self.init(
             delegate: vc,
@@ -113,7 +113,7 @@ final public  class LMReactionViewModel {
             guard response.success else {
                 return
             }
-            (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
+            (self?.delegate as? LMChatReactionViewController)?.didTapDimmedView()
         }
     }
     
@@ -127,7 +127,7 @@ final public  class LMReactionViewModel {
             guard response.success else {
                 return
             }
-            (self?.delegate as? LMReactionViewController)?.didTapDimmedView()
+            (self?.delegate as? LMChatReactionViewController)?.didTapDimmedView()
         }
     }
 }

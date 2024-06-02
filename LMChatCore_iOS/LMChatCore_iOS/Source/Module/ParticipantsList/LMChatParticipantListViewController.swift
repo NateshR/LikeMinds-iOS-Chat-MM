@@ -1,5 +1,5 @@
 //
-//  LMParticipantListViewController.swift
+//  LMChatParticipantListViewController.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 16/02/24.
@@ -8,8 +8,8 @@
 import Foundation
 import LikeMindsChatUI
 
-open class LMParticipantListViewController: LMViewController {
-    public var viewModel: LMParticipantListViewModel?
+open class LMChatParticipantListViewController: LMViewController {
+    public var viewModel: LMChatParticipantListViewModel?
     public var searchController = UISearchController(searchResultsController: nil)
     
     
@@ -58,7 +58,7 @@ open class LMParticipantListViewController: LMViewController {
     }
 }
 
-extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
+extension LMChatParticipantListViewController: LMChatParticipantListViewModelProtocol {
     public func reloadData(with data: [LMChatParticipantCell.ContentModel]) {
         containerView.data = data
         containerView.reloadList()
@@ -75,7 +75,7 @@ extension LMParticipantListViewController: LMParticipantListViewModelProtocol {
 }
 
 @objc
-extension LMParticipantListViewController: LMParticipantListViewDelegate {
+extension LMChatParticipantListViewController: LMParticipantListViewDelegate {
     open func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
     }
@@ -85,7 +85,7 @@ extension LMParticipantListViewController: LMParticipantListViewDelegate {
     }
 }
 
-extension LMParticipantListViewController: UISearchResultsUpdating {
+extension LMChatParticipantListViewController: UISearchResultsUpdating {
     public func updateSearchResults(for searchController: UISearchController) {
         viewModel?.searchParticipants(searchController.searchBar.text )
     }

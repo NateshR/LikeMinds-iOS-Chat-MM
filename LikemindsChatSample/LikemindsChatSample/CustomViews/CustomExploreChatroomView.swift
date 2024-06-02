@@ -9,7 +9,6 @@ import LikeMindsChatUI
 import UIKit
 
 final class CustomExploreChatroomView: LMChatExploreChatroomView {
-    
     override func setupViews() {
         super.setupViews()
     }
@@ -42,5 +41,4 @@ final class CustomExploreChatroomView: LMChatExploreChatroomView {
             joinButton.backgroundColor = Appearance.shared.colors.red
         }
     }
-   
 }

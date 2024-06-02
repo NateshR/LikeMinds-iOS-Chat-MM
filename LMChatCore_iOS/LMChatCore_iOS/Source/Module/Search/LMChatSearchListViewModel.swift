@@ -1,5 +1,5 @@
 //
-//  SearchListViewModel.swift
+//  LMChatSearchListViewModel.swift
 //  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 16/04/24.
@@ -9,12 +9,12 @@ import LikeMindsChat
 import Foundation
 import LikeMindsChatUI
 
-public protocol SearchListViewProtocol: AnyObject {
-    func updateSearchList(with data: [SearchListViewController.ContentModel])
+public protocol LMChatSearchListViewProtocol: AnyObject {
+    func updateSearchList(with data: [LMChatSearchListViewController.ContentModel])
     func showHideFooterLoader(isShow: Bool)
 }
 
-final public class SearchListViewModel {
+final public class LMChatSearchListViewModel {
     public enum APIStatus {
         case headerChatroomFollowTrue
         case headerChatroomFollowFalse
@@ -51,23 +51,23 @@ final public class SearchListViewModel {
         }
     }
     
-    public static func createModule() throws -> SearchListViewController {
+    public static func createModule() throws -> LMChatSearchListViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
-        let viewcontroller = SearchListViewController()
-        let viewmodel = SearchListViewModel(delegate: viewcontroller)
+        let viewcontroller = LMCoreComponents.shared.searchListScreen.init()
+        let viewmodel = LMChatSearchListViewModel(delegate: viewcontroller)
         viewcontroller.viewmodel = viewmodel
         
         return viewcontroller
     }
     
-    var delegate: SearchListViewProtocol?
+    var delegate: LMChatSearchListViewProtocol?
     
-    var headerChatroomData: [SearchChatroomDataModel]
-    var titleFollowedChatroomData: [SearchChatroomDataModel]
-    var titleNotFollowedChatroomData: [SearchChatroomDataModel]
-    var followedConversationData: [SearchConversationDataModel]
-    var notFollowedConversationData: [SearchConversationDataModel]
+    var headerChatroomData: [LMChatSearchChatroomDataModel]
+    var titleFollowedChatroomData: [LMChatSearchChatroomDataModel]
+    var titleNotFollowedChatroomData: [LMChatSearchChatroomDataModel]
+    var followedConversationData: [LMChatSearchConversationDataModel]
+    var notFollowedConversationData: [LMChatSearchConversationDataModel]
     
     private var searchString: String
     private var currentAPIStatus: APIStatus
@@ -76,7 +76,7 @@ final public class SearchListViewModel {
     private var isAPICallInProgress: Bool
     private var shouldAllowAPICall: Bool
     
-    init(delegate: SearchListViewProtocol? = nil) {
+    init(delegate: LMChatSearchListViewProtocol? = nil) {
         self.delegate = delegate
         
         headerChatroomData = []
@@ -188,7 +188,7 @@ final public class SearchListViewModel {
             
             currentPage += 1
             
-            let chatroomData: [SearchChatroomDataModel] = chatrooms.compactMap { chatroom in
+            let chatroomData: [LMChatSearchChatroomDataModel] = chatrooms.compactMap { chatroom in
                 self.convertToChatroomData(from: chatroom.chatroom, member: chatroom.member)
             }
             
@@ -212,7 +212,7 @@ final public class SearchListViewModel {
         }
     }
     
-    private func convertToChatroomData(from chatroom: _Chatroom_?, member: Member?) -> SearchChatroomDataModel? {
+    private func convertToChatroomData(from chatroom: _Chatroom_?, member: Member?) -> LMChatSearchChatroomDataModel? {
         guard let chatroom,
               let id = chatroom.id,
               let user = generateUserDetails(from: member) else { return .none }
@@ -248,7 +248,7 @@ final public class SearchListViewModel {
             
             currentPage += 1
             
-            let conversationData: [SearchConversationDataModel] = conversations.compactMap { conversation in
+            let conversationData: [LMChatSearchConversationDataModel] = conversations.compactMap { conversation in
                 guard let chatroomData = self.convertToChatroomData(from: conversation.chatroom, member: conversation.member) else { return .none }
 
                 return .init(
@@ -277,7 +277,7 @@ final public class SearchListViewModel {
         }
     }
     
-    private func generateUserDetails(from data: Member?) -> SearchListUserDataModel? {
+    private func generateUserDetails(from data: Member?) -> LMChatSearchListUserDataModel? {
         guard let data,
               let uuid = data.sdkClientInfo?.uuid else { return .none }
         
@@ -287,9 +287,9 @@ final public class SearchListViewModel {
 
 
 // MARK: Convert To Content Model
-extension SearchListViewModel {
+extension LMChatSearchListViewModel {
     func convertToContentModel() {
-        var dataModel: [SearchListViewController.ContentModel] = []
+        var dataModel: [LMChatSearchListViewController.ContentModel] = []
         
         if !headerChatroomData.isEmpty {
             let followedChatroomConverted = convertChatroomCell(from: headerChatroomData)
@@ -316,13 +316,13 @@ extension SearchListViewModel {
         delegate?.updateSearchList(with: dataModel)
     }
     
-    private func convertChatroomCell(from data: [SearchChatroomDataModel]) -> [LMChatSearchChatroomCell.ContentModel] {
+    private func convertChatroomCell(from data: [LMChatSearchChatroomDataModel]) -> [LMChatSearchChatroomCell.ContentModel] {
         data.map {
             .init(chatroomID: $0.id, image: $0.chatroomImage, chatroomName: $0.chatroomTitle)
         }
     }
     
-    private func convertTitleMessageCell(from data: [SearchChatroomDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
+    private func convertTitleMessageCell(from data: [LMChatSearchChatroomDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.id,
@@ -337,7 +337,7 @@ extension SearchListViewModel {
         }
     }
     
-    private func convertMessageCell(from data: [SearchConversationDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
+    private func convertMessageCell(from data: [LMChatSearchConversationDataModel], isJoined: Bool) -> [LMChatSearchMessageCell.ContentModel] {
         data.map {
             .init(
                 chatroomID: $0.chatroomDetails.id,

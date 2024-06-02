@@ -70,4 +70,9 @@ public struct LMUIComponents {
     public var linkContentView: LMChatLinkPreviewContentView.Type = LMChatLinkPreviewContentView.self
     public var messageLinkPreview: LMChatMessageLinkPreview.Type = LMChatMessageLinkPreview.self
     
+    public var reactionViewCell: LMChatReactionViewCell.Type = LMChatReactionViewCell.self
+    public var reactionTitleCell: LMChatReactionTitleCell.Type = LMChatReactionTitleCell.self
+    
+    public var searchMessageCell: LMChatSearchMessageCell.Type = LMChatSearchMessageCell.self
+    public var searchChatroomCell: LMChatSearchChatroomCell.Type = LMChatSearchChatroomCell.self
 }

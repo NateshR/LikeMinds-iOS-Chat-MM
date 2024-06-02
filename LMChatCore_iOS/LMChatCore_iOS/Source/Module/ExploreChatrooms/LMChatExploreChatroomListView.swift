@@ -1,5 +1,5 @@
 //
-//  LMExploreChatroomListView.swift
+//  LMChatExploreChatroomListView.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 19/04/24.
@@ -14,7 +14,7 @@ public protocol LMChatExploreChatroomFilterProtocol: AnyObject {
 }
 
 @IBDesignable
-open class LMExploreChatroomListView: LMViewController {
+open class LMChatExploreChatroomListView: LMViewController {
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -89,7 +89,7 @@ open class LMExploreChatroomListView: LMViewController {
 
 
 // MARK: UITableView
-extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate, UITableViewDataSourcePrefetching {
+extension LMChatExploreChatroomListView: UITableViewDataSource, UITableViewDelegate, UITableViewDataSourcePrefetching {
    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         chatroomData.count
     }
@@ -117,7 +117,7 @@ extension LMExploreChatroomListView: UITableViewDataSource, UITableViewDelegate,
 }
 
 
-extension LMExploreChatroomListView: LMChatExploreChatroomProtocol {
+extension LMChatExploreChatroomListView: LMChatExploreChatroomProtocol {
     public func onTapJoinButton(_ value: Bool, _ chatroomId: String) {
         if let index = chatroomData.firstIndex(where: {$0.chatroomId == chatroomId}) {
             chatroomData[index].isFollowed = value
@@ -127,13 +127,13 @@ extension LMExploreChatroomListView: LMChatExploreChatroomProtocol {
 }
 
 
-extension LMExploreChatroomListView: LMChatExploreChatroomViewModelProtocol {
+extension LMChatExploreChatroomListView: LMChatExploreChatroomViewModelProtocol {
     public func updateExploreChatroomsData(with data: [LMChatExploreChatroomView.ContentModel]) {
        updateChatroomsData(chatroomData: data)
     }
 }
 
-extension LMExploreChatroomListView: LMChatExploreChatroomFilterProtocol {
+extension LMChatExploreChatroomListView: LMChatExploreChatroomFilterProtocol {
     public func applyFilter(with filter: LMChatExploreChatroomViewModel.Filter) {
         viewModel?.applyFilter(filter: filter)
         tableView.backgroundView = loadingView

@@ -1,5 +1,5 @@
 //
-//  SearchListViewController.swift
+//  LMChatSearchListViewController.swift
 //  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 16/04/24.
@@ -8,7 +8,7 @@
 import LikeMindsChatUI
 import UIKit
 
-public class SearchListViewController: LMViewController {
+public class LMChatSearchListViewController: LMViewController {
     public struct ContentModel {
         let title: String?
         let data: [LMChatSearchCellDataProtocol]
@@ -21,8 +21,8 @@ public class SearchListViewController: LMViewController {
     
     open private(set) lazy var tableView: LMTableView = {
         let table = LMTableView(frame: .zero, style: .grouped).translatesAutoresizingMaskIntoConstraints()
-        table.register(LMChatSearchMessageCell.self)
-        table.register(LMChatSearchChatroomCell.self)
+        table.register(LMUIComponents.shared.searchMessageCell)
+        table.register(LMUIComponents.shared.searchChatroomCell)
         table.dataSource = self
         table.delegate = self
         table.estimatedSectionHeaderHeight = .leastNonzeroMagnitude
@@ -39,7 +39,7 @@ public class SearchListViewController: LMViewController {
     
     public var searchResults: [ContentModel] = []
     public var timer: Timer?
-    public var viewmodel: SearchListViewModel?
+    public var viewmodel: LMChatSearchListViewModel?
     
     open override func setupViews() {
         super.setupViews()
@@ -82,7 +82,7 @@ public class SearchListViewController: LMViewController {
 }
 
 // MARK: UITableView
-extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
+extension LMChatSearchListViewController: UITableViewDataSource, UITableViewDelegate {
     open func numberOfSections(in tableView: UITableView) -> Int { searchResults.count }
     
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -91,11 +91,11 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel,
-           let cell = tableView.dequeueReusableCell(LMChatSearchMessageCell.self) {
+           let cell = tableView.dequeueReusableCell(LMUIComponents.shared.searchMessageCell) {
             cell.configure(with: data)
             return cell
         } else if let data = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel,
-                  let cell = tableView.dequeueReusableCell(LMChatSearchChatroomCell.self) {
+                  let cell = tableView.dequeueReusableCell(LMUIComponents.shared.searchChatroomCell) {
             cell.configure(with: data)
             return cell
         }
@@ -142,7 +142,7 @@ extension SearchListViewController: UITableViewDataSource, UITableViewDelegate {
 
 
 // MARK: UISearchResultsUpdating
-extension SearchListViewController: UISearchBarDelegate {
+extension LMChatSearchListViewController: UISearchBarDelegate {
     open func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard let text = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else {
@@ -174,8 +174,8 @@ extension SearchListViewController: UISearchBarDelegate {
 }
 
 
-// MARK: SearchListViewProtocol
-extension SearchListViewController: SearchListViewProtocol {
+// MARK: LMChatSearchListViewProtocol
+extension LMChatSearchListViewController: LMChatSearchListViewProtocol {
    public func updateSearchList(with data: [ContentModel]) {
        tableView.backgroundView = data.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
         showHideFooterLoader(isShow: false)

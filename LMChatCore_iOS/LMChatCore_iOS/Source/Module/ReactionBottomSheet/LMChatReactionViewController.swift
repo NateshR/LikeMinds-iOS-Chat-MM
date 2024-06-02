@@ -1,5 +1,5 @@
 //
-//  LMReactionViewController.swift
+//  LMChatReactionViewController.swift
 //  SampleApp
 //
 //  Created by Devansh Mohata on 14/04/24.
@@ -12,7 +12,7 @@ public protocol LMReactionViewControllerDelegate: AnyObject {
     func reactionDeleted(chatroomId: String?, conversationId: String?)
 }
 
-open class LMReactionViewController: LMViewController {
+open class LMChatReactionViewController: LMViewController {
     
     lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
@@ -41,7 +41,7 @@ open class LMReactionViewController: LMViewController {
         let table = LMTableView().translatesAutoresizingMaskIntoConstraints()
         table.dataSource = self
         table.delegate = self
-        table.register(LMChatReactionViewCell.self)
+        table.register(LMUIComponents.shared.reactionViewCell)
         table.separatorStyle = .none
         table.backgroundColor = Appearance.shared.colors.white
         return table
@@ -52,7 +52,7 @@ open class LMReactionViewController: LMViewController {
         collection.dataSource = self
         collection.delegate = self
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.registerCell(type: LMChatReactionTitleCell.self)
+        collection.registerCell(type: LMUIComponents.shared.reactionTitleCell)
         collection.backgroundColor = Appearance.shared.colors.white
         return collection
     }()
@@ -73,7 +73,7 @@ open class LMReactionViewController: LMViewController {
     }()
     
     var bottomConstraint: NSLayoutConstraint?
-    var viewModel: LMReactionViewModel?
+    var viewModel: LMChatReactionViewModel?
     var titleData: [LMChatReactionTitleCell.ContentModel] = []
     var emojiData: [LMChatReactionViewCell.ContentModel] = []
     
@@ -170,7 +170,7 @@ open class LMReactionViewController: LMViewController {
 }
 
 
-extension LMReactionViewController: ReactionViewModelProtocol {
+extension LMChatReactionViewController: ReactionViewModelProtocol {
     
     func reactionDeleted() {
         delegate?.reactionDeleted(chatroomId: viewModel?.chatroomId, conversationId: viewModel?.conversationId)
@@ -186,13 +186,13 @@ extension LMReactionViewController: ReactionViewModelProtocol {
 }
 
 
-extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
+extension LMChatReactionViewController: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         emojiData.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(LMChatReactionViewCell.self) {
+        if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.reactionViewCell) {
             cell.configure(with: emojiData[indexPath.row])
             return cell
         }
@@ -212,13 +212,13 @@ extension LMReactionViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension LMReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension LMChatReactionViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         titleData.count
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let cell = collectionView.dequeueReusableCell(with: LMChatReactionTitleCell.self, for: indexPath) {
+        if let cell = collectionView.dequeueReusableCell(with: LMUIComponents.shared.reactionTitleCell, for: indexPath) {
             cell.configure(data: titleData[indexPath.row])
             return cell
         }

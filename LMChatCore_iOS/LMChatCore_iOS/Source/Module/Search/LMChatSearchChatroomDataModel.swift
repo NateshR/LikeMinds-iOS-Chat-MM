@@ -1,20 +1,20 @@
 //
-//  SearchChatroomDataModel.swift
+//  LMChatSearchChatroomDataModel.swift
 //  LikeMindsChatCore
 //
 //  Created by Devansh Mohata on 02/05/24.
 //
 
-public struct SearchChatroomDataModel {
+public struct LMChatSearchChatroomDataModel {
     let id: String
     let chatroomTitle: String
     let chatroomImage: String?
     let isFollowed: Bool
     let title: String?
     let createdAt: Double
-    let user: SearchListUserDataModel
+    let user: LMChatSearchListUserDataModel
     
-    public init(id: String, chatroomTitle: String, chatroomImage: String?, isFollowed: Bool, title: String?, createdAt: Double, user: SearchListUserDataModel) {
+    public init(id: String, chatroomTitle: String, chatroomImage: String?, isFollowed: Bool, title: String?, createdAt: Double, user: LMChatSearchListUserDataModel) {
         self.id = id
         self.chatroomTitle = chatroomTitle
         self.chatroomImage = chatroomImage
@@ -26,14 +26,14 @@ public struct SearchChatroomDataModel {
 }
 
 
-public struct SearchConversationDataModel {
+public struct LMChatSearchConversationDataModel {
     public let id: String
-    public let chatroomDetails: SearchChatroomDataModel
+    public let chatroomDetails: LMChatSearchChatroomDataModel
     public let message: String
     public let createdAt: Double
     public let updatedAt: Double
     
-    public init(id: String, chatroomDetails: SearchChatroomDataModel, message: String, createdAt: Double, updatedAt: Double) {
+    public init(id: String, chatroomDetails: LMChatSearchChatroomDataModel, message: String, createdAt: Double, updatedAt: Double) {
         self.id = id
         self.chatroomDetails = chatroomDetails
         self.message = message
@@ -43,7 +43,7 @@ public struct SearchConversationDataModel {
 }
 
 
-public struct SearchListUserDataModel {
+public struct LMChatSearchListUserDataModel {
     public let uuid: String
     public let username: String
     public let imageURL: String?

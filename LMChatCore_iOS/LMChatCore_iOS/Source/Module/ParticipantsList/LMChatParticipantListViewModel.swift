@@ -1,5 +1,5 @@
 //
-//  LMParticipantListViewModel.swift
+//  LMChatParticipantListViewModel.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 16/02/24.
@@ -8,12 +8,12 @@
 import LikeMindsChatUI
 import LikeMindsChat
 
-public protocol LMParticipantListViewModelProtocol: AnyObject {
+public protocol LMChatParticipantListViewModelProtocol: AnyObject {
     func reloadData(with data: [LMChatParticipantCell.ContentModel])
 }
 
-public class LMParticipantListViewModel {
-    weak var delegate: LMParticipantListViewModelProtocol?
+public class LMChatParticipantListViewModel {
+    weak var delegate: LMChatParticipantListViewModelProtocol?
     var participants: [Member] = []
     
     private var pageNo: Int
@@ -29,7 +29,7 @@ public class LMParticipantListViewModel {
     var searchedText: String?
     var chatroomActionData: GetChatroomActionsResponse?
     
-    init(_ viewController: LMParticipantListViewModelProtocol, chatroomId: String, isSecret: Bool) {
+    init(_ viewController: LMChatParticipantListViewModelProtocol, chatroomId: String, isSecret: Bool) {
         self.delegate = viewController
         self.chatroomId = chatroomId
         self.isSecretChatroom = isSecret
@@ -41,10 +41,10 @@ public class LMParticipantListViewModel {
         self.isAllParticipantLoaded = false
     }
     
-    public static func createModule(withChatroomId chatroomId: String, isSecretChatroom isSecret: Bool = false) throws -> LMParticipantListViewController {
+    public static func createModule(withChatroomId chatroomId: String, isSecretChatroom isSecret: Bool = false) throws -> LMChatParticipantListViewController {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         let viewController = LMCoreComponents.shared.participantListScreen.init()
-        viewController.viewModel = LMParticipantListViewModel(viewController, chatroomId: chatroomId, isSecret: isSecret)
+        viewController.viewModel = LMChatParticipantListViewModel(viewController, chatroomId: chatroomId, isSecret: isSecret)
         return viewController
     }
     
