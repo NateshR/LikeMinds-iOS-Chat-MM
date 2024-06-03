@@ -46,18 +46,18 @@
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zxl-pe-UMt">
-                                <rect key="frame" x="41.333333333333343" y="128.66666666666666" width="310.66666666666663" height="34.333333333333343"/>
+                                <rect key="frame" x="196.66666666666666" y="163" width="0.0" height="0.0"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OQM-KZ-92L">
-                                        <rect key="frame" x="0.0" y="0.0" width="155.33333333333334" height="34.333333333333336"/>
+                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OQM-KZ-92L">
+                                        <rect key="frame" x="0.0" y="0.0" width="0.0" height="34.333333333333336"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="Login as CM"/>
                                         <connections>
                                             <action selector="loginAsCMButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hpT-N6-VxN"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0lH-Xr-JBN">
-                                        <rect key="frame" x="155.33333333333331" y="0.0" width="155.33333333333331" height="34.333333333333336"/>
+                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0lH-Xr-JBN">
+                                        <rect key="frame" x="0.0" y="0.0" width="0.0" height="34.333333333333336"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="plain" title="Login as Member"/>
                                         <connections>

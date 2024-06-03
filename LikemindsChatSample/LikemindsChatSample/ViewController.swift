@@ -16,49 +16,6 @@ class ViewController: LMViewController {
     @IBOutlet weak var userIdField: UITextField?
     @IBOutlet weak var userNameField: UITextField?
     @IBOutlet weak var loginButton: UIButton?
-    
-    
-//    open private(set) lazy var containerView: LMChatBottomMessageComposerView = {
-//        let view = LMChatBottomMessageComposerView().translatesAutoresizingMaskIntoConstraints()
-////        view.backgroundColor = .cyan
-//        return view
-//    }()
-    
-//    open private(set) lazy var containerView: LMChatHomeFeedChatroomView = {
-//        let view = LMChatHomeFeedChatroomView().translatesAutoresizingMaskIntoConstraints()
-////                view.backgroundColor = .cyan
-//        return view
-//    }()
-    
-//    open private(set) lazy var containerView: LMChatHomeFeedExploreTabView = {
-//        let view = LMChatHomeFeedExploreTabView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .systemGroupedBackground
-//        return view
-//    }()
-    
-//    open private(set) lazy var containerView: LMChatHomeFeedListView = {
-//        let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .systemGroupedBackground
-//        return view
-//    }()
-    
-//    open private(set) lazy var containerView: LMChatMessageReplyPreview = {
-//        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .cyan
-//        return view
-//    }()
-    
-//    open private(set) lazy var containerView: LMBottomMessageLinkPreview = {
-//        let view = LMBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
-//        view.backgroundColor = .cyan
-//        return view
-//    }()
-    
-    private(set) lazy var loadingView: LMChatMessageLoadingShimmerView = {
-        let view = LMChatMessageLoadingShimmerView().translatesAutoresizingMaskIntoConstraints()
-        view.setWidthConstraint(with: UIScreen.main.bounds.size.width)
-        return view
-    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -82,15 +39,9 @@ class ViewController: LMViewController {
     }
     
     @IBAction func loginAsCMButtonClicked(_ sender: UIButton) {
-        apiKeyField?.text = "5f567ca1-9d74-4a1b-be8b-a7a81fef796f"
-        userIdField?.text = "99b69c4f-998d-4248-86c1-6eed66e53ad2"
-        userNameField?.text = "og shubh Gupta"
     }
     
     @IBAction func loginAsMemberButtonClicked(_ sender: UIButton) {
-        apiKeyField?.text = "5f567ca1-9d74-4a1b-be8b-a7a81fef796f"
-        userIdField?.text = "53b0176d-246f-4954-a746-9de96a572cc6"
-        userNameField?.text = "DEFCON"
     }
 
     @IBAction func loginButtonClicked(_ sender: UIButton) {
@@ -109,6 +60,7 @@ class ViewController: LMViewController {
         callInitiateApi(userId: userId, username: username, apiKey: apiKey)
     }
     
+    @discardableResult
     func isSavedData() -> Bool {
         let userDefalut = UserDefaults.standard
         guard let apiKey = userDefalut.value(forKey: "apiKey") as? String,
@@ -124,7 +76,10 @@ class ViewController: LMViewController {
         LMChatMain.shared.configure(apiKey: apiKey)
         self.showHideLoaderView(isShow: true, backgroundColor: .clear)
         try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
-            guard success else { return }
+            guard success else {
+                self?.showAlert(message: error ?? "")
+                return
+            }
             self?.moveToNextScreen()
         }
     }
