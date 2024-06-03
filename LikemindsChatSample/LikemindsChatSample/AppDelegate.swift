@@ -12,11 +12,11 @@ import LikeMindsChatUI
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
-        LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
-        LMUIComponents.shared.messageBubbleView = CustomMessageBubbleView.self
-        LMUIComponents.shared.exploreChatroomView = CustomExploreChatroomView.self
-        LMUIComponents.shared.messageReplyView = CustomReplyPreview.self
+//        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
+//        LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
+//        LMUIComponents.shared.messageBubbleView = CustomMessageBubbleView.self
+//        LMUIComponents.shared.exploreChatroomView = CustomExploreChatroomView.self
+//        LMUIComponents.shared.messageReplyView = CustomReplyPreview.self
         registerForPushNotifications(application: application)
         return true
     }
