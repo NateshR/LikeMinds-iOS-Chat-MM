@@ -66,7 +66,7 @@ class NavigationScreen: NavigationScreenProtocol {
             reactions.delegate = (source as? LMChatMessageListViewController)
             source.present(reactions, animated: true)
         case .exploreFeed:
-            guard let exploreFeed = try? LMChatExploreChatroomViewModel.createModule() else { return }
+            guard let exploreFeed = try? LMExploreChatroomViewModel.createModule() else { return }
             source.navigationController?.pushViewController(exploreFeed, animated: true)
         case .browser(let url):
             let config = SFSafariViewController.Configuration()

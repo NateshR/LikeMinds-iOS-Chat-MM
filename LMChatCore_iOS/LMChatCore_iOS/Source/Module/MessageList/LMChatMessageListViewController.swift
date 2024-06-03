@@ -273,20 +273,7 @@ open class LMChatMessageListViewController: LMViewController {
         let participantCount = viewModel?.chatroomActionData?.participantCount ?? 0
         let subtitle = participantCount > 0 ? "\(participantCount) participants" : ""
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: subtitle)
-        
-        if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
-            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
-        } else if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
-            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
-        }
-        else {
-            if let canMessage = viewModel?.chatroomViewData?.memberCanMessage,
-               let hasRight = viewModel?.checkMemberRight(.respondsInChatRoom) {
-                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: canMessage && hasRight)
-            } else {
-                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
-            }
-        }
+        memberRightsCheck()
     }
     
     func topicBarClicked(topicId: String) {
@@ -297,10 +284,22 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
-        if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
+        
+        if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state == 1 {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
+        } else if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
+        } else if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
         } else if viewModel?.checkMemberRight(.respondsInChatRoom) == false || viewModel?.chatroomViewData?.memberCanMessage == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: false)
+        } else {
+            if let canMessage = viewModel?.chatroomViewData?.memberCanMessage,
+               let hasRight = viewModel?.checkMemberRight(.respondsInChatRoom) {
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictByManager, isEnable: canMessage && hasRight)
+            } else {
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
+            }
         }
     }
     
