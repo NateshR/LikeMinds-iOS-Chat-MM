@@ -106,6 +106,7 @@ open class LMChatMessageListViewController: LMViewController {
         
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
         setupBackButtonItemWithImageView()
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -209,6 +210,9 @@ open class LMChatMessageListViewController: LMViewController {
         self.view.endEditing(true)
         guard let actions = viewModel?.chatroomActionData?.chatroomActions else { return }
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.popoverPresentationController?.sourceView = self.view
+        alert.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection()
+        alert.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
         for item in actions {
             let actionItem = UIAlertAction(title: item.title, style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
                 self?.viewModel?.performChatroomActions(action: item)
@@ -327,6 +331,21 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         messageListView.currentLoggedInUserReplaceTagFormat = viewModel?.loggedInUserReplaceTagValue ?? ""
         messageListView.reloadData()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
+        hideShowTopicBarView()
+    }
+    
+    func hideShowTopicBarView() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {[weak self] in
+            guard let self else { return }
+            if let firstSection = messageListView.tableSections.first,
+               let message = firstSection.data.first,
+               message.messageType == LMChatMessageListView.chatroomHeader,
+               let _ = messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) {
+                self.chatroomTopicBar.isHidden = true
+            } else {
+                self.chatroomTopicBar.isHidden = false
+            }
+        }
     }
     
     public func reloadData(at: ScrollDirection) {
@@ -366,6 +385,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
                 self?.chatroomTopicBar.isHidden = false
             }
         }
+        hideShowTopicBarView()
     }
     
     public func insertLastMessageRow(section: String, conversationId: String) {
@@ -397,6 +417,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
         chatroomTopicBar.isHidden = false
+        hideShowTopicBarView()
     }
 }
 
@@ -413,6 +434,10 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func didRetryUploading(messageId: String) {
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.popoverPresentationController?.sourceView = self.view
+        alert.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection()
+        alert.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+
         let tryAction = UIAlertAction(title: "Try again", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
             guard let self else { return }
             viewModel?.retryUploadConversation(messageId)
@@ -760,6 +785,9 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     public func composeAttachment() {
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.popoverPresentationController?.sourceView = self.view
+        alert.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection()
+        alert.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
         let camera = UIAlertAction(title: "Camera", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
             guard let self else { return }
             LMChatCheckMediaAccess.checkCameraAccess(viewController: self, delegate: self)

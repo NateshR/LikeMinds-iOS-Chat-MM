@@ -521,6 +521,11 @@ public final class LMChatMessageListViewModel {
             .build()
         LMChatClient.shared.muteChatroom(request: request) {[weak self] response in
             guard response.success else { return }
+            if value {
+                self?.delegate?.showToastMessage(message: String(format: Constants.shared.strings.muteUnmuteMessage, "muted"))
+            } else {
+                self?.delegate?.showToastMessage(message: String(format: Constants.shared.strings.muteUnmuteMessage, "unmuted"))
+            }
             self?.fetchChatroomActions()
         }
     }

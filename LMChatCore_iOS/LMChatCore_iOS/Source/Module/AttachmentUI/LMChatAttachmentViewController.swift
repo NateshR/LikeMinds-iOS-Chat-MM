@@ -258,7 +258,7 @@ open class LMChatAttachmentViewController: LMViewController {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        view.backgroundColor = Appearance.shared.colors.white
+        view.backgroundColor = backgroundColor
     }
     
     @objc
@@ -328,6 +328,7 @@ open class LMChatAttachmentViewController: LMViewController {
         LMEditImageViewController.showEditImageVC(parentVC: self, image: image, editModel: editModel) { [weak self] resImage, editModel in
             self?.zoomableImageViewContainer.configure(with: resImage)
             self?.viewModel?.selectedMedia?.photo = resImage
+            self?.mediaCollectionView.reloadData()
         }
     }
 }
@@ -456,8 +457,8 @@ extension LMChatAttachmentViewController: LMAttachmentBottomMessageDelegate {
 extension LMChatAttachmentViewController: MediaPickerDelegate {
     
     func mediaPicker(_ picker: UIViewController, didFinishPicking results: [MediaPickerModel]) {
+        picker.dismiss(animated: true)
         guard !results.isEmpty || !(viewModel?.mediaCellData ?? []).isEmpty else {
-            picker.dismiss(animated: true)
             cancelEditing(nil)
             return
         }
