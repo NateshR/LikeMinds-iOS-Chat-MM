@@ -665,6 +665,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                      shareLink: String?,
                      replyConversationId: String?,
                      replyChatRoomId: String?, temporaryId: String? = nil) {
+        LMSharedPreferences.removeValue(forKey: chatroomId)
         guard let communityId = chatroomViewData?.communityId else { return }
         if !trackLastConversationExist {
             fetchBottomConversations()
@@ -845,6 +846,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func postEditedConversation(text: String, shareLink: String?, conversation: Conversation?) {
         guard !text.isEmpty, let conversationId = conversation?.id else { return }
+        LMSharedPreferences.removeValue(forKey: chatroomId)
         let request = EditConversationRequest.builder()
             .conversationId(conversationId)
             .text(text)
@@ -873,6 +875,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             }
             self?.fetchChatroomActions()
             self?.chatroomViewData = LMChatClient.shared.getChatroom(request: .Builder().chatroomId(self?.chatroomId ?? "").build())?.data?.chatroom
+            LMChatClient.shared.syncChatrooms()
         }
     }
     
