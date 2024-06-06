@@ -343,7 +343,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     func hideShowTopicBarView() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {[weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {[weak self] in
             guard let self else { return }
             if let firstSection = messageListView.tableSections.first,
                let message = firstSection.data.first,
@@ -390,7 +390,6 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         if viewModel?.fetchingInitialBottomData == true {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
                 self?.messageListView.tableView.alpha = 1
-                self?.chatroomTopicBar.isHidden = false
             }
         }
         hideShowTopicBarView()
@@ -424,7 +423,6 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         }
         
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
-        chatroomTopicBar.isHidden = false
         hideShowTopicBarView()
     }
 }
