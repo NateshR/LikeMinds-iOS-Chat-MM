@@ -112,7 +112,6 @@ public final class LMChatExploreChatroomViewModel {
             guard response.success else {
                 return
             }
-            LMChatClient.shared.syncChatrooms()
         }
     }
     

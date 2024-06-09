@@ -128,31 +128,32 @@ public final class LMChatMessageListViewModel {
             fetchIntermediateConversations(chatroom: chatroom, conversationId: medianConversationId)
         }
         //4th case -> chatroom is present and conversation is not present
-        else  if chatroom.totalAllResponseCount == 0 {
-            // Convert chatroom data into first conversation and display
-            //                chatroomDataToHeaderConversation(chatroom)
-            fetchBottomConversations()
-        }
+//        else  if chatroom.totalAllResponseCount == 0 {
+//            // Convert chatroom data into first conversation and display
+//            //                chatroomDataToHeaderConversation(chatroom)
+//            fetchBottomConversations()
+//        }
         //5th case -> chatroom is opened through deeplink/explore feed, which is open for the first time
-        else if chatroomWasNotLoaded {
-            fetchBottomConversations()
-            chatroomWasNotLoaded = false
-        }
+//        else if chatroomWasNotLoaded {
+//            fetchBottomConversations()
+//            chatroomWasNotLoaded = false
+//        }
         //6th case -> chatroom is present and conversation is present, chatroom opened for the first time from home feed
-        else if chatroom.lastSeenConversation == nil {
-            // showshimmer
-        }
+//        else if chatroom.lastSeenConversation == nil {
+//            // showshimmer
+//        }
         //7th case -> chatroom is present but conversations are not stored in chatroom
         else if !chatroom.isConversationStored {
             // showshimmer
         }
         //8th case -> chatroom is present and conversation is present, chatroom has no unseen conversations
-        else if chatroom.unseenCount == 0 {
-            fetchBottomConversations()
-        }
+//        else if chatroom.unseenCount == 0 {
+//            fetchBottomConversations()
+//        }
         //9th case -> chatroom is present and conversation is present, chatroom has unseen conversations
         else {
-            fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
+//            fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
+            fetchBottomConversations()
         }
         
         fetchChatroomActions()
