@@ -24,6 +24,7 @@ public protocol LMChatBottomMessageComposerDelegate: AnyObject {
     
     func cancelReply()
     func cancelLinkPreview()
+    func showToastMessage(message: String?)
 }
 
 @IBDesignable
@@ -411,6 +412,7 @@ open class LMChatBottomMessageComposerView: LMView {
         let message = inputTextView.getText()
         guard !message.isEmpty,
               message != inputTextView.placeHolderText else {
+            delegate?.showToastMessage(message: Constants.shared.strings.voiceRecordMessage )
             return
         }
         delegate?.composeMessage(message: message, composeLink: detectedFirstLink)
