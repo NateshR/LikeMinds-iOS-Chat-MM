@@ -340,7 +340,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             if let firstSection = messageListView.tableSections.first,
                let message = firstSection.data.first,
                message.messageType == LMChatMessageListView.chatroomHeader,
-               let _ = messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) {
+               messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) != nil {
                 self.chatroomTopicBar.isHidden = true
             } else {
                 self.chatroomTopicBar.isHidden = false
