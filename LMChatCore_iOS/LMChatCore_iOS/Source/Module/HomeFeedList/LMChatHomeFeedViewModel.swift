@@ -149,11 +149,11 @@ extension LMChatHomeFeedViewModel: HomeFeedClientObserver {
     }
     
     public func onChange(removed: [Chatroom], inserted: [(Int, Chatroom)], updated: [(Int, Chatroom)]) {
-        if updated.count > 0 {
+        if !updated.isEmpty {
             updateChatroomsData(data: updated.compactMap({$0.1}))
-        } else if inserted.count > 0 {
+        } else if !inserted.isEmpty {
             updateChatroomsData(data: inserted.compactMap({$0.1}))
-        } else if removed.count > 0 {
+        } else if !removed.isEmpty {
             reloadChatroomsData(data: removed)
         }
     }
