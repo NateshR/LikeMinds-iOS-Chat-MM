@@ -8,7 +8,7 @@ target 'LikemindsChatSample' do
   use_frameworks!
 
   # Pods for LikemindsChatSample
- pod 'LikeMindsChatCore', path: '../LikeMindsChatCore.podspec'
+ pod 'LikeMindsChatCore'
 
 end
 
