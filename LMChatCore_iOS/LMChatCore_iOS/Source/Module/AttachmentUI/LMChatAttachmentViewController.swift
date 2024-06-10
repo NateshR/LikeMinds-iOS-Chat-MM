@@ -168,6 +168,18 @@ open class LMChatAttachmentViewController: LMViewController {
         initializeHideKeyboard(zoomableImageViewContainer)
         initializeHideKeyboard(videoImageViewContainer)
         initializeHideKeyboard(audioPlayer)
+        let attText = GetAttributedTextWithRoutes.getAttributedText(from: LMSharedPreferences.getString(forKey: viewModel?.chatroomId ?? "NA") ?? "")
+        if !attText.string.isEmpty {
+            bottomMessageBoxView.inputTextView.attributedText = attText
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
+                self?.bottomMessageBoxView.inputTextView.becomeFirstResponder()
+            }
+        }
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        bottomMessageBoxView.inputTextView.mentionDelegate?.contentHeightChanged()
     }
     
     func openPicker() {

@@ -107,6 +107,13 @@ open class LMChatMessageListViewController: LMViewController {
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
         setupBackButtonItemWithImageView()
         self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
+        let attText = GetAttributedTextWithRoutes.getAttributedText(from: LMSharedPreferences.getString(forKey: viewModel?.chatroomId ?? "NA") ?? "")
+        if !attText.string.isEmpty {
+            bottomMessageBoxView.inputTextView.attributedText = attText
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
+                self?.bottomMessageBoxView.inputTextView.becomeFirstResponder()
+            }
+        }
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -114,6 +121,7 @@ open class LMChatMessageListViewController: LMViewController {
         if viewModel?.isConversationSyncCompleted == true {
             viewModel?.addObserveConversations()
         }
+        bottomMessageBoxView.inputTextView.mentionDelegate?.contentHeightChanged()
     }
     
     func setupBackButtonItemWithImageView() {
@@ -335,7 +343,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     func hideShowTopicBarView() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {[weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {[weak self] in
             guard let self else { return }
             if let firstSection = messageListView.tableSections.first,
                let message = firstSection.data.first,
@@ -382,7 +390,6 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         if viewModel?.fetchingInitialBottomData == true {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
                 self?.messageListView.tableView.alpha = 1
-                self?.chatroomTopicBar.isHidden = false
             }
         }
         hideShowTopicBarView()
@@ -416,7 +423,6 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         }
         
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
-        chatroomTopicBar.isHidden = false
         hideShowTopicBarView()
     }
 }
@@ -757,6 +763,12 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     public func askForMicrophoneAccess() {
         LMChatCheckMediaAccess.askForMicrophoneAccess(from: self)
     }
+    
+    func clearTextView() {
+        bottomMessageBoxView.inputTextView.text = ""
+        bottomMessageBoxView.checkSendButtonGestures()
+        bottomMessageBoxView.inputTextView.mentionDelegate?.contentHeightChanged()
+    }
         
     public func cancelReply() {
         viewModel?.replyChatMessage = nil
@@ -784,6 +796,8 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     
     public func composeAttachment() {
         
+        LMSharedPreferences.setString(bottomMessageBoxView.inputTextView.getText(), forKey: viewModel?.chatroomId ?? "NA")
+        
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.popoverPresentationController?.sourceView = self.view
         alert.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection()
@@ -798,7 +812,6 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
         let photo = UIAlertAction(title: "Photo & Video", style: UIAlertAction.Style.default) { [weak self] (UIAlertAction) in
             guard let self else { return }
             MediaPickerManager.shared.presentPicker(viewController: self, delegate: self)
-//            NavigationScreen.shared.perform(.messageAttachment(delegate: self, chatroomId: viewModel?.chatroomId, sourceType: .photoLibrary), from: self, params: nil)
         }
         
         let photoImage = Constants.shared.images.galleryIcon
@@ -995,10 +1008,10 @@ extension LMChatMessageListViewController: LMChatAttachmentViewDelegate {
             }
             return mediaData.build()
         }
-        
         viewModel?.postMessage(message: message, filesUrls: attachmentMedia, shareLink: self.viewModel?.currentDetectedOgTags?.url, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom)
         cancelReply()
         cancelLinkPreview()
+        clearTextView()
     }
 }
 

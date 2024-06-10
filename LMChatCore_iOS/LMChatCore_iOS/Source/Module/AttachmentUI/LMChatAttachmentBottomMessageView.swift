@@ -42,15 +42,12 @@ open class LMChatAttachmentBottomMessageView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.spacing = 12
-        //        view.alignment = .bottom
         return view
     }()
     
     open private(set) lazy var inputTextContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-//        view.cornerRadius(with: 18)
         view.backgroundColor = Appearance.shared.colors.clear
-        //        view.borderColor(withBorderWidth: 1, with: .lightGray)
         return view
     }()
     
@@ -64,7 +61,6 @@ open class LMChatAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var inputTextView: LMChatTaggingTextView = {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
-//        view.textContainerInset = .zero
         view.placeHolderText = "Add message..."
         view.mentionDelegate = self
         view.isScrollEnabled = false
@@ -83,7 +79,6 @@ open class LMChatAttachmentBottomMessageView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(UIImage(systemName: "giftcard"), for: .normal)
         button.widthAnchor.constraint(equalToConstant: 40.0).isActive = true
-        //        button.heightAnchor.constraint(equalToConstant: 40.0).isActive = true
         return button
     }()
     
@@ -125,10 +120,8 @@ open class LMChatAttachmentBottomMessageView: LMView {
     
     open private(set) lazy var seperatorLineView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
-        //        view.cornerRadius(with: 18)
         view.backgroundColor = Appearance.shared.colors.white
         view.setWidthConstraint(with: 2)
-        //        view.borderColor(withBorderWidth: 1, with: .lightGray)
         return view
     }()
     
@@ -143,15 +136,11 @@ open class LMChatAttachmentBottomMessageView: LMView {
         containerView.addSubview(horizontalStackView)
         inputTextContainerView.addSubview(inputTextAndGifHorizontalStackView)
         inputTextAndGifHorizontalStackView.addArrangedSubview(inputTextView)
-//        inputTextAndGifHorizontalStackView.addArrangedSubview(gifButton)
         
         horizontalStackView.addArrangedSubview(attachmentButton)
         horizontalStackView.addArrangedSubview(seperatorLineView)
         horizontalStackView.addArrangedSubview(inputTextContainerView)
         horizontalStackView.addArrangedSubview(sendButton)
-        
-//        addOnVerticleStackView.addArrangedSubview(linkPreviewView)
-//        addOnVerticleStackView.addArrangedSubview(replyMessageView)
         addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
     }
     
@@ -176,7 +165,7 @@ open class LMChatAttachmentBottomMessageView: LMView {
             horizontalStackView.topAnchor.constraint(equalTo: addOnVerticleStackView.bottomAnchor, constant: 4),
             horizontalStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -4),
             
-            inputTextAndGifHorizontalStackView.leadingAnchor.constraint(equalTo: inputTextContainerView.leadingAnchor, constant: 8),
+            inputTextAndGifHorizontalStackView.leadingAnchor.constraint(equalTo: inputTextContainerView.leadingAnchor),
             inputTextAndGifHorizontalStackView.trailingAnchor.constraint(equalTo: inputTextContainerView.trailingAnchor, constant: -10),
             inputTextAndGifHorizontalStackView.topAnchor.constraint(equalTo: inputTextContainerView.topAnchor),
             inputTextAndGifHorizontalStackView.bottomAnchor.constraint(equalTo: inputTextContainerView.bottomAnchor),
@@ -219,7 +208,7 @@ extension LMChatAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
         let newSize = inputTextView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
         
         inputTextView.isScrollEnabled = newSize.height > maxHeightOfTextView
-        inputTextViewHeightConstraint?.constant = min(newSize.height, maxHeightOfTextView)
+        inputTextViewHeightConstraint?.constant = min(max(newSize.height, 36), maxHeightOfTextView)
     }
 }
 
