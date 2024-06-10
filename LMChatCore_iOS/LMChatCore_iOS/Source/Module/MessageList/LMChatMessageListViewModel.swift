@@ -620,7 +620,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     
     public func getPostedConversations(conversations: [Conversation]?) {
         print("getPostedConversations -- \(conversations)")
-        guard let conversations else { return }
+        guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
@@ -631,7 +631,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     
     public func getChangedConversations(conversations: [Conversation]?) {
         print("getChangedConversations -- \(conversations)")
-        guard let conversations else { return }
+        guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
@@ -642,7 +642,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     
     public func getNewConversations(conversations: [Conversation]?) {
         print("getNewConversations -- \(conversations)")
-        guard let conversations else { return }
+        guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             if (item.attachmentCount ?? 0) > 0 {
                 if item.attachmentUploaded == true {
