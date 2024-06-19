@@ -14,7 +14,9 @@ public struct LMCoreComponents {
     public static var shared = Self()
     
     // MARK: HomeFeed Screen
-    public var homeFeedScreen: LMChatHomeFeedViewController.Type = LMChatHomeFeedViewController.self
+    public var groupChatFeedScreen: LMChatGroupFeedViewController.Type = LMChatGroupFeedViewController.self
+    public var dmChatFeedScreen: LMChatDMFeedViewController.Type = LMChatDMFeedViewController.self
+    public var chatFeedScreen: LMChatFeedViewController.Type = LMChatFeedViewController.self
     
     public var exploreChatroomListScreen: LMExploreChatroomListView.Type = LMExploreChatroomListView.self
     public var exploreChatroomScreen: LMExploreChatroomViewController.Type = LMExploreChatroomViewController.self
