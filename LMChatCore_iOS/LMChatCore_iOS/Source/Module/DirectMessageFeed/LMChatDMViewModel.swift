@@ -13,6 +13,7 @@ public protocol LMChatDMViewModelProtocol: AnyObject {
     func reloadData()
     func updateHomeFeedChatroomsData()
     func updateHomeFeedExploreCountData()
+    func checkDMStatus(showDM: Bool)
 }
 
 public class LMChatDMViewModel {
@@ -46,6 +47,16 @@ public class LMChatDMViewModel {
     
     func syncChatroom() {
         LMChatClient.shared.syncChatrooms()
+    }
+    
+    func checkDMStatus() {
+        let request = CheckDMStatusRequest.builder()
+            .requestFrom("dm_feed_v2")
+            .uuid(UserPreferences.shared.getClientUUID() ?? "")
+            .build()
+        LMChatClient.shared.checkDMStatus(request: request) { response in
+            guard let data = response.data else { return }
+        }
     }
 
     func reloadChatroomsData(data: [Chatroom]) {

@@ -15,7 +15,6 @@ public struct LMCoreComponents {
     
     // MARK: HomeFeed Screen
     public var groupChatFeedScreen: LMChatGroupFeedViewController.Type = LMChatGroupFeedViewController.self
-    public var dmChatFeedScreen: LMChatDMFeedViewController.Type = LMChatDMFeedViewController.self
     public var chatFeedScreen: LMChatFeedViewController.Type = LMChatFeedViewController.self
     
     public var exploreChatroomListScreen: LMExploreChatroomListView.Type = LMExploreChatroomListView.self
@@ -38,4 +37,8 @@ public struct LMCoreComponents {
     
     // MARK: Search List Screen
     public var searchListScreen: LMChatSearchListViewController.Type = LMChatSearchListViewController.self
+    
+    //MARK: DM Screen
+    public var dmChatFeedScreen: LMChatDMFeedViewController.Type = LMChatDMFeedViewController.self
+    public var dmParticipantsScreen: LMChatDMParticipantsViewController.Type = LMChatDMParticipantsViewController.self
 }

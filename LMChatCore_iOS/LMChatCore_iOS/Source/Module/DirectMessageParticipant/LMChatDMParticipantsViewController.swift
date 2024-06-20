@@ -1,15 +1,15 @@
 //
-//  LMChatParticipantListViewController.swift
+//  LMChatDMParticipantsViewController.swift
 //  LikeMindsChatCore
 //
-//  Created by Pushpendra Singh on 16/02/24.
+//  Created by Pushpendra Singh on 20/06/24.
 //
 
 import Foundation
 import LikeMindsChatUI
 
-open class LMChatParticipantListViewController: LMViewController {
-    public var viewModel: LMChatParticipantListViewModel?
+open class LMChatDMParticipantsViewController: LMViewController {
+    public var viewModel: LMChatDMParticipantsViewModel?
     public var searchController = UISearchController(searchResultsController: nil)
     
     
@@ -45,9 +45,7 @@ open class LMChatParticipantListViewController: LMViewController {
         
         setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
         setupSearchBar()
-        
         viewModel?.getParticipants()
-        viewModel?.fetchChatroomData()
     }
     
     open func setupSearchBar() {
@@ -58,7 +56,7 @@ open class LMChatParticipantListViewController: LMViewController {
     }
 }
 
-extension LMChatParticipantListViewController: LMChatParticipantListViewModelProtocol {
+extension LMChatDMParticipantsViewController: LMChatDMParticipantsViewModelProtocol {
     public func reloadData(with data: [LMChatParticipantCell.ContentModel]) {
         containerView.data = data
         containerView.reloadList()
@@ -75,7 +73,7 @@ extension LMChatParticipantListViewController: LMChatParticipantListViewModelPro
 }
 
 @objc
-extension LMChatParticipantListViewController: LMParticipantListViewDelegate {
+extension LMChatDMParticipantsViewController: LMParticipantListViewDelegate {
     
     open func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
@@ -86,7 +84,7 @@ extension LMChatParticipantListViewController: LMParticipantListViewDelegate {
     }
 }
 
-extension LMChatParticipantListViewController: UISearchResultsUpdating {
+extension LMChatDMParticipantsViewController: UISearchResultsUpdating {
     public func updateSearchResults(for searchController: UISearchController) {
         viewModel?.searchParticipants(searchController.searchBar.text )
     }
