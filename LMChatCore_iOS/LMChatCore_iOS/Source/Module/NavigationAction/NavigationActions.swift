@@ -18,7 +18,7 @@ enum NavigationActions {
     case messageAttachment(delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, sourceType: LMChatAttachmentViewModel.LMAttachmentSourceType)
     case messageAttachmentWithData(data:[MediaPickerModel], delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, mediaType: MediaType)
     case participants(chatroomId: String, isSecret: Bool)
-    case dmParticipants
+    case dmMemberList(showList: Int?)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
     case reactionSheet(reactions: [Reaction], selectedReaction: String?, conversation: String?, chatroomId: String?)
     case exploreFeed
@@ -59,8 +59,8 @@ class NavigationScreen: NavigationScreenProtocol {
         case .participants(let chatroomId, let isSecret):
             guard let participants = try? LMChatParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
             source.navigationController?.pushViewController(participants, animated: true)
-        case .dmParticipants:
-            guard let participants = try? LMChatDMParticipantsViewModel.createModule() else { return }
+        case .dmMemberList(let showList):
+            guard let participants = try? LMChatMemberListViewModel.createModule(showList: showList) else { return }
             source.navigationController?.pushViewController(participants, animated: true)
         case .report(let chatroomId, let conversationId, let memberId):
             guard let report = try? LMChatReportViewModel.createModule(reportContentId: (chatroomId, conversationId, memberId)) else { return }

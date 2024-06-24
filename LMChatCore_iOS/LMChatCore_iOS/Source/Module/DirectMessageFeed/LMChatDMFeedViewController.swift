@@ -10,7 +10,7 @@ import LikeMindsChatUI
 
 open class LMChatDMFeedViewController: LMViewController {
     
-    var viewModel: LMChatDMViewModel?
+    var viewModel: LMChatDMFeedViewModel?
     
     open private(set) lazy var feedListView: LMChatHomeFeedListView = {
         let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
@@ -59,6 +59,7 @@ open class LMChatDMFeedViewController: LMViewController {
         }
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
+        viewModel?.checkDMStatus()
         profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name?.components(separatedBy: " ").first ?? ""))
     }
     
@@ -97,11 +98,11 @@ open class LMChatDMFeedViewController: LMViewController {
         newDMFabButton.setInsets(forContentPadding: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5), imageTitlePadding: 10)
         newDMFabButton.layer.cornerRadius = 25
         newDMFabButton.addTarget(self, action: #selector(newFabButtonClicked), for: .touchUpInside)
-//        newDMFabButton.isHidden = true
+        newDMFabButton.isHidden = true
     }
     
     @objc open func newFabButtonClicked() {
-        NavigationScreen.shared.perform(.dmParticipants, from: self, params: nil)
+        NavigationScreen.shared.perform(.dmMemberList(showList: viewModel?.showList), from: self, params: nil)
     }
     
     open func newDMButtonExapndAndCollapes(_ offsetY: CGFloat) {
@@ -139,10 +140,10 @@ open class LMChatDMFeedViewController: LMViewController {
     }
 }
 
-extension LMChatDMFeedViewController: LMChatDMViewModelProtocol {
+extension LMChatDMFeedViewController: LMChatDMFeedViewModelProtocol {
     
     public func checkDMStatus(showDM: Bool) {
-        
+        showDMFabButton(showFab: showDM)
     }
     
     public func updateHomeFeedChatroomsData() {

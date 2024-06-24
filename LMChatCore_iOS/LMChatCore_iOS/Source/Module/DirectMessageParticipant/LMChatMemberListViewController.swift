@@ -8,12 +8,21 @@
 import Foundation
 import LikeMindsChatUI
 
-open class LMChatDMParticipantsViewController: LMViewController {
-    public var viewModel: LMChatDMParticipantsViewModel?
+open class LMChatMemberListViewController: LMViewController {
+    public var viewModel: LMChatMemberListViewModel?
     public var searchController = UISearchController(searchResultsController: nil)
     
     
     // MARK: UI Elements
+    open private(set) lazy var memberCountsLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = ""
+        label.font = Appearance.shared.fonts.textFont2
+        label.textColor = Appearance.shared.colors.previewSubtitleTextColor
+        label.numberOfLines = 1
+        return label
+    }()
+    
     open private(set) lazy var containerView: LMChatParticipantListView = {
         let view = LMUIComponents.shared.participantListView.init().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = .systemGroupedBackground
@@ -24,6 +33,7 @@ open class LMChatDMParticipantsViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        self.view.addSubview(memberCountsLabel)
         self.view.addSubview(containerView)
     }
     
@@ -31,10 +41,13 @@ open class LMChatDMParticipantsViewController: LMViewController {
     // MARK: setupLayouts
     open override func setupLayouts() {
         NSLayoutConstraint.activate([
+            memberCountsLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            memberCountsLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            memberCountsLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+            containerView.topAnchor.constraint(equalTo: memberCountsLabel.bottomAnchor, constant: 8)
         ])
     }
     
@@ -43,7 +56,7 @@ open class LMChatDMParticipantsViewController: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        setNavigationTitleAndSubtitle(with: "Participants", subtitle: nil, alignment: .center)
+        setNavigationTitleAndSubtitle(with: Constants.shared.strings.sendDMToTitle, subtitle: nil, alignment: .center)
         setupSearchBar()
         viewModel?.getParticipants()
     }
@@ -53,30 +66,40 @@ open class LMChatDMParticipantsViewController: LMViewController {
         searchController.searchResultsUpdater = self
         navigationController?.navigationBar.prefersLargeTitles = false
         searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
 }
 
-extension LMChatDMParticipantsViewController: LMChatDMParticipantsViewModelProtocol {
+extension LMChatMemberListViewController: LMChatMemberListViewModelProtocol {
     public func reloadData(with data: [LMChatParticipantCell.ContentModel]) {
         containerView.data = data
         containerView.reloadList()
         
         var subCount: String? = nil
         
-        if let count = viewModel?.chatroomActionData?.participantCount,
+        if let count = viewModel?.totalParticipantCount,
            count != 0 {
-            subCount = "\(count) participants"
+            subCount = "\(count) members"
         }
-        
-        setNavigationTitleAndSubtitle(with: "Participants", subtitle: subCount)
+        memberCountsLabel.text = subCount
+//        setNavigationTitleAndSubtitle(with: Constants.shared.strings.sendDMToTitle, subtitle: subCount)
     }
 }
 
 @objc
-extension LMChatDMParticipantsViewController: LMParticipantListViewDelegate {
+extension LMChatMemberListViewController: LMParticipantListViewDelegate {
     
     open func didTapOnCell(indexPath: IndexPath) {
         print("participant clicked......")
+        let member = containerView.data[indexPath.row]
+        guard let uuid = member.id else { return }
+        LMChatDMCreationHandler.shared.openDMChatroom(uuid: uuid, viewController: self) {[weak self] chatroomId in
+            guard let self, let chatroomId else { return }
+            DispatchQueue.main.async {
+                NavigationScreen.shared.perform(.chatroom(chatroomId: chatroomId, conversationID: nil), from: self, params: nil)
+            }
+        }
     }
     
     open func loadMoreData() {
@@ -84,7 +107,7 @@ extension LMChatDMParticipantsViewController: LMParticipantListViewDelegate {
     }
 }
 
-extension LMChatDMParticipantsViewController: UISearchResultsUpdating {
+extension LMChatMemberListViewController: UISearchResultsUpdating {
     public func updateSearchResults(for searchController: UISearchController) {
         viewModel?.searchParticipants(searchController.searchBar.text )
     }

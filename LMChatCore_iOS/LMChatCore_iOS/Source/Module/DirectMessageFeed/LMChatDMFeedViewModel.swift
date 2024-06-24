@@ -1,5 +1,5 @@
 //
-//  LMChatDMViewModel.swift
+//  LMChatDMFeedViewModel.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 17/06/24.
@@ -9,21 +9,22 @@ import Foundation
 import LikeMindsChat
 import LikeMindsChatUI
 
-public protocol LMChatDMViewModelProtocol: AnyObject {
+public protocol LMChatDMFeedViewModelProtocol: AnyObject {
     func reloadData()
     func updateHomeFeedChatroomsData()
     func updateHomeFeedExploreCountData()
     func checkDMStatus(showDM: Bool)
 }
 
-public class LMChatDMViewModel {
+public class LMChatDMFeedViewModel {
     
-    weak var delegate: LMChatDMViewModelProtocol?
+    weak var delegate: LMChatDMFeedViewModelProtocol?
     var chatrooms: [Chatroom] = []
     var exploreTabCountData: GetExploreTabCountResponse?
     var memberProfile: User?
+    var showList: Int?
     
-    init(_ viewController: LMChatDMViewModelProtocol) {
+    init(_ viewController: LMChatDMFeedViewModelProtocol) {
         self.delegate = viewController
     }
     
@@ -31,7 +32,7 @@ public class LMChatDMViewModel {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.dmChatFeedScreen.init()
-        viewController.viewModel = LMChatDMViewModel(viewController)
+        viewController.viewModel = LMChatDMFeedViewModel(viewController)
         return viewController
     }
     
@@ -54,8 +55,10 @@ public class LMChatDMViewModel {
             .requestFrom("dm_feed_v2")
             .uuid(UserPreferences.shared.getClientUUID() ?? "")
             .build()
-        LMChatClient.shared.checkDMStatus(request: request) { response in
-            guard let data = response.data else { return }
+        LMChatClient.shared.checkDMStatus(request: request) {[weak self] response in
+            guard let self, let showDM = response.data?.showDM, let cta = response.data?.cta else { return }
+            delegate?.checkDMStatus(showDM: showDM)
+            showList = Int(cta.getQueryItems()["show_list"] ?? "")
         }
     }
 
@@ -113,6 +116,12 @@ public class LMChatDMViewModel {
         if let title = member.customTitle {
             dmTitle = dmTitle + " \(Constants.shared.strings.dot) " + "\(title)"
         }
+        if UserPreferences.shared.getClientUUID() == member.sdkClientInfo?.uuid {
+            dmTitle = chatroom?.member?.name ?? ""
+            if let title = chatroom?.member?.customTitle {
+                dmTitle = dmTitle + " \(Constants.shared.strings.dot) " + "\(title)"
+            }
+        }
         return dmTitle
     }
     
@@ -130,7 +139,7 @@ public class LMChatDMViewModel {
     
 }
 
-extension LMChatDMViewModel: HomeFeedClientObserver {
+extension LMChatDMFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
         reloadChatroomsData(data: chatrooms)

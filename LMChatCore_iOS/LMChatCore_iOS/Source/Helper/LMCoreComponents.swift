@@ -40,5 +40,5 @@ public struct LMCoreComponents {
     
     //MARK: DM Screen
     public var dmChatFeedScreen: LMChatDMFeedViewController.Type = LMChatDMFeedViewController.self
-    public var dmParticipantsScreen: LMChatDMParticipantsViewController.Type = LMChatDMParticipantsViewController.self
+    public var dmMemberListScreen: LMChatMemberListViewController.Type = LMChatMemberListViewController.self
 }

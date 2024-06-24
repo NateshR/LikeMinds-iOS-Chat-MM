@@ -126,7 +126,7 @@ open class ChatFeedViewController: LMViewController {
         guard let homefeedvc = try? LMChatHomeFeedViewModel.createModule() else { return }
         viewControllers.append(homefeedvc)
         
-        guard let homefeedvc2 = try? LMChatDMViewModel.createModule() else { return }
+        guard let homefeedvc2 = try? LMChatDMFeedViewModel.createModule() else { return }
         viewControllers.append(homefeedvc2)
     }
 
