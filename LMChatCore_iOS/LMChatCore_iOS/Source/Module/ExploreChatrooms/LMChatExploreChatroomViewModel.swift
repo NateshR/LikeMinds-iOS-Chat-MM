@@ -124,7 +124,7 @@ public final class LMChatExploreChatroomViewModel {
                     chatroomName: chatroom.header,
                     chatroomImageUrl: chatroom.chatroomImageUrl,
                     isSecret: chatroom.isSecret ?? false,
-                    isAnnouncementRoom: chatroom.type == ChatroomType.purpose.rawValue,
+                    isAnnouncementRoom: chatroom.type == ChatroomType.purpose,
                     participantsCount: chatroom.participantsCount ?? 0,
                     messageCount: chatroom.totalResponseCount,
                     isFollowed: chatroom.followStatus ?? false,

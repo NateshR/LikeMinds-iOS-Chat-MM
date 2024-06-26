@@ -19,6 +19,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func memberRightsCheck()
     func showToastMessage(message: String?)
     func insertLastMessageRow(section: String, conversationId: String)
+    func directMessageStatus()
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -46,6 +47,8 @@ public final class LMChatMessageListViewModel {
     var fetchingInitialBottomData: Bool = false
     var isConversationSyncCompleted: Bool = false
     var trackLastConversationExist: Bool = true
+    var dmStatus: CheckDMStatusResponse?
+    var loggedInUserData: User?
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -77,13 +80,21 @@ public final class LMChatMessageListViewModel {
         memberState?.state == MemberState.admin.rawValue
     }
     
+    func loggedInUser() -> User? {
+        guard let user = loggedInUserData else {
+            loggedInUserData = LMChatClient.shared.getLoggedInUser()
+            return loggedInUserData
+        }
+        return user
+    }
+    
     func checkMemberRight(_ rightState: MemberRightState) -> Bool {
         guard let right = memberState?.memberRights?.first(where:  {$0.state == rightState}) else { return  true }
         return right.isSelected ?? true
     }
     
     func loggedInUserTag() {
-        guard let user = LMChatClient.shared.getLoggedInUser() else { return }
+        guard let user = loggedInUser() else { return }
 //        loggedInUserTagValue = "<<\(user.name ?? "")|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
 //        loggedInUserReplaceTagValue = "<<You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
         loggedInUserTagValue = "<<\(user.name ?? "")|route://member_profile/\(user.sdkClientInfo?.user ?? 0)?member_id=\(user.sdkClientInfo?.user ?? 0)&community_id=\(SDKPreferences.shared.getCommunityId() ?? "")>>"
@@ -155,7 +166,9 @@ public final class LMChatMessageListViewModel {
 //            fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
             fetchBottomConversations()
         }
-        
+        if chatroomViewData?.type == ChatroomType.directMessage {
+            checkDMStatus()
+        }
         fetchChatroomActions()
         markChatroomAsRead()
         fetchMemberState()
@@ -189,8 +202,8 @@ public final class LMChatMessageListViewModel {
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
         if conversations.count < conversationFetchLimit {
-            if  let chatroom = chatroomViewData {
-                let message = chatroomDataToConversation(chatroom)
+            if  let chatroom = chatroomViewData,
+                let message = chatroomDataToConversation(chatroom) {
                 insertOrUpdateConversationIntoList(message)
             }
         }
@@ -214,8 +227,8 @@ public final class LMChatMessageListViewModel {
         chatMessages = conversations
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
-        if  let chatroom = chatroomViewData {
-            let message = chatroomDataToConversation(chatroom)
+        if  let chatroom = chatroomViewData,
+            let message = chatroomDataToConversation(chatroom) {
             insertOrUpdateConversationIntoList(message)
         }
         if conversations.count < conversationFetchLimit {
@@ -227,7 +240,7 @@ public final class LMChatMessageListViewModel {
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
-        let message = chatroomDataToConversation(chatroom)
+        guard let message = chatroomDataToConversation(chatroom) else { return }
         insertOrUpdateConversationIntoList(message)
     }
     
@@ -252,8 +265,10 @@ public final class LMChatMessageListViewModel {
             if type == .below { trackLastConversationExist = true }
             return
         }
-        if type == .above, conversations.count < conversationFetchLimit, let chatroom = self.chatroomViewData {
-            conversations.insert(chatroomDataToConversation(chatroom), at: 0)
+        if type == .above, conversations.count < conversationFetchLimit,
+           let chatroom = self.chatroomViewData,
+           let message = chatroomDataToConversation(chatroom) {
+            conversations.insert(message, at: 0)
         }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
@@ -305,8 +320,9 @@ public final class LMChatMessageListViewModel {
         let belowConversations = LMChatClient.shared.getConversations(withRequest: getBelowConversationRequest)?.data?.conversations ?? []
         var allConversations = aboveConversations + [mediumConversation] + belowConversations
         
-        if aboveConversations.count < conversationFetchLimit {
-            allConversations.insert(chatroomDataToConversation(chatroom), at: 0)
+        if aboveConversations.count < conversationFetchLimit,
+           let message = chatroomDataToConversation(chatroom){
+            allConversations.insert(message, at: 0)
         }
         
         chatMessages = allConversations
@@ -350,7 +366,7 @@ public final class LMChatMessageListViewModel {
         if let replyConversation {
             replies =
             [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                   message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
+                   message: convertMessageIntoFormat(replyConversation),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
                    attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
@@ -366,7 +382,7 @@ public final class LMChatMessageListViewModel {
                    tempId: replyConversation.temporaryId)]
         }
         return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                     message: ignoreGiphyUnsupportedMessage(conversation.answer),
+                     message: convertMessageIntoFormat(conversation),
                      timestamp: conversation.createdEpoch,
                      reactions: reactionGrouping(conversation.reactions?.reversed() ?? []),
                      attachments: conversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).map({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
@@ -393,9 +409,24 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-        let text = message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
-        return text //GetAttributedTextWithRoutes.getAttributedText(from: text).string
+    func convertMessageIntoFormat(_ conversation: Conversation) -> String {
+        var message = conversation.answer.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        if chatroomViewData?.type == .directMessage {
+            let loggedInUserTag = "<<\(loggedInUserData?.name ?? "")|route://member/\(loggedInUserData?.sdkClientInfo?.user ?? 0)>>"
+            switch conversation.state {
+            case .directMessageMemberRequestRejected:
+                message = "Tap to undo|route://tap_to_undo>> " + message
+            case .directMessageMemberRequestApproved:
+                message = message.replacingOccurrences(of: loggedInUserTag, with: "You")
+            case .chatRoomHeader:
+                message = message.replacingOccurrences(of: loggedInUserTag, with: "")
+            default:
+                break
+            }
+            return message
+        } else {
+            return message
+        }
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMChatMessageListView.ContentModel.OgTags? {
@@ -451,7 +482,8 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func chatroomDataToConversation(_ chatroom: Chatroom) -> Conversation {
+    func chatroomDataToConversation(_ chatroom: Chatroom) -> Conversation? {
+        guard chatroom.type != .directMessage else { return nil }
         let conversation = Conversation.builder()
             .date(chatroom.date)
             .answer(chatroom.title)
@@ -553,6 +585,43 @@ public final class LMChatMessageListViewModel {
             break
         }
     }
+    
+    func isChatroomType(type: ChatroomType) -> Bool {
+        (chatroomViewData?.type == type)
+    }
+    
+    func checkDMStatus() {
+        let request = CheckDMStatusRequest.builder()
+            .requestFrom("chatroom")
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.checkDMStatus(request: request) {[weak self] response in
+            guard let self, let status = response.data else { return }
+            dmStatus = status
+            delegate?.directMessageStatus()
+        }
+    }
+    
+    func sendDMRequest(text: String?, requestState: ChatRequestState) {
+        let request = SendDMRequest.builder()
+            .text(text)
+            .chatRequestState(requestState.rawValue)
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.sendDMRequest(request: request) { response in
+            
+        }
+    }
+    
+    func blockDMMember(status: BlockMemberRequest.BlockState) {
+        let request = BlockMemberRequest.builder()
+            .status(status)
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.blockDMMember(request: request) { response in
+            
+        }
+    }
 }
 
 extension LMChatMessageListViewModel: ConversationClientObserver {
@@ -605,7 +674,6 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     }
     
     public func getPostedConversations(conversations: [Conversation]?) {
-        print("getPostedConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
@@ -616,7 +684,6 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     }
     
     public func getChangedConversations(conversations: [Conversation]?) {
-        print("getChangedConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
@@ -627,7 +694,6 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     }
     
     public func getNewConversations(conversations: [Conversation]?) {
-        print("getNewConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             if (item.attachmentCount ?? 0) > 0 {
@@ -889,8 +955,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 .hasReactions(!reactions.isEmpty)
                 .build()
             self.chatroomViewData = updatedChatroom
-            let message = chatroomDataToConversation(updatedChatroom)
-            insertOrUpdateConversationIntoList(message)
+            if let message = chatroomDataToConversation(updatedChatroom) {
+                insertOrUpdateConversationIntoList(message)
+            }
             delegate?.reloadChatMessageList()
             return
         }
@@ -997,8 +1064,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .hasReactions(!reactions.isEmpty)
             .build()
         self.chatroomViewData = updatedChatroom
-        let message = chatroomDataToConversation(updatedChatroom)
-        insertOrUpdateConversationIntoList(message)
+        if let message = chatroomDataToConversation(updatedChatroom) {
+            insertOrUpdateConversationIntoList(message)
+        }
         delegate?.reloadChatMessageList()
     }
     

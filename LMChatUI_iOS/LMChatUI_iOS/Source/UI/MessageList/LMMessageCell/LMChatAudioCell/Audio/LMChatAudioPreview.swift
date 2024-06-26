@@ -14,27 +14,27 @@ public extension Notification.Name {
 
 open class LMChatAudioPreview: LMView {
     // MARK: UI Elements
-    lazy var containerView: LMView = {
+    open private(set) lazy var containerView: LMView = {
         let view = LMView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
         
-    lazy var thumbnailImage: LMImageView = {
+    open private(set) lazy var thumbnailImage: LMImageView = {
         let imageView = LMImageView().translatesAutoresizingMaskIntoConstraints()
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
         return imageView
     }()
     
-    lazy var headphoneContainerView: LMView = {
+    open private(set) lazy var headphoneContainerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         view.cornerRadius(with: 12)
         view.backgroundColor = Appearance.shared.colors.black.withAlphaComponent(0.6)
         return view
     }()
     
-    lazy var headphoneImage: LMImageView = {
+    open private(set) lazy var headphoneImage: LMImageView = {
         let imageView = LMImageView().translatesAutoresizingMaskIntoConstraints()
         imageView.image = Constants.shared.images.audioIcon.withSystemImageConfig(pointSize: 30)
         imageView.contentMode = .center
@@ -42,7 +42,7 @@ open class LMChatAudioPreview: LMView {
         return imageView
     }()
     
-    lazy var durationLbl: LMLabel = {
+    open private(set) lazy var durationLbl: LMLabel = {
         let label = LMLabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "00:00"
@@ -52,7 +52,7 @@ open class LMChatAudioPreview: LMView {
         return label
     }()
     
-    var playPauseButton: LMImageView = {
+    open private(set) lazy var playPauseButton: LMImageView = {
         let button = LMImageView()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.image = Constants.shared.images.playCircleFilled
@@ -61,14 +61,14 @@ open class LMChatAudioPreview: LMView {
         return button
     }()
     
-    var slider: UISlider = {
+    open private(set) lazy var slider: UISlider = {
         let slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false
         slider.setThumbImage(Constants.shared.images.circleFill, for: .normal)
         return slider
     }()
     
-    lazy var titleLabel: LMLabel = {
+    open private(set) lazy var titleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "Audio"
         label.font = .systemFont(ofSize: 14)

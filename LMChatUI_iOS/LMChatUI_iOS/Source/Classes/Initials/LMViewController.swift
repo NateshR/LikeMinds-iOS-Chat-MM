@@ -200,13 +200,27 @@ open class LMViewController: UIViewController {
     
     open func showErrorAlert(_ title: String? = "Error", message: String?) {
         guard let message = message else { return }
-//        self.presentAlert(title: title, message: message)
+        self.showError(with: message, isPopVC: false)
     }
     
     @objc open func errorMessage(notification: Notification) {
         if let errorMessage = notification.object as? String {
             self.showErrorAlert(message: errorMessage)
         }
+    }
+    
+    open func showAlertWithActions(title:String?, message:String?, withActions actions:[(actionTitle: String, action: (() -> Void)?)]?) {
+        let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        if let actions {
+            for item in actions {
+                alertVC.addAction(UIAlertAction(title: item.actionTitle, style: .default, handler: { (action) in
+                    item.action?()
+                }))
+            }
+        } else {
+            alertVC.addAction(.init(title: "Ok", style: .cancel))
+        }
+        self.present(alertVC, animated: true, completion: nil)
     }
     
     deinit {

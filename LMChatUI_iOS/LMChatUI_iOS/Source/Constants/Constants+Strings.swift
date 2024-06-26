@@ -32,5 +32,14 @@ public extension Constants {
         public let muteUnmuteMessage = "Notification %@ for this chatroom!"
         public let voiceRecordMessage = "Tap and hold to record a voice message!"
         public let sendDMToTitle = "Send DM to"
+        public let memberAndCommunityManagerMessage = "Direct message is a feature to connect with your community members and community managers."
+        public let memberMessage = "Direct message is a feature to connect with your community managers directly to give feedbacks, provide solution to queries and personal consultations."
+        public let managerMessage = "Direct message is a feature to connect with your community members directly to give feedbacks, provide solution to queries and personal consultations."
+        public let bottomMessage = "Send a DM request to %@ by sending your 1st message."
+        public let pendingChatRequest = "DM Request pending. Messaging would be enabled once your request is approved."
+        public let approveChatRequest = "DM Request pending. Messaging would be enabled once you approve the request."
+        public let rejectedChatRequest = "You can not send message to rejected connection. Approve to send a message."
+        public let m2mDirectMessageDisable = "Direct messaging among members has been disabled by the community manager."
+        public let approveRejectViewTitle = "The sender has sent you a direct messaging request. Approve or respond with a message to get connected. Rejecting this request will not notify the sender."
     }
 }

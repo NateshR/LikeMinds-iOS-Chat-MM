@@ -282,10 +282,15 @@ open class LMChatMessageListViewController: LMViewController {
     
     public func updateChatroomSubtitles() {
         navigationTitleView.isHidden = false
-        let participantCount = viewModel?.chatroomActionData?.participantCount ?? 0
-        let subtitle = participantCount > 0 ? "\(participantCount) participants" : ""
-        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: subtitle)
-        memberRightsCheck()
+        if viewModel?.isChatroomType(type: .directMessage) == true {
+//            directMessageValidation()
+//            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        } else {
+            let participantCount = viewModel?.chatroomActionData?.participantCount ?? 0
+            let subtitle = participantCount > 0 ? "\(participantCount) participants" : ""
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: subtitle)
+            memberRightsCheck()
+        }
     }
     
     func topicBarClicked(topicId: String) {
@@ -296,10 +301,9 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
-        
-        if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state == 1 {
+        if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state == 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
-        } else if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
+        } else if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state != 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
         } else if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
@@ -313,6 +317,55 @@ open class LMChatMessageListViewController: LMViewController {
                 bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
             }
         }
+    }
+    
+    public func directMessageValidation() {
+        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        if viewModel?.dmStatus?.showDM == false {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.m2mDirectMessageDisable, isEnable: false)
+        }
+        let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+        if viewModel?.chatroomViewData?.chatRequestState == nil {
+            if isDMWithRequestEnabled == true {
+                
+                bottomMessageBoxView.attachmentButton.isHidden = true
+                bottomMessageBoxView.gifButton.isHidden = true
+                //                        bottomSendMessageView?.recordButtonBehindView.isHidden = true
+                updateBottomBar(footerView: LMChatDirectMessageFooterView.createView(String(format: Constants.shared.strings.bottomMessage, viewModel?.chatroomViewData?.chatWithUser?.name ?? ""), isApproveRejectView: true, delegate: self))
+            }
+        } else {
+            switch viewModel?.chatroomViewData?.chatRequestState {
+            case .initiated:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                if viewModel?.loggedInUser()?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
+                    bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                } else {
+                    updateBottomBar(footerView: LMChatDirectMessageFooterView.createView(Constants.shared.strings.approveRejectViewTitle, isApproveRejectView: true, delegate: self))
+                }
+            case .approved:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: nil, isEnable: true)
+                bottomMessageBoxView.attachmentButton.isHidden = false
+                bottomMessageBoxView.gifButton.isHidden = false
+                break
+            case .rejected:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                if viewModel?.loggedInUser()?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
+                    // Tap to undo in converstion state 19
+                    bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.rejectedChatRequest, isEnable: false)
+                } else {
+                    // remove Tap to undo in converstion state 19
+                }
+            default:
+                break
+            }
+        }
+    }
+    
+    func updateBottomBar(footerView: LMView) {
+//        footerView.translatesAutoresizingMaskIntoConstraints = false
+//        footerView.widthAnchor.constraint(equalTo: messageListView.tableView.widthAnchor).isActive = true
+//        footerView.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        messageListView.tableView.backgroundView = footerView
     }
     
 }
@@ -349,10 +402,18 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
                let message = firstSection.data.first,
                message.messageType == LMChatMessageListView.chatroomHeader,
                messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) != nil {
-                self.chatroomTopicBar.isHidden = true
+                hideTopicBar(true)
             } else {
-                self.chatroomTopicBar.isHidden = false
+                hideTopicBar(false)
             }
+        }
+    }
+    
+    func hideTopicBar(_ isHidden: Bool) {
+        if viewModel?.chatroomViewData?.type == .directMessage {
+            self.chatroomTopicBar.isHidden = true
+        } else {
+            self.chatroomTopicBar.isHidden = isHidden
         }
     }
     
@@ -425,6 +486,10 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
         backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
         hideShowTopicBarView()
     }
+    
+    public func directMessageStatus() {
+        directMessageValidation()
+    }
 }
 
 extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
@@ -476,9 +541,9 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
            let message = firstSection.data.first,
            message.messageType == LMChatMessageListView.chatroomHeader,
            let _ = messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) {
-            self.chatroomTopicBar.isHidden = true
+            hideTopicBar(true)
         } else {
-            self.chatroomTopicBar.isHidden = false
+            hideTopicBar(false)
         }
         
         // Check if user scrolled to the top
@@ -783,6 +848,31 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     }
     
     public func composeMessage(message: String, composeLink: String?) {
+        
+        if viewModel?.chatroomViewData?.type == .directMessage &&
+            viewModel?.chatroomViewData?.chatRequestState == nil {
+            let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            if isDMWithRequestEnabled == true {
+                if message.count > 300 {
+                    showToastMessage(message: "Request can’t be more than 300 characters.")
+                } else {
+                    if viewModel?.chatroomViewData?.isPrivateMember == true {
+                        self.showAlertWithActions(title: "Send DM request?", message: "A direct messaging request would be sent to this member. You would be able to send further messages only once your request is approved.", withActions: [
+                            ("Cancel", nil),
+                            ("Confirm", {[weak self] in
+                                self?.viewModel?.sendDMRequest(text: message, requestState: .initiated)
+                                self?.bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                            })
+                        ])
+                    } else {
+                        viewModel?.sendDMRequest(text: message, requestState: .approved)
+                    }
+                }
+            } else {
+                viewModel?.sendDMRequest(text: message, requestState: .approved)
+            }
+            return
+        }
         
         if let chatMessage = viewModel?.editChatMessage {
             viewModel?.editChatMessage = nil
@@ -1183,4 +1273,30 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
         print(route)
     }
 
+}
+
+extension LMChatMessageListViewController: LMChatApproveRejectDelegate {
+    
+    public func approveRequest() {
+        self.showAlertWithActions(title: "Approve DM request?", message: "Member will be able to send you messages and get notified of the same.", withActions: [
+            ("Cancel", nil),
+            ("Accept", {[weak self] in
+                self?.viewModel?.sendDMRequest(text: nil, requestState: .approved)
+            })
+        ])
+        
+    }
+    
+    public func rejectRequest() {
+        self.showAlertWithActions(title: "Reject DM request?", message: "Member would be blocked from sending you future messages. The sender will not be notified of this.", withActions: [
+            ("Reject", {[weak self] in
+                self?.viewModel?.sendDMRequest(text: nil, requestState: .rejected)
+            }),
+            ("Cancel", nil),
+            ("Report And Reject", {[weak self] in
+                //TODO: Report first and then reject
+                self?.viewModel?.sendDMRequest(text: nil, requestState: .rejected)
+            })
+        ])
+    }
 }

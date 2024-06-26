@@ -75,4 +75,5 @@ public struct LMUIComponents {
     
     public var searchMessageCell: LMChatSearchMessageCell.Type = LMChatSearchMessageCell.self
     public var searchChatroomCell: LMChatSearchChatroomCell.Type = LMChatSearchChatroomCell.self
+    public var approveRejectRequestView: LMChatApproveRejectView.Type = LMChatApproveRejectView.self
 }
