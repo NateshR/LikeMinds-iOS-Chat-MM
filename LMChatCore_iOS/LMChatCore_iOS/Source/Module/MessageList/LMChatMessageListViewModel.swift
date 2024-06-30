@@ -414,8 +414,6 @@ public final class LMChatMessageListViewModel {
         if chatroomViewData?.type == .directMessage {
             let loggedInUserTag = "<<\(loggedInUserData?.name ?? "")|route://member/\(loggedInUserData?.sdkClientInfo?.user ?? 0)>>"
             switch conversation.state {
-            case .directMessageMemberRequestRejected:
-                message = "Tap to undo|route://tap_to_undo>> " + message
             case .directMessageMemberRequestApproved:
                 message = message.replacingOccurrences(of: loggedInUserTag, with: "You")
             case .chatRoomHeader:
@@ -427,6 +425,15 @@ public final class LMChatMessageListViewModel {
         } else {
             return message
         }
+    }
+    
+    func addTapToUndoForRejectedNotification(_ lastMessage: LMChatMessageListView.ContentModel.Message) -> LMChatMessageListView.ContentModel.Message? {
+        var message = lastMessage
+        if message.messageType == ConversationState.directMessageMemberRequestRejected.rawValue, let text = message.message {
+            message.message = text + " <<Tap to undo|route://tap_to_undo>>"
+            return message
+        }
+        return nil
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMChatMessageListView.ContentModel.OgTags? {
@@ -581,6 +588,16 @@ public final class LMChatMessageListViewModel {
             muteUnmuteChatroom(value: true)
         case .unMute:
             muteUnmuteChatroom(value: false)
+        case .viewProfile:
+            if chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid == loggedInUserData?.uuid {
+                print("View Profile: \(chatroomViewData?.member?.sdkClientInfo?.uuid)")
+            } else {
+                print("View Profile: \(chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid)")
+            }
+        case .blockDMMember:
+            blockDMMember(status: .block)
+        case .unblockDMMember:
+            blockDMMember(status: .unblock)
         default:
             break
         }

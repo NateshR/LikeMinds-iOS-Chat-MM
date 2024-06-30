@@ -57,14 +57,18 @@ class LMChatDirectMessageFooterView: LMView {
         pinSubView(subView: approveRejectView)
     }
     
-    static func createView(_ text: String, isApproveRejectView: Bool, delegate: LMChatApproveRejectDelegate?) -> LMChatDirectMessageFooterView {
+    static func createView(_ text: String, delegate: LMChatApproveRejectDelegate?) -> UITableViewHeaderFooterView {
         let view = LMChatDirectMessageFooterView().translatesAutoresizingMaskIntoConstraints()
-        if isApproveRejectView {
-            view.setupApproveRejectView(text, delegate: delegate)
-        } else {
-            view.setupLabel(text)
-        }
-        return view
+        view.setupApproveRejectView(text, delegate: delegate)
+        let footerView = UITableViewHeaderFooterView()
+        footerView.addSubview(view)
+        view.leadingAnchor.constraint(equalTo: footerView.leadingAnchor).isActive = true
+        view.trailingAnchor.constraint(equalTo: footerView.trailingAnchor).isActive = true
+        view.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 10).isActive = true
+        view.bottomAnchor.constraint(equalTo: footerView.bottomAnchor).isActive = true
+        footerView.backgroundColor = .secondarySystemBackground
+        footerView.layoutIfNeeded()
+        return footerView
     }
     
 //    func updateFooterView(chatRequestState: Chatre?) {

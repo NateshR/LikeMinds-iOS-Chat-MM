@@ -10,6 +10,19 @@ import LikeMindsChatUI
 
 public protocol LMChatReportViewModelProtocol: LMBaseViewControllerProtocol {
     func updateView(with tags: [(name: String, tagID: Int)], selectedTag: Int, showTextView: Bool)
+    func didReceivedReportContent(reason: String?)
+}
+
+public protocol LMChatReportViewDelegate: AnyObject {
+    func didReportActionCompleted(reason: String?)
+}
+
+public extension LMChatReportViewModelProtocol {
+    func updateView(with tags: [(name: String, tagID: Int)], selectedTag: Int, showTextView: Bool) {}
+}
+
+public extension LMChatReportViewDelegate {
+    func didReportActionCompleted(reason: String?) {}
 }
 
 open class LMChatReportViewController: LMViewController {
@@ -92,6 +105,7 @@ open class LMChatReportViewController: LMViewController {
     public var selectedTag = -1
     public var placeholderText = "Write Description!"
     public var viewmodel: LMChatReportViewModel?
+    public var delegate: LMChatReportViewDelegate?
     
     
     // MARK: setupViews
@@ -282,6 +296,21 @@ extension LMChatReportViewController: UITextViewDelegate {
 
 // MARK: LMChatReportViewModelProtocol
 extension LMChatReportViewController: LMChatReportViewModelProtocol {
+    
+    public func didReceivedReportContent(reason: String?) {
+        let title = "\(viewmodel?.contentType.rawValue ?? "") is reported for review"
+        let message = "Our team will look into your feedback and will take appropriate action on this \(viewmodel?.contentType.rawValue ?? "")"
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.delegate?.didReportActionCompleted(reason: reason)
+                self?.popViewController(animated: true)
+            })
+            self?.present(alert, animated: true)
+        }
+    }
+    
     public func updateView(with tags: [(name: String, tagID: Int)], selectedTag: Int, showTextView: Bool) {
         self.tags = tags
         self.selectedTag = selectedTag

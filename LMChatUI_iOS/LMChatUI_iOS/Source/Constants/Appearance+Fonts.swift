@@ -29,6 +29,7 @@ public extension Appearance {
         public var navigationTitleFont: UIFont = .systemFont(ofSize: 18, weight: .bold)
         public var navigationSubtitleFont: UIFont = .systemFont(ofSize: 14)
         public var normalFontSize11: UIFont = .systemFont(ofSize: 11)
+        public var normalFontSize12: UIFont = .systemFont(ofSize: 12)
         public var emojiTrayFont: UIFont = .systemFont(ofSize: 30)
         public var headingLabel: UIFont = .systemFont(ofSize: 16, weight: .bold)
         public var italicFont16:UIFont = .italicSystemFont(ofSize: 16)

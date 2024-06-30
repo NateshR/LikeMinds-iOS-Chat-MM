@@ -57,7 +57,7 @@ open class LMChatNotificationCell: LMTableViewCell {
             infoLabel.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
             infoLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16),
             infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -6)
+            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
     }
     
@@ -67,7 +67,7 @@ open class LMChatNotificationCell: LMTableViewCell {
         super.setupAppearance()
         backgroundColor = Appearance.shared.colors.clear
         contentView.backgroundColor = Appearance.shared.colors.clear
-        containerView.backgroundColor = Appearance.shared.colors.backgroundColor
+        containerView.backgroundColor = Appearance.shared.colors.clear
     }
     
     

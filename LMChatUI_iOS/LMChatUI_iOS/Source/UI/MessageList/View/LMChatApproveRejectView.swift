@@ -19,9 +19,9 @@ open class LMChatApproveRejectView: LMView {
     open private(set) lazy var stackContainerView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .vertical
-        view.distribution = .fillProportionally
-        view.alignment = .leading
-        view.spacing = 2
+        view.distribution = .fill
+        view.alignment = .fill
+        view.spacing = 16
         view.isLayoutMarginsRelativeArrangement = true
         view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
         return view
@@ -31,7 +31,8 @@ open class LMChatApproveRejectView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = ""
         label.numberOfLines = 0
-        label.font = Appearance.shared.fonts.headingFont1
+        label.textAlignment = .center
+        label.font = Appearance.shared.fonts.textFont2
         label.textColor = Appearance.shared.colors.previewSubtitleTextColor
         return label
     }()
@@ -40,7 +41,7 @@ open class LMChatApproveRejectView: LMView {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.distribution = .fillEqually
-        view.alignment = .center
+        view.alignment = .fill
         view.spacing = 20
         view.isLayoutMarginsRelativeArrangement = true
         view.directionalLayoutMargins = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
@@ -51,7 +52,7 @@ open class LMChatApproveRejectView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle("Approve", for: .normal)
         button.setFont(Appearance.shared.fonts.headingFont1)
-        button.tintColor = Appearance.shared.colors.linkColor
+        button.setTitleColor(Appearance.shared.colors.linkColor, for: .normal)
         button.addTarget(self, action: #selector(approveButtonClicked), for: .touchUpInside)
         return button
     }()
@@ -60,7 +61,7 @@ open class LMChatApproveRejectView: LMView {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setTitle("Reject", for: .normal)
         button.setFont(Appearance.shared.fonts.headingFont1)
-        button.tintColor = Appearance.shared.colors.linkColor
+        button.setTitleColor(Appearance.shared.colors.linkColor, for: .normal)
         button.addTarget(self, action: #selector(rejectButtonClicked), for: .touchUpInside)
         return button
     }()
@@ -75,6 +76,8 @@ open class LMChatApproveRejectView: LMView {
     open override func setupAppearance() {
         super.setupAppearance()
         backgroundColor = .secondarySystemBackground
+        approveButton.backgroundColor = Appearance.shared.colors.white
+        rejectButton.backgroundColor = Appearance.shared.colors.white
     }
     
     // MARK: setupViews

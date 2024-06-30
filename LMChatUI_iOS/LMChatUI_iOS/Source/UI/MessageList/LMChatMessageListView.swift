@@ -67,7 +67,7 @@ open class LMChatMessageListView: LMView {
         public struct Message {
             public let messageId: String
             public let memberTitle: String?
-            public let message: String?
+            public var message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
             public let attachments: [Attachment]?
@@ -241,13 +241,13 @@ open class LMChatMessageListView: LMView {
     }
     
     public func reloadData() {
-        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+//        tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }
     
     public  func justReloadData() {
-        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+//        tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }

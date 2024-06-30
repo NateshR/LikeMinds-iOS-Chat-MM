@@ -41,5 +41,11 @@ public extension Constants {
         public let rejectedChatRequest = "You can not send message to rejected connection. Approve to send a message."
         public let m2mDirectMessageDisable = "Direct messaging among members has been disabled by the community manager."
         public let approveRejectViewTitle = "The sender has sent you a direct messaging request. Approve or respond with a message to get connected. Rejecting this request will not notify the sender."
+        public let sendDMRequestTitle = "Send DM request?"
+        public let sendDMRequestMessage = "A direct messaging request would be sent to this member. You would be able to send further messages only once your request is approved."
+        public let dmRequestApproveTitle = "Approve DM request?"
+        public let dmRequestApproveMessage = "Member will be able to send you messages and get notified of the same."
+        public let dmRequestRejectTitle = "Reject DM request?"
+        public let dmRequestRejectMessage = "Member would be blocked from sending you future messages. The sender will not be notified of this."
     }
 }
