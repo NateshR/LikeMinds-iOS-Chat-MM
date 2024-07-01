@@ -260,6 +260,7 @@ open class LMChatBottomMessageComposerView: LMView {
     var lockContainerViewHeight: CGFloat = 100
     var lockContainerViewHeightConstraint: NSLayoutConstraint?
     public var detectedFirstLink: String?
+    public var isShowSendMessageButtonOnly: Bool = false
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -416,6 +417,9 @@ open class LMChatBottomMessageComposerView: LMView {
             return
         }
         delegate?.composeMessage(message: message, composeLink: detectedFirstLink)
+    }
+    
+    public func resetInputTextView() {
         closeLinkPreview()
         inputTextView.text = ""
         isLinkPreviewCancel = false

@@ -64,7 +64,7 @@ class LMChatDMCreationHandler {
             .build()
         LMChatClient.shared.createDMChatroom(request: request) {[weak self] response in
             (self?.viewController)?.showHideLoaderView(isShow: false, backgroundColor: .clear)
-            guard let chatroomId = response.data?.chatroom?.id else {
+            guard let chatroomId = response.data?.chatroomData?.id else {
                 self?.viewController?.showErrorAlert(nil, message: response.errorMessage)
                 self?.completion?(nil)
                 return

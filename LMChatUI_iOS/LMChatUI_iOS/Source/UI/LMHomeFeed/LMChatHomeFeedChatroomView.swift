@@ -98,6 +98,17 @@ open class LMChatHomeFeedChatroomView: LMView {
         return label
     }()
     
+    open private(set) lazy var customTitle: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = "CM"
+        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.numberOfLines = 1
+        label.textColor = Appearance.shared.colors.textColor
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return label
+    }()
+    
     open private(set) lazy var lastMessageLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = ""
@@ -225,6 +236,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         chatroomMessageContainerStackView.addArrangedSubview(lastMessageLabel)
         chatroomMessageContainerStackView.addArrangedSubview(muteAndBadgeIconContainerStackView)
         chatroomNameContainerStackView.addArrangedSubview(chatroomNameLabel)
+        chatroomNameContainerStackView.addArrangedSubview(customTitle)
         chatroomNameContainerStackView.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
         chatroomNameContainerStackView.addArrangedSubview(spacerBetweenLockAndTimestamp)
         chatroomNameContainerStackView.addArrangedSubview(timestampLabel)
@@ -248,7 +260,7 @@ open class LMChatHomeFeedChatroomView: LMView {
     }
     
     open func setData(_ data: ContentModel) {
-        chatroomNameLabel.text = data.chatroomName
+        chatroomName(data.chatroomName)
         lastMessageLabelSet(data)
         muteIconImageView.isHidden = !data.isMuted
         announcementIconImageView.isHidden = !data.isAnnouncementRoom
@@ -328,5 +340,12 @@ open class LMChatHomeFeedChatroomView: LMView {
         completeText.append(attributedText)
         completeText.append(textAfterIcon)
         lastMessageLabel.attributedText = completeText
+    }
+    
+    func chatroomName(_ name: String) {
+        let components = name.components(separatedBy: "\(Constants.shared.strings.dot)")
+        chatroomNameLabel.text = components.first
+        customTitle.isHidden = components.count < 2
+        customTitle.text = "\(Constants.Strings.shared.dot) " + (components.last ?? "")
     }
 }

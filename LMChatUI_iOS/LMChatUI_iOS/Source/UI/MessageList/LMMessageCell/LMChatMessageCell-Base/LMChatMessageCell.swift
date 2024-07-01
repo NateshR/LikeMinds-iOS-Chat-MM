@@ -8,7 +8,7 @@
 import Foundation
 import Kingfisher
 
-public protocol LMChatMessageCellDelegate: AnyObject {
+public protocol LMChatMessageCellDelegate: LMChatMessageBaseProtocol {
     func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
     func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?)
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
@@ -93,6 +93,8 @@ open class LMChatMessageCell: LMTableViewCell {
         containerView.addSubview(chatMessageView)
         containerView.addSubview(retryContainerStackView)
         contentView.addSubview(selectedButton)
+        chatMessageView.textLabel.canPerformActionRestriction = true
+        chatMessageView.textLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tappedTextView)))
     }
     
     // MARK: setupLayouts
@@ -119,6 +121,26 @@ open class LMChatMessageCell: LMTableViewCell {
         contentView.backgroundColor = Appearance.shared.colors.clear
         chatMessageView.backgroundColor = Appearance.shared.colors.clear
         containerView.backgroundColor = Appearance.shared.colors.clear
+    }
+    
+    @objc
+    open func tappedTextView(tapGesture: UITapGestureRecognizer) {
+        guard let textView = tapGesture.view as? LMTextView,
+              let position = textView.closestPosition(to: tapGesture.location(in: textView)),
+              let text = textView.textStyling(at: position, in: .forward) else { return }
+        if let url = text[.link] as? URL {
+            didTapURL(url: url)
+        } else if let route = text[.route] as? String {
+            didTapRoute(route: route)
+        }
+    }
+    
+    open func didTapRoute(route: String) {
+        delegate?.didTapRoute(route: route)
+    }
+    
+    open func didTapURL(url: URL) {
+        delegate?.didTapURL(url: url)
     }
     
     

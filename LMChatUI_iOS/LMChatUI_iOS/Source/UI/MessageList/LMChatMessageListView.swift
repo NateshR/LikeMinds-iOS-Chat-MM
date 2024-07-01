@@ -13,7 +13,12 @@ public enum ScrollDirection : Int {
     case none = -1
 }
 
-public protocol LMChatMessageListViewDelegate: AnyObject {
+public protocol LMChatMessageBaseProtocol: AnyObject {
+    func didTapURL(url: URL)
+    func didTapRoute(route: String)
+}
+
+public protocol LMChatMessageListViewDelegate: LMChatMessageBaseProtocol {
     func didTapOnCell(indexPath: IndexPath)
     func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
     func didTappedOnReaction(reaction: String, indexPath: IndexPath)
@@ -326,6 +331,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
                 cell.setData(with: .init(message: item, loggedInUserTag: currentLoggedInUserTagFormat, loggedInUserReplaceTag: currentLoggedInUserReplaceTagFormat))
+                cell.delegate = delegate
                 tableViewCell =  cell
             }
         }

@@ -47,5 +47,6 @@ public extension Constants {
         public let dmRequestApproveMessage = "Member will be able to send you messages and get notified of the same."
         public let dmRequestRejectTitle = "Reject DM request?"
         public let dmRequestRejectMessage = "Member would be blocked from sending you future messages. The sender will not be notified of this."
+        public let dmRequestTextLimit = "Request can’t be more than 300 characters."
     }
 }

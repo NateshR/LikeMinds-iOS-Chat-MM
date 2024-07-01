@@ -43,11 +43,11 @@ public class LMChatDMFeedViewModel {
     func getChatrooms() {
         fetchUserProfile()
         LMChatClient.shared.getDMChatrooms(withObserver: self)
-        LMChatClient.shared.observeLiveHomeFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
+        LMChatClient.shared.observeLiveDMFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }
     
     func syncChatroom() {
-        LMChatClient.shared.syncChatrooms()
+        LMChatClient.shared.syncDMChatrooms()
     }
     
     func checkDMStatus() {

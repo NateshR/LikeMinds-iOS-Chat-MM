@@ -329,6 +329,10 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
+        guard viewModel?.isChatroomType(type: .directMessage) == false else {
+            directMessageStatus()
+            return
+        }
         if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state == 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
         } else if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state != 1 {
@@ -348,7 +352,11 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func directMessageValidation() {
-        setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.member?.name, subtitle: nil)
+        } else {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        }
         if viewModel?.dmStatus?.showDM == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.m2mDirectMessageDisable, isEnable: false)
         }
@@ -359,7 +367,7 @@ open class LMChatMessageListViewController: LMViewController {
                 bottomMessageBoxView.attachmentButton.isHidden = true
                 bottomMessageBoxView.gifButton.isHidden = true
 //                        bottomSendMessageView?.recordButtonBehindView.isHidden = true
-                bottomMessageLabel.text = String(format: Constants.shared.strings.bottomMessage, viewModel?.chatroomViewData?.chatWithUser?.name ?? "")
+                bottomMessageLabel.text = String(format: Constants.shared.strings.bottomMessage, viewModel?.directMessageUserName() ?? "")
                 bottomMessageLabel.isHidden = false
             }
         } else {
@@ -367,7 +375,7 @@ open class LMChatMessageListViewController: LMViewController {
             switch viewModel?.chatroomViewData?.chatRequestState {
             case .initiated:
                 bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
-                if viewModel?.loggedInUser()?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
+                if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
                     bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
                 } else {
                     updateBottomBar(footerView: LMChatDirectMessageFooterView.createView(Constants.shared.strings.approveRejectViewTitle, delegate: self))
@@ -407,6 +415,10 @@ open class LMChatMessageListViewController: LMViewController {
 }
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
+    
+    public func viewProfile(route: String) {
+        self.showAlertWithActions(title: "View Profile", message: "Handle route \(route) to view profile! ", withActions: nil)
+    }
     
     public func showToastMessage(message: String?) {
         bottomMessageBoxView.inputTextView.resignFirstResponder()
@@ -532,7 +544,16 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? "", titleHeader: viewModel?.chatroomViewData?.member?.name ?? "", type: 1, attachmentsUrls: []))
         }
         
-        backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
+        if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.member?.name, subtitle: nil)
+        } else {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        }
+        if viewModel?.isChatroomType(type: .directMessage) == true {
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.directMessageUserName().components(separatedBy: " ").first ?? ""))
+        } else {
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
+        }
         hideShowTopicBarView()
     }
     
@@ -903,26 +924,33 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
             if isDMWithRequestEnabled == true {
                 if message.count > 300 {
-                    showToastMessage(message: "Request can’t be more than 300 characters.")
+                    self.showErrorAlert(message: Constants.shared.strings.dmRequestTextLimit)
+//                    showToastMessage(message: Constants.shared.strings.dmRequestTextLimit)
                 } else {
                     if viewModel?.chatroomViewData?.isPrivateMember == true {
+                        bottomMessageBoxView.inputTextView.resignFirstResponder()
                         self.showAlertWithActions(title: Constants.shared.strings.sendDMRequestTitle, message: Constants.shared.strings.sendDMRequestMessage, withActions: [
                             ("Cancel", nil),
                             ("Confirm", {[weak self] in
+                                self?.bottomMessageBoxView.resetInputTextView()
                                 self?.viewModel?.sendDMRequest(text: message, requestState: .initiated)
                                 self?.bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
                             })
                         ])
                     } else {
+                        bottomMessageBoxView.resetInputTextView()
                         viewModel?.sendDMRequest(text: message, requestState: .approved)
+                        bottomMessageLabel.isHidden = true
                     }
                 }
             } else {
+                bottomMessageBoxView.resetInputTextView()
                 viewModel?.sendDMRequest(text: message, requestState: .approved)
+                bottomMessageLabel.isHidden = true
             }
             return
         }
-        
+        bottomMessageBoxView.resetInputTextView()
         if let chatMessage = viewModel?.editChatMessage {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
@@ -1248,6 +1276,20 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
 }
 
 extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroomHeaderMessageCellDelegate {
+    
+    public func didTapURL(url: URL) {
+        NavigationScreen.shared.perform(.browser(url: url), from: self, params: nil)
+    }
+    
+    public func didTapRoute(route: String) {
+        if route == "route://tap_to_undo" {
+            viewModel?.blockDMMember(status: .unblock)
+        } else {
+            print("route: \(route)")
+            viewProfile(route: route)
+        }
+    }
+    
     
     public func pauseAudioPlayer() {
         LMChatAudioPlayManager.shared.stopAudio { }

@@ -20,6 +20,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func showToastMessage(message: String?)
     func insertLastMessageRow(section: String, conversationId: String)
     func directMessageStatus()
+    func viewProfile(route: String)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -74,6 +75,14 @@ public final class LMChatMessageListViewModel {
         }
         self.isConversationSyncCompleted = true
         self.addObserveConversations()
+        let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+            return
+        }
+        chatroomViewData = chatroom
+        if isChatroomType(type: .directMessage) == true {
+            delegate?.directMessageStatus()
+        }
     }
     
     func isAdmin() -> Bool {
@@ -429,7 +438,9 @@ public final class LMChatMessageListViewModel {
     
     func addTapToUndoForRejectedNotification(_ lastMessage: LMChatMessageListView.ContentModel.Message) -> LMChatMessageListView.ContentModel.Message? {
         var message = lastMessage
-        if message.messageType == ConversationState.directMessageMemberRequestRejected.rawValue, let text = message.message {
+        if message.messageType == ConversationState.directMessageMemberRequestRejected.rawValue,
+           UserPreferences.shared.getLMMemberId() == chatroomViewData?.chatRequestedById,
+           let text = message.message {
             message.message = text + " <<Tap to undo|route://tap_to_undo>>"
             return message
         }
@@ -589,10 +600,11 @@ public final class LMChatMessageListViewModel {
         case .unMute:
             muteUnmuteChatroom(value: false)
         case .viewProfile:
+            let route = "route://member_profile/"
             if chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid == loggedInUserData?.uuid {
-                print("View Profile: \(chatroomViewData?.member?.sdkClientInfo?.uuid)")
+                delegate?.viewProfile(route: route + "\(chatroomViewData?.member?.sdkClientInfo?.uuid ?? "")")
             } else {
-                print("View Profile: \(chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid)")
+                delegate?.viewProfile(route: route + "\(chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid ?? "")")
             }
         case .blockDMMember:
             blockDMMember(status: .block)
@@ -625,8 +637,14 @@ public final class LMChatMessageListViewModel {
             .chatRequestState(requestState.rawValue)
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.sendDMRequest(request: request) { response in
-            
+        LMChatClient.shared.sendDMRequest(request: request) {[weak self] response in
+            guard response.success else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                return
+            }
+            self?.delegate?.showToastMessage(message: "Direct message request sent!")
+            self?.fetchChatroomActions()
+            self?.syncConversation()
         }
     }
     
@@ -635,8 +653,23 @@ public final class LMChatMessageListViewModel {
             .status(status)
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.blockDMMember(request: request) { response in
-            
+        LMChatClient.shared.blockDMMember(request: request) {[weak self] response in
+            guard response.success else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                return
+            }
+            let requestType = status == .block ? "blocked" : "unblocked"
+            self?.delegate?.showToastMessage(message: "Member \(requestType)!")
+            self?.fetchChatroomActions()
+            self?.syncConversation()
+        }
+    }
+    
+    func directMessageUserName() -> String {
+        if loggedInUserData?.sdkClientInfo?.uuid == chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            return chatroomViewData?.member?.name ?? ""
+        } else {
+            return chatroomViewData?.chatWithUser?.name ?? ""
         }
     }
 }
@@ -922,7 +955,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .text(text)
             .shareLink(shareLink)
             .build()
-        LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
+        LMChatClient.shared.editConversation(request: request) { resposne in
             guard resposne.success, let _ = resposne.data?.conversation else { return}
         }
     }
@@ -1128,8 +1161,8 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .chatroomId(chatroomId)
             .conversationId(conversationId)
             .build()
-        LMChatClient.shared.setChatroomTopic(request: request) {[weak self] response in
-            guard let self, response.success else {
+        LMChatClient.shared.setChatroomTopic(request: request) { response in
+            guard response.success else {
                 return
             }
         }
@@ -1143,10 +1176,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             if conversationIds.count > 1 {
                 let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
                 copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
-                //        else if let chatRoom = chatMessage.chatRoom {
-                //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
-                //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
-                //        }
             } else {
                 let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
                 copiedString = copiedString  + "\(answer.string)"
