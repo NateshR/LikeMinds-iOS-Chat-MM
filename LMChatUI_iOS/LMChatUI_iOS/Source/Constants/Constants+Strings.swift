@@ -21,6 +21,7 @@ public extension Constants {
         public let reportMessage = "Report message"
         public let delete = "Delete"
         public let reply = "Reply"
+        public let replyPrivately = "Reply Privately"
         public let dot = "•"
         public let messageDeleteText = "This message was deleted!"
         public let restrictForAnnouncement = "Only community managers can respond here."

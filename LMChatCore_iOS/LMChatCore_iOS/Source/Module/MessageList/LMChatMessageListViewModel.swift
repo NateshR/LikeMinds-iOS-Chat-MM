@@ -49,6 +49,7 @@ public final class LMChatMessageListViewModel {
     var isConversationSyncCompleted: Bool = false
     var trackLastConversationExist: Bool = true
     var dmStatus: CheckDMStatusResponse?
+    var showList: Int?
     var loggedInUserData: User?
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
@@ -177,6 +178,8 @@ public final class LMChatMessageListViewModel {
         }
         if chatroomViewData?.type == ChatroomType.directMessage {
             checkDMStatus()
+        } else {
+            checkDMStatus(requestFrom: "group_channel")
         }
         fetchChatroomActions()
         markChatroomAsRead()
@@ -190,7 +193,6 @@ public final class LMChatMessageListViewModel {
     
     func convertConversationsIntoGroupedArray(conversations: [Conversation]?) -> [LMChatMessageListView.ContentModel] {
         guard let conversations else { return [] }
-        print("conversations ------> \(conversations)")
         let dictionary = Dictionary(grouping: conversations, by: { $0.date })
         var conversationsArray: [LMChatMessageListView.ContentModel] = []
         for key in dictionary.keys {
@@ -374,7 +376,9 @@ public final class LMChatMessageListViewModel {
         
         if let replyConversation {
             replies =
-            [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
+            [.init(messageId: replyConversation.id ?? "",
+                   memberTitle: conversation.member?.communityManager(),
+                   memberState: replyConversation.member?.state,
                    message: convertMessageIntoFormat(replyConversation),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
@@ -390,7 +394,9 @@ public final class LMChatMessageListViewModel {
                    attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(replyConversation.conversationStatus),
                    tempId: replyConversation.temporaryId)]
         }
-        return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
+        return .init(messageId: conversation.id ?? "",
+                     memberTitle: conversation.member?.communityManager(),
+                     memberState: conversation.member?.state,
                      message: convertMessageIntoFormat(conversation),
                      timestamp: conversation.createdEpoch,
                      reactions: reactionGrouping(conversation.reactions?.reversed() ?? []),
@@ -619,15 +625,18 @@ public final class LMChatMessageListViewModel {
         (chatroomViewData?.type == type)
     }
     
-    func checkDMStatus() {
+    func checkDMStatus(requestFrom: String = "chatroom") {
         let request = CheckDMStatusRequest.builder()
-            .requestFrom("chatroom")
+            .requestFrom(requestFrom)
             .chatroomId(chatroomId)
             .build()
         LMChatClient.shared.checkDMStatus(request: request) {[weak self] response in
             guard let self, let status = response.data else { return }
             dmStatus = status
-            delegate?.directMessageStatus()
+            showList = Int(status.cta?.getQueryItems()["show_list"] ?? "")
+            if isChatroomType(type: .directMessage) == true {
+                delegate?.directMessageStatus()
+            }
         }
     }
     

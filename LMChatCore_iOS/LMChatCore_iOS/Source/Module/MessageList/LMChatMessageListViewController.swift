@@ -136,6 +136,7 @@ open class LMChatMessageListViewController: LMViewController {
         let attText = GetAttributedTextWithRoutes.getAttributedText(from: LMSharedPreferences.getString(forKey: viewModel?.chatroomId ?? "NA") ?? "")
         if !attText.string.isEmpty {
             bottomMessageBoxView.inputTextView.attributedText = attText
+            bottomMessageBoxView.tagSendButtonOnBasisOfText(attText.string)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
                 self?.bottomMessageBoxView.inputTextView.becomeFirstResponder()
             }
@@ -363,10 +364,10 @@ open class LMChatMessageListViewController: LMViewController {
         let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
         if viewModel?.chatroomViewData?.chatRequestState == nil {
             if isDMWithRequestEnabled == true {
-                
+                bottomMessageBoxView.sendButton.tag = bottomMessageBoxView.messageButtonTag
+                bottomMessageBoxView.sendButton.setImage(bottomMessageBoxView.sendButtonIcon, for: .normal)
                 bottomMessageBoxView.attachmentButton.isHidden = true
                 bottomMessageBoxView.gifButton.isHidden = true
-//                        bottomSendMessageView?.recordButtonBehindView.isHidden = true
                 bottomMessageLabel.text = String(format: Constants.shared.strings.bottomMessage, viewModel?.directMessageUserName() ?? "")
                 bottomMessageLabel.isHidden = false
             }
@@ -668,6 +669,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         actions.append(replyAction)
+        
+        if viewModel?.isChatroomType(type: .directMessage) == false, 
+            item.isIncoming == true,
+           item.messageType != LMChatMessageListView.chatroomHeader {
+            if (viewModel?.showList == 1) || (viewModel?.showList == 2 && item.memberState == 1) {
+                let replyPrivatelyAction = UIAction(title: Constants.shared.strings.replyPrivately,
+                                                    image: Constants.shared.images.replyIcon) { [weak self] action in
+                    self?.contextMenuItemClicked(withType: .replyPrivately, atIndex: indexPath, message: item)
+                }
+                actions.append(replyPrivatelyAction)
+            }
+        }
+        
         if let message = item.message, !message.isEmpty {
             let copyAction = UIAction(title: Constants.shared.strings.copy,
                                       image: Constants.shared.images.copyIcon) { [weak self] action in
@@ -804,6 +818,15 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             }
         case .setTopic:
             viewModel?.setAsCurrentTopic(conversationId: message.messageId)
+        case .replyPrivately:
+            guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
+                  let uuid = conversation.member?.sdkClientInfo?.uuid else { return }
+            LMChatDMCreationHandler.shared.openDMChatroom(uuid: uuid, viewController: self) {[weak self] chatroomId in
+                guard let self, let chatroomId else { return }
+                DispatchQueue.main.async {
+                    NavigationScreen.shared.perform(.chatroom(chatroomId: chatroomId, conversationID: nil), from: self, params: nil)
+                }
+            }
         default:
             break
         }
@@ -1435,7 +1458,12 @@ extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
     }
     
     public func textViewDidChange(_ textView: UITextView) {
-        bottomMessageBoxView.checkSendButtonGestures()
+        if viewModel?.isChatroomType(type: .directMessage) == true, viewModel?.chatroomViewData?.chatRequestState == nil {
+            bottomMessageBoxView.sendButton.tag = bottomMessageBoxView.messageButtonTag
+            bottomMessageBoxView.sendButton.setImage(bottomMessageBoxView.sendButtonIcon, for: .normal)
+        } else {
+            bottomMessageBoxView.checkSendButtonGestures()
+        }
         
         // Find first url link here and ignore email
         let links = textView.text.detectedLinks

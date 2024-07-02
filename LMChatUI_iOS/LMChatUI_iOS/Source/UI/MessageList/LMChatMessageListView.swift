@@ -38,6 +38,7 @@ public protocol LMChatMessageListViewDelegate: LMChatMessageBaseProtocol {
 public enum LMMessageActionType: String {
     case delete
     case reply
+    case replyPrivately
     case copy
     case edit
     case select
@@ -72,6 +73,7 @@ open class LMChatMessageListView: LMView {
         public struct Message {
             public let messageId: String
             public let memberTitle: String?
+            public let memberState: Int?
             public var message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
@@ -91,7 +93,7 @@ open class LMChatMessageListView: LMView {
             public var messageStatus: LMMessageStatus?
             public var tempId: String?
             
-            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
+            public init(messageId: String, memberTitle: String?, memberState: Int?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -112,6 +114,7 @@ open class LMChatMessageListView: LMView {
                 self.isShowMore = isShowMore
                 self.messageStatus = messageStatus
                 self.tempId = tempId
+                self.memberState = memberState
             }
         }
         
