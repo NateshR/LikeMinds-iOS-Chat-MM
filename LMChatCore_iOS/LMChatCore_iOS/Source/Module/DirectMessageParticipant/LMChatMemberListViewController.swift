@@ -46,7 +46,7 @@ open class LMChatMemberListViewController: LMViewController {
         memberCountsLabel.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 12),
                                         leading: (view.leadingAnchor, 16),
                                      trailing: (view.trailingAnchor, -16))
-        containerView.addConstraint(top: (memberCountsLabel.topAnchor, 8),
+        containerView.addConstraint(top: (memberCountsLabel.bottomAnchor, 8),
                                     bottom: (view.safeAreaLayoutGuide.bottomAnchor, 0),
                                         leading: (view.leadingAnchor, 0),
                                         trailing: (view.trailingAnchor, 0))

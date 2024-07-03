@@ -78,11 +78,21 @@ open class LMChatDMFeedViewController: LMViewController {
         setupNewFabButton()
     }
     
-    open func setupRightItemBars() {
+    func setupRightItemBars() {
         let profileItem = UIBarButtonItem(customView: profileIcon)
         let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(searchBarItemClicked))
         searchItem.tintColor = Appearance.shared.colors.textColor
-        navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        profileItem.customView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(profileItemClicked)))
+        if let vc = self.navigationController?.viewControllers.first {
+            vc.navigationItem.rightBarButtonItems = [profileItem, searchItem]
+            (vc as? LMViewController)?.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil)
+        } else {
+            navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        }
+    }
+    
+    @objc open func profileItemClicked() {
+        self.showAlertWithActions(title: "View Profile", message: "Handle route route://member_profile/\(viewModel?.memberProfile?.sdkClientInfo?.uuid ?? "") to view profile! ", withActions: nil)
     }
     
     open func setupNewFabButton() {

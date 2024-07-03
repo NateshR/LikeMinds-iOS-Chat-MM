@@ -31,9 +31,6 @@ open class LMChatGroupFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
     }
     
@@ -51,20 +48,15 @@ open class LMChatGroupFeedViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        super.setupViews()
         self.view.addSubview(feedListView)
         setupRightItemBars()
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        NSLayoutConstraint.activate([
-            feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-            //            containerView.heightAnchor.constraint(equalToConstant: 40),
-            feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-        ])
+        super.setupLayouts()
+        self.view.safeAreaPinSubView(subView: feedListView)
     }
     
     func setupRightItemBars() {
