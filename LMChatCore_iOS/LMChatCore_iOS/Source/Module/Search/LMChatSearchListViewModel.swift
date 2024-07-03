@@ -14,7 +14,7 @@ public protocol LMChatSearchListViewProtocol: AnyObject {
     func showHideFooterLoader(isShow: Bool)
 }
 
-final public class LMChatSearchListViewModel {
+final public class LMChatSearchListViewModel: LMChatBaseViewModel {
     public enum APIStatus {
         case headerChatroomFollowTrue
         case headerChatroomFollowFalse
@@ -282,6 +282,12 @@ final public class LMChatSearchListViewModel {
               let uuid = data.sdkClientInfo?.uuid else { return .none }
         
         return .init(uuid: uuid, username: data.name ?? "User", imageURL: data.imageUrl, isGuest: data.isGuest)
+    }
+    
+    func trackEventBasicParams(chatroomId: String) -> [String: AnyHashable] {
+        [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""]
     }
 }
 

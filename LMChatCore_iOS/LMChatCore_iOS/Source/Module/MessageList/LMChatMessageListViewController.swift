@@ -141,6 +141,12 @@ open class LMChatMessageListViewController: LMViewController {
                 self?.bottomMessageBoxView.inputTextView.becomeFirstResponder()
             }
         }
+        LMChatMain.analytics?.trackEvent(for: .chatRoomOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: viewModel?.chatroomId,
+                                                           LMChatAnalyticsKeys.chatroomType.rawValue: viewModel?.chatroomViewData?.type?.value,
+                                                           LMChatAnalyticsKeys.chatroomName.rawValue: viewModel?.chatroomViewData?.header,
+                                                           LMChatAnalyticsKeys.communityId.rawValue: viewModel?.chatroomViewData?.communityId,
+                                                           LMChatAnalyticsKeys.source.rawValue: "home_feed"])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -862,15 +868,21 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
-        guard let fileUrl = URL(string: url.getLinkWithHttps()) else {
-            return
-        }
+        guard let fileUrl = URL(string: url.getLinkWithHttps()) else { return }
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        var eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        eventProps["url"] = url
+        eventProps["type"] = "Link"
+        LMChatMain.analytics?.trackEvent(for: .chatLinkClicked, eventProperties: eventProps)
         NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
     }
     
     public func didTappedOnGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let attachments = message.attachments, !attachments.isEmpty else { return }
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .imageViewed, eventProperties: eventProps)
         
         let mediaData: [LMChatMediaPreviewViewModel.DataModel.MediaModel] = attachments.compactMap {
             .init(mediaType: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, thumbnailURL: $0.thumbnailUrl, mediaURL: $0.fileUrl ?? "")
@@ -884,11 +896,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         if message.messageType == LMChatMessageListView.chatroomHeader {
+            
+            let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+            LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: eventProps)
+            
             NavigationScreen.shared.perform(.reactionSheet(reactions: (viewModel?.chatroomViewData?.reactions ?? []).reversed(), selectedReaction: reaction, conversation: nil, chatroomId: message.messageId), from: self, params: nil)
             return
         }
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
               let reactions = conversation.reactions else { return }
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [:])
+        
         NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
@@ -940,7 +960,6 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             if isDMWithRequestEnabled == true {
                 if message.count > 300 {
                     self.showErrorAlert(message: Constants.shared.strings.dmRequestTextLimit)
-//                    showToastMessage(message: Constants.shared.strings.dmRequestTextLimit)
                 } else {
                     if viewModel?.chatroomViewData?.isPrivateMember == true {
                         bottomMessageBoxView.inputTextView.resignFirstResponder()
@@ -1030,6 +1049,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
         if let audioURL = LMChatAudioRecordManager.shared.recordingStopped() {
             let newURL = URL(fileURLWithPath: audioURL.absoluteString)
             let mediaModel = MediaPickerModel(with: newURL, type: .voice_note)
+            
+            let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+            LMChatMain.analytics?.trackEvent(for: .voiceNoteSent, eventProperties: eventProps)
+            
             postConversationWithAttchments(message: nil, attachments: [mediaModel])
         }
         LMChatAudioRecordManager.shared.resetAudioParameters()
@@ -1069,6 +1092,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             if canRecord {
                 bottomMessageBoxView.showRecordingView()
                 NotificationCenter.default.addObserver(self, selector: #selector(updateRecordDuration), name: .audioDurationUpdate, object: nil)
+                LMChatMain.analytics?.trackEvent(for: .voiceNoteRecorded,
+                                                 eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: "",
+                                                                   LMChatAnalyticsKeys.communityId.rawValue: "",
+                                                                   LMChatAnalyticsKeys.chatroomType.rawValue: ""])
             } else {
                 // TODO: Show Error Alert if false
             }
@@ -1089,6 +1116,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     
     public func playRecording() {
         guard let url = LMChatAudioRecordManager.shared.audioURL else { return }
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .voiceNotePreviewed, eventProperties: eventProps)
+        
         LMChatAudioPlayManager.shared.startAudio(fileURL: url.absoluteString) { [weak self] progress in
             self?.bottomMessageBoxView.updateRecordTime(with: progress, isPlayback: true)
         }
@@ -1099,6 +1130,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     }
     
     public func deleteRecording() {
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .voiceNoteCanceled, eventProperties: eventProps)
+        
         LMChatAudioRecordManager.shared.deleteAudioRecording()
     }
     
@@ -1298,9 +1333,8 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
     
     public func didTapRoute(route: String) {
         if route == "route://tap_to_undo" {
-            viewModel?.blockDMMember(status: .unblock)
+            viewModel?.blockDMMember(status: .unblock, source: "tap_to_unblock")
         } else {
-            print("route: \(route)")
             viewProfile(route: route)
         }
     }
@@ -1411,7 +1445,7 @@ extension LMChatMessageListViewController: LMChatApproveRejectDelegate {
 
 extension LMChatMessageListViewController: LMChatReportViewDelegate {
     public func didReportActionCompleted(reason: String?) {
-        viewModel?.sendDMRequest(text: nil, requestState: .rejected)
+        viewModel?.sendDMRequest(text: nil, requestState: .rejected, reason: reason)
     }
 }
 

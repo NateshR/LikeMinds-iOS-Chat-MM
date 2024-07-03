@@ -10,7 +10,7 @@ import LikeMindsChatUI
 
 open class LMChatGroupFeedViewController: LMViewController {
     
-    var viewModel: LMChatHomeFeedViewModel?
+    var viewModel: LMChatGroupFeedViewModel?
     
     open private(set) lazy var feedListView: LMChatHomeFeedListView = {
         let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
@@ -32,6 +32,8 @@ open class LMChatGroupFeedViewController: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
+        LMChatMain.analytics?.trackEvent(for: .homeFeedPageOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.communityId.rawValue: viewModel?.getCommunityId() ?? ""])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -73,6 +75,7 @@ open class LMChatGroupFeedViewController: LMViewController {
     }
     
     @objc open func searchBarItemClicked() {
+        LMChatMain.analytics?.trackEvent(for: .searchIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
         NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
     }
     
@@ -81,7 +84,7 @@ open class LMChatGroupFeedViewController: LMViewController {
     }
 }
 
-extension LMChatGroupFeedViewController: LMHomeFeedViewModelProtocol {
+extension LMChatGroupFeedViewController: LMChatGroupFeedViewModelProtocol {
     
     public func updateHomeFeedChatroomsData() {
        let chatrooms =  (viewModel?.chatrooms ?? []).compactMap({ chatroom in

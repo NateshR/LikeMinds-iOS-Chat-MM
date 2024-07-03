@@ -1,5 +1,5 @@
 //
-//  LMChatHomeFeedViewModel.swift
+//  LMChatGroupFeedViewModel.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 12/02/24.
@@ -9,20 +9,31 @@ import Foundation
 import LikeMindsChat
 import LikeMindsChatUI
 
-public protocol LMHomeFeedViewModelProtocol: AnyObject {
+public protocol LMChatGroupFeedViewModelProtocol: AnyObject {
     func reloadData()
     func updateHomeFeedChatroomsData()
     func updateHomeFeedExploreCountData()
 }
 
-public class LMChatHomeFeedViewModel {
+public class LMChatBaseViewModel {
     
-    weak var delegate: LMHomeFeedViewModelProtocol?
+    func getCommunityId() -> String {
+        SDKPreferences.shared.getCommunityId() ?? ""
+    }
+    
+    func getCommunityName() -> String {
+        SDKPreferences.shared.getCommunityName() ?? ""
+    }
+}
+
+public class LMChatGroupFeedViewModel: LMChatBaseViewModel {
+    
+    weak var delegate: LMChatGroupFeedViewModelProtocol?
     var chatrooms: [Chatroom] = []
     var exploreTabCountData: GetExploreTabCountResponse?
     var memberProfile: User?
     
-    init(_ viewController: LMHomeFeedViewModelProtocol) {
+    init(_ viewController: LMChatGroupFeedViewModelProtocol) {
         self.delegate = viewController
     }
     
@@ -30,7 +41,7 @@ public class LMChatHomeFeedViewModel {
         guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.groupChatFeedScreen.init()
-        viewController.viewModel = LMChatHomeFeedViewModel(viewController)
+        viewController.viewModel = LMChatGroupFeedViewModel(viewController)
         return viewController
     }
     
@@ -118,7 +129,7 @@ public class LMChatHomeFeedViewModel {
     
 }
 
-extension LMChatHomeFeedViewModel: HomeFeedClientObserver {
+extension LMChatGroupFeedViewModel: HomeFeedClientObserver {
     
     public func initial(_ chatrooms: [Chatroom]) {
         reloadChatroomsData(data: chatrooms)

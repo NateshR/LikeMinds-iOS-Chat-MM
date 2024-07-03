@@ -26,7 +26,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
 
-public final class LMChatMessageListViewModel {
+public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     
     weak var delegate: LMMessageListViewModelProtocol?
     var chatroomId: String
@@ -566,6 +566,7 @@ public final class LMChatMessageListViewModel {
             .build()
         LMChatClient.shared.muteChatroom(request: request) {[weak self] response in
             guard response.success else { return }
+            LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: self?.chatroomViewData?.header ?? ""])
             if value {
                 self?.delegate?.showToastMessage(message: String(format: Constants.shared.strings.muteUnmuteMessage, "muted"))
             } else {
@@ -615,9 +616,9 @@ public final class LMChatMessageListViewModel {
                 delegate?.viewProfile(route: route + "\(chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid ?? "")")
             }
         case .blockDMMember:
-            blockDMMember(status: .block)
+            blockDMMember(status: .block, source: "overflow_menu")
         case .unblockDMMember:
-            blockDMMember(status: .unblock)
+            blockDMMember(status: .unblock, source: "overflow_menu")
         default:
             break
         }
@@ -642,7 +643,7 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func sendDMRequest(text: String?, requestState: ChatRequestState) {
+    func sendDMRequest(text: String?, requestState: ChatRequestState, reason: String? = nil) {
         let request = SendDMRequest.builder()
             .text(text)
             .chatRequestState(requestState.rawValue)
@@ -661,6 +662,7 @@ public final class LMChatMessageListViewModel {
                 self?.insertOrUpdateConversationIntoList(conversation)
                 self?.delegate?.reloadChatMessageList()
             }
+            self?.trackEventSendDMRequest(requestState: requestState, reason: reason)
             self?.delegate?.approveRejectView(isShow: false)
             self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
             self?.fetchChatroomActions()
@@ -668,7 +670,8 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func blockDMMember(status: BlockMemberRequest.BlockState) {
+    func blockDMMember(status: BlockMemberRequest.BlockState, source: String?) {
+        guard isChatroomType(type: .directMessage) == true else { return }
         let request = BlockMemberRequest.builder()
             .status(status)
             .chatroomId(chatroomId)
@@ -686,6 +689,7 @@ public final class LMChatMessageListViewModel {
                 self?.insertOrUpdateConversationIntoList(conversation)
                 self?.delegate?.reloadChatMessageList()
             }
+            self?.trackEventDMBlockUser(status: status, source: source)
             let requestType = status == .block ? "blocked" : "unblocked"
             self?.delegate?.showToastMessage(message: "Member \(requestType)!")
             self?.fetchChatroomActions()
@@ -699,6 +703,82 @@ public final class LMChatMessageListViewModel {
         } else {
             return chatroomViewData?.chatWithUser?.name ?? ""
         }
+    }
+    
+    func directMessageUserUUID() -> String {
+        if loggedInUserData?.sdkClientInfo?.uuid == chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            return chatroomViewData?.member?.sdkClientInfo?.uuid ?? ""
+        } else {
+            return chatroomViewData?.chatWithUser?.uuid ?? ""
+        }
+    }
+    
+    func trackEventSendDMRequest(requestState: ChatRequestState, reason: String?) {
+        var uuid = directMessageUserUUID()
+        switch requestState {
+        case .initiated:
+            LMChatMain.analytics?.trackEvent(for: .dmRequestSent,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.receiver.rawValue: uuid ?? "",
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.source.rawValue: "DM cta"])
+        case .approved:
+            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.senderId.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.status.rawValue: "Approved"])
+        case .rejected:
+            let reported = reason != nil
+            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.senderId.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.status.rawValue: "Rejected",
+                                                LMChatAnalyticsKeys.reported.rawValue: "\(reported)",
+                                                LMChatAnalyticsKeys.reportedReason.rawValue: reason ?? ""])
+        default:
+            break
+        }
+    }
+    
+    func trackEventDMBlockUser(status: BlockMemberRequest.BlockState, source: String?) {
+        switch status {
+        case .block:
+            LMChatMain.analytics?.trackEvent(for: .dmBlock,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.blockedUser.rawValue: directMessageUserUUID() ?? "",
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""])
+        case .unblock:
+            LMChatMain.analytics?.trackEvent(for: .dmUnblock,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID() ?? "",
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.source.rawValue: source ?? ""])
+        default:
+            break
+        }
+    }
+    
+    func trackEventDMSent() {
+        guard isChatroomType(type: .directMessage) == true else { return }
+        LMChatMain.analytics?.trackEvent(for: .dmSent,
+                                         eventProperties: [
+                                            LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID() ?? "",
+                                            LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+                                            LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""])
+    }
+    
+    func trackEventBasicParams(messageId: String?) -> [String: AnyHashable] {
+        [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+         LMChatAnalyticsKeys.messageId.rawValue: messageId ?? "",
+         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
+         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""]
     }
 }
 
@@ -861,6 +941,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         guard let conversation = response, let conversId = conversation.id else {
             return
         }
+        trackEventDMSent()
         var requestFiles:[LMChatAttachmentUploadRequest] = []
         if let updatedFileUrls, !updatedFileUrls.isEmpty {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
@@ -999,6 +1080,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard response.success else {
                 return
             }
+            
+            LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
+            
             if status {
                 self?.delegate?.showToastMessage(message: Constants.shared.strings.followedMessage)
             } else {
@@ -1012,6 +1096,12 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func putConversationReaction(conversationId: String, reaction: String) {
         updateReactionsForUI(reaction: reaction, conversationId: conversationId, chatroomId: nil)
+        
+        LMChatMain.analytics?.trackEvent(for: .reactionAdded, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         let request = PutReactionRequest.builder()
             .conversationId(conversationId)
             .reaction(reaction)
@@ -1153,6 +1243,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     private func onDeleteConversation(ids: [String]) {
+        
+        LMChatMain.analytics?.trackEvent(for: .messageDeleted, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            "message_ids": ids.joined(separator: ", ")])
+        
         for conId in ids {
             if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
                 let conversation = chatMessages[index]
@@ -1171,6 +1266,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func editConversation(conversationId: String) {
+        
+        LMChatMain.analytics?.trackEvent(for: .messageEdited, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         self.editChatMessage = chatMessages.first(where: {$0.id == conversationId})
     }
     
@@ -1185,6 +1285,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     func setAsCurrentTopic(conversationId: String) {
         chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
         delegate?.updateTopicBar()
+        
+        LMChatMain.analytics?.trackEvent(for: .setChatroomTopic, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         let request = SetChatroomTopicRequest.builder()
             .chatroomId(chatroomId)
             .conversationId(conversationId)
@@ -1197,6 +1302,10 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func copyConversation(conversationIds: [String]) {
+        
+        LMChatMain.analytics?.trackEvent(for: .messageCopied, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            "messages_id": conversationIds.joined(separator: ", ")])
         
         var copiedString: String = ""
         for convId in conversationIds {

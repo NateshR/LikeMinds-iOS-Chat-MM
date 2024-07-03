@@ -46,6 +46,8 @@ open class LMChatDMFeedViewController: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
+        LMChatMain.analytics?.trackEvent(for: .dmScreenOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.communityId.rawValue: viewModel?.getCommunityId() ?? "", LMChatAnalyticsKeys.source.rawValue: "home_feed"])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -139,6 +141,7 @@ open class LMChatDMFeedViewController: LMViewController {
     }
     
     @objc open func searchBarItemClicked() {
+        LMChatMain.analytics?.trackEvent(for: .searchIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
         NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
     }
 }
