@@ -16,7 +16,7 @@ final class LMChatAnalyticsTracker: LMChatAnalyticsProtocol {
     public func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String : AnyHashable]) {
         let track = """
             ========Event Tracker========
-        Event Name: \(eventName)
+        Event Name: \(eventName.rawValue)
         Event Properties: \(eventProperties)
             =============================
         """
@@ -127,8 +127,8 @@ public enum LMChatAnalyticsSource: String {
     case messageReactionsFromLongPress = "long press"
     case messageReactionsFromReactionButton = "reaction button"
     case communityTab = "community_tab"
-    case communityFeed = "home_feed"
-    case homeFeed = "explore_feed"
+    case homeFeed = "home_feed"
+    case exploreFeed = "explore_feed"
     case notification = "notification"
     case deepLink = "deep_link"
     case pollResult = "poll_result"

@@ -51,9 +51,6 @@ open class ChatFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        setupViews()
-        setupLayouts()
-        setupAppearance()
         viewModel?.checkDMTab()
         segmentControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         pageController.setViewControllers([viewControllers[currentPageIndex]], direction: .forward, animated: false) { _ in }
