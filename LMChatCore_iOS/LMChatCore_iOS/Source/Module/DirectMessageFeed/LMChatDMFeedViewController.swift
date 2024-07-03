@@ -45,9 +45,6 @@ open class LMChatDMFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
     }
     
@@ -65,6 +62,7 @@ open class LMChatDMFeedViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
         setupRightItemBars()
@@ -72,16 +70,11 @@ open class LMChatDMFeedViewController: LMViewController {
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        NSLayoutConstraint.activate([
-            feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            
-            newDMFabButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            newDMFabButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
-            newDMFabButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        super.setupLayouts()
+        self.view.safeAreaPinSubView(subView: feedListView)
+        newDMFabButton.addConstraint(bottom: (view.safeAreaLayoutGuide.bottomAnchor, -16),
+                                     trailing: (view.trailingAnchor, -16))
+        newDMFabButton.setHeightConstraint(with: 50)
         setupNewFabButton()
     }
     

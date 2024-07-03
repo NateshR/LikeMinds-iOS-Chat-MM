@@ -57,6 +57,15 @@ public extension UIView {
         pinSubView(subView: subView)
     }
     
+    func safeAreaPinSubView(subView: UIView, padding: UIEdgeInsets = .zero) {
+        NSLayoutConstraint.activate([
+            subView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: padding.left),
+            subView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: padding.right),
+            subView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: padding.top),
+            subView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: padding.bottom)
+        ])
+    }
+    
     func addConstraint(top: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        bottom: (anchor: NSLayoutYAxisAnchor, padding: CGFloat)? = nil,
                        leading: (anchor: NSLayoutXAxisAnchor, padding: CGFloat)? = nil,

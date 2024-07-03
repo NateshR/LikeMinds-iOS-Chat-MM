@@ -50,9 +50,6 @@ open class LMChatFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        setupViews()
-        setupLayouts()
-        setupAppearance()
         segmentControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         pageController.setViewControllers([viewControllers[currentPageIndex]], direction: .forward, animated: false) { _ in }
     }
@@ -69,16 +66,11 @@ open class LMChatFeedViewController: LMViewController {
     
     open override func setupLayouts() {
         super.setupLayouts()
-        NSLayoutConstraint.activate([
-            containerStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            containerStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            segmentControl.leadingAnchor.constraint(equalTo: containerStackView.leadingAnchor, constant: 16),
-            segmentControl.trailingAnchor.constraint(equalTo: containerStackView.trailingAnchor, constant: -16),
-            pageContainerView.leadingAnchor.constraint(equalTo: containerStackView.leadingAnchor),
-            pageContainerView.trailingAnchor.constraint(equalTo: containerStackView.trailingAnchor),
-            ])
+        self.view.safeAreaPinSubView(subView: containerStackView, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
+        segmentControl.addConstraint(leading: (containerStackView.leadingAnchor, 16),
+        trailing: (containerStackView.trailingAnchor, -16))
+        pageContainerView.addConstraint(leading: (containerStackView.leadingAnchor, 0),
+                                     trailing: (containerStackView.trailingAnchor, 0))
     }
     
     open override func setupAppearance() {
