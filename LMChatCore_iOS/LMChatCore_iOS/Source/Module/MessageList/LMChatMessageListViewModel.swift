@@ -714,29 +714,29 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     }
     
     func trackEventSendDMRequest(requestState: ChatRequestState, reason: String?) {
-        var uuid = directMessageUserUUID()
+        let uuid = directMessageUserUUID()
         switch requestState {
         case .initiated:
             LMChatMain.analytics?.trackEvent(for: .dmRequestSent,
                                              eventProperties: [
-                                                LMChatAnalyticsKeys.receiver.rawValue: uuid ?? "",
-                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.receiver.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
                                                 LMChatAnalyticsKeys.source.rawValue: "DM cta"])
         case .approved:
             LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.senderId.rawValue: uuid,
-                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
                                                 LMChatAnalyticsKeys.status.rawValue: "Approved"])
         case .rejected:
             let reported = reason != nil
             LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.senderId.rawValue: uuid,
-                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
                                                 LMChatAnalyticsKeys.status.rawValue: "Rejected",
                                                 LMChatAnalyticsKeys.reported.rawValue: "\(reported)",
                                                 LMChatAnalyticsKeys.reportedReason.rawValue: reason ?? ""])
@@ -750,15 +750,15 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         case .block:
             LMChatMain.analytics?.trackEvent(for: .dmBlock,
                                              eventProperties: [
-                                                LMChatAnalyticsKeys.blockedUser.rawValue: directMessageUserUUID() ?? "",
-                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""])
+                                                LMChatAnalyticsKeys.blockedUser.rawValue: directMessageUserUUID(),
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()])
         case .unblock:
             LMChatMain.analytics?.trackEvent(for: .dmUnblock,
                                              eventProperties: [
-                                                LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID() ?? "",
-                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? "",
+                                                LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
                                                 LMChatAnalyticsKeys.source.rawValue: source ?? ""])
         default:
             break
@@ -769,16 +769,16 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         guard isChatroomType(type: .directMessage) == true else { return }
         LMChatMain.analytics?.trackEvent(for: .dmSent,
                                          eventProperties: [
-                                            LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID() ?? "",
-                                            LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-                                            LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""])
+                                            LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
+                                            LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                            LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()])
     }
     
     func trackEventBasicParams(messageId: String?) -> [String: AnyHashable] {
         [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
          LMChatAnalyticsKeys.messageId.rawValue: messageId ?? "",
-         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""]
+         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
 }
 
