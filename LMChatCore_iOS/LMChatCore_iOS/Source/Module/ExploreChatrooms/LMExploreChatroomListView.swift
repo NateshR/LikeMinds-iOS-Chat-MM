@@ -82,6 +82,7 @@ open class LMExploreChatroomListView: LMViewController {
     
     public func updateChatroomsData(chatroomData: [LMChatExploreChatroomView.ContentModel]) {
         self.chatroomData = chatroomData
+        self.showHideLoaderView(isShow: false, backgroundColor: .clear)
         tableView.reloadData()
         tableView.backgroundView = chatroomData.isEmpty ? LMChatNoResultView(frame: tableView.bounds) : nil
     }
@@ -136,11 +137,11 @@ extension LMExploreChatroomListView: LMChatExploreChatroomViewModelProtocol {
 extension LMExploreChatroomListView: LMChatExploreChatroomFilterProtocol {
     public func applyFilter(with filter: LMChatExploreChatroomViewModel.Filter) {
         viewModel?.applyFilter(filter: filter)
-        tableView.backgroundView = loadingView
+        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
     }
     
     public func applyPinnedStatus() {
         viewModel?.applyFilter()
-        tableView.backgroundView = loadingView
+        self.showHideLoaderView(isShow: true, backgroundColor: .clear)
     }
 }

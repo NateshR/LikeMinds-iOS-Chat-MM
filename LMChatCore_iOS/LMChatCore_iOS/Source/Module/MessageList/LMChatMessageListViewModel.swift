@@ -951,6 +951,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             savePostedConversation(requestList: requestFiles, conversation: conversation)
             followUnfollow()
         }
+        markChatroomAsRead()
     }
     
     func getUploadFileRequestList(fileUrls: [LMChatAttachmentMediaData], conversationId: String, chatroomId: String) -> [LMChatAttachmentUploadRequest] {
@@ -1321,14 +1322,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
-    }
-    
-    func fetchReplyConversationOnClick(repliedConversationId: String) {
-        if let conversation = chatMessages.first(where: {$0.id == repliedConversationId}) {
-            messagesList
-        } else if let chatroomViewData {
-            fetchIntermediateConversations(chatroom: chatroomViewData, conversationId: repliedConversationId)
-        }
     }
     
     func postMessageWithAttachment() {
