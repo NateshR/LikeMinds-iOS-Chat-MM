@@ -96,7 +96,7 @@ public class LMChatHomeFeedViewModel {
                                                         chatroomImageUrl: chatroom?.chatroomImageUrl,
                                                         isMuted: chatroom?.muteStatus ?? false,
                                                         isSecret: chatroom?.isSecret ?? false,
-                                                        isAnnouncementRoom: chatroom?.type == ChatroomType.purpose.rawValue,
+                                                        isAnnouncementRoom: chatroom?.type == ChatroomType.purpose,
                                                         unreadCount: chatroom?.unseenCount ?? 0,
                                                         timestamp: LMCoreTimeUtils.timestampConverted(withEpoch: lastConversation?.createdEpoch ?? 0, withOnlyTime: false) ?? "",
                                                         fileTypeWithCount: getAttachmentType(chatroom: chatroom),

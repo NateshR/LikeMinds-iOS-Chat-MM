@@ -45,9 +45,6 @@ open class LMChatDMFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
     }
     
@@ -65,6 +62,7 @@ open class LMChatDMFeedViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
         setupRightItemBars()
@@ -72,24 +70,29 @@ open class LMChatDMFeedViewController: LMViewController {
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        NSLayoutConstraint.activate([
-            feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            
-            newDMFabButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            newDMFabButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
-            newDMFabButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        super.setupLayouts()
+        self.view.safeAreaPinSubView(subView: feedListView)
+        newDMFabButton.addConstraint(bottom: (view.safeAreaLayoutGuide.bottomAnchor, -16),
+                                     trailing: (view.trailingAnchor, -16))
+        newDMFabButton.setHeightConstraint(with: 50)
         setupNewFabButton()
     }
     
-    open func setupRightItemBars() {
+    func setupRightItemBars() {
         let profileItem = UIBarButtonItem(customView: profileIcon)
         let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(searchBarItemClicked))
         searchItem.tintColor = Appearance.shared.colors.textColor
-        navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        profileItem.customView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(profileItemClicked)))
+        if let vc = self.navigationController?.viewControllers.first {
+            vc.navigationItem.rightBarButtonItems = [profileItem, searchItem]
+            (vc as? LMViewController)?.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil)
+        } else {
+            navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        }
+    }
+    
+    @objc open func profileItemClicked() {
+        self.showAlertWithActions(title: "View Profile", message: "Handle route route://member_profile/\(viewModel?.memberProfile?.sdkClientInfo?.uuid ?? "") to view profile! ", withActions: nil)
     }
     
     open func setupNewFabButton() {

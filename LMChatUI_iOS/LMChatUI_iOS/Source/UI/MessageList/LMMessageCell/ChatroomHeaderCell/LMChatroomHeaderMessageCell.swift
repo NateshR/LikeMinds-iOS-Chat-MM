@@ -9,6 +9,8 @@ import Foundation
 
 public protocol LMChatroomHeaderMessageCellDelegate: AnyObject {
     func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
+    func didTapURL(url: URL)
+    func didTapRoute(route: String)
 }
 
 @IBDesignable

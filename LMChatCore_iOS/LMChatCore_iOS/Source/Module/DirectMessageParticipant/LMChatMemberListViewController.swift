@@ -33,6 +33,7 @@ open class LMChatMemberListViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        super.setupViews()
         self.view.addSubview(memberCountsLabel)
         self.view.addSubview(containerView)
     }
@@ -40,15 +41,15 @@ open class LMChatMemberListViewController: LMViewController {
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        NSLayoutConstraint.activate([
-            memberCountsLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            memberCountsLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            memberCountsLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            containerView.topAnchor.constraint(equalTo: memberCountsLabel.bottomAnchor, constant: 8)
-        ])
+        super.setupLayouts()
+        
+        memberCountsLabel.addConstraint(top: (view.safeAreaLayoutGuide.topAnchor, 12),
+                                        leading: (view.leadingAnchor, 16),
+                                     trailing: (view.trailingAnchor, -16))
+        containerView.addConstraint(top: (memberCountsLabel.bottomAnchor, 8),
+                                    bottom: (view.safeAreaLayoutGuide.bottomAnchor, 0),
+                                        leading: (view.leadingAnchor, 0),
+                                        trailing: (view.trailingAnchor, 0))
     }
     
     
@@ -83,7 +84,6 @@ extension LMChatMemberListViewController: LMChatMemberListViewModelProtocol {
             subCount = "\(count) members"
         }
         memberCountsLabel.text = subCount
-//        setNavigationTitleAndSubtitle(with: Constants.shared.strings.sendDMToTitle, subtitle: subCount)
     }
 }
 

@@ -164,7 +164,7 @@ open class LMChatAttachmentViewController: LMViewController {
         setupAppearance()
         openPicker()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomId ?? ""
-        
+        viewModel?.fetchChatroom()
         initializeHideKeyboard(zoomableImageViewContainer)
         initializeHideKeyboard(videoImageViewContainer)
         initializeHideKeyboard(audioPlayer)
@@ -180,6 +180,7 @@ open class LMChatAttachmentViewController: LMViewController {
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         bottomMessageBoxView.inputTextView.mentionDelegate?.contentHeightChanged()
+        bottomMessageBoxView.isTaggingEnable = (viewModel?.chatroomData?.type != .directMessage)
     }
     
     func openPicker() {

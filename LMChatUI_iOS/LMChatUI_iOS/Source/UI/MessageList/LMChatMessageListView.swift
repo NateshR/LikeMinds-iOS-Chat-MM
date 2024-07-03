@@ -13,7 +13,12 @@ public enum ScrollDirection : Int {
     case none = -1
 }
 
-public protocol LMChatMessageListViewDelegate: AnyObject {
+public protocol LMChatMessageBaseProtocol: AnyObject {
+    func didTapURL(url: URL)
+    func didTapRoute(route: String)
+}
+
+public protocol LMChatMessageListViewDelegate: LMChatMessageBaseProtocol {
     func didTapOnCell(indexPath: IndexPath)
     func fetchDataOnScroll(indexPath: IndexPath, direction: ScrollDirection)
     func didTappedOnReaction(reaction: String, indexPath: IndexPath)
@@ -33,6 +38,7 @@ public protocol LMChatMessageListViewDelegate: AnyObject {
 public enum LMMessageActionType: String {
     case delete
     case reply
+    case replyPrivately
     case copy
     case edit
     case select
@@ -67,7 +73,8 @@ open class LMChatMessageListView: LMView {
         public struct Message {
             public let messageId: String
             public let memberTitle: String?
-            public let message: String?
+            public let memberState: Int?
+            public var message: String?
             public let timestamp: Int?
             public let reactions: [Reaction]?
             public let attachments: [Attachment]?
@@ -85,8 +92,9 @@ open class LMChatMessageListView: LMView {
             public var isShowMore: Bool = false
             public var messageStatus: LMMessageStatus?
             public var tempId: String?
+            public var hideLeftProfileImage: Bool?
             
-            public init(messageId: String, memberTitle: String?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
+            public init(messageId: String, memberTitle: String?, memberState: Int?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?, hideLeftProfileImage: Bool?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -107,6 +115,8 @@ open class LMChatMessageListView: LMView {
                 self.isShowMore = isShowMore
                 self.messageStatus = messageStatus
                 self.tempId = tempId
+                self.memberState = memberState
+                self.hideLeftProfileImage = hideLeftProfileImage
             }
         }
         
@@ -178,7 +188,7 @@ open class LMChatMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-        table.contentInset = .init(top: 0, left: 0, bottom: 12, right: 0)
+        table.contentInset = .init(top: 0, left: 0, bottom: 8, right: 0)
         return table
     }()
     
@@ -241,13 +251,13 @@ open class LMChatMessageListView: LMView {
     }
     
     public func reloadData() {
-        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+//        tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }
     
     public  func justReloadData() {
-        tableSections.sort(by: {$0.timestamp < $1.timestamp})
+//        tableSections.sort(by: {$0.timestamp < $1.timestamp})
         removeShimmer()
         tableView.reloadData()
     }
@@ -256,14 +266,14 @@ open class LMChatMessageListView: LMView {
         if !tableSections.isEmpty { tableView.backgroundView = nil }
     }
     
-    public func scrollToBottom() {
+    public func scrollToBottom(animation: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
             guard let self else { return }
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
             if hasRowAtIndexPath(indexPath: indexPath) {
-                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: animation)
             }
         }
         
@@ -272,10 +282,10 @@ open class LMChatMessageListView: LMView {
         }
     }
     
-    public func scrollAtIndexPath(indexPath: IndexPath) {
+    public func scrollAtIndexPath(indexPath: IndexPath, animation: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self else { return }
-            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: animation)
             let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
             let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
             let cell = messageCell ?? chatroomCell
@@ -326,6 +336,7 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         default:
             if let cell = tableView.dequeueReusableCell(LMUIComponents.shared.chatNotificationCell) {
                 cell.setData(with: .init(message: item, loggedInUserTag: currentLoggedInUserTagFormat, loggedInUserReplaceTag: currentLoggedInUserReplaceTagFormat))
+                cell.delegate = delegate
                 tableViewCell =  cell
             }
         }

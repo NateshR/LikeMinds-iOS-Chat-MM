@@ -45,5 +45,6 @@ public extension Appearance {
         public var linkColor: UIColor = .link
         public var hashtagColor: UIColor = .blue
         public var systemYellow: UIColor = .systemYellow
+        public var secondaryBackgroundColor: UIColor = UIColor(hex: 0xF2F2F7)
     }
 }

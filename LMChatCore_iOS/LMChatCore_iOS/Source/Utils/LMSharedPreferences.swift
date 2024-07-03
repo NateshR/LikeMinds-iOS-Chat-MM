@@ -54,5 +54,4 @@ class LMSharedPreferences {
     static func bool(forKey key: String) -> Bool? {
         shared.value(forKey: key) as? Bool
     }
-    
 }

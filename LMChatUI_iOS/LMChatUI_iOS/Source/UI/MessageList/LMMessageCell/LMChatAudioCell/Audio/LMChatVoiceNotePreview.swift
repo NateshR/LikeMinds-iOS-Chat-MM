@@ -29,12 +29,12 @@ public struct LMChatAudioContentModel {
 
 open class LMChatVoiceNotePreview: LMView {
     // MARK: UI Elements
-    var containerView: LMView = {
+    open private(set) lazy var containerView: LMView = {
         let view = LMView().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
-    var playPauseButton: LMImageView = {
+    open private(set) lazy var playPauseButton: LMImageView = {
         let button = LMImageView().translatesAutoresizingMaskIntoConstraints()
         button.image = Constants.shared.images.playCircleFilled
         button.contentMode = .scaleAspectFill
@@ -42,7 +42,7 @@ open class LMChatVoiceNotePreview: LMView {
         return button
     }()
     
-    var slider: UISlider = {
+    open private(set) lazy var slider: UISlider = {
         let slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false
         slider.setThumbImage(UIImage(systemName: "circle.fill"), for: .normal)
@@ -50,13 +50,13 @@ open class LMChatVoiceNotePreview: LMView {
     }()
     
     
-    var img: LMImageView = {
+    open private(set) lazy var img: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
         image.image = Constants.shared.images.micFillIcon
         return image
     }()
     
-    var durationLbl: LMLabel = {
+    open private(set) lazy var durationLbl: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.text = "00:00"
         label.textColor = Appearance.shared.colors.black

@@ -31,8 +31,8 @@ public protocol LMChatBottomMessageComposerDelegate: AnyObject {
 open class LMChatBottomMessageComposerView: LMView {
     
     open weak var delegate: LMChatBottomMessageComposerDelegate?
-    let audioButtonTag = 10
-    let messageButtonTag = 11
+    public let audioButtonTag = 10
+    public let messageButtonTag = 11
     
     // MARK: UI Elements
     open private(set) lazy var containerView: LMView = {
@@ -103,7 +103,7 @@ open class LMChatBottomMessageComposerView: LMView {
     }()
     
     open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {
-        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.messageReplyView.init().translatesAutoresizingMaskIntoConstraints()
         view.onClickCancelReplyPreview = { [weak self] in
             self?.replyMessageViewContainer.isHidden = true
             self?.delegate?.cancelReply()
@@ -119,7 +119,7 @@ open class LMChatBottomMessageComposerView: LMView {
     }()
     
     open private(set) lazy var linkPreviewView: LMChatBottomMessageLinkPreview = {
-        let view = LMChatBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.bottomLinkPreview.init().translatesAutoresizingMaskIntoConstraints()
         view.delegate = self
         return view
     }()
@@ -139,6 +139,7 @@ open class LMChatBottomMessageComposerView: LMView {
     open private(set) lazy var sendButton: LMButton = {
         let button = LMButton().translatesAutoresizingMaskIntoConstraints()
         button.setImage(micButtonIcon, for: .normal)
+        button.tag = audioButtonTag
         button.contentMode = .scaleToFill
         return button
     }()
@@ -251,8 +252,8 @@ open class LMChatBottomMessageComposerView: LMView {
     var isPlayingAudio = false
     var isLockedIn = false
     
-    let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
-    let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
+    public let micButtonIcon = Constants.shared.images.micIcon.withSystemImageConfig(pointSize: 24)
+    public let sendButtonIcon = Constants.shared.images.sendButton.withSystemImageConfig(pointSize: 30)
     let attachmentButtonIcon = Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 24)
     let gifBadgeIcon = Constants.shared.images.gifBadgeIcon
     
@@ -260,11 +261,12 @@ open class LMChatBottomMessageComposerView: LMView {
     var lockContainerViewHeight: CGFloat = 100
     var lockContainerViewHeightConstraint: NSLayoutConstraint?
     public var detectedFirstLink: String?
+    public var isShowSendMessageButtonOnly: Bool = false
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
         showHideLockContainer(isShow: false)
-        sendButton.tag = messageButtonTag
+        sendButton.tag = audioButtonTag
     }
     
     // MARK: setupViews
@@ -404,6 +406,16 @@ open class LMChatBottomMessageComposerView: LMView {
         containerView.isUserInteractionEnabled = isEnable
     }
     
+    public func tagSendButtonOnBasisOfText(_ text: String?) {
+        guard let text, !text.isEmpty, text != inputTextView.placeHolderText else {
+            sendButton.tag = audioButtonTag
+            sendButton.setImage(micButtonIcon, for: .normal)
+            return
+        }
+        sendButton.tag = messageButtonTag
+        sendButton.setImage(sendButtonIcon, for: .normal)
+    }
+    
     @objc func sendMessageButtonClicked(_ sender: UIButton) {
         if sender.tag == audioButtonTag {
             audioButtonClicked(sender)
@@ -412,10 +424,12 @@ open class LMChatBottomMessageComposerView: LMView {
         let message = inputTextView.getText()
         guard !message.isEmpty,
               message != inputTextView.placeHolderText else {
-            delegate?.showToastMessage(message: Constants.shared.strings.voiceRecordMessage )
             return
         }
         delegate?.composeMessage(message: message, composeLink: detectedFirstLink)
+    }
+    
+    public func resetInputTextView() {
         closeLinkPreview()
         inputTextView.text = ""
         isLinkPreviewCancel = false
@@ -433,8 +447,12 @@ open class LMChatBottomMessageComposerView: LMView {
     }
     
     @objc func audioButtonClicked(_ sender: UIButton) {
-        delegate?.composeAudio()
-        resetRecordingView()
+        if !audioContainerView.isHidden {
+            delegate?.composeAudio()
+            resetRecordingView()
+        } else {
+            delegate?.showToastMessage(message: Constants.shared.strings.voiceRecordMessage )
+        }
     }
     
     open override func setupAppearance() {
@@ -600,7 +618,7 @@ extension LMChatBottomMessageComposerView: LMBottomMessageLinkPreviewDelete {
 extension LMChatBottomMessageComposerView {
     // Resets Recording View and shows Text Input View
     public func resetRecordingView() {
-        sendButton.tag = messageButtonTag
+        sendButton.tag = audioButtonTag
         resetSendButtonConstraints()
         
         recordDuration.text = "00:00"
@@ -653,7 +671,7 @@ extension LMChatBottomMessageComposerView {
         // Making sure that the text field is empty and the user isn't locked in
         sendButtonLongPressGesture.isEnabled = isText && !isLockedIn
         sendButtonPanPressGesture.isEnabled = isText && !isLockedIn
-        
+        sendButton.tag = isText ? audioButtonTag : messageButtonTag
         sendButton.setImage(isText ? micButtonIcon : sendButtonIcon, for: .normal)
     }
     
