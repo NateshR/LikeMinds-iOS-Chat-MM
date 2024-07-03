@@ -21,6 +21,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func insertLastMessageRow(section: String, conversationId: String)
     func directMessageStatus()
     func viewProfile(route: String)
+    func approveRejectView(isShow: Bool)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -392,7 +393,8 @@ public final class LMChatMessageListViewModel {
                    ogTags: createOgTags(replyConversation.ogTags),
                    isEdited: replyConversation.isEdited,
                    attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(replyConversation.conversationStatus),
-                   tempId: replyConversation.temporaryId)]
+                   tempId: replyConversation.temporaryId,
+                   hideLeftProfileImage: isChatroomType(type: .directMessage))]
         }
         return .init(messageId: conversation.id ?? "",
                      memberTitle: conversation.member?.communityManager(),
@@ -407,7 +409,7 @@ public final class LMChatMessageListViewModel {
                      createdByImageUrl: conversation.member?.imageUrl,
                      createdById: conversation.member?.sdkClientInfo?.uuid,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: LMCoreTimeUtils.timestampConverted(withEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus), tempId: conversation.temporaryId)
+                     messageType: conversation.state.rawValue, createdTime: LMCoreTimeUtils.timestampConverted(withEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus), tempId: conversation.temporaryId, hideLeftProfileImage: isChatroomType(type: .directMessage))
     }
     
     func messageStatus(_ status: ConversationStatus?) -> LMMessageStatus {
@@ -651,7 +653,16 @@ public final class LMChatMessageListViewModel {
                 self?.delegate?.showToastMessage(message: response.errorMessage)
                 return
             }
-            self?.delegate?.showToastMessage(message: "Direct message request sent!")
+            if let conversation = response.data?.conversation {
+                self?.chatroomViewData = self?.chatroomViewData?.toBuilder()
+                    .chatRequestState(requestState.rawValue)
+                    .chatRequestedById(UserPreferences.shared.getLMMemberId())
+                    .build()
+                self?.insertOrUpdateConversationIntoList(conversation)
+                self?.delegate?.reloadChatMessageList()
+            }
+            self?.delegate?.approveRejectView(isShow: false)
+            self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
             self?.fetchChatroomActions()
             self?.syncConversation()
         }
@@ -666,6 +677,14 @@ public final class LMChatMessageListViewModel {
             guard response.success else {
                 self?.delegate?.showToastMessage(message: response.errorMessage)
                 return
+            }
+            if let conversation = response.data?.conversation {
+                self?.chatroomViewData = self?.chatroomViewData?.toBuilder()
+                    .chatRequestState(status.rawValue)
+                    .chatRequestedById(UserPreferences.shared.getLMMemberId())
+                    .build()
+                self?.insertOrUpdateConversationIntoList(conversation)
+                self?.delegate?.reloadChatMessageList()
             }
             let requestType = status == .block ? "blocked" : "unblocked"
             self?.delegate?.showToastMessage(message: "Member \(requestType)!")

@@ -103,7 +103,7 @@ open class LMChatBottomMessageComposerView: LMView {
     }()
     
     open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {
-        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.messageReplyView.init().translatesAutoresizingMaskIntoConstraints()
         view.onClickCancelReplyPreview = { [weak self] in
             self?.replyMessageViewContainer.isHidden = true
             self?.delegate?.cancelReply()
@@ -119,7 +119,7 @@ open class LMChatBottomMessageComposerView: LMView {
     }()
     
     open private(set) lazy var linkPreviewView: LMChatBottomMessageLinkPreview = {
-        let view = LMChatBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.bottomLinkPreview.init().translatesAutoresizingMaskIntoConstraints()
         view.delegate = self
         return view
     }()

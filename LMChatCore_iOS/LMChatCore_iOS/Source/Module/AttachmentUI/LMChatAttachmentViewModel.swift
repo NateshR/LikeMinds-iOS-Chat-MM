@@ -16,6 +16,7 @@ public final class LMChatAttachmentViewModel {
     
     weak var delegate: LMChatAttachmentViewModelProtocol?
     var chatroomId: String?
+    var chatroomData: Chatroom?
     var mediaCellData: [MediaPickerModel] = []
     var selectedMedia: MediaPickerModel?
     var mediaType: MediaType?
@@ -56,6 +57,15 @@ public final class LMChatAttachmentViewModel {
         viewmodel.mediaType = mediaType
         viewcontroller.viewModel = viewmodel
         return viewcontroller
+    }
+    
+    func fetchChatroom() {
+        guard let chatroomId else { return }
+        let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+            return
+        }
+        self.chatroomData = chatroom
     }
     
 }

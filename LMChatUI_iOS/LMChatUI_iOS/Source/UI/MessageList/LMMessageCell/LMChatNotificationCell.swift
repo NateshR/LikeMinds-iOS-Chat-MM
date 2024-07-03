@@ -61,7 +61,7 @@ open class LMChatNotificationCell: LMTableViewCell {
             infoLabel.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 12),
             infoLabel.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -12),
             infoLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+            infoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -6)
         ])
     }
     

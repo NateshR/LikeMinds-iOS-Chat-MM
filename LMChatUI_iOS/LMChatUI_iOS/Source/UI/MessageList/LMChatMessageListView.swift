@@ -92,8 +92,9 @@ open class LMChatMessageListView: LMView {
             public var isShowMore: Bool = false
             public var messageStatus: LMMessageStatus?
             public var tempId: String?
+            public var hideLeftProfileImage: Bool?
             
-            public init(messageId: String, memberTitle: String?, memberState: Int?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?) {
+            public init(messageId: String, memberTitle: String?, memberState: Int?, message: String?, timestamp: Int?, reactions: [Reaction]?, attachments: [Attachment]?, replied: [Message]?, isDeleted: Bool?, createdBy: String?, createdByImageUrl: String?, createdById: String?, isIncoming: Bool?, messageType: Int, createdTime: String?, ogTags: OgTags?, isEdited: Bool?, attachmentUploaded: Bool?, isShowMore: Bool, messageStatus: LMMessageStatus?, tempId: String?, hideLeftProfileImage: Bool?) {
                 self.messageId = messageId
                 self.memberTitle = memberTitle
                 self.message = message
@@ -115,6 +116,7 @@ open class LMChatMessageListView: LMView {
                 self.messageStatus = messageStatus
                 self.tempId = tempId
                 self.memberState = memberState
+                self.hideLeftProfileImage = hideLeftProfileImage
             }
         }
         
@@ -186,7 +188,7 @@ open class LMChatMessageListView: LMView {
         table.clipsToBounds = true
         table.separatorStyle = .none
         table.backgroundView = loadingView
-        table.contentInset = .init(top: 0, left: 0, bottom: 12, right: 0)
+        table.contentInset = .init(top: 0, left: 0, bottom: 8, right: 0)
         return table
     }()
     
@@ -264,14 +266,14 @@ open class LMChatMessageListView: LMView {
         if !tableSections.isEmpty { tableView.backgroundView = nil }
     }
     
-    public func scrollToBottom() {
+    public func scrollToBottom(animation: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {[weak self] in
             guard let self else { return }
             let indexPath = IndexPath(
                 row: self.tableView.numberOfRows(inSection:  self.tableView.numberOfSections-1) - 1,
                 section: self.tableView.numberOfSections - 1)
             if hasRowAtIndexPath(indexPath: indexPath) {
-                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: animation)
             }
         }
         
@@ -280,10 +282,10 @@ open class LMChatMessageListView: LMView {
         }
     }
     
-    public func scrollAtIndexPath(indexPath: IndexPath) {
+    public func scrollAtIndexPath(indexPath: IndexPath, animation: Bool = false) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self else { return }
-            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: animation)
             let messageCell = tableView.cellForRow(at: indexPath) as? LMChatMessageCell
             let chatroomCell = tableView.cellForRow(at: indexPath) as? LMChatroomHeaderMessageCell
             let cell = messageCell ?? chatroomCell

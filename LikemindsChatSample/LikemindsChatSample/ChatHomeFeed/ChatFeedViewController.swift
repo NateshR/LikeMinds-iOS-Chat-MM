@@ -26,8 +26,8 @@ open class ChatFeedViewController: LMViewController {
         let segment = UISegmentedControl()
         segment.translatesAutoresizingMaskIntoConstraints = false
         segment.setHeightConstraint(with: 40)
-        segment.insertSegment(withTitle: "Group", at: 0, animated: true)
-        segment.insertSegment(withTitle: "DM", at: 1, animated: true)
+        segment.insertSegment(withTitle: "Groups", at: 0, animated: true)
+        segment.insertSegment(withTitle: "DMs", at: 1, animated: true)
         segment.selectedSegmentIndex = 0
         return segment
     }()
@@ -54,8 +54,10 @@ open class ChatFeedViewController: LMViewController {
         setupViews()
         setupLayouts()
         setupAppearance()
+        viewModel?.checkDMTab()
         segmentControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         pageController.setViewControllers([viewControllers[currentPageIndex]], direction: .forward, animated: false) { _ in }
+        
     }
     
     open override func setupViews() {
@@ -85,6 +87,7 @@ open class ChatFeedViewController: LMViewController {
     open override func setupAppearance() {
         super.setupAppearance()
         self.view.backgroundColor = .white
+        segmentControl.selectedSegmentTintColor = .white
     }
     
     open override func setupActions() {
@@ -173,5 +176,11 @@ extension ChatFeedViewController: UIPageViewControllerDataSource, UIPageViewCont
 }
 
 extension ChatFeedViewController: ChatFeedViewModelProtocol {
-    
+    public func showDMTab() {
+        if viewModel?.dmTab?.hideDMTab == true {
+//            self.segmentControl.isHidden = true
+        } else {
+//            segmentControl.setTitle("DMs", forSegmentAt: <#T##Int#>)
+        }
+    }
 }

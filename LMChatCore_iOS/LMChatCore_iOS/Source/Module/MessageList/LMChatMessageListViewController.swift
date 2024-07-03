@@ -406,16 +406,21 @@ open class LMChatMessageListViewController: LMViewController {
         messageListView.tableView.tableFooterView?.layoutIfNeeded()
         if let footer = messageListView.tableView.tableFooterView {
             var frame = footer.frame
-            frame.size.height = 160
+            frame.size.height = 170
             footer.frame = frame
             messageListView.tableView.tableFooterView  = footer
         }
-        
     }
     
 }
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
+    
+    public func approveRejectView(isShow: Bool) {
+        if !isShow {
+            messageListView.tableView.tableFooterView = nil
+        }
+    }
     
     public func viewProfile(route: String) {
         self.showAlertWithActions(title: "View Profile", message: "Handle route \(route) to view profile! ", withActions: nil)
@@ -644,6 +649,10 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             return nil
         }
         
+        if viewModel?.isChatroomType(type: .directMessage) == true && viewModel?.chatroomViewData?.chatRequestState != .approved {
+            return nil
+        }
+        
         if item.messageType == LMChatMessageListView.chatroomHeader {
             return contextMenuForChatroomData(indexPath, item: item)
         }
@@ -750,6 +759,9 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction? {
         let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard viewModel?.checkMemberRight(.respondsInChatRoom) == true, item.isDeleted == false, viewModel?.chatroomViewData?.memberCanMessage == true else { return nil }
+        if viewModel?.isChatroomType(type: .directMessage) == true && viewModel?.chatroomViewData?.chatRequestState != .approved {
+            return nil
+        }
         if (viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false) { return nil }
         let action = UIContextualAction(style: .normal,
                                         title: "") {[weak self] (contextAction: UIContextualAction, sourceView: UIView, completionHandler: (Bool) -> Void) in

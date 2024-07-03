@@ -101,12 +101,12 @@ open class LMChatAttachmentBottomMessageView: LMView {
     }()
     
     open private(set) lazy var replyMessageView: LMChatMessageReplyPreview = {
-        let view = LMChatMessageReplyPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.messageReplyView.init().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
     open private(set) lazy var linkPreviewView: LMChatBottomMessageLinkPreview = {
-        let view = LMChatBottomMessageLinkPreview().translatesAutoresizingMaskIntoConstraints()
+        let view = LMUIComponents.shared.bottomLinkPreview.init().translatesAutoresizingMaskIntoConstraints()
         return view
     }()
     
@@ -127,6 +127,7 @@ open class LMChatAttachmentBottomMessageView: LMView {
     
     let maxHeightOfTextView: CGFloat = 120
     let minHeightOfTextView: CGFloat = 44
+    public var isTaggingEnable: Bool? = true
     
     // MARK: setupViews
     open override func setupViews() {
@@ -194,10 +195,12 @@ open class LMChatAttachmentBottomMessageView: LMView {
 extension LMChatAttachmentBottomMessageView: LMFeedTaggingTextViewProtocol {
     
     public func mentionStarted(with text: String, chatroomId: String) {
+        guard isTaggingEnable == true else { return }
         taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
     }
     
     public func mentionStopped() {
+        guard isTaggingEnable == true else { return }
         taggingListView.stopFetchingUsers()
     }
     

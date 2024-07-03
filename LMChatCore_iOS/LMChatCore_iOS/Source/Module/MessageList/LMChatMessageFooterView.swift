@@ -66,34 +66,8 @@ class LMChatDirectMessageFooterView: LMView {
         view.trailingAnchor.constraint(equalTo: footerView.trailingAnchor).isActive = true
         view.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 10).isActive = true
         view.bottomAnchor.constraint(equalTo: footerView.bottomAnchor).isActive = true
-        footerView.backgroundColor = .secondarySystemBackground
+        footerView.backgroundColor = Appearance.shared.colors.secondaryBackgroundColor
         footerView.layoutIfNeeded()
         return footerView
     }
-    
-//    func updateFooterView(chatRequestState: Chatre?) {
-//     
-//            if chatRoom.chatRequestState == .initiated && (UserBasicInfoUtil.loggedInMemberUUID != chatRoom.chatRequestedBy?.sdkClientInfo?.uuid) {
-//                guard let footer = DirecetMessageConfirmationView.nib.instantiate(withOwner: nil).first as? DirecetMessageConfirmationView else { return }
-//                footer.delegate = delegate
-//                self.addSubview(footer)
-//                self.backgroundColor = .white
-//                footer.translatesAutoresizingMaskIntoConstraints = false
-//                footer.addConstraintsToView(superView: self)
-//            } else if chatRoom.isPrivateMember == true,
-//                      chatRoom.chatRequestState == nil {
-//                let label = UILabel()
-//                label.numberOfLines = 0
-//                let member = UserBasicInfoUtil.loggedInMemberUUID == chatRoom.chatroomWithUser?.sdkClientInfo?.uuid ? chatRoom.member : chatRoom.chatroomWithUser
-//                label.text = String(format: Constant.DirectMessage.bottomMessage, member?.name ?? "")
-//                label.font = UIFont.systemFont(ofSize: 12)
-//                label.textAlignment = .center
-//                label.textColor = LMColors.charcoalGrey
-//                self.addSubview(label)
-//                self.frame.size.height = 100
-//                label.translatesAutoresizingMaskIntoConstraints = false
-//                label.addConstraintsToView(superView: self, top: 5, bottom: 0, leading: 16, trailing: -16)
-//            }
-//        }
-
 }

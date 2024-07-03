@@ -102,12 +102,12 @@ open class LMChatMessageCell: LMTableViewCell {
         super.setupLayouts()
         contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
             retryContainerStackView.centerYAnchor.constraint(equalTo: chatMessageView.centerYAnchor),
             
-            chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
-            chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            chatMessageView.trailingAnchor.constraint(equalTo: retryContainerStackView.leadingAnchor, constant: -8),
+            chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            chatMessageView.trailingAnchor.constraint(equalTo: retryContainerStackView.leadingAnchor),
             chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
         contentView.pinSubView(subView: selectedButton)
@@ -153,6 +153,10 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.delegate = self
         if data.message?.isIncoming == false {
             retryButton.isHidden = data.message?.messageStatus != .failed
+        }
+        if data.message?.hideLeftProfileImage == true {
+            chatMessageView.chatProfileImageView.isHidden = true
+            chatMessageView.usernameLabel.isHidden = true
         }
     }
     

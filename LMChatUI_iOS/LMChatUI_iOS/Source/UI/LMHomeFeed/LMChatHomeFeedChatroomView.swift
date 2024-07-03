@@ -271,7 +271,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         timestampLabel.text = data.timestamp
         let placeholder = UIImage.generateLetterImage(name: data.chatroomName.components(separatedBy: " ").first ?? "")
         if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
-            chatroomImageView.kf.setImage(with: url, placeholder: placeholder)
+            chatroomImageView.kf.setImage(with: url, placeholder: placeholder, options: [.fromMemoryCacheOrRefresh])
         } else {
             chatroomImageView.image = placeholder
         }

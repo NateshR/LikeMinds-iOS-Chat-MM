@@ -75,7 +75,7 @@ open class LMChatApproveRejectView: LMView {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = Appearance.shared.colors.secondaryBackgroundColor
         approveButton.backgroundColor = Appearance.shared.colors.white
         rejectButton.backgroundColor = Appearance.shared.colors.white
     }
@@ -93,7 +93,7 @@ open class LMChatApproveRejectView: LMView {
     // MARK: setupLayouts
     open override func setupLayouts() {
         super.setupLayouts()
-        pinSubView(subView: stackContainerView, padding: .init(top: 16, left: 16, bottom: -16, right: -16))
+        pinSubView(subView: stackContainerView, padding: .init(top: 12, left: 16, bottom: -16, right: -16))
         approveButton.setHeightConstraint(with: 40)
         rejectButton.setHeightConstraint(with: 40)
         approveButton.cornerRadius(with: 8)
