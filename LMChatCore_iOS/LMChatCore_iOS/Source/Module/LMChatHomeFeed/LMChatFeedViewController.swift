@@ -7,11 +7,10 @@
 
 import Foundation
 import LikeMindsChatUI
-import LikeMindsChatCore
 
-open class ChatFeedViewController: LMViewController {
+open class LMChatFeedViewController: LMViewController {
     
-    var viewModel: ChatFeedViewModel?
+    var viewModel: LMChatFeedViewModel?
     
     open private(set) lazy var containerStackView: LMStackView = {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
@@ -84,7 +83,6 @@ open class ChatFeedViewController: LMViewController {
     
     open override func setupAppearance() {
         super.setupAppearance()
-        self.view.backgroundColor = .white
     }
     
     open override func setupActions() {
@@ -126,7 +124,7 @@ open class ChatFeedViewController: LMViewController {
         guard let homefeedvc = try? LMChatHomeFeedViewModel.createModule() else { return }
         viewControllers.append(homefeedvc)
         
-        guard let homefeedvc2 = try? LMChatDMFeedViewModel.createModule() else { return }
+        guard let homefeedvc2 = try? LMChatHomeFeedViewModel.createModule() else { return }
         viewControllers.append(homefeedvc2)
     }
 
@@ -144,7 +142,7 @@ open class ChatFeedViewController: LMViewController {
     }
 }
 
-extension ChatFeedViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+extension LMChatFeedViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
     
     open func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         if let index = viewControllers.firstIndex(of: viewController),
@@ -172,6 +170,6 @@ extension ChatFeedViewController: UIPageViewControllerDataSource, UIPageViewCont
     }
 }
 
-extension ChatFeedViewController: ChatFeedViewModelProtocol {
+extension LMChatFeedViewController: LMChatFeedViewModelProtocol {
     
 }
