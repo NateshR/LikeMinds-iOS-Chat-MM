@@ -31,7 +31,7 @@ class ViewController: LMViewController {
     
     func moveToNextScreen() {
         self.showHideLoaderView(isShow: false, backgroundColor: .clear)
-//        guard let homefeedvc = try? LMChatHomeFeedViewModel.createModule() else { return }
+//        guard let homefeedvc = try? LMChatGroupFeedViewModel.createModule() else { return }
 //        guard let homefeedvc = try? LMChatFeedViewModel.createModule() else { return }
         let homefeedvc = ChatFeedViewModel.createModule()
         let navigation = UINavigationController(rootViewController: homefeedvc)

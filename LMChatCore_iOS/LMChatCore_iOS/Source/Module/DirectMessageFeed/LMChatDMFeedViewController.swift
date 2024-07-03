@@ -46,6 +46,8 @@ open class LMChatDMFeedViewController: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
+        LMChatMain.analytics?.trackEvent(for: .dmScreenOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.communityId.rawValue: viewModel?.getCommunityId() ?? "", LMChatAnalyticsKeys.source.rawValue: "home_feed"])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -57,7 +59,6 @@ open class LMChatDMFeedViewController: LMViewController {
         viewModel?.getChatrooms()
         viewModel?.syncChatroom()
         viewModel?.checkDMStatus()
-        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name?.components(separatedBy: " ").first ?? ""))
     }
     
     // MARK: setupViews
@@ -65,7 +66,6 @@ open class LMChatDMFeedViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
-        setupRightItemBars()
     }
     
     // MARK: setupLayouts
@@ -139,6 +139,7 @@ open class LMChatDMFeedViewController: LMViewController {
     }
     
     @objc open func searchBarItemClicked() {
+        LMChatMain.analytics?.trackEvent(for: .searchIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
         NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
     }
 }

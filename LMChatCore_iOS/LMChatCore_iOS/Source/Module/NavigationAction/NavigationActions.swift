@@ -43,7 +43,7 @@ class NavigationScreen: NavigationScreenProtocol {
     func perform(_ action: NavigationActions, from source: LMViewController, params: Any?) {
         switch action {
         case .homeFeed:
-            guard let homefeedvc = try? LMChatHomeFeedViewModel.createModule() else { return }
+            guard let homefeedvc = try? LMChatGroupFeedViewModel.createModule() else { return }
             source.navigationController?.pushViewController(homefeedvc, animated: true)
         case .chatroom(let chatroomId, let conversationId):
             guard let chatroom = try? LMChatMessageListViewModel.createModule(withChatroomId: chatroomId, conversationId: conversationId) else { return }

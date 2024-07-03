@@ -14,7 +14,7 @@ public class LMChatMain {
     private init() {}
     
     public static var shared: LMChatMain = .init()
-//    static var analytics: LMFeedAnalyticsProtocol = LMFeedAnalyticsTracker()
+    public static var analytics: LMChatAnalyticsProtocol? = LMChatAnalyticsTracker()
     static private(set) var isInitialized: Bool = false
     var apiKey: String = ""
     var deviceId: String?
@@ -95,26 +95,5 @@ public class LMChatMain {
         DeepLinkManager.sharedInstance.didReceivedRemoteNotification(route)
         return true
     }
-    
-}
-
-// MARK: LMFeedAnalyticsProtocol
-public protocol LMChatAnalyticsProtocol {
-    func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String: AnyHashable])
-}
-
-final class LMChatAnalyticsTracker: LMChatAnalyticsProtocol {
-    public func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String : AnyHashable]) {
-        let track = """
-            ========Event Tracker========
-        Event Name: \(eventName)
-        Event Properties: \(eventProperties)
-            =============================
-        """
-        print(track)
-    }
-}
-
-public struct LMChatAnalyticsEventName {
     
 }

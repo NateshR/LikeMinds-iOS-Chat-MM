@@ -16,7 +16,7 @@ public protocol LMChatDMFeedViewModelProtocol: AnyObject {
     func checkDMStatus(showDM: Bool)
 }
 
-public class LMChatDMFeedViewModel {
+public class LMChatDMFeedViewModel: LMChatBaseViewModel {
     
     weak var delegate: LMChatDMFeedViewModelProtocol?
     var chatrooms: [Chatroom] = []
@@ -94,7 +94,6 @@ public class LMChatDMFeedViewModel {
         let creatorName = isLoggedInUser ? "You" : (lastConversation?.member?.name ?? "").components(separatedBy: " ").first ?? ""
         var lastMessage = chatroom?.lastConversation?.answer ?? ""
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
-        let fileType = lastConversation?.attachments?.first?.type
         
         return  LMChatHomeFeedChatroomView.ContentModel(userName: creatorName,
                                                         lastMessage: lastMessage,
