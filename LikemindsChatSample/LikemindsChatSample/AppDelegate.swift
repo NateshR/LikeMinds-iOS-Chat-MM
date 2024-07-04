@@ -14,11 +14,15 @@ import FirebaseCore
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-//        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
-//        LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
+        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
+        LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
 //        LMUIComponents.shared.messageBubbleView = CustomMessageBubbleView.self
 //        LMUIComponents.shared.exploreChatroomView = CustomExploreChatroomView.self
 //        LMUIComponents.shared.messageReplyView = CustomReplyPreview.self
+        LMUIComponents.shared.participantView = CustomParticipantItemView.self
+        LMUIComponents.shared.approveRejectRequestView = CustomDMApproveRejectView.self
+        LMCoreComponents.shared.dmMemberListScreen = CustomMemberListViewController.self
+        LMCoreComponents.shared.dmChatFeedScreen = CustomDMFeedViewController.self
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         registerForPushNotifications(application: application)

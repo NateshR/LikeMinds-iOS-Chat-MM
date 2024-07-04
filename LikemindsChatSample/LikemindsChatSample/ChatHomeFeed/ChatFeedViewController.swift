@@ -175,9 +175,21 @@ extension ChatFeedViewController: UIPageViewControllerDataSource, UIPageViewCont
 extension ChatFeedViewController: ChatFeedViewModelProtocol {
     public func showDMTab() {
         if viewModel?.dmTab?.hideDMTab == true {
-//            self.segmentControl.isHidden = true
+            self.segmentControl.isHidden = true
+            if self.viewControllers.count > 1 {
+                self.viewControllers[1] = UIViewController()
+                for view in self.pageController.view.subviews {
+                    if let subView = view as? UIScrollView {
+                        subView.isScrollEnabled = false
+                    }
+                }
+            }
         } else {
-//            segmentControl.setTitle("DMs", forSegmentAt: <#T##Int#>)
+//            if let count = viewModel?.dmTab?.unreadDMCount, count > 0 {
+//                segmentControl.setTitle("DMs \(count)", forSegmentAt: 1)
+//            } else {
+//                segmentControl.setTitle("DMs 5", forSegmentAt: 1)
+//            }
         }
     }
 }
