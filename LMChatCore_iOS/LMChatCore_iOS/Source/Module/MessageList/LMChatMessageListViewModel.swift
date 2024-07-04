@@ -178,6 +178,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             fetchBottomConversations()
         }
         if chatroomViewData?.type == ChatroomType.directMessage {
+            delegate?.directMessageStatus()
             checkDMStatus()
         } else {
             checkDMStatus(requestFrom: "group_channel")

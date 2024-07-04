@@ -56,9 +56,7 @@ open class LMChatDMFeedViewController: LMViewController {
             LMSharedPreferences.removeValue(forKey: .tempDeeplinkUrl)
             DeepLinkManager.sharedInstance.routeToScreen(routeUrl: deeplinkUrl, fromNotification: false, fromDeeplink: true)
         }
-        viewModel?.getChatrooms()
-        viewModel?.syncChatroom()
-        viewModel?.checkDMStatus()
+        viewModel?.getInitialData()
     }
     
     // MARK: setupViews
@@ -92,7 +90,7 @@ open class LMChatDMFeedViewController: LMViewController {
     }
     
     @objc open func profileItemClicked() {
-        self.showAlertWithActions(title: "View Profile", message: "Handle route route://member_profile/\(viewModel?.memberProfile?.sdkClientInfo?.uuid ?? "") to view profile! ", withActions: nil)
+//        self.showAlertWithActions(title: "View Profile", message: "Handle route route://member_profile/\(viewModel?.memberProfile?.sdkClientInfo?.uuid ?? "") to view profile! ", withActions: nil)
     }
     
     open func setupNewFabButton() {

@@ -40,7 +40,7 @@ public class LMChatMain {
                 completion?(response.success, response.errorMessage)
                 return
             }
-            if let communitySettings = response.data?.community?.communitySettings, let setting = communitySettings.first(where: {$0.type == "enable_dm_without_connection_request"}), setting.enabled == true {
+            if let communitySettings = response.data?.community?.communitySettings, let setting = communitySettings.first(where: {$0.type == CommunitySetting.SettingType.enableDMWithoutConnectionRequest.rawValue}), setting.enabled == true {
                 LMSharedPreferences.setValue(true, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
             } else {
                 LMSharedPreferences.setValue(false, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)

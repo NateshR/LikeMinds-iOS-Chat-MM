@@ -36,6 +36,12 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
         return viewController
     }
     
+    func getInitialData() {
+        getChatrooms()
+        syncChatroom()
+        checkDMStatus()
+    }
+    
     func fetchUserProfile() {
         memberProfile = LMChatClient.shared.getLoggedInUser()
     }
@@ -59,6 +65,16 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
             guard let self, let showDM = response.data?.showDM, let cta = response.data?.cta else { return }
             delegate?.checkDMStatus(showDM: showDM)
             showList = Int(cta.getQueryItems()["show_list"] ?? "")
+        }
+    }
+    
+    func checkDMTab() {
+        LMChatClient.shared.checkDMTab {[weak self] response in
+            guard let data = response.data, data.hideDMTab == false else {
+                self?.reloadChatroomsData(data: [])
+                return
+            }
+            self?.getInitialData()
         }
     }
 

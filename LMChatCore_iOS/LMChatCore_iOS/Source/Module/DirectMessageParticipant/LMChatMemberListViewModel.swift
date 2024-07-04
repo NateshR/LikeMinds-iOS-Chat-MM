@@ -35,7 +35,7 @@ public class LMChatMemberListViewModel {
         self.delegate = viewController
         self.showList = showList
         self.pageNo = 1
-        self.pageSize = 20
+        self.pageSize = 10
         self.totalParticipantCount = .zero
         self.isParticipantLoading = false
         self.isAllParticipantLoaded = false
