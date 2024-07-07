@@ -90,7 +90,7 @@ open class LMChatHomeFeedChatroomView: LMView {
     
     open private(set) lazy var chatroomNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatname"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
@@ -100,7 +100,7 @@ open class LMChatHomeFeedChatroomView: LMView {
     
     open private(set) lazy var customTitle: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "CM"
+        label.text = ""
         label.font = Appearance.shared.fonts.subHeadingFont1
         label.numberOfLines = 1
         label.textColor = Appearance.shared.colors.textColor
@@ -257,6 +257,7 @@ open class LMChatHomeFeedChatroomView: LMView {
             chatroomContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
             
         ])
+        lastMessageLabel.setHeightConstraint(with: 18)
     }
     
     open func setData(_ data: ContentModel) {
@@ -333,13 +334,15 @@ open class LMChatHomeFeedChatroomView: LMView {
         }
 
         // Initialize mutable string
-        let completeText = NSMutableAttributedString()
-        let textBeforeIcon = NSAttributedString(string:  data.userName + ":")
-        let textAfterIcon = NSAttributedString(string: " " + (data.lastMessage))
-        completeText.append(textBeforeIcon)
-        completeText.append(attributedText)
-        completeText.append(textAfterIcon)
-        lastMessageLabel.attributedText = completeText
+        if !data.userName.isEmpty {
+            let completeText = NSMutableAttributedString()
+            let textBeforeIcon = NSAttributedString(string:  data.userName + ":")
+            let textAfterIcon = NSAttributedString(string: " " + (data.lastMessage))
+            completeText.append(textBeforeIcon)
+            completeText.append(attributedText)
+            completeText.append(textAfterIcon)
+            lastMessageLabel.attributedText = completeText
+        }
     }
     
     func chatroomName(_ name: String) {

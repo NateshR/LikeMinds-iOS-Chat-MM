@@ -114,10 +114,10 @@ open class LMChatHomeFeedListView: LMView {
     
     public func updateChatroomsData(chatroomData: [LMChatHomeFeedChatroomCell.ContentModel]) {
         if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
-            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
+            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 1)
         } else {
             if !chatroomData.isEmpty {
-                tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
+                tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 1))
             }
         }
         if chatroomData.isEmpty {

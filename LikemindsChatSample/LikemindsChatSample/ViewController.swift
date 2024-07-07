@@ -10,16 +10,33 @@ import LikeMindsChat
 import LikeMindsChatUI
 import LikeMindsChatCore
 
+extension UIViewController {
+    var window: UIWindow? {
+        if #available(iOS 13, *) {
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let delegate = windowScene.delegate as? SceneDelegate, let window = delegate.window else { return nil }
+            return window
+        }
+        return nil
+    }
+}
+
 class ViewController: LMViewController {
     
     @IBOutlet weak var apiKeyField: UITextField?
     @IBOutlet weak var userIdField: UITextField?
     @IBOutlet weak var userNameField: UITextField?
     @IBOutlet weak var loginButton: UIButton?
+    
+    static func createViewController() -> ViewController {
+        let main : UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        return main.instantiateViewController(withIdentifier: "LoginViewController") as! ViewController
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         isSavedData()
+        self.apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
     }
     
     func moveToNextScreen() {
@@ -27,7 +44,7 @@ class ViewController: LMViewController {
         let homefeedvc = ChatFeedViewModel.createModule()
         let navigation = UINavigationController(rootViewController: homefeedvc)
         navigation.modalPresentationStyle = .overFullScreen
-        self.present(navigation, animated: false)
+        self.window?.rootViewController = navigation
     }
     
     // MARK: setupViews

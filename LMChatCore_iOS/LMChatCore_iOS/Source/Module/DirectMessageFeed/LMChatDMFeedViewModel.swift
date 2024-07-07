@@ -110,34 +110,41 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
         let creatorName = isLoggedInUser ? "You" : (lastConversation?.member?.name ?? "").components(separatedBy: " ").first ?? ""
         var lastMessage = chatroom?.lastConversation?.answer ?? ""
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
-        
+        let directMessageHeader = directMessageTitle(chatroom: chatroom)
         return  LMChatHomeFeedChatroomView.ContentModel(userName: creatorName,
                                                         lastMessage: lastMessage,
-                                                        chatroomName: directMessageTitle(chatroom: chatroom),
-                                                        chatroomImageUrl: chatroom?.chatWithUser?.imageUrl,
+                                                        chatroomName: directMessageHeader.title,
+                                                        chatroomImageUrl: directMessageHeader.imageUrl,
                                                         isMuted: chatroom?.muteStatus ?? false,
                                                         isSecret: chatroom?.isSecret ?? false,
                                                         isAnnouncementRoom: chatroom?.type == ChatroomType.purpose,
-                                                        unreadCount: chatroom?.unseenCount ?? 0,
+                                                        unreadCount: unreadCount(chatroom, isLoggedInUser: isLoggedInUser),
                                                         timestamp: LMCoreTimeUtils.timestampConverted(withEpoch: lastConversation?.createdEpoch ?? 0, withOnlyTime: false) ?? "",
                                                         fileTypeWithCount: getAttachmentType(chatroom: chatroom),
                                                         messageType: chatroom?.lastConversation?.state.rawValue ?? 0,
                                                         isContainOgTags: lastConversation?.ogTags != nil)
     }
     
-    func directMessageTitle(chatroom: Chatroom?) -> String {
-        guard let member = chatroom?.chatWithUser else { return chatroom?.header ?? ""}
+    func unreadCount(_ chatroom: Chatroom?, isLoggedInUser: Bool) -> Int {
+        guard !isLoggedInUser else { return 0 }
+        return chatroom?.unseenCount ?? 0
+    }
+    
+    func directMessageTitle(chatroom: Chatroom?) -> (title: String, imageUrl: String?) {
+        guard let member = chatroom?.chatWithUser else { return (chatroom?.header ?? "", nil)}
         var dmTitle = member.name ?? ""
+        var imageUrl = member.imageUrl
         if let title = member.customTitle {
             dmTitle = dmTitle + " \(Constants.shared.strings.dot) " + "\(title)"
         }
         if UserPreferences.shared.getClientUUID() == member.sdkClientInfo?.uuid {
             dmTitle = chatroom?.member?.name ?? ""
+            imageUrl = chatroom?.member?.imageUrl
             if let title = chatroom?.member?.customTitle {
                 dmTitle = dmTitle + " \(Constants.shared.strings.dot) " + "\(title)"
             }
         }
-        return dmTitle
+        return (dmTitle, imageUrl)
     }
     
     func getAttachmentType(chatroom: Chatroom?) -> [(String, Int)] {

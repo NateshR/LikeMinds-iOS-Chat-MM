@@ -37,4 +37,17 @@ public class ChatFeedViewModel {
         }
     }
     
+    func logout() {
+        let request = LogoutRequest.builder().deviceId(UIDevice.current.identifierForVendor?.uuidString ?? "").build()
+        LMChatClient.shared.logout(request: request) {[weak self] response in
+            guard let vc = self?.delegate as? ChatFeedViewController else { return }
+            let userDefalut = UserDefaults.standard
+            userDefalut.removeObject(forKey: "apiKey")
+            userDefalut.removeObject(forKey: "userId")
+            userDefalut.removeObject(forKey: "username")
+            let navigationController = UINavigationController(rootViewController: ViewController.createViewController())
+            vc.window?.rootViewController = navigationController
+        }
+    }
+    
 }

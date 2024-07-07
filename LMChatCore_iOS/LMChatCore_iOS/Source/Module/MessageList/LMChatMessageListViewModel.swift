@@ -537,9 +537,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let request = MarkReadChatroomRequest.builder()
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.markReadChatroom(request: request) { response in
-            print(response)
-        }
+        LMChatClient.shared.markReadChatroom(request: request) {_ in }
     }
     
     func fetchChatroomActions() {
@@ -655,14 +653,16 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
                 self?.delegate?.showToastMessage(message: response.errorMessage)
                 return
             }
-            if let conversation = response.data?.conversation {
+            if var conversation = response.data?.conversation {
                 self?.chatroomViewData = self?.chatroomViewData?.toBuilder()
                     .chatRequestState(requestState.rawValue)
                     .chatRequestedById(UserPreferences.shared.getLMMemberId())
                     .build()
+                conversation = conversation.toBuilder().conversationStatus(.sent).build()
                 self?.insertOrUpdateConversationIntoList(conversation)
                 self?.delegate?.reloadChatMessageList()
             }
+            self?.markChatroomAsRead()
             self?.trackEventSendDMRequest(requestState: requestState, reason: reason)
             self?.delegate?.approveRejectView(isShow: false)
             self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")

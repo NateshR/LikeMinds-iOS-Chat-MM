@@ -394,7 +394,11 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
             editButton.isHidden = data.mediaType == .gif
             zoomableImageViewContainer.isHidden = false
             self.zoomableImageViewContainer.zoomScale = 1
-            self.zoomableImageViewContainer.configure(with: data.photo)
+            if data.mediaType == .gif {
+                self.zoomableImageViewContainer.configure(with: data.url)
+            } else {
+                self.zoomableImageViewContainer.configure(with: data.photo)
+            }
         case .video:
             bottomMessageBoxView.attachmentButton.isHidden = false
             videoImageViewContainer.isHidden = false
