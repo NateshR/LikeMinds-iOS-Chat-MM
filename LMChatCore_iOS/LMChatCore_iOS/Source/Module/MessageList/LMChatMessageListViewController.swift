@@ -57,6 +57,7 @@ open class LMChatMessageListViewController: LMViewController {
     
     open private(set) lazy var chatroomTopicBar: LMChatroomTopicView = {
         let view = LMChatroomTopicView().translatesAutoresizingMaskIntoConstraints()
+        view.isHidden = true
         return view
     }()
     
@@ -65,6 +66,31 @@ open class LMChatMessageListViewController: LMViewController {
         let viewModel = LMChatTaggingListViewModel(delegate: view)
         view.viewModel = viewModel
         view.delegate = self
+        return view
+    }()
+    
+    open private(set) lazy var bottomMessageLabel: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.textAlignment = .center
+        label.font = Appearance.shared.fonts.normalFontSize12
+        label.textColor = Appearance.shared.colors.previewSubtitleTextColor
+        label.backgroundColor = Appearance.shared.colors.clear
+        label.numberOfLines = 0
+        label.paddingTop = 6
+        label.paddingBottom = 16
+        label.paddingLeft = 8
+        label.paddingRight = 8
+        label.isHidden = true
+        return label
+    }()
+    
+    open private(set) lazy var bottomLabelContainerView: LMStackView = {
+        let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        view.axis = .horizontal
+        view.distribution = .fill
+        view.alignment = .fill
+        view.spacing = 2
+        view.backgroundColor = Appearance.shared.colors.backgroundColor
         return view
     }()
     
@@ -110,10 +136,17 @@ open class LMChatMessageListViewController: LMViewController {
         let attText = GetAttributedTextWithRoutes.getAttributedText(from: LMSharedPreferences.getString(forKey: viewModel?.chatroomId ?? "NA") ?? "")
         if !attText.string.isEmpty {
             bottomMessageBoxView.inputTextView.attributedText = attText
+            bottomMessageBoxView.tagSendButtonOnBasisOfText(attText.string)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {[weak self] in
                 self?.bottomMessageBoxView.inputTextView.becomeFirstResponder()
             }
         }
+        LMChatMain.analytics?.trackEvent(for: .chatRoomOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: viewModel?.chatroomId,
+                                                           LMChatAnalyticsKeys.chatroomType.rawValue: viewModel?.chatroomViewData?.type?.value,
+                                                           LMChatAnalyticsKeys.chatroomName.rawValue: viewModel?.chatroomViewData?.header,
+                                                           LMChatAnalyticsKeys.communityId.rawValue: viewModel?.chatroomViewData?.communityId,
+                                                           LMChatAnalyticsKeys.source.rawValue: "home_feed"])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -142,7 +175,9 @@ open class LMChatMessageListViewController: LMViewController {
         self.view.addSubview(messageListView)
         self.view.addSubview(bottomMessageBoxView)
         self.view.addSubview(chatroomTopicBar)
+        self.view.addSubview(bottomLabelContainerView)
         self.view.addSubview(scrollToBottomButton)
+        bottomLabelContainerView.addArrangedSubview(bottomMessageLabel)
         bottomMessageBoxView.addOnVerticleStackView.insertArrangedSubview(taggingListView, at: 0)
         bottomMessageBoxView.inputTextView.placeHolderText = "Type your response"
         chatroomTopicBar.onTopicViewClick = {[weak self] topicId in
@@ -163,11 +198,15 @@ open class LMChatMessageListViewController: LMViewController {
             
             messageListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             messageListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            messageListView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            messageListView.bottomAnchor.constraint(equalTo: bottomLabelContainerView.topAnchor),
             messageListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             
+            bottomLabelContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomLabelContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomLabelContainerView.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor),
+            
             scrollToBottomButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            scrollToBottomButton.bottomAnchor.constraint(equalTo: bottomMessageBoxView.topAnchor, constant: -10),
+            scrollToBottomButton.bottomAnchor.constraint(equalTo: bottomLabelContainerView.topAnchor, constant: -10),
             
             bottomMessageBoxView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMessageBoxView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -282,6 +321,7 @@ open class LMChatMessageListViewController: LMViewController {
     
     public func updateChatroomSubtitles() {
         navigationTitleView.isHidden = false
+        guard viewModel?.isChatroomType(type: .directMessage) == false else { return }
         let participantCount = viewModel?.chatroomActionData?.participantCount ?? 0
         let subtitle = participantCount > 0 ? "\(participantCount) participants" : ""
         setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.header, subtitle: subtitle)
@@ -296,10 +336,13 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     public func memberRightsCheck() {
-        
-        if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state == 1 {
+        guard viewModel?.isChatroomType(type: .directMessage) == false else {
+            directMessageStatus()
+            return
+        }
+        if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state == 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: "", isEnable: true)
-        } else if viewModel?.chatroomViewData?.type == 7 && viewModel?.memberState?.state != 1 {
+        } else if viewModel?.chatroomViewData?.type == .purpose && viewModel?.memberState?.state != 1 {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.restrictForAnnouncement, isEnable: false)
         } else if viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.secretChatroomRestrictionMessage, isEnable: false)
@@ -315,9 +358,79 @@ open class LMChatMessageListViewController: LMViewController {
         }
     }
     
+    public func directMessageValidation() {
+        if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.member?.name, subtitle: nil)
+        } else {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        }
+        if viewModel?.dmStatus?.showDM == false {
+            bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.m2mDirectMessageDisable, isEnable: false)
+        }
+        let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+        if viewModel?.chatroomViewData?.chatRequestState == nil {
+            if isDMWithRequestEnabled == true {
+                bottomMessageBoxView.sendButton.tag = bottomMessageBoxView.messageButtonTag
+                bottomMessageBoxView.sendButton.setImage(bottomMessageBoxView.sendButtonIcon, for: .normal)
+                bottomMessageBoxView.attachmentButton.isHidden = true
+                bottomMessageBoxView.gifButton.isHidden = true
+                bottomMessageLabel.text = String(format: Constants.shared.strings.bottomMessage, viewModel?.directMessageUserName() ?? "")
+                bottomMessageLabel.isHidden = false
+            }
+        } else {
+            bottomMessageLabel.isHidden = true
+            switch viewModel?.chatroomViewData?.chatRequestState {
+            case .initiated:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
+                    bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                } else {
+                    updateBottomBar(footerView: LMChatDirectMessageFooterView.createView(Constants.shared.strings.approveRejectViewTitle, delegate: self))
+                }
+            case .approved:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: nil, isEnable: true)
+                bottomMessageBoxView.attachmentButton.isHidden = false
+                bottomMessageBoxView.gifButton.isHidden = false
+                break
+            case .rejected:
+                bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                if viewModel?.loggedInUser()?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatRequestedByUser?.sdkClientInfo?.uuid {
+                    // Tap to undo in converstion state 19
+                    bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.rejectedChatRequest, isEnable: false)
+                } else {
+                    // remove Tap to undo in converstion state 19
+                }
+            default:
+                break
+            }
+        }
+    }
+    
+    func updateBottomBar(footerView: UITableViewHeaderFooterView) {
+        footerView.widthAnchor.constraint(equalToConstant: messageListView.tableView.frame.width).isActive = true
+        messageListView.tableView.tableFooterView = footerView
+        messageListView.tableView.tableFooterView?.layoutIfNeeded()
+        if let footer = messageListView.tableView.tableFooterView {
+            var frame = footer.frame
+            frame.size.height = 170
+            footer.frame = frame
+            messageListView.tableView.tableFooterView  = footer
+        }
+    }
+    
 }
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
+    
+    public func approveRejectView(isShow: Bool) {
+        if !isShow {
+            messageListView.tableView.tableFooterView = nil
+        }
+    }
+    
+    public func viewProfile(route: String) {
+        self.showAlertWithActions(title: "View Profile", message: "Handle route \(route) to view profile! ", withActions: nil)
+    }
     
     public func showToastMessage(message: String?) {
         bottomMessageBoxView.inputTextView.resignFirstResponder()
@@ -334,12 +447,23 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     public func reloadChatMessageList() {
-        messageListView.tableSections = viewModel?.messagesList ?? []
+        messageListView.tableSections = (viewModel?.messagesList ?? [])
         messageListView.currentLoggedInUserTagFormat = viewModel?.loggedInUserTagValue ?? ""
         messageListView.currentLoggedInUserReplaceTagFormat = viewModel?.loggedInUserReplaceTagValue ?? ""
+        messageListView.tableSections.sort(by: {$0.timestamp < $1.timestamp})
+        modifyMessageWithTapToUndo()
         messageListView.reloadData()
         bottomMessageBoxView.inputTextView.chatroomId = viewModel?.chatroomViewData?.id ?? ""
         hideShowTopicBarView()
+    }
+    
+    func modifyMessageWithTapToUndo() {
+        guard viewModel?.isChatroomType(type: .directMessage) == true else  { return }
+        let section = messageListView.tableSections.count - 1
+        let row = messageListView.tableSections[section].data.count - 1
+        let message = messageListView.tableSections[section].data[row]
+        guard let modifiedMessage = viewModel?.addTapToUndoForRejectedNotification(message) else { return }
+        messageListView.tableSections[section].data[row] = modifiedMessage
     }
     
     func hideShowTopicBarView() {
@@ -349,10 +473,18 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
                let message = firstSection.data.first,
                message.messageType == LMChatMessageListView.chatroomHeader,
                messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) != nil {
-                self.chatroomTopicBar.isHidden = true
+                hideTopicBar(true)
             } else {
-                self.chatroomTopicBar.isHidden = false
+                hideTopicBar(false)
             }
+        }
+    }
+    
+    func hideTopicBar(_ isHidden: Bool) {
+        if viewModel?.chatroomViewData?.type == .directMessage {
+            self.chatroomTopicBar.isHidden = true
+        } else if chatroomTopicBar.nameLabel.text?.isEmpty == false {
+            self.chatroomTopicBar.isHidden = isHidden
         }
     }
     
@@ -361,6 +493,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {[weak self] in
                 guard let self else { return }
                 messageListView.tableSections = viewModel?.messagesList ?? []
+                messageListView.tableSections.sort(by: {$0.timestamp < $1.timestamp})
                 messageListView.reloadData()
                 guard let lastSectionItem,
                       let lastRowItem,
@@ -371,6 +504,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             }
         } else {
             messageListView.tableSections = viewModel?.messagesList ?? []
+            messageListView.tableSections.sort(by: {$0.timestamp < $1.timestamp})
             messageListView.reloadData()
         }
     }
@@ -422,8 +556,21 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
             chatroomTopicBar.setData(.init(title: viewModel?.chatroomViewData?.title ?? "", createdBy: viewModel?.chatroomViewData?.member?.name ?? "", chatroomImageUrl: viewModel?.chatroomViewData?.chatroomImageUrl ?? "", topicId: viewModel?.chatroomViewData?.id ?? "", titleHeader: viewModel?.chatroomViewData?.member?.name ?? "", type: 1, attachmentsUrls: []))
         }
         
-        backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
+        if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.member?.name, subtitle: nil)
+        } else {
+            setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+        }
+        if viewModel?.isChatroomType(type: .directMessage) == true {
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.directMessageUserName().components(separatedBy: " ").first ?? ""))
+        } else {
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatroomImageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.chatroomViewData?.header?.components(separatedBy: " ").first ?? ""))
+        }
         hideShowTopicBarView()
+    }
+    
+    public func directMessageStatus() {
+        directMessageValidation()
     }
 }
 
@@ -476,9 +623,9 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
            let message = firstSection.data.first,
            message.messageType == LMChatMessageListView.chatroomHeader,
            let _ = messageListView.tableView.cellForRow(at: IndexPath(row: 0, section: 0)) {
-            self.chatroomTopicBar.isHidden = true
+            hideTopicBar(true)
         } else {
-            self.chatroomTopicBar.isHidden = false
+            hideTopicBar(false)
         }
         
         // Check if user scrolled to the top
@@ -508,6 +655,10 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             return nil
         }
         
+        if viewModel?.isChatroomType(type: .directMessage) == true && viewModel?.chatroomViewData?.chatRequestState != .approved {
+            return nil
+        }
+        
         if item.messageType == LMChatMessageListView.chatroomHeader {
             return contextMenuForChatroomData(indexPath, item: item)
         }
@@ -533,6 +684,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             self?.contextMenuItemClicked(withType: .reply, atIndex: indexPath, message: item)
         }
         actions.append(replyAction)
+        
+        if viewModel?.isChatroomType(type: .directMessage) == false, 
+            item.isIncoming == true,
+           item.messageType != LMChatMessageListView.chatroomHeader {
+            if (viewModel?.showList == 1) || (viewModel?.showList == 2 && item.memberState == 1) {
+                let replyPrivatelyAction = UIAction(title: Constants.shared.strings.replyPrivately,
+                                                    image: Constants.shared.images.replyIcon) { [weak self] action in
+                    self?.contextMenuItemClicked(withType: .replyPrivately, atIndex: indexPath, message: item)
+                }
+                actions.append(replyPrivatelyAction)
+            }
+        }
+        
         if let message = item.message, !message.isEmpty {
             let copyAction = UIAction(title: Constants.shared.strings.copy,
                                       image: Constants.shared.images.copyIcon) { [weak self] action in
@@ -601,6 +765,9 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func trailingSwipeAction(forRowAtIndexPath indexPath: IndexPath) -> UIContextualAction? {
         let item = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard viewModel?.checkMemberRight(.respondsInChatRoom) == true, item.isDeleted == false, viewModel?.chatroomViewData?.memberCanMessage == true else { return nil }
+        if viewModel?.isChatroomType(type: .directMessage) == true && viewModel?.chatroomViewData?.chatRequestState != .approved {
+            return nil
+        }
         if (viewModel?.chatroomViewData?.isSecret == true && viewModel?.chatroomViewData?.followStatus == false) { return nil }
         let action = UIContextualAction(style: .normal,
                                         title: "") {[weak self] (contextAction: UIContextualAction, sourceView: UIView, completionHandler: (Bool) -> Void) in
@@ -669,6 +836,15 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
             }
         case .setTopic:
             viewModel?.setAsCurrentTopic(conversationId: message.messageId)
+        case .replyPrivately:
+            guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
+                  let uuid = conversation.member?.sdkClientInfo?.uuid else { return }
+            LMChatDMCreationHandler.shared.openDMChatroom(uuid: uuid, viewController: self) {[weak self] chatroomId in
+                guard let self, let chatroomId else { return }
+                DispatchQueue.main.async {
+                    NavigationScreen.shared.perform(.chatroom(chatroomId: chatroomId, conversationID: nil), from: self, params: nil)
+                }
+            }
         default:
             break
         }
@@ -692,9 +868,12 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     }
     
     public func didTappedOnAttachmentOfMessage(url: String, indexPath: IndexPath) {
-        guard let fileUrl = URL(string: url.getLinkWithHttps()) else {
-            return
-        }
+        guard let fileUrl = URL(string: url.getLinkWithHttps()) else { return }
+        let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
+        var eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        eventProps["url"] = url
+        eventProps["type"] = "Link"
+        LMChatMain.analytics?.trackEvent(for: .chatLinkClicked, eventProperties: eventProps)
         NavigationScreen.shared.perform(.browser(url: fileUrl), from: self, params: nil)
     }
     
@@ -702,11 +881,14 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         guard let attachments = message.attachments, !attachments.isEmpty else { return }
         
+        let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .imageViewed, eventProperties: eventProps)
+        
         let mediaData: [LMChatMediaPreviewViewModel.DataModel.MediaModel] = attachments.compactMap {
             .init(mediaType: MediaType(rawValue: ($0.fileType ?? "")) ?? .image, thumbnailURL: $0.thumbnailUrl, mediaURL: $0.fileUrl ?? "")
         }
         
-        let data: LMChatMediaPreviewViewModel.DataModel = .init(userName: message.createdBy ?? "User", senDate: formatDate(message.timestamp ?? 0), media: mediaData)
+        let data: LMChatMediaPreviewViewModel.DataModel = .init(userName: message.createdBy ?? "User", senDate: LMCoreTimeUtils.generateCreateAtDate(miliseconds: Double((message.timestamp ?? 0)), format: "dd MMM yyyy, HH:mm"), media: mediaData)
         
         NavigationScreen.shared.perform(.mediaPreview(data: data, startIndex: attachmentIndex), from: self, params: nil)
     }
@@ -714,11 +896,19 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     public func didTappedOnReaction(reaction: String, indexPath: IndexPath) {
         let message = messageListView.tableSections[indexPath.section].data[indexPath.row]
         if message.messageType == LMChatMessageListView.chatroomHeader {
+            
+            let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+            LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: eventProps)
+            
             NavigationScreen.shared.perform(.reactionSheet(reactions: (viewModel?.chatroomViewData?.reactions ?? []).reversed(), selectedReaction: reaction, conversation: nil, chatroomId: message.messageId), from: self, params: nil)
             return
         }
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
               let reactions = conversation.reactions else { return }
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [:])
+        
         NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)
     }
     
@@ -736,26 +926,6 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
     
     public func didTapOnCell(indexPath: IndexPath) {
         self.bottomMessageBoxView.inputTextView.resignFirstResponder()
-    }
-
-    // TODO: Move to Date Extension Folder
-    func formatDate(_ epoch: Int, _ format: String = "dd MMM yyyy, HH:mm") -> String {
-        // Convert epoch to Date
-        var epoch = epoch
-        
-        if epoch > Int(Date().timeIntervalSince1970) {
-            epoch /= 1000
-        }
-        
-        let date = Date(timeIntervalSince1970: TimeInterval(epoch))
-        
-        // Create a DateFormatter to format the Date object
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.timeZone = TimeZone.current
-        
-        return dateFormatter.string(from: date)
     }
 }
 
@@ -784,6 +954,37 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     
     public func composeMessage(message: String, composeLink: String?) {
         
+        if viewModel?.chatroomViewData?.type == .directMessage &&
+            viewModel?.chatroomViewData?.chatRequestState == nil {
+            let isDMWithRequestEnabled = LMSharedPreferences.bool(forKey: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            if isDMWithRequestEnabled == true {
+                if message.count > 300 {
+                    self.showErrorAlert(message: Constants.shared.strings.dmRequestTextLimit)
+                } else {
+                    if viewModel?.chatroomViewData?.isPrivateMember == true {
+                        bottomMessageBoxView.inputTextView.resignFirstResponder()
+                        self.showAlertWithActions(title: Constants.shared.strings.sendDMRequestTitle, message: Constants.shared.strings.sendDMRequestMessage, withActions: [
+                            ("Cancel", nil),
+                            ("Confirm", {[weak self] in
+                                self?.bottomMessageBoxView.resetInputTextView()
+                                self?.viewModel?.sendDMRequest(text: message, requestState: .initiated)
+                                self?.bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.pendingChatRequest, isEnable: false)
+                            })
+                        ])
+                    } else {
+                        bottomMessageBoxView.resetInputTextView()
+                        viewModel?.sendDMRequest(text: message, requestState: .approved)
+                        bottomMessageLabel.isHidden = true
+                    }
+                }
+            } else {
+                bottomMessageBoxView.resetInputTextView()
+                viewModel?.sendDMRequest(text: message, requestState: .approved)
+                bottomMessageLabel.isHidden = true
+            }
+            return
+        }
+        bottomMessageBoxView.resetInputTextView()
         if let chatMessage = viewModel?.editChatMessage {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
@@ -848,6 +1049,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
         if let audioURL = LMChatAudioRecordManager.shared.recordingStopped() {
             let newURL = URL(fileURLWithPath: audioURL.absoluteString)
             let mediaModel = MediaPickerModel(with: newURL, type: .voice_note)
+            
+            let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+            LMChatMain.analytics?.trackEvent(for: .voiceNoteSent, eventProperties: eventProps)
+            
             postConversationWithAttchments(message: nil, attachments: [mediaModel])
         }
         LMChatAudioRecordManager.shared.resetAudioParameters()
@@ -887,6 +1092,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             if canRecord {
                 bottomMessageBoxView.showRecordingView()
                 NotificationCenter.default.addObserver(self, selector: #selector(updateRecordDuration), name: .audioDurationUpdate, object: nil)
+                LMChatMain.analytics?.trackEvent(for: .voiceNoteRecorded,
+                                                 eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: "",
+                                                                   LMChatAnalyticsKeys.communityId.rawValue: "",
+                                                                   LMChatAnalyticsKeys.chatroomType.rawValue: ""])
             } else {
                 // TODO: Show Error Alert if false
             }
@@ -907,6 +1116,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     
     public func playRecording() {
         guard let url = LMChatAudioRecordManager.shared.audioURL else { return }
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .voiceNotePreviewed, eventProperties: eventProps)
+        
         LMChatAudioPlayManager.shared.startAudio(fileURL: url.absoluteString) { [weak self] progress in
             self?.bottomMessageBoxView.updateRecordTime(with: progress, isPlayback: true)
         }
@@ -917,6 +1130,10 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
     }
     
     public func deleteRecording() {
+        
+        let eventProps = viewModel?.trackEventBasicParams(messageId: nil) ?? [:]
+        LMChatMain.analytics?.trackEvent(for: .voiceNoteCanceled, eventProperties: eventProps)
+        
         LMChatAudioRecordManager.shared.deleteAudioRecording()
     }
     
@@ -1110,6 +1327,19 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
 
 extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroomHeaderMessageCellDelegate {
     
+    public func didTapURL(url: URL) {
+        NavigationScreen.shared.perform(.browser(url: url), from: self, params: nil)
+    }
+    
+    public func didTapRoute(route: String) {
+        if route == "route://tap_to_undo" {
+            viewModel?.blockDMMember(status: .unblock, source: "tap_to_unblock")
+        } else {
+            viewProfile(route: route)
+        }
+    }
+    
+    
     public func pauseAudioPlayer() {
         LMChatAudioPlayManager.shared.stopAudio { }
     }
@@ -1184,3 +1414,92 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
     }
 
 }
+
+extension LMChatMessageListViewController: LMChatApproveRejectDelegate {
+    
+    public func approveRequest() {
+        self.showAlertWithActions(title: Constants.shared.strings.dmRequestApproveTitle, message: Constants.shared.strings.dmRequestApproveMessage, withActions: [
+            ("Cancel", nil),
+            ("Accept", {[weak self] in
+                self?.viewModel?.sendDMRequest(text: nil, requestState: .approved)
+            })
+        ])
+        
+    }
+    
+    public func rejectRequest() {
+        self.showAlertWithActions(title: Constants.shared.strings.dmRequestRejectTitle, message: Constants.shared.strings.dmRequestRejectMessage, withActions: [
+            ("Reject", {[weak self] in
+                self?.viewModel?.sendDMRequest(text: nil, requestState: .rejected)
+            }),
+            ("Cancel", nil),
+            ("Report And Reject", {[weak self] in
+                guard let self,
+                      let reportView = try? LMChatReportViewModel.createModule(reportContentId: (viewModel?.chatroomId, nil, nil)) else { return }
+                reportView.delegate = self
+                self.navigationController?.pushViewController(reportView, animated: true)
+            })
+        ])
+    }
+}
+
+extension LMChatMessageListViewController: LMChatReportViewDelegate {
+    public func didReportActionCompleted(reason: String?) {
+        viewModel?.sendDMRequest(text: nil, requestState: .rejected, reason: reason)
+    }
+}
+
+extension LMChatMessageListViewController: LMChatTaggedUserFoundProtocol {
+    public func userSelected(with route: String, and userName: String) {
+        bottomMessageBoxView.inputTextView.addTaggedUser(with: userName, route: route)
+        mentionStopped()
+    }
+    
+    public func updateHeight(with height: CGFloat) {
+        taggingViewHeightConstraints?.constant = height
+    }
+}
+
+extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
+    
+    public func mentionStarted(with text: String, chatroomId: String) {
+        guard viewModel?.isChatroomType(type: .directMessage) == false else { return }
+        taggingListView.fetchUsers(for: text, chatroomId: chatroomId)
+    }
+    
+    public func mentionStopped() {
+        guard viewModel?.isChatroomType(type: .directMessage) == false else { return }
+        taggingListView.stopFetchingUsers()
+    }
+    
+    
+    public func contentHeightChanged() {
+        let width = bottomMessageBoxView.inputTextView.frame.size.width
+        
+        let newSize = bottomMessageBoxView.inputTextView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        
+        bottomMessageBoxView.inputTextView.isScrollEnabled = newSize.height > bottomMessageBoxView.maxHeightOfTextView
+        bottomMessageBoxView.inputTextViewHeightConstraint?.constant = min(max(newSize.height, 36), bottomMessageBoxView.maxHeightOfTextView)
+        LMSharedPreferences.setString(bottomMessageBoxView.inputTextView.getText(), forKey: viewModel?.chatroomId ?? "NA")
+    }
+    
+    public func textViewDidChange(_ textView: UITextView) {
+        if viewModel?.isChatroomType(type: .directMessage) == true, viewModel?.chatroomViewData?.chatRequestState == nil {
+            bottomMessageBoxView.sendButton.tag = bottomMessageBoxView.messageButtonTag
+            bottomMessageBoxView.sendButton.setImage(bottomMessageBoxView.sendButtonIcon, for: .normal)
+        } else {
+            bottomMessageBoxView.checkSendButtonGestures()
+        }
+        
+        // Find first url link here and ignore email
+        let links = textView.text.detectedLinks
+        if !bottomMessageBoxView.isLinkPreviewCancel, !links.isEmpty, let link = links.first(where: {!$0.isEmail()}) {
+            bottomMessageBoxView.detectedFirstLink = link
+            bottomMessageBoxView.delegate?.linkDetected(link)
+        } else {
+            bottomMessageBoxView.linkPreviewView.isHidden = true
+            bottomMessageBoxView.detectedFirstLink = nil
+        }
+    }
+}
+

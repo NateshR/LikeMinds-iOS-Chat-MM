@@ -14,7 +14,7 @@ public class LMChatMain {
     private init() {}
     
     public static var shared: LMChatMain = .init()
-//    static var analytics: LMFeedAnalyticsProtocol = LMFeedAnalyticsTracker()
+    public static var analytics: LMChatAnalyticsProtocol? = LMChatAnalyticsTracker()
     static private(set) var isInitialized: Bool = false
     var apiKey: String = ""
     var deviceId: String?
@@ -39,6 +39,11 @@ public class LMChatMain {
                 self?.logout()
                 completion?(response.success, response.errorMessage)
                 return
+            }
+            if let communitySettings = response.data?.community?.communitySettings, let setting = communitySettings.first(where: {$0.type == CommunitySetting.SettingType.enableDMWithoutConnectionRequest.rawValue}), setting.enabled == true {
+                LMSharedPreferences.setValue(true, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            } else {
+                LMSharedPreferences.setValue(false, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
             }
             Self.isInitialized = true
             self?.registerDevice(deviceId: deviceId)
@@ -90,26 +95,5 @@ public class LMChatMain {
         DeepLinkManager.sharedInstance.didReceivedRemoteNotification(route)
         return true
     }
-    
-}
-
-// MARK: LMFeedAnalyticsProtocol
-public protocol LMChatAnalyticsProtocol {
-    func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String: AnyHashable])
-}
-
-final class LMChatAnalyticsTracker: LMChatAnalyticsProtocol {
-    public func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String : AnyHashable]) {
-        let track = """
-            ========Event Tracker========
-        Event Name: \(eventName)
-        Event Properties: \(eventProperties)
-            =============================
-        """
-        print(track)
-    }
-}
-
-public struct LMChatAnalyticsEventName {
     
 }

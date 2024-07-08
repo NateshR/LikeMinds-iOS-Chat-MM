@@ -55,6 +55,7 @@ open class LMChatMessageBubbleView: LMView {
     }()
     
     var timestampTopConstraint: NSLayoutConstraint?
+    var timestampTrailingConstraint: NSLayoutConstraint?
     
     /// A type describing the content of this view.
     public struct ContentModel {
@@ -98,17 +99,22 @@ open class LMChatMessageBubbleView: LMView {
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             timestampLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
-            timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             timestampLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 10),
         ])
         timestampTopConstraint = timestampLabel.topAnchor.constraint(equalTo: contentContainer.bottomAnchor, constant: 4)
+        timestampTrailingConstraint = timestampLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
         timestampTopConstraint?.isActive = true
+        timestampTrailingConstraint?.isActive = true
         containerViewLeadingConstraint?.isActive = true
         containerViewTrailingConstraint?.isActive = true
     }
     
     func updateTimestampLabelTopConstraint(withConstant constant: CGFloat = 4) {
         timestampTopConstraint?.constant = constant
+    }
+    
+    func updateTimestampLabelTrailingConstraint(withConstant constant: CGFloat = -16) {
+        timestampTrailingConstraint?.constant = constant
     }
     
     open func addArrangeSubview(_ view: UIView, atIndex: Int? = nil) {

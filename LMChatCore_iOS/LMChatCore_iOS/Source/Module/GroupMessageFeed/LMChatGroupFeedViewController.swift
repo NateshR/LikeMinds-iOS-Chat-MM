@@ -1,5 +1,5 @@
 //
-//  LMChatHomeFeedViewController.swift
+//  LMChatGroupFeedViewController.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 12/02/24.
@@ -8,9 +8,9 @@
 import Foundation
 import LikeMindsChatUI
 
-open class LMChatHomeFeedViewController: LMViewController {
+open class LMChatGroupFeedViewController: LMViewController {
     
-    var viewModel: LMChatHomeFeedViewModel?
+    var viewModel: LMChatGroupFeedViewModel?
     
     open private(set) lazy var feedListView: LMChatHomeFeedListView = {
         let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
@@ -31,10 +31,9 @@ open class LMChatHomeFeedViewController: LMViewController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupViews()
-        setupLayouts()
         self.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil, alignment: .center)
+        LMChatMain.analytics?.trackEvent(for: .homeFeedPageOpened,
+                                         eventProperties: [LMChatAnalyticsKeys.communityId.rawValue: viewModel?.getCommunityId() ?? ""])
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -51,35 +50,41 @@ open class LMChatHomeFeedViewController: LMViewController {
     
     // MARK: setupViews
     open override func setupViews() {
+        super.setupViews()
         self.view.addSubview(feedListView)
         setupRightItemBars()
     }
     
     // MARK: setupLayouts
     open override func setupLayouts() {
-        NSLayoutConstraint.activate([
-            feedListView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            feedListView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-            //            containerView.heightAnchor.constraint(equalToConstant: 40),
-            feedListView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            feedListView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-        ])
+        super.setupLayouts()
+        self.view.safeAreaPinSubView(subView: feedListView)
     }
     
     func setupRightItemBars() {
         let profileItem = UIBarButtonItem(customView: profileIcon)
         let searchItem = UIBarButtonItem(image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(searchBarItemClicked))
         searchItem.tintColor = Appearance.shared.colors.textColor
-        navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        profileItem.customView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(profileItemClicked)))
+        if let vc = self.navigationController?.viewControllers.first {
+            vc.navigationItem.rightBarButtonItems = [profileItem, searchItem]
+            (vc as? LMViewController)?.setNavigationTitleAndSubtitle(with: "Community", subtitle: nil)
+        } else {
+            navigationItem.rightBarButtonItems = [profileItem, searchItem]
+        }
     }
     
-    @objc func searchBarItemClicked() {
+    @objc open func searchBarItemClicked() {
+        LMChatMain.analytics?.trackEvent(for: .searchIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
         NavigationScreen.shared.perform(.searchScreen, from: self, params: nil)
+    }
+    
+    @objc open func profileItemClicked() {
+//        self.showAlertWithActions(title: "View Profile", message: "Handle route route://member_profile/\(viewModel?.memberProfile?.sdkClientInfo?.uuid ?? "") to view profile! ", withActions: nil)
     }
 }
 
-extension LMChatHomeFeedViewController: LMHomeFeedViewModelProtocol {
+extension LMChatGroupFeedViewController: LMChatGroupFeedViewModelProtocol {
     
     public func updateHomeFeedChatroomsData() {
        let chatrooms =  (viewModel?.chatrooms ?? []).compactMap({ chatroom in
@@ -97,7 +102,7 @@ extension LMChatHomeFeedViewController: LMHomeFeedViewModelProtocol {
     public func reloadData() {}
 }
 
-extension LMChatHomeFeedViewController: LMHomFeedListViewDelegate {
+extension LMChatGroupFeedViewController: LMHomFeedListViewDelegate {
     
     public func didTapOnCell(indexPath: IndexPath) {
         switch feedListView.tableSections[indexPath.section].sectionType {

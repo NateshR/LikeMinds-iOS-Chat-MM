@@ -131,7 +131,7 @@ public struct GetAttributedTextWithRoutes {
             let replaceAttributes: [NSAttributedString.Key: Any] = [
                 .foregroundColor: withHighlightedColor,
                 .font: font,
-                .route: routeString
+                .route: nameWithRoute.route
             ]
             
             let newAttributedString = NSAttributedString(string: replaceString, attributes: replaceAttributes)

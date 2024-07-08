@@ -133,8 +133,13 @@ open class LMChatHomeFeedExploreTabView: LMView {
     
     open func setData(_ data: ContentModel) {
         exploreTitleLabel.text = data.tilesName
+        chatroomCountBadgeLabel.isHidden = false
         if data.unreadCount <= 0 {
-            chatroomCountBadgeLabel.text = data.totalCount > 99 ? "99+" : "\(data.totalCount) Chatrooms"
+            if data.totalCount <= 0 {
+                chatroomCountBadgeLabel.isHidden = true
+            } else  {
+                chatroomCountBadgeLabel.text = data.totalCount > 99 ? "99+" : "\(data.totalCount) Chatrooms"
+            }
         } else {
             chatroomCountBadgeLabel.text = data.unreadCount > 99 ? "99+" : "\(data.unreadCount) NEW"
         }

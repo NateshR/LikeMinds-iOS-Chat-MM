@@ -33,7 +33,7 @@ public class LMBarButtonItem: UIBarButtonItem {
         let view = LMStackView().translatesAutoresizingMaskIntoConstraints()
         view.axis = .horizontal
         view.alignment = .center
-        view.spacing = 0
+        view.spacing = 4
         view.addArrangedSubview(backArrow)
         view.addArrangedSubview(imageView)
         return view

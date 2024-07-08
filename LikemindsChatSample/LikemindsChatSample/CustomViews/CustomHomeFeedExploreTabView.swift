@@ -20,6 +20,9 @@ final class CustomHomeFeedExploreTabView: LMChatHomeFeedExploreTabView {
     
     override func setupAppearance() {
         super.setupAppearance()
-        containerView.backgroundColor = .systemPink
+        containerView.backgroundColor = .systemFill
+        exploreTitleLabel.textColor = .systemGreen
+        chatroomCountBadgeLabel.textColor = .systemRed
+        chatroomCountBadgeLabel.backgroundColor = .systemGray
     }
 }

@@ -18,6 +18,7 @@ enum NavigationActions {
     case messageAttachment(delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, sourceType: LMChatAttachmentViewModel.LMAttachmentSourceType)
     case messageAttachmentWithData(data:[MediaPickerModel], delegate: LMChatAttachmentViewDelegate?, chatroomId: String?, mediaType: MediaType)
     case participants(chatroomId: String, isSecret: Bool)
+    case dmMemberList(showList: Int?)
     case report(chatroomId: String?, conversationId: String?, memberId: String?)
     case reactionSheet(reactions: [Reaction], selectedReaction: String?, conversation: String?, chatroomId: String?)
     case exploreFeed
@@ -42,7 +43,7 @@ class NavigationScreen: NavigationScreenProtocol {
     func perform(_ action: NavigationActions, from source: LMViewController, params: Any?) {
         switch action {
         case .homeFeed:
-            guard let homefeedvc = try? LMChatHomeFeedViewModel.createModule() else { return }
+            guard let homefeedvc = try? LMChatGroupFeedViewModel.createModule() else { return }
             source.navigationController?.pushViewController(homefeedvc, animated: true)
         case .chatroom(let chatroomId, let conversationId):
             guard let chatroom = try? LMChatMessageListViewModel.createModule(withChatroomId: chatroomId, conversationId: conversationId) else { return }
@@ -57,6 +58,9 @@ class NavigationScreen: NavigationScreenProtocol {
             source.present(viewController, animated: true)
         case .participants(let chatroomId, let isSecret):
             guard let participants = try? LMChatParticipantListViewModel.createModule(withChatroomId: chatroomId, isSecretChatroom: isSecret) else { return }
+            source.navigationController?.pushViewController(participants, animated: true)
+        case .dmMemberList(let showList):
+            guard let participants = try? LMChatMemberListViewModel.createModule(showList: showList) else { return }
             source.navigationController?.pushViewController(participants, animated: true)
         case .report(let chatroomId, let conversationId, let memberId):
             guard let report = try? LMChatReportViewModel.createModule(reportContentId: (chatroomId, conversationId, memberId)) else { return }

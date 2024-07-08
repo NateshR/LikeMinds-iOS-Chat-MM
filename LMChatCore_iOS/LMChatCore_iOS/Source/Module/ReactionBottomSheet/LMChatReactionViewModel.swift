@@ -55,6 +55,7 @@ final public class LMChatReactionViewModel {
     }
     
     func getData() {
+        reactionListOpen()
         fetchReactions()
     }
     
@@ -100,11 +101,24 @@ final public class LMChatReactionViewModel {
         delegate?.showData(with: reactions, cells: reactionList)
     }
     
+    func reactionListOpen() {
+        // TODO: Analytics Missing Community ID
+        LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId,
+            LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
+    }
+    
     func deleteConversationReaction() {
         guard let conversationId else {
             deleteChatroomReaction()
             return
         }
+        
+        LMChatMain.analytics?.trackEvent(for: .reactionRemoved, eventProperties: [
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId,
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
+        
         let request = DeleteReactionRequest.builder()
             .conversationId(conversationId)
             .build()

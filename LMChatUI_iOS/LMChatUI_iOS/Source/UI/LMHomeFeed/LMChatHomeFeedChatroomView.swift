@@ -90,11 +90,22 @@ open class LMChatHomeFeedChatroomView: LMView {
     
     open private(set) lazy var chatroomNameLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Chatname"
+        label.text = ""
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.black
         label.numberOfLines = 1
         label.setContentHuggingPriority(.required, for: .horizontal)
+        return label
+    }()
+    
+    open private(set) lazy var customTitle: LMLabel = {
+        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
+        label.text = ""
+        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.numberOfLines = 1
+        label.textColor = Appearance.shared.colors.textColor
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
         return label
     }()
     
@@ -225,6 +236,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         chatroomMessageContainerStackView.addArrangedSubview(lastMessageLabel)
         chatroomMessageContainerStackView.addArrangedSubview(muteAndBadgeIconContainerStackView)
         chatroomNameContainerStackView.addArrangedSubview(chatroomNameLabel)
+        chatroomNameContainerStackView.addArrangedSubview(customTitle)
         chatroomNameContainerStackView.addArrangedSubview(lockAndAnnouncementIconContainerStackView)
         chatroomNameContainerStackView.addArrangedSubview(spacerBetweenLockAndTimestamp)
         chatroomNameContainerStackView.addArrangedSubview(timestampLabel)
@@ -245,10 +257,11 @@ open class LMChatHomeFeedChatroomView: LMView {
             chatroomContainerStackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
             
         ])
+        lastMessageLabel.setHeightConstraint(with: 18)
     }
     
     open func setData(_ data: ContentModel) {
-        chatroomNameLabel.text = data.chatroomName
+        chatroomName(data.chatroomName)
         lastMessageLabelSet(data)
         muteIconImageView.isHidden = !data.isMuted
         announcementIconImageView.isHidden = !data.isAnnouncementRoom
@@ -259,7 +272,7 @@ open class LMChatHomeFeedChatroomView: LMView {
         timestampLabel.text = data.timestamp
         let placeholder = UIImage.generateLetterImage(name: data.chatroomName.components(separatedBy: " ").first ?? "")
         if let imageUrl = data.chatroomImageUrl, let url = URL(string: imageUrl) {
-            chatroomImageView.kf.setImage(with: url, placeholder: placeholder)
+            chatroomImageView.kf.setImage(with: url, placeholder: placeholder, options: [.fromMemoryCacheOrRefresh])
         } else {
             chatroomImageView.image = placeholder
         }
@@ -321,12 +334,21 @@ open class LMChatHomeFeedChatroomView: LMView {
         }
 
         // Initialize mutable string
-        let completeText = NSMutableAttributedString()
-        let textBeforeIcon = NSAttributedString(string:  data.userName + ":")
-        let textAfterIcon = NSAttributedString(string: " " + (data.lastMessage))
-        completeText.append(textBeforeIcon)
-        completeText.append(attributedText)
-        completeText.append(textAfterIcon)
-        lastMessageLabel.attributedText = completeText
+        if !data.userName.isEmpty {
+            let completeText = NSMutableAttributedString()
+            let textBeforeIcon = NSAttributedString(string:  data.userName + ":")
+            let textAfterIcon = NSAttributedString(string: " " + (data.lastMessage))
+            completeText.append(textBeforeIcon)
+            completeText.append(attributedText)
+            completeText.append(textAfterIcon)
+            lastMessageLabel.attributedText = completeText
+        }
+    }
+    
+    func chatroomName(_ name: String) {
+        let components = name.components(separatedBy: "\(Constants.shared.strings.dot)")
+        chatroomNameLabel.text = components.first
+        customTitle.isHidden = components.count < 2
+        customTitle.text = "\(Constants.Strings.shared.dot) " + (components.last ?? "")
     }
 }

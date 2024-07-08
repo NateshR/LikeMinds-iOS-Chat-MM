@@ -19,11 +19,14 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func memberRightsCheck()
     func showToastMessage(message: String?)
     func insertLastMessageRow(section: String, conversationId: String)
+    func directMessageStatus()
+    func viewProfile(route: String)
+    func approveRejectView(isShow: Bool)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
 
-public final class LMChatMessageListViewModel {
+public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     
     weak var delegate: LMMessageListViewModelProtocol?
     var chatroomId: String
@@ -46,6 +49,10 @@ public final class LMChatMessageListViewModel {
     var fetchingInitialBottomData: Bool = false
     var isConversationSyncCompleted: Bool = false
     var trackLastConversationExist: Bool = true
+    var dmStatus: CheckDMStatusResponse?
+    var showList: Int?
+    var loggedInUserData: User?
+    var isMarkReadProgress: Bool = false
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -71,10 +78,26 @@ public final class LMChatMessageListViewModel {
         }
         self.isConversationSyncCompleted = true
         self.addObserveConversations()
+        let chatroomRequest = GetChatroomRequest.Builder().chatroomId(chatroomId).build()
+        guard let chatroom = LMChatClient.shared.getChatroom(request: chatroomRequest)?.data?.chatroom else {
+            return
+        }
+        chatroomViewData = chatroom
+        if isChatroomType(type: .directMessage) == true {
+            delegate?.directMessageStatus()
+        }
     }
     
     func isAdmin() -> Bool {
         memberState?.state == MemberState.admin.rawValue
+    }
+    
+    func loggedInUser() -> User? {
+        guard let user = loggedInUserData else {
+            loggedInUserData = LMChatClient.shared.getLoggedInUser()
+            return loggedInUserData
+        }
+        return user
     }
     
     func checkMemberRight(_ rightState: MemberRightState) -> Bool {
@@ -83,7 +106,7 @@ public final class LMChatMessageListViewModel {
     }
     
     func loggedInUserTag() {
-        guard let user = LMChatClient.shared.getLoggedInUser() else { return }
+        guard let user = loggedInUser() else { return }
 //        loggedInUserTagValue = "<<\(user.name ?? "")|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
 //        loggedInUserReplaceTagValue = "<<You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
         loggedInUserTagValue = "<<\(user.name ?? "")|route://member_profile/\(user.sdkClientInfo?.user ?? 0)?member_id=\(user.sdkClientInfo?.user ?? 0)&community_id=\(SDKPreferences.shared.getCommunityId() ?? "")>>"
@@ -155,7 +178,12 @@ public final class LMChatMessageListViewModel {
 //            fetchIntermediateConversations(chatroom: chatroom, conversationId: chatroom.lastSeenConversation?.id ?? "")
             fetchBottomConversations()
         }
-        
+        if chatroomViewData?.type == ChatroomType.directMessage {
+            delegate?.directMessageStatus()
+            checkDMStatus()
+        } else {
+            checkDMStatus(requestFrom: "group_channel")
+        }
         fetchChatroomActions()
         markChatroomAsRead()
         fetchMemberState()
@@ -168,7 +196,6 @@ public final class LMChatMessageListViewModel {
     
     func convertConversationsIntoGroupedArray(conversations: [Conversation]?) -> [LMChatMessageListView.ContentModel] {
         guard let conversations else { return [] }
-        print("conversations ------> \(conversations)")
         let dictionary = Dictionary(grouping: conversations, by: { $0.date })
         var conversationsArray: [LMChatMessageListView.ContentModel] = []
         for key in dictionary.keys {
@@ -189,8 +216,8 @@ public final class LMChatMessageListViewModel {
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
         if conversations.count < conversationFetchLimit {
-            if  let chatroom = chatroomViewData {
-                let message = chatroomDataToConversation(chatroom)
+            if  let chatroom = chatroomViewData,
+                let message = chatroomDataToConversation(chatroom) {
                 insertOrUpdateConversationIntoList(message)
             }
         }
@@ -214,8 +241,8 @@ public final class LMChatMessageListViewModel {
         chatMessages = conversations
         messagesList.removeAll()
         messagesList.append(contentsOf: convertConversationsIntoGroupedArray(conversations: conversations))
-        if  let chatroom = chatroomViewData {
-            let message = chatroomDataToConversation(chatroom)
+        if  let chatroom = chatroomViewData,
+            let message = chatroomDataToConversation(chatroom) {
             insertOrUpdateConversationIntoList(message)
         }
         if conversations.count < conversationFetchLimit {
@@ -227,7 +254,7 @@ public final class LMChatMessageListViewModel {
     }
     
     func chatroomDataToHeaderConversation(_ chatroom: Chatroom) {
-        let message = chatroomDataToConversation(chatroom)
+        guard let message = chatroomDataToConversation(chatroom) else { return }
         insertOrUpdateConversationIntoList(message)
     }
     
@@ -252,8 +279,10 @@ public final class LMChatMessageListViewModel {
             if type == .below { trackLastConversationExist = true }
             return
         }
-        if type == .above, conversations.count < conversationFetchLimit, let chatroom = self.chatroomViewData {
-            conversations.insert(chatroomDataToConversation(chatroom), at: 0)
+        if type == .above, conversations.count < conversationFetchLimit,
+           let chatroom = self.chatroomViewData,
+           let message = chatroomDataToConversation(chatroom) {
+            conversations.insert(message, at: 0)
         }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
@@ -305,8 +334,9 @@ public final class LMChatMessageListViewModel {
         let belowConversations = LMChatClient.shared.getConversations(withRequest: getBelowConversationRequest)?.data?.conversations ?? []
         var allConversations = aboveConversations + [mediumConversation] + belowConversations
         
-        if aboveConversations.count < conversationFetchLimit {
-            allConversations.insert(chatroomDataToConversation(chatroom), at: 0)
+        if aboveConversations.count < conversationFetchLimit,
+           let message = chatroomDataToConversation(chatroom){
+            allConversations.insert(message, at: 0)
         }
         
         chatMessages = allConversations
@@ -349,8 +379,10 @@ public final class LMChatMessageListViewModel {
         
         if let replyConversation {
             replies =
-            [.init(messageId: replyConversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                   message: ignoreGiphyUnsupportedMessage(replyConversation.answer),
+            [.init(messageId: replyConversation.id ?? "",
+                   memberTitle: conversation.member?.communityManager(),
+                   memberState: replyConversation.member?.state,
+                   message: convertMessageIntoFormat(replyConversation),
                    timestamp: replyConversation.createdEpoch,
                       reactions: nil,
                    attachments: replyConversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).compactMap({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}), replied: nil,
@@ -359,14 +391,17 @@ public final class LMChatMessageListViewModel {
                    createdByImageUrl: replyConversation.member?.imageUrl, createdById: replyConversation.member?.sdkClientInfo?.uuid,
                    isIncoming: replyConversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
                    messageType: replyConversation.state.rawValue,
-                   createdTime: timestampConverted(createdAtInEpoch: replyConversation.createdEpoch ?? 0),
+                   createdTime: LMCoreTimeUtils.timestampConverted(withEpoch: replyConversation.createdEpoch ?? 0),
                    ogTags: createOgTags(replyConversation.ogTags),
                    isEdited: replyConversation.isEdited,
                    attachmentUploaded: replyConversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(replyConversation.conversationStatus),
-                   tempId: replyConversation.temporaryId)]
+                   tempId: replyConversation.temporaryId,
+                   hideLeftProfileImage: isChatroomType(type: .directMessage))]
         }
-        return .init(messageId: conversation.id ?? "", memberTitle: conversation.member?.communityManager(),
-                     message: ignoreGiphyUnsupportedMessage(conversation.answer),
+        return .init(messageId: conversation.id ?? "",
+                     memberTitle: conversation.member?.communityManager(),
+                     memberState: conversation.member?.state,
+                     message: convertMessageIntoFormat(conversation),
                      timestamp: conversation.createdEpoch,
                      reactions: reactionGrouping(conversation.reactions?.reversed() ?? []),
                      attachments: conversation.attachments?.sorted(by: {($0.index ?? 0) < ($1.index ?? 0)}).map({.init(fileUrl: FileUtils.imageUrl($0.url), thumbnailUrl: FileUtils.imageUrl($0.thumbnailUrl), fileSize: $0.meta?.size, numberOfPages: $0.meta?.numberOfPage, duration: $0.meta?.duration, fileType: $0.type, fileName: $0.name)}),
@@ -376,7 +411,7 @@ public final class LMChatMessageListViewModel {
                      createdByImageUrl: conversation.member?.imageUrl,
                      createdById: conversation.member?.sdkClientInfo?.uuid,
                      isIncoming: conversation.member?.sdkClientInfo?.uuid != UserPreferences.shared.getClientUUID(),
-                     messageType: conversation.state.rawValue, createdTime: timestampConverted(createdAtInEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus), tempId: conversation.temporaryId)
+                     messageType: conversation.state.rawValue, createdTime: LMCoreTimeUtils.timestampConverted(withEpoch: conversation.createdEpoch ?? 0), ogTags: createOgTags(conversation.ogTags), isEdited: conversation.isEdited, attachmentUploaded: conversation.attachmentUploaded, isShowMore: false, messageStatus: messageStatus(conversation.conversationStatus), tempId: conversation.temporaryId, hideLeftProfileImage: isChatroomType(type: .directMessage))
     }
     
     func messageStatus(_ status: ConversationStatus?) -> LMMessageStatus {
@@ -393,9 +428,33 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func ignoreGiphyUnsupportedMessage(_ message: String) -> String {
-        let text = message.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
-        return text //GetAttributedTextWithRoutes.getAttributedText(from: text).string
+    func convertMessageIntoFormat(_ conversation: Conversation) -> String {
+        var message = conversation.answer.replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: "")
+        if chatroomViewData?.type == .directMessage {
+            let loggedInUserTag = "<<\(loggedInUserData?.name ?? "")|route://member/\(loggedInUserData?.sdkClientInfo?.user ?? 0)>>"
+            switch conversation.state {
+            case .directMessageMemberRequestApproved:
+                message = message.replacingOccurrences(of: loggedInUserTag, with: "You")
+            case .chatRoomHeader:
+                message = message.replacingOccurrences(of: loggedInUserTag, with: "")
+            default:
+                break
+            }
+            return message
+        } else {
+            return message
+        }
+    }
+    
+    func addTapToUndoForRejectedNotification(_ lastMessage: LMChatMessageListView.ContentModel.Message) -> LMChatMessageListView.ContentModel.Message? {
+        var message = lastMessage
+        if message.messageType == ConversationState.directMessageMemberRequestRejected.rawValue,
+           UserPreferences.shared.getLMMemberId() == chatroomViewData?.chatRequestedById,
+           let text = message.message {
+            message.message = text + " <<Tap to undo|route://tap_to_undo>>"
+            return message
+        }
+        return nil
     }
     
     func createOgTags(_ ogTags: LinkOGTags?) -> LMChatMessageListView.ContentModel.OgTags? {
@@ -416,21 +475,7 @@ public final class LMChatMessageListViewModel {
         }
         return reactionsArray
     }
-    
-    func timestampConverted(createdAtInEpoch: Int) -> String? {
-        guard createdAtInEpoch > .zero else { return nil }
-        var epochTime = Double(createdAtInEpoch)
-        
-        if epochTime > Date().timeIntervalSince1970 {
-            epochTime = epochTime / 1000
-        }
-        
-        let date = Date(timeIntervalSince1970: epochTime)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        return dateFormatter.string(from: date)
-    }
-    
+
     func insertOrUpdateConversationIntoList(_ conversation: Conversation) {
         if let firstIndex = chatMessages.firstIndex(where: {($0.id == conversation.id) || ($0.id == conversation.temporaryId) || ($0.temporaryId != nil && $0.temporaryId == conversation.temporaryId)}) {
             chatMessages[firstIndex] = conversation
@@ -465,7 +510,8 @@ public final class LMChatMessageListViewModel {
         }
     }
     
-    func chatroomDataToConversation(_ chatroom: Chatroom) -> Conversation {
+    func chatroomDataToConversation(_ chatroom: Chatroom) -> Conversation? {
+        guard chatroom.type != .directMessage else { return nil }
         let conversation = Conversation.builder()
             .date(chatroom.date)
             .answer(chatroom.title)
@@ -489,11 +535,13 @@ public final class LMChatMessageListViewModel {
     }
     
     func markChatroomAsRead() {
+        guard !isMarkReadProgress else { return }
+        self.isMarkReadProgress = true
         let request = MarkReadChatroomRequest.builder()
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.markReadChatroom(request: request) { response in
-            print(response)
+        LMChatClient.shared.markReadChatroom(request: request) { [weak self] _ in
+            self?.isMarkReadProgress = false
         }
     }
     
@@ -522,6 +570,7 @@ public final class LMChatMessageListViewModel {
             .build()
         LMChatClient.shared.muteChatroom(request: request) {[weak self] response in
             guard response.success else { return }
+            LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: self?.chatroomViewData?.header ?? ""])
             if value {
                 self?.delegate?.showToastMessage(message: String(format: Constants.shared.strings.muteUnmuteMessage, "muted"))
             } else {
@@ -563,9 +612,179 @@ public final class LMChatMessageListViewModel {
             muteUnmuteChatroom(value: true)
         case .unMute:
             muteUnmuteChatroom(value: false)
+        case .viewProfile:
+            let route = "route://member_profile/"
+            if chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid == loggedInUserData?.uuid {
+                delegate?.viewProfile(route: route + "\(chatroomViewData?.member?.sdkClientInfo?.uuid ?? "")")
+            } else {
+                delegate?.viewProfile(route: route + "\(chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid ?? "")")
+            }
+        case .blockDMMember:
+            blockDMMember(status: .block, source: "overflow_menu")
+        case .unblockDMMember:
+            blockDMMember(status: .unblock, source: "overflow_menu")
         default:
             break
         }
+    }
+    
+    func isChatroomType(type: ChatroomType) -> Bool {
+        (chatroomViewData?.type == type)
+    }
+    
+    func checkDMStatus(requestFrom: String = "chatroom") {
+        let request = CheckDMStatusRequest.builder()
+            .requestFrom(requestFrom)
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.checkDMStatus(request: request) {[weak self] response in
+            guard let self, let status = response.data else { return }
+            dmStatus = status
+            showList = Int(status.cta?.getQueryItems()["show_list"] ?? "")
+            if isChatroomType(type: .directMessage) == true {
+                delegate?.directMessageStatus()
+            }
+        }
+    }
+    
+    func sendDMRequest(text: String?, requestState: ChatRequestState, reason: String? = nil) {
+        let request = SendDMRequest.builder()
+            .text(text)
+            .chatRequestState(requestState.rawValue)
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.sendDMRequest(request: request) {[weak self] response in
+            guard response.success else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                return
+            }
+            if var conversation = response.data?.conversation {
+                self?.chatroomViewData = self?.chatroomViewData?.toBuilder()
+                    .chatRequestState(requestState.rawValue)
+                    .chatRequestedById(UserPreferences.shared.getLMMemberId())
+                    .build()
+                conversation = conversation.toBuilder().conversationStatus(.sent).build()
+                self?.insertOrUpdateConversationIntoList(conversation)
+                self?.delegate?.reloadChatMessageList()
+            }
+            self?.markChatroomAsRead()
+            self?.trackEventSendDMRequest(requestState: requestState, reason: reason)
+            self?.delegate?.approveRejectView(isShow: false)
+            self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
+            self?.fetchChatroomActions()
+            self?.syncConversation()
+        }
+    }
+    
+    func blockDMMember(status: BlockMemberRequest.BlockState, source: String?) {
+        guard isChatroomType(type: .directMessage) == true else { return }
+        let request = BlockMemberRequest.builder()
+            .status(status)
+            .chatroomId(chatroomId)
+            .build()
+        LMChatClient.shared.blockDMMember(request: request) {[weak self] response in
+            guard response.success else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                return
+            }
+            if let conversation = response.data?.conversation {
+                self?.chatroomViewData = self?.chatroomViewData?.toBuilder()
+                    .chatRequestState(status.rawValue)
+                    .chatRequestedById(UserPreferences.shared.getLMMemberId())
+                    .build()
+                self?.insertOrUpdateConversationIntoList(conversation)
+                self?.delegate?.reloadChatMessageList()
+            }
+            self?.trackEventDMBlockUser(status: status, source: source)
+            let requestType = status == .block ? "blocked" : "unblocked"
+            self?.delegate?.showToastMessage(message: "Member \(requestType)!")
+            self?.fetchChatroomActions()
+            self?.syncConversation()
+        }
+    }
+    
+    func directMessageUserName() -> String {
+        if loggedInUserData?.sdkClientInfo?.uuid == chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            return chatroomViewData?.member?.name ?? ""
+        } else {
+            return chatroomViewData?.chatWithUser?.name ?? ""
+        }
+    }
+    
+    func directMessageUserUUID() -> String {
+        if loggedInUserData?.sdkClientInfo?.uuid == chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
+            return chatroomViewData?.member?.sdkClientInfo?.uuid ?? ""
+        } else {
+            return chatroomViewData?.chatWithUser?.uuid ?? ""
+        }
+    }
+    
+    func trackEventSendDMRequest(requestState: ChatRequestState, reason: String?) {
+        let uuid = directMessageUserUUID()
+        switch requestState {
+        case .initiated:
+            LMChatMain.analytics?.trackEvent(for: .dmRequestSent,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.receiver.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
+                                                LMChatAnalyticsKeys.source.rawValue: "DM cta"])
+        case .approved:
+            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.senderId.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
+                                                LMChatAnalyticsKeys.status.rawValue: "Approved"])
+        case .rejected:
+            let reported = reason != nil
+            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.senderId.rawValue: uuid,
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
+                                                LMChatAnalyticsKeys.status.rawValue: "Rejected",
+                                                LMChatAnalyticsKeys.reported.rawValue: "\(reported)",
+                                                LMChatAnalyticsKeys.reportedReason.rawValue: reason ?? ""])
+        default:
+            break
+        }
+    }
+    
+    func trackEventDMBlockUser(status: BlockMemberRequest.BlockState, source: String?) {
+        switch status {
+        case .block:
+            LMChatMain.analytics?.trackEvent(for: .dmBlock,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.blockedUser.rawValue: directMessageUserUUID(),
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()])
+        case .unblock:
+            LMChatMain.analytics?.trackEvent(for: .dmUnblock,
+                                             eventProperties: [
+                                                LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
+                                                LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                                LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
+                                                LMChatAnalyticsKeys.source.rawValue: source ?? ""])
+        default:
+            break
+        }
+    }
+    
+    func trackEventDMSent() {
+        guard isChatroomType(type: .directMessage) == true else { return }
+        LMChatMain.analytics?.trackEvent(for: .dmSent,
+                                         eventProperties: [
+                                            LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
+                                            LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+                                            LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()])
+    }
+    
+    func trackEventBasicParams(messageId: String?) -> [String: AnyHashable] {
+        [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+         LMChatAnalyticsKeys.messageId.rawValue: messageId ?? "",
+         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
 }
 
@@ -619,29 +838,28 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     }
     
     public func getPostedConversations(conversations: [Conversation]?) {
-        print("getPostedConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
         if !conversations.isEmpty {
             delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
         }
     }
     
     public func getChangedConversations(conversations: [Conversation]?) {
-        print("getChangedConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             insertOrUpdateConversationIntoList(item)
         }
         if !conversations.isEmpty {
             delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
         }
     }
     
     public func getNewConversations(conversations: [Conversation]?) {
-        print("getNewConversations -- \(conversations)")
         guard let conversations, !fetchingInitialBottomData else { return }
         for item in conversations {
             if (item.attachmentCount ?? 0) > 0 {
@@ -654,6 +872,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         }
         if !conversations.isEmpty {
             delegate?.scrollToBottom(forceToBottom: false)
+            self.markChatroomAsRead()
         }
     }
     
@@ -731,6 +950,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         guard let conversation = response, let conversId = conversation.id else {
             return
         }
+        trackEventDMSent()
         var requestFiles:[LMChatAttachmentUploadRequest] = []
         if let updatedFileUrls, !updatedFileUrls.isEmpty {
             requestFiles.append(contentsOf: getUploadFileRequestList(fileUrls: updatedFileUrls, conversationId: conversId, chatroomId: conversation.chatroomId ?? ""))
@@ -853,7 +1073,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .text(text)
             .shareLink(shareLink)
             .build()
-        LMChatClient.shared.editConversation(request: request) {[weak self] resposne in
+        LMChatClient.shared.editConversation(request: request) { resposne in
             guard resposne.success, let _ = resposne.data?.conversation else { return}
         }
     }
@@ -869,6 +1089,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             guard response.success else {
                 return
             }
+            
+            LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
+            
             if status {
                 self?.delegate?.showToastMessage(message: Constants.shared.strings.followedMessage)
             } else {
@@ -882,6 +1105,12 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func putConversationReaction(conversationId: String, reaction: String) {
         updateReactionsForUI(reaction: reaction, conversationId: conversationId, chatroomId: nil)
+        
+        LMChatMain.analytics?.trackEvent(for: .reactionAdded, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         let request = PutReactionRequest.builder()
             .conversationId(conversationId)
             .reaction(reaction)
@@ -903,8 +1132,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 .hasReactions(!reactions.isEmpty)
                 .build()
             self.chatroomViewData = updatedChatroom
-            let message = chatroomDataToConversation(updatedChatroom)
-            insertOrUpdateConversationIntoList(message)
+            if let message = chatroomDataToConversation(updatedChatroom) {
+                insertOrUpdateConversationIntoList(message)
+            }
             delegate?.reloadChatMessageList()
             return
         }
@@ -1011,8 +1241,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .hasReactions(!reactions.isEmpty)
             .build()
         self.chatroomViewData = updatedChatroom
-        let message = chatroomDataToConversation(updatedChatroom)
-        insertOrUpdateConversationIntoList(message)
+        if let message = chatroomDataToConversation(updatedChatroom) {
+            insertOrUpdateConversationIntoList(message)
+        }
         delegate?.reloadChatMessageList()
     }
     
@@ -1021,6 +1252,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     private func onDeleteConversation(ids: [String]) {
+        
+        LMChatMain.analytics?.trackEvent(for: .messageDeleted, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            "message_ids": ids.joined(separator: ", ")])
+        
         for conId in ids {
             if let index = chatMessages.firstIndex(where: {$0.id == conId}) {
                 let conversation = chatMessages[index]
@@ -1039,6 +1275,11 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     }
     
     func editConversation(conversationId: String) {
+        
+        LMChatMain.analytics?.trackEvent(for: .messageEdited, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         self.editChatMessage = chatMessages.first(where: {$0.id == conversationId})
     }
     
@@ -1053,12 +1294,17 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     func setAsCurrentTopic(conversationId: String) {
         chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
         delegate?.updateTopicBar()
+        
+        LMChatMain.analytics?.trackEvent(for: .setChatroomTopic, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            LMChatAnalyticsKeys.messageId.rawValue: conversationId])
+        
         let request = SetChatroomTopicRequest.builder()
             .chatroomId(chatroomId)
             .conversationId(conversationId)
             .build()
-        LMChatClient.shared.setChatroomTopic(request: request) {[weak self] response in
-            guard let self, response.success else {
+        LMChatClient.shared.setChatroomTopic(request: request) { response in
+            guard response.success else {
                 return
             }
         }
@@ -1066,16 +1312,16 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func copyConversation(conversationIds: [String]) {
         
+        LMChatMain.analytics?.trackEvent(for: .messageCopied, eventProperties: [
+            LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+            "messages_id": conversationIds.joined(separator: ", ")])
+        
         var copiedString: String = ""
         for convId in conversationIds {
             guard let chatMessage = self.chatMessages.first(where: {$0.id == convId}), !chatMessage.answer.isEmpty else {return}
             if conversationIds.count > 1 {
                 let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
                 copiedString = copiedString  + "[\(chatMessage.date ?? ""), \(chatMessage.createdAt ?? "")] \(chatMessage.member?.name ?? ""): \(answer.string) \n"
-                //        else if let chatRoom = chatMessage.chatRoom {
-                //            let chatroomTitle =  GetTaggedNames.shared.getTaggedAttributedNames(with: chatRoom.title, andPrefix: "", forTextView: true)
-                //            copiedString = "[\(chatRoom.date ?? ""), \(chatRoom.createdAt ?? "")] \(chatRoom.member?.name ?? ""): \(chatroomTitle?.string ?? "") "
-                //        }
             } else {
                 let answer =  GetAttributedTextWithRoutes.getAttributedText(from: chatMessage.answer.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: GiphyAPIConfiguration.gifMessage, with: ""))
                 copiedString = copiedString  + "\(answer.string)"
@@ -1084,14 +1330,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
-    }
-    
-    func fetchReplyConversationOnClick(repliedConversationId: String) {
-        if let conversation = chatMessages.first(where: {$0.id == repliedConversationId}) {
-            messagesList
-        } else if let chatroomViewData {
-            fetchIntermediateConversations(chatroom: chatroomViewData, conversationId: repliedConversationId)
-        }
     }
     
     func postMessageWithAttachment() {

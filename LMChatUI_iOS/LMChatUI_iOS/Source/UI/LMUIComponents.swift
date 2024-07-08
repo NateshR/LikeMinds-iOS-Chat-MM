@@ -57,6 +57,7 @@ public struct LMUIComponents {
     public var attachmentRetryView: LMChatAttachmentUploadRetryView.Type = LMChatAttachmentUploadRetryView.self
     public var messageReactionView: LMChatMessageReactionsView.Type = LMChatMessageReactionsView.self
     public var messageReplyView: LMChatMessageReplyPreview.Type = LMChatMessageReplyPreview.self
+    public var bottomLinkPreview: LMChatBottomMessageLinkPreview.Type = LMChatBottomMessageLinkPreview.self
     public var chatProfileView: LMChatProfileView.Type = LMChatProfileView.self
     public var galleryContentView: LMChatGalleryContentView.Type = LMChatGalleryContentView.self
     public var galleryView: LMChatMessageGallaryView.Type = LMChatMessageGallaryView.self
@@ -75,4 +76,5 @@ public struct LMUIComponents {
     
     public var searchMessageCell: LMChatSearchMessageCell.Type = LMChatSearchMessageCell.self
     public var searchChatroomCell: LMChatSearchChatroomCell.Type = LMChatSearchChatroomCell.self
+    public var approveRejectRequestView: LMChatApproveRejectView.Type = LMChatApproveRejectView.self
 }

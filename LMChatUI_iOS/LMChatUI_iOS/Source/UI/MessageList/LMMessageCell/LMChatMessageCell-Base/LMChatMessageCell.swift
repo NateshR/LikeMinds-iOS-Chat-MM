@@ -8,7 +8,7 @@
 import Foundation
 import Kingfisher
 
-public protocol LMChatMessageCellDelegate: AnyObject {
+public protocol LMChatMessageCellDelegate: LMChatMessageBaseProtocol {
     func onClickReactionOfMessage(reaction: String, indexPath: IndexPath?)
     func onClickAttachmentOfMessage(url: String, indexPath: IndexPath?)
     func onClickGalleryOfMessage(attachmentIndex: Int, indexPath: IndexPath?)
@@ -93,6 +93,8 @@ open class LMChatMessageCell: LMTableViewCell {
         containerView.addSubview(chatMessageView)
         containerView.addSubview(retryContainerStackView)
         contentView.addSubview(selectedButton)
+        chatMessageView.textLabel.canPerformActionRestriction = true
+        chatMessageView.textLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tappedTextView)))
     }
     
     // MARK: setupLayouts
@@ -100,12 +102,12 @@ open class LMChatMessageCell: LMTableViewCell {
         super.setupLayouts()
         contentView.pinSubView(subView: containerView)
         NSLayoutConstraint.activate([
-            retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            retryContainerStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
             retryContainerStackView.centerYAnchor.constraint(equalTo: chatMessageView.centerYAnchor),
             
-            chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 5),
-            chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            chatMessageView.trailingAnchor.constraint(equalTo: retryContainerStackView.leadingAnchor, constant: -8),
+            chatMessageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            chatMessageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            chatMessageView.trailingAnchor.constraint(equalTo: retryContainerStackView.leadingAnchor),
             chatMessageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
         contentView.pinSubView(subView: selectedButton)
@@ -121,6 +123,26 @@ open class LMChatMessageCell: LMTableViewCell {
         containerView.backgroundColor = Appearance.shared.colors.clear
     }
     
+    @objc
+    open func tappedTextView(tapGesture: UITapGestureRecognizer) {
+        guard let textView = tapGesture.view as? LMTextView,
+              let position = textView.closestPosition(to: tapGesture.location(in: textView)),
+              let text = textView.textStyling(at: position, in: .forward) else { return }
+        if let url = text[.link] as? URL {
+            didTapURL(url: url)
+        } else if let route = text[.route] as? String {
+            didTapRoute(route: route)
+        }
+    }
+    
+    open func didTapRoute(route: String) {
+        delegate?.didTapRoute(route: route)
+    }
+    
+    open func didTapURL(url: URL) {
+        delegate?.didTapURL(url: url)
+    }
+    
     
     // MARK: configure
     open func setData(with data: ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
@@ -131,6 +153,10 @@ open class LMChatMessageCell: LMTableViewCell {
         chatMessageView.delegate = self
         if data.message?.isIncoming == false {
             retryButton.isHidden = data.message?.messageStatus != .failed
+        }
+        if data.message?.hideLeftProfileImage == true {
+            chatMessageView.chatProfileImageView.isHidden = true
+            chatMessageView.usernameLabel.isHidden = true
         }
     }
     

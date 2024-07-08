@@ -103,17 +103,7 @@ public final class LMChatReportViewModel {
                 return
             }
             
-            let title = "\(contentType.rawValue) is reported for review"
-            let message = "Our team will look into your feedback and will take appropriate action on this \(contentType.rawValue)"
-            DispatchQueue.main.async {
-                let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-                
-                alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                    self?.delegate?.popViewController(animated: true)
-                })
-                (self.delegate as? UIViewController)?.present(alert, animated: true)
-            }
-            
+            self.delegate?.didReceivedReportContent(reason: reasonName)
         }
     }
 

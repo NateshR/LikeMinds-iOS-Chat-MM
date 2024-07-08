@@ -8,15 +8,24 @@
 import UIKit
 import LikeMindsChatCore
 import LikeMindsChatUI
+import FirebaseMessaging
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 //        LMUIComponents.shared.homeFeedChatroomView = CustomChatroomView.self
 //        LMUIComponents.shared.homeFeedExploreTabView = CustomHomeFeedExploreTabView.self
 //        LMUIComponents.shared.messageBubbleView = CustomMessageBubbleView.self
 //        LMUIComponents.shared.exploreChatroomView = CustomExploreChatroomView.self
 //        LMUIComponents.shared.messageReplyView = CustomReplyPreview.self
+//        LMUIComponents.shared.participantView = CustomParticipantItemView.self
+//        LMUIComponents.shared.approveRejectRequestView = CustomDMApproveRejectView.self
+//        LMCoreComponents.shared.dmMemberListScreen = CustomMemberListViewController.self
+//        LMCoreComponents.shared.dmChatFeedScreen = CustomDMFeedViewController.self
+        FirebaseApp.configure()
+        Messaging.messaging().delegate = self
         registerForPushNotifications(application: application)
         return true
     }
@@ -34,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-
+    
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
@@ -47,11 +56,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         LMChatMain.shared.didReceieveNotification(userInfo: response.notification.request.content.userInfo)
     }
     
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
     
     private func registerForPushNotifications(application: UIApplication) {
+        
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) {
             (granted, error) in
             guard granted else { return }
@@ -63,9 +75,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     
 }
 
-//extension AppDelegate: MessagingDelegate {
-//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-//        print("Firebase registration token: \(String(describing: fcmToken))")
-//    }
-//    
-//}
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("Firebase registration token: \(String(describing: fcmToken))")
+    }
+    
+}

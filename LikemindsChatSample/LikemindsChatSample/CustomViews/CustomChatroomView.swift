@@ -14,6 +14,9 @@ class CustomChatroomView: LMChatHomeFeedChatroomView {
         chatroomImageView.cornerRadius(with: 8)
         self.backgroundColor = .giphyYellow
         self.chatroomCountBadgeLabel.backgroundColor = .red
+        chatroomNameLabel.textColor = .systemTeal
+        lastMessageLabel.textColor = .systemGreen
+        muteIconImageView.tintColor = .black
     }
     
     override func setupLayouts() {

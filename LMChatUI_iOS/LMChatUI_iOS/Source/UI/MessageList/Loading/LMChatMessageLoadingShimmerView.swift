@@ -28,11 +28,12 @@ open class LMChatMessageLoadingShimmerView: LMView {
     
     open override func setupViews() {
         super.setupViews()
-        addSubviewWithDefaultConstraints(stackView)
+        addSubview(stackView)
     }
     
     open override func setupLayouts() {
         super.setupLayouts()
+        pinSubView(subView: stackView, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
         for _ in 0..<2 {
             let shimmer = LMUIComponents.shared.messageLoading.init()
             shimmer.translatesAutoresizingMaskIntoConstraints = false

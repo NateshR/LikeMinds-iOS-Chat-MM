@@ -12,6 +12,15 @@ protocol BaseContentModel {}
 public protocol LMHomFeedListViewDelegate: AnyObject {
     func didTapOnCell(indexPath: IndexPath)
     func fetchMoreData()
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
+    func scrollViewDidScroll(_ scrollView: UIScrollView)
+}
+
+public extension LMHomFeedListViewDelegate {
+    func didTapOnCell(indexPath: IndexPath) {}
+    func fetchMoreData() {}
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {}
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {}
 }
 
 public enum HomeFeedSection: String {
@@ -105,10 +114,10 @@ open class LMChatHomeFeedListView: LMView {
     
     public func updateChatroomsData(chatroomData: [LMChatHomeFeedChatroomCell.ContentModel]) {
         if let index = tableSections.firstIndex(where: {$0.sectionType == .chatrooms}) {
-            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2)
+            tableSections[index] = .init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 1)
         } else {
             if !chatroomData.isEmpty {
-                tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 2))
+                tableSections.append(.init(data: chatroomData, sectionType: .chatrooms, sectionOrder: 1))
             }
         }
         if chatroomData.isEmpty {
@@ -173,6 +182,13 @@ extension LMChatHomeFeedListView: UITableViewDataSource, UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate?.didTapOnCell(indexPath: indexPath)
+    }
+    
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.delegate?.scrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
+    }
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        self.delegate?.scrollViewDidScroll(scrollView)
     }
 }
 
