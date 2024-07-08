@@ -57,6 +57,7 @@ open class LMChatDMFeedViewController: LMViewController {
             DeepLinkManager.sharedInstance.routeToScreen(routeUrl: deeplinkUrl, fromNotification: false, fromDeeplink: true)
         }
         viewModel?.getInitialData()
+        profileIcon.kf.setImage(with: URL(string: viewModel?.memberProfile?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.memberProfile?.name?.components(separatedBy: " ").first ?? ""))
     }
     
     // MARK: setupViews
@@ -64,6 +65,7 @@ open class LMChatDMFeedViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
+        setupRightItemBars()
     }
     
     // MARK: setupLayouts

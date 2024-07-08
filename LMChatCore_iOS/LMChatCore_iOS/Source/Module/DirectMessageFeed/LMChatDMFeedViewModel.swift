@@ -37,6 +37,7 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
     }
     
     func getInitialData() {
+        fetchUserProfile()
         getChatrooms()
         syncChatroom()
         checkDMStatus()
@@ -47,7 +48,6 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
     }
     
     func getChatrooms() {
-        fetchUserProfile()
         LMChatClient.shared.getDMChatrooms(withObserver: self)
         LMChatClient.shared.observeLiveDMFeed(withCommunityId: SDKPreferences.shared.getCommunityId() ?? "")
     }

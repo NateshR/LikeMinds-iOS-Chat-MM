@@ -52,6 +52,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     var dmStatus: CheckDMStatusResponse?
     var showList: Int?
     var loggedInUserData: User?
+    var isMarkReadProgress: Bool = false
     
     init(delegate: LMMessageListViewModelProtocol?, chatroomExtra: ChatroomDetailsExtra) {
         self.delegate = delegate
@@ -534,10 +535,14 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     }
     
     func markChatroomAsRead() {
+        guard !isMarkReadProgress else { return }
+        self.isMarkReadProgress = true
         let request = MarkReadChatroomRequest.builder()
             .chatroomId(chatroomId)
             .build()
-        LMChatClient.shared.markReadChatroom(request: request) {_ in }
+        LMChatClient.shared.markReadChatroom(request: request) { [weak self] _ in
+            self?.isMarkReadProgress = false
+        }
     }
     
     func fetchChatroomActions() {
@@ -839,6 +844,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         }
         if !conversations.isEmpty {
             delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
         }
     }
     
@@ -849,6 +855,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         }
         if !conversations.isEmpty {
             delegate?.reloadChatMessageList()
+            self.markChatroomAsRead()
         }
     }
     
@@ -865,6 +872,7 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
         }
         if !conversations.isEmpty {
             delegate?.scrollToBottom(forceToBottom: false)
+            self.markChatroomAsRead()
         }
     }
     
@@ -952,7 +960,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             savePostedConversation(requestList: requestFiles, conversation: conversation)
             followUnfollow()
         }
-        markChatroomAsRead()
     }
     
     func getUploadFileRequestList(fileUrls: [LMChatAttachmentMediaData], conversationId: String, chatroomId: String) -> [LMChatAttachmentUploadRequest] {
