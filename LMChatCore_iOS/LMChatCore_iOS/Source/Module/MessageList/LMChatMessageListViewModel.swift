@@ -62,7 +62,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     
     
     public static func createModule(withChatroomId chatroomId: String, conversationId: String?) throws -> LMChatMessageListViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.messageListScreen.init()
         let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationId, nil))
@@ -569,7 +569,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             .build()
         LMChatClient.shared.muteChatroom(request: request) {[weak self] response in
             guard response.success else { return }
-            LMChatMain.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: self?.chatroomViewData?.header ?? ""])
+            LMChatCore.analytics?.trackEvent(for: value ? .chatroomMuted : .chatroomUnmuted, eventProperties: [LMChatAnalyticsKeys.chatroomName.rawValue: self?.chatroomViewData?.header ?? ""])
             if value {
                 self?.delegate?.showToastMessage(message: String(format: Constants.shared.strings.muteUnmuteMessage, "muted"))
             } else {
@@ -722,14 +722,14 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let uuid = directMessageUserUUID()
         switch requestState {
         case .initiated:
-            LMChatMain.analytics?.trackEvent(for: .dmRequestSent,
+            LMChatCore.analytics?.trackEvent(for: .dmRequestSent,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.receiver.rawValue: uuid,
                                                 LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
                                                 LMChatAnalyticsKeys.communityName.rawValue: getCommunityName(),
                                                 LMChatAnalyticsKeys.source.rawValue: "DM cta"])
         case .approved:
-            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+            LMChatCore.analytics?.trackEvent(for: .dmRequestResponded,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.senderId.rawValue: uuid,
                                                 LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
@@ -737,7 +737,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
                                                 LMChatAnalyticsKeys.status.rawValue: "Approved"])
         case .rejected:
             let reported = reason != nil
-            LMChatMain.analytics?.trackEvent(for: .dmRequestResponded,
+            LMChatCore.analytics?.trackEvent(for: .dmRequestResponded,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.senderId.rawValue: uuid,
                                                 LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
@@ -753,13 +753,13 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     func trackEventDMBlockUser(status: BlockMemberRequest.BlockState, source: String?) {
         switch status {
         case .block:
-            LMChatMain.analytics?.trackEvent(for: .dmBlock,
+            LMChatCore.analytics?.trackEvent(for: .dmBlock,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.blockedUser.rawValue: directMessageUserUUID(),
                                                 LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
                                                 LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()])
         case .unblock:
-            LMChatMain.analytics?.trackEvent(for: .dmUnblock,
+            LMChatCore.analytics?.trackEvent(for: .dmUnblock,
                                              eventProperties: [
                                                 LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
                                                 LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
@@ -772,7 +772,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     
     func trackEventDMSent() {
         guard isChatroomType(type: .directMessage) == true else { return }
-        LMChatMain.analytics?.trackEvent(for: .dmSent,
+        LMChatCore.analytics?.trackEvent(for: .dmSent,
                                          eventProperties: [
                                             LMChatAnalyticsKeys.receiver.rawValue: directMessageUserUUID(),
                                             LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
@@ -1089,7 +1089,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 return
             }
             
-            LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
+            LMChatCore.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
             
             if status {
                 self?.delegate?.showToastMessage(message: Constants.shared.strings.followedMessage)
@@ -1105,7 +1105,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     func putConversationReaction(conversationId: String, reaction: String) {
         updateReactionsForUI(reaction: reaction, conversationId: conversationId, chatroomId: nil)
         
-        LMChatMain.analytics?.trackEvent(for: .reactionAdded, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .reactionAdded, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
             LMChatAnalyticsKeys.messageId.rawValue: conversationId])
@@ -1252,7 +1252,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     private func onDeleteConversation(ids: [String]) {
         
-        LMChatMain.analytics?.trackEvent(for: .messageDeleted, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .messageDeleted, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             "message_ids": ids.joined(separator: ", ")])
         
@@ -1275,7 +1275,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func editConversation(conversationId: String) {
         
-        LMChatMain.analytics?.trackEvent(for: .messageEdited, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .messageEdited, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             LMChatAnalyticsKeys.messageId.rawValue: conversationId])
         
@@ -1294,7 +1294,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         chatroomTopic = chatMessages.first(where: {$0.id == conversationId})
         delegate?.updateTopicBar()
         
-        LMChatMain.analytics?.trackEvent(for: .setChatroomTopic, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .setChatroomTopic, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             LMChatAnalyticsKeys.messageId.rawValue: conversationId])
         
@@ -1311,7 +1311,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
     func copyConversation(conversationIds: [String]) {
         
-        LMChatMain.analytics?.trackEvent(for: .messageCopied, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .messageCopied, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             "messages_id": conversationIds.joined(separator: ", ")])
         

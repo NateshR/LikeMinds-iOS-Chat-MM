@@ -45,7 +45,7 @@ public final class LMChatReportViewModel {
     }
     
     public static func createModule(reportContentId: ReportContentID) throws -> LMChatReportViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.reportScreen.init()
         let viewmodel = Self.init(delegate: viewcontroller, reportContentId: reportContentId)

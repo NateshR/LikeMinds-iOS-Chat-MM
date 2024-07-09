@@ -53,7 +53,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        LMChatMain.shared.didReceieveNotification(userInfo: response.notification.request.content.userInfo)
+        LMChatCore.shared.didReceieveNotification(userInfo: response.notification.request.content.userInfo)
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

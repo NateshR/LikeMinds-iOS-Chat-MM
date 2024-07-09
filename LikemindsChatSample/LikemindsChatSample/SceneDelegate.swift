@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let _ = (scene as? UIWindowScene) else { return }
         
         if let url = connectionOptions.urlContexts.first?.url {
-            LMChatMain.shared.parseDeepLink(routeUrl: url.absoluteString)
+            LMChatCore.shared.parseDeepLink(routeUrl: url.absoluteString)
         }
     }
 
@@ -61,7 +61,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             print("path: \(context.url.path)")
             print("components: \(context.url.pathComponents)")
         }
-        LMChatMain.shared.parseDeepLink(routeUrl: url)
+        LMChatCore.shared.parseDeepLink(routeUrl: url)
     }
 
 }

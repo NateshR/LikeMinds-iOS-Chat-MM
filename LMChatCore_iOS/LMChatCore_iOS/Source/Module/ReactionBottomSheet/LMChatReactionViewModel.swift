@@ -38,7 +38,7 @@ final public class LMChatReactionViewModel {
     }
     
     public static func createModule(reactions: [Reaction], selected: String?, conversationId: String?, chatroomId: String?) throws -> LMChatReactionViewController? {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let vc = LMCoreComponents.shared.reactionListScreen.init()
         
@@ -103,7 +103,7 @@ final public class LMChatReactionViewModel {
     
     func reactionListOpen() {
         // TODO: Analytics Missing Community ID
-        LMChatMain.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [
             LMChatAnalyticsKeys.messageId.rawValue: conversationId,
             LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
@@ -115,7 +115,7 @@ final public class LMChatReactionViewModel {
             return
         }
         
-        LMChatMain.analytics?.trackEvent(for: .reactionRemoved, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: .reactionRemoved, eventProperties: [
             LMChatAnalyticsKeys.messageId.rawValue: conversationId,
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId])
         

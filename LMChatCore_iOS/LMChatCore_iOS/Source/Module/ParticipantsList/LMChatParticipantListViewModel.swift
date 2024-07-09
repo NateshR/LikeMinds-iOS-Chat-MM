@@ -42,7 +42,7 @@ public class LMChatParticipantListViewModel {
     }
     
     public static func createModule(withChatroomId chatroomId: String, isSecretChatroom isSecret: Bool = false) throws -> LMChatParticipantListViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         let viewController = LMCoreComponents.shared.participantListScreen.init()
         viewController.viewModel = LMChatParticipantListViewModel(viewController, chatroomId: chatroomId, isSecret: isSecret)
         return viewController

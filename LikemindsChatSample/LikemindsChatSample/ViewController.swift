@@ -90,9 +90,9 @@ class ViewController: LMViewController {
     }
     
     func callInitiateApi(userId: String, username: String, apiKey: String) {
-        LMChatMain.shared.configure(apiKey: apiKey)
+        LMChatCore.shared.configure(apiKey: apiKey)
         self.showHideLoaderView(isShow: true, backgroundColor: .clear)
-        try? LMChatMain.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
+        try? LMChatCore.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
             guard success else {
                 self?.showAlert(message: error ?? "")
                 return
