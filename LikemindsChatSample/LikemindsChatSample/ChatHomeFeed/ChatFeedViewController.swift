@@ -201,12 +201,6 @@ extension ChatFeedViewController: ChatFeedViewModelProtocol {
                     }
                 }
             }
-        } else {
-//            if let count = viewModel?.dmTab?.unreadDMCount, count > 0 {
-//                segmentControl.setTitle("DMs \(count)", forSegmentAt: 1)
-//            } else {
-//                segmentControl.setTitle("DMs 5", forSegmentAt: 1)
-//            }
         }
     }
 }
