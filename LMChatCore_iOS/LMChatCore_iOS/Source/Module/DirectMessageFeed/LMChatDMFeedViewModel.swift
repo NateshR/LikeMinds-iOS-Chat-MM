@@ -29,7 +29,7 @@ public class LMChatDMFeedViewModel: LMChatBaseViewModel {
     }
     
     public static func createModule() throws -> LMChatDMFeedViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.dmChatFeedScreen.init()
         viewController.viewModel = LMChatDMFeedViewModel(viewController)

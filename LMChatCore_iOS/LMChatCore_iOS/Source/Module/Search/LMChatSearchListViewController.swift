@@ -83,7 +83,7 @@ public class LMChatSearchListViewController: LMViewController {
     open override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         
-        LMChatMain.analytics?.trackEvent(for: .chatroomSearchClosed, eventProperties: [:])
+        LMChatCore.analytics?.trackEvent(for: .chatroomSearchClosed, eventProperties: [:])
     }
 }
 
@@ -135,10 +135,10 @@ extension LMChatSearchListViewController: UITableViewDataSource, UITableViewDele
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchChatroomCell.ContentModel {
-            LMChatMain.analytics?.trackEvent(for: .chatroomSearched, eventProperties: viewmodel?.trackEventBasicParams(chatroomId: cell.chatroomID) ?? [:])
+            LMChatCore.analytics?.trackEvent(for: .chatroomSearched, eventProperties: viewmodel?.trackEventBasicParams(chatroomId: cell.chatroomID) ?? [:])
             NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: nil), from: self, params: nil)
         } else if let cell = searchResults[indexPath.section].data[indexPath.row] as? LMChatSearchMessageCell.ContentModel {
-            LMChatMain.analytics?.trackEvent(for: .messageSearched, eventProperties: viewmodel?.trackEventBasicParams(chatroomId: cell.chatroomID) ?? [:])
+            LMChatCore.analytics?.trackEvent(for: .messageSearched, eventProperties: viewmodel?.trackEventBasicParams(chatroomId: cell.chatroomID) ?? [:])
             NavigationScreen.shared.perform(.chatroom(chatroomId: cell.chatroomID, conversationID: cell.messageID), from: self, params: nil)
         }
     }
@@ -169,7 +169,7 @@ extension LMChatSearchListViewController: UISearchBarDelegate {
     }
     
     open func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        LMChatMain.analytics?.trackEvent(for: .searchCrossIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
+        LMChatCore.analytics?.trackEvent(for: .searchCrossIconClicked, eventProperties: [LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.homeFeed.rawValue])
         resetSearchData()
     }
     

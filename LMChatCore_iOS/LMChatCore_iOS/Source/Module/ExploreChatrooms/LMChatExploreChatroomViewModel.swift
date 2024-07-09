@@ -51,7 +51,7 @@ public final class LMChatExploreChatroomViewModel {
     }
     
     public static func createModule() throws -> LMExploreChatroomListView {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.exploreChatroomListScreen.init()
         let viewmodel = LMChatExploreChatroomViewModel(delegate: viewController)
@@ -113,7 +113,7 @@ public final class LMChatExploreChatroomViewModel {
                 return
             }
         }
-        LMChatMain.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [
+        LMChatCore.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId(),
             LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.exploreFeed])

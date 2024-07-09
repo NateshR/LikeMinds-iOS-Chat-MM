@@ -1,5 +1,5 @@
 //
-//  LMChatMain.swift
+//  LMChatCore.swift
 //  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 17/02/24.
@@ -9,11 +9,11 @@ import Foundation
 import LikeMindsChat
 import FirebaseMessaging
 
-public class LMChatMain {
+public class LMChatCore {
     
     private init() {}
     
-    public static var shared: LMChatMain = .init()
+    public static var shared: LMChatCore = .init()
     public static var analytics: LMChatAnalyticsProtocol? = LMChatAnalyticsTracker()
     static private(set) var isInitialized: Bool = false
     var apiKey: String = ""

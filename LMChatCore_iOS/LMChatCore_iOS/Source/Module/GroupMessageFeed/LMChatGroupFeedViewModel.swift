@@ -38,7 +38,7 @@ public class LMChatGroupFeedViewModel: LMChatBaseViewModel {
     }
     
     public static func createModule() throws -> LMChatGroupFeedViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.groupChatFeedScreen.init()
         viewController.viewModel = LMChatGroupFeedViewModel(viewController)

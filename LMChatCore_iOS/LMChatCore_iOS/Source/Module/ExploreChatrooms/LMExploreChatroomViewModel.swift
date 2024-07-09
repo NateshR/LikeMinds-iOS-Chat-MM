@@ -12,7 +12,7 @@ import LikeMindsChat
 
 public class LMExploreChatroomViewModel {
     public static func createModule() throws -> LMExploreChatroomViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewController = LMCoreComponents.shared.exploreChatroomScreen.init()
         viewController.viewModel = LMExploreChatroomViewModel()

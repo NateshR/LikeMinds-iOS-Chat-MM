@@ -52,7 +52,7 @@ final public class LMChatSearchListViewModel: LMChatBaseViewModel {
     }
     
     public static func createModule() throws -> LMChatSearchListViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.searchListScreen.init()
         let viewmodel = LMChatSearchListViewModel(delegate: viewcontroller)

@@ -43,7 +43,7 @@ public class LMChatMemberListViewModel {
     }
     
     public static func createModule(showList: Int?) throws -> LMChatMemberListViewController {
-        guard LMChatMain.isInitialized else { throw LMChatError.chatNotInitialized }
+        guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         let viewController = LMCoreComponents.shared.dmMemberListScreen.init()
         viewController.viewModel = LMChatMemberListViewModel(viewController, showList: showList)
         return viewController
