@@ -36,7 +36,6 @@ class ViewController: LMViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         isSavedData()
-        self.apiKeyField?.text = "17ab90f3-6cba-4dd9-aeea-979a081081b7"
     }
     
     func moveToNextScreen() {
