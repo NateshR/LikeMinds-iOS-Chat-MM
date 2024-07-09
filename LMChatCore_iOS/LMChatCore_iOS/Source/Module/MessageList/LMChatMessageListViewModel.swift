@@ -107,14 +107,13 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     
     func loggedInUserTag() {
         guard let user = loggedInUser() else { return }
-//        loggedInUserTagValue = "<<\(user.name ?? "")|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
-//        loggedInUserReplaceTagValue = "<<You|route://user_profile/\(user.sdkClientInfo?.uuid ?? "")>>"
         loggedInUserTagValue = "<<\(user.name ?? "")|route://member_profile/\(user.sdkClientInfo?.user ?? 0)?member_id=\(user.sdkClientInfo?.user ?? 0)&community_id=\(SDKPreferences.shared.getCommunityId() ?? "")>>"
         loggedInUserReplaceTagValue = "<<You|route://member_profile/\(user.sdkClientInfo?.user ?? 0)?member_id=\(user.sdkClientInfo?.user ?? 0)&community_id=\(SDKPreferences.shared.getCommunityId() ?? "")>>"
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+        LMChatClient.shared.observeLiveConversation(withChatroomId: nil)
     }
     
     func getInitialData() {

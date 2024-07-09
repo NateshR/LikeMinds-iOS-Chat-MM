@@ -85,8 +85,8 @@ open class LMChatApproveRejectView: LMView {
         super.setupViews()
         addSubview(stackContainerView)
         stackContainerView.addArrangedSubview(titleLable)
-        stackActionsContainerView.addArrangedSubview(approveButton)
         stackActionsContainerView.addArrangedSubview(rejectButton)
+        stackActionsContainerView.addArrangedSubview(approveButton)
         stackContainerView.addArrangedSubview(stackActionsContainerView)
     }
     
