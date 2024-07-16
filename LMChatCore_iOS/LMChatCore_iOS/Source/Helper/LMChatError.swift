@@ -16,11 +16,16 @@ public enum LMChatError: Error {
     
     case routeError(error: String?)
     
+    case notificationRegisterationFailed(error: String?)
+    case logoutFailed(error: String?)
+    
     public var localizedDescription: String {
         switch self {
         case .apiInitializationFailed(let error),
                 .reportFailed(let error),
-                .routeError(let error):
+                .routeError(let error),
+                .notificationRegisterationFailed(let error),
+                .logoutFailed(let error):
             return error ?? LMStringConstant.shared.genericErrorMessage
         case .appAccessFalse:
             return "User does not have right access for app usage"

@@ -90,12 +90,7 @@ open class LMChatAudioCarouselCell: LMCollectionViewCell {
     
     // MARK: setData
     open func setData(with data: ContentModel) {
-        if self.isSelected {
-            imageView.borderColor(withBorderWidth: 2, with: .green)
-        } else {
-            imageView.borderColor(withBorderWidth: 2, with: .clear)
-        }
-        guard let url = data.fileUrl else { return }
+        imageView.borderColor(withBorderWidth: 2, with: isSelected ? .green : .clear)
     }
     
     @objc private func imageClicked(_ gesture: UITapGestureRecognizer) {

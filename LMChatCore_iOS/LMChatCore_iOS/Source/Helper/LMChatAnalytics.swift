@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: LMFeedAnalyticsProtocol
+// MARK: LMChatAnalyticsProtocol
 public protocol LMChatAnalyticsProtocol {
     func trackEvent(for eventName: LMChatAnalyticsEventName, eventProperties: [String: AnyHashable])
 }

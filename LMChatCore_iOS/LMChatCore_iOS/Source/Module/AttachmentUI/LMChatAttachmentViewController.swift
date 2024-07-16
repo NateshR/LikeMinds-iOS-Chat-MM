@@ -376,8 +376,7 @@ extension LMChatAttachmentViewController: UICollectionViewDataSource, UICollecti
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        if let data = viewModel?.mediaCellData[indexPath.row],
-           let cell = collectionView.dequeueReusableCell(with: LMChatMediaCarouselCell.self, for: indexPath) {
+        if let data = viewModel?.mediaCellData[indexPath.row] {
             setDataToView(data)
         }
     }

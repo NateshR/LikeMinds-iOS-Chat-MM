@@ -9,6 +9,7 @@ import UIKit
 import LikeMindsChat
 import LikeMindsChatUI
 import LikeMindsChatCore
+import FirebaseMessaging
 
 extension UIViewController {
     var window: UIWindow? {
@@ -32,7 +33,6 @@ class ViewController: LMViewController {
         let main : UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         return main.instantiateViewController(withIdentifier: "LoginViewController") as! ViewController
     }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         isSavedData()
@@ -46,20 +46,12 @@ class ViewController: LMViewController {
         self.window?.rootViewController = navigation
     }
     
-    // MARK: setupViews
-    open override func setupViews() {
-    }
-    
-    // MARK: setupLayouts
-    open override func setupLayouts() {
-    }
-    
     @IBAction func loginAsCMButtonClicked(_ sender: UIButton) {
     }
     
     @IBAction func loginAsMemberButtonClicked(_ sender: UIButton) {
     }
-
+    
     @IBAction func loginButtonClicked(_ sender: UIButton) {
         guard let apiKey = apiKeyField?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !apiKey.isEmpty,
               let userId = userIdField?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !userId.isEmpty,
@@ -89,15 +81,17 @@ class ViewController: LMViewController {
     }
     
     func callInitiateApi(userId: String, username: String, apiKey: String) {
-        LMChatCore.shared.configure(apiKey: apiKey)
         self.showHideLoaderView(isShow: true, backgroundColor: .clear)
-        try? LMChatCore.shared.initiateUser(username: username, userId: userId, deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "") {[weak self] success, error in
-            guard success else {
-                self?.showAlert(message: error ?? "")
-                return
+        
+        LMChatCore.shared.showChat(apiKey:apiKey,  username: username, uuid: userId){[weak self] result in
+            switch result {
+            case .success:
+                self?.moveToNextScreen()
+            case .failure(let error):
+                self?.showAlert(message: error.localizedDescription)
             }
-            self?.moveToNextScreen()
         }
+        
     }
     
     func showAlert(message: String) {
@@ -105,6 +99,4 @@ class ViewController: LMViewController {
         alert.addAction(UIAlertAction(title: "Ok", style: .cancel))
         present(alert, animated: true)
     }
- 
 }
-

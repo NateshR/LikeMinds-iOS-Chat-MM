@@ -56,8 +56,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for context in URLContexts {
             print("url: \(context.url.absoluteURL)")
             url = context.url.absoluteString
-            print("scheme: \(context.url.scheme)")
-            print("host: \(context.url.host)")
+            print("scheme: \(String(describing: context.url.scheme))")
+            print("host: \(String(describing: context.url.host))")
             print("path: \(context.url.path)")
             print("components: \(context.url.pathComponents)")
         }
