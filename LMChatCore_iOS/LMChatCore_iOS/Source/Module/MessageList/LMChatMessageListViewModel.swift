@@ -879,6 +879,24 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
 
 extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
     
+    func postPollConversation(pollData: LMChatCreatePollDataModel) {
+        let postPollConversationRequest = PostPollConversationRequest.Builder()
+            .chatroomId(self.chatroomId)
+            .text(pollData.pollQuestion)
+            .polls([])
+            .pollType(pollData.isInstantPoll ? 0 : 1)
+            .expiryTime(pollData.expiryTime.millisecondsSince1970)
+            .isAnonymous(pollData.isAnonymous)
+            .allowAddOption(pollData.allowAddOptions)
+            .multipleSelectNo(pollData.selectStateCount)
+            .multipleSelectState(pollData.selectState.rawValue)
+            .build()
+        
+        LMChatClient.shared.postPollConversation(request: postPollConversationRequest) { response in
+            
+        }
+    }
+    
     func postMessage(message: String?,
                      filesUrls: [LMChatAttachmentMediaData]?,
                      shareLink: String?,

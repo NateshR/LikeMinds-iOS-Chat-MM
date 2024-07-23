@@ -63,7 +63,7 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
         self.pollExpiryDate = prefilledData?.expiryTime
     }
     
-    public static func createModule(with pollDelegate: LMChatCreatePollProtocol?, data: LMChatCreatePollDataModel? = nil) throws -> LMChatCreatePollViewController {
+    public static func createModule(withDelegate pollDelegate: LMChatCreatePollViewDelegate?, data: LMChatCreatePollDataModel? = nil) throws -> LMChatCreatePollViewController {
         guard LMChatCore.isInitialized else { throw LMChatError.chatNotInitialized }
         
         let viewcontroller = LMCoreComponents.shared.createPollScreen.init()

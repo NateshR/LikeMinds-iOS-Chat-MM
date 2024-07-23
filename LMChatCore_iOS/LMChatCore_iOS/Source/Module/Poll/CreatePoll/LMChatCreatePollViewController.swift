@@ -8,7 +8,7 @@
 import Foundation
 import LikeMindsChatUI
 
-public protocol LMChatCreatePollProtocol: AnyObject {
+public protocol LMChatCreatePollViewDelegate: AnyObject {
     func updatePollDetails(with data: LMChatCreatePollDataModel)
     func cancelledPollCreation()
 }
@@ -86,7 +86,7 @@ open class LMChatCreatePollViewController: LMViewController {
     
     // MARK: Data Variables
     public var viewmodel: LMChatCreatePollViewModel?
-    public weak var pollDelegate: LMChatCreatePollProtocol?
+    public weak var pollDelegate: LMChatCreatePollViewDelegate?
     
     // MARK: setupViews
     open override func setupViews() {
