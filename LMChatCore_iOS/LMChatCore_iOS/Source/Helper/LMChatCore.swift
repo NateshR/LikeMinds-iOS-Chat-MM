@@ -29,7 +29,7 @@ public class LMChatCore {
     private init() {}
     
     public static var shared: LMChatCore = .init()
-    //    static var analytics: LMFeedAnalyticsProtocol = LMFeedAnalyticsTracker()
+    //    static var analytics: LMChatAnalyticsProtocol = LMChatAnalyticsTracker()
     static private(set) var isInitialized: Bool = false
     // Callbacks for accessToken and refreshToken strategy
     private(set) var coreCallback: LMChatCoreCallback?
