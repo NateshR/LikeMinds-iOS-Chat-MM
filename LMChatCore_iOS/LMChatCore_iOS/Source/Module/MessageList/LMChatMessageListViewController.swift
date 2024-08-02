@@ -1528,20 +1528,23 @@ extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
 extension LMChatMessageListViewController: LMChatPollViewDelegate {
     
     public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
-        
+        do {
+            let viewcontroller = try LMChatPollResultViewModel.createModule(with: messageId, optionList: [], selectedOption: nil)
+            navigationController?.pushViewController(viewcontroller, animated: true)
+        } catch {
+            print("Error in \(#function)")
+        }
     }
     
     public func didTapToVote(for chatroomId: String, messageId: String, optionID: String) {
-        
+        print("Voted!")
     }
     
     public func didTapSubmitVote(for chatroomId: String, messageId: String) {
-        
+        print("Vote submitted!")
     }
     
-    public func editVoteTapped(for chatroomId: String, messageId: String) {
-        
-    }
+    public func editVoteTapped(for chatroomId: String, messageId: String) {}
     
     public func didTapAddOption(for chatroomId: String, messageId: String) {
         

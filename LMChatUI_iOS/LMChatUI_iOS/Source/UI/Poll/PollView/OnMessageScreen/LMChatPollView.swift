@@ -107,7 +107,7 @@ open class LMChatPollView: LMBasePollView {
     open private(set) lazy var topStack: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
-        stack.alignment = .leading
+        stack.alignment = .fill
         stack.distribution = .fill
         stack.spacing = 8
         return stack
@@ -138,6 +138,12 @@ open class LMChatPollView: LMBasePollView {
         return stack
     }()
     
+    open private(set) lazy var topMetaStackSpacer: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.widthAnchor.constraint(greaterThanOrEqualToConstant: 4).isActive = true
+        return view
+    }()
+    
     open private(set) lazy var answerTitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.appTintColor
@@ -157,7 +163,7 @@ open class LMChatPollView: LMBasePollView {
     }()
     
     open private(set) lazy var addOptionButton: LMButton = {
-        let button = LMButton.createButton(with: "Add an Option", image: Constants.shared.images.plusIcon, textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 8, left: 0, bottom: 8, right: 0), imageSpacing: 4)
+        let button = LMButton.createButton(with: "Add an option", image: Constants.shared.images.plusIcon, textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 8, left: 0, bottom: 8, right: 0), imageSpacing: 0)
         button.tintColor = Appearance.shared.colors.black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -192,6 +198,7 @@ open class LMChatPollView: LMBasePollView {
         topStack.addArrangedSubview(pollTypeLabel)
         topStack.addArrangedSubview(topMetaStack)
         topMetaStack.addArrangedSubview(pollImageView)
+        topMetaStack.addArrangedSubview(topMetaStackSpacer)
         topMetaStack.addArrangedSubview(expiryDateLabel)
     }
     
@@ -201,20 +208,20 @@ open class LMChatPollView: LMBasePollView {
         super.setupLayouts()
         
         pinSubView(subView: containerView)
+        let standardMargin: CGFloat = 8
+        questionContainerStackView.addConstraint(top: (containerView.topAnchor, standardMargin),
+                                                 leading: (containerView.leadingAnchor, standardMargin),
+                                                 trailing: (containerView.trailingAnchor, -standardMargin))
         
-        questionContainerStackView.addConstraint(top: (containerView.topAnchor, 16),
-                                                 leading: (containerView.leadingAnchor, 16),
-                                                 trailing: (containerView.trailingAnchor, -16))
-        
-        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, 16),
-                                      leading: (questionContainerStackView.leadingAnchor, -8),
-                                      trailing: (questionContainerStackView.trailingAnchor, 8))
+        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, standardMargin),
+                                      leading: (questionContainerStackView.leadingAnchor, 0),
+                                      trailing: (questionContainerStackView.trailingAnchor, 0))
         
         addOptionButton.addConstraint(leading: (bottomStack.leadingAnchor, 0),
                                       trailing: (bottomStack.trailingAnchor, 0))
         
-        bottomStack.addConstraint(top: (optionStackView.bottomAnchor, 16),
-                                  bottom: (containerView.bottomAnchor, -16),
+        bottomStack.addConstraint(top: (optionStackView.bottomAnchor, standardMargin),
+                                  bottom: (containerView.bottomAnchor, -standardMargin),
                                   leading: (optionStackView.leadingAnchor, 0),
                                   trailing: (optionStackView.trailingAnchor, 0))
         
@@ -301,8 +308,6 @@ open class LMChatPollView: LMBasePollView {
         }
         
         answerTitleLabel.text = data.answerText
-        
-//        let expiryText = "• \(data.expiryDateFormatted)\(data.isShowEditVote ? " •": "")"
         expiryDateLabel.text = data.expiryDateFormatted
         
         addOptionButton.isHidden = !data.allowAddOptions

@@ -144,14 +144,15 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         
         innerContainerView.addConstraint(leading: (outerStackView.leadingAnchor, 0),
                                          trailing: (outerStackView.trailingAnchor, 0))
+        innerContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         
         voteCount.addConstraint(top: (voteCountContainer.topAnchor, 0),
                                 bottom: (voteCountContainer.bottomAnchor, 0),
                                 leading: (voteCountContainer.leadingAnchor, 8))
         voteCount.trailingAnchor.constraint(lessThanOrEqualTo: voteCountContainer.trailingAnchor, constant: -8).isActive = true
         
-        stackView.addConstraint(top: (innerContainerView.topAnchor, 16),
-                                bottom: (innerContainerView.bottomAnchor, -16),
+        stackView.addConstraint(top: (innerContainerView.topAnchor, 8),
+                                bottom: (innerContainerView.bottomAnchor, -8),
                                 leading: (innerContainerView.leadingAnchor, 16))
         
         checkmarkIcon.addConstraint(leading: (stackView.trailingAnchor, 16),
@@ -174,6 +175,8 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         innerContainerView.clipsToBounds = true
         innerContainerView.layer.cornerRadius = 10
         innerContainerView.layer.borderWidth = 1
+        innerContainerView.layer.borderColor = Appearance.shared.colors.pollBorderColor.cgColor
+        innerContainerView.backgroundColor = Appearance.shared.colors.white
     }
     
     

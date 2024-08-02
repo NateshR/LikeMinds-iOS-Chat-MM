@@ -35,6 +35,7 @@ public extension Appearance {
         public var incomingColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
         public var outgoingColor = UIColor(red: 0.88, green: 0.99, blue: 0.98, alpha: 1)
         public var appTintColor: UIColor = .link
+        public var pollBorderColor: UIColor = UIColor(hex: 0x06C3AF, alpha: 0.3)
         
         // UIKit Colors
         public var white: UIColor = .white

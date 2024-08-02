@@ -40,6 +40,32 @@ class DataModelConverter {
             .build()
     }
     
+    func convertPostPollConversation(uuid: String, communityId: String, request: PostPollConversationRequest) -> Conversation {
+        let miliseconds = Int(Date().millisecondsSince1970)
+        let member = LMChatClient.shared.getCurrentMember()?.data?.member
+        return Conversation.Builder()
+            .id(request.temporaryId)
+            .chatroomId(request.chatroomId)
+            .communityId(communityId)
+            .answer(request.text)
+            .state(ConversationState.microPoll.rawValue)
+            .createdEpoch(miliseconds)
+            .memberId(uuid)
+            .member(member)
+            .createdAt(LMCoreTimeUtils.generateCreateAtDate(miliseconds: Double(miliseconds), format: "HH:mm"))
+            .lastSeen(true)
+            .date(LMCoreTimeUtils.generateCreateAtDate(miliseconds: Double(miliseconds)))
+//            .replyConversationId(request.repliedConversationId)
+            .localCreatedEpoch(miliseconds)
+            .temporaryId(request.temporaryId)
+            .isEdited(false)
+//            .attachmentUploaded(false)
+            .expiryTime(request.expiryTime)
+            .conversationStatus(.sending)
+            .polls(request.polls)
+            .build()
+    }
+    
     func convertAttachments(_ fileUrls: [LMChatAttachmentMediaData]?, tempConvId: String?) -> [Attachment]? {
         var i = 0
         return fileUrls?.map({ media in

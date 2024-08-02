@@ -31,7 +31,7 @@ open class LMBasePollView: LMView {
         stack.axis = .vertical
         stack.alignment = .fill
         stack.distribution = .fill
-        stack.spacing = 4
+        stack.spacing = 8
         return stack
     }()
     
@@ -56,7 +56,7 @@ open class LMBasePollView: LMView {
         stack.axis = .vertical
         stack.alignment = .fill
         stack.distribution = .fillEqually
-        stack.spacing = 6
+        stack.spacing = 8
         return stack
     }()
     
@@ -109,6 +109,6 @@ public extension LMBasePollView.Content {
     }
     
     var isShowOption: Bool {
-        !(optionState.lowercased() == "exactly" && optionCount == 1)
+        !(optionState.lowercased() == "exactly" && optionCount < 2)
     }
 }
