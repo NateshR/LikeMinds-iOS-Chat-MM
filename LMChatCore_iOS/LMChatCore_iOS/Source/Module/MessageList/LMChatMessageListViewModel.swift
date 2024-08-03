@@ -444,7 +444,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
                                                      votePercentage: Double(poll.percentage ?? 0),
                                                      isSelected: poll.isSelected ?? false,
                                                      showVoteCount: conversation.toShowResults ?? false,
-                                                     showProgressBar: true,
+                                                     showProgressBar: conversation.toShowResults ?? false,
                                                      showTickButton: poll.isSelected ?? false)
         }
         return options
@@ -822,6 +822,32 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
          LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
          LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
+    
+    func pollOptionSelected(messageId: String, option: String) {
+        guard var poll = chatMessages.first(where: {$0.id == messageId}) else { return }
+        
+        if (poll.expiryTime ?? 0) < Int(Date().millisecondsSince1970) {
+            delegate?.showToastMessage(message: "Poll ended. Vote can not be submitted now.")
+            return
+        } else if poll.polls?.contains(where: { $0.isSelected == true }) == true{
+            return
+        } else if  poll.multipleSelectNum == 1 {
+//            submitPollVote(for: postID, pollID: pollID, options: [option])
+        } else {
+            let multipleSelectState = LMChatPollSelectState(rawValue: poll.multipleSelectState ?? -1)
+            
+//            if let index = poll.userSelectedOptions.firstIndex(of: option) {
+//                poll.userSelectedOptions.remove(at: index)
+//            } else {
+//                poll.userSelectedOptions.append(option)
+//            }
+//            
+//            post.pollAttachment = poll
+//            postDetail = post
+//            
+//            convertToViewData()
+        }
+    }
 }
 
 extension LMChatMessageListViewModel: ConversationClientObserver {
@@ -955,6 +981,17 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         return Poll.builder()
             .text(option)
             .build()
+    }
+    
+    func submitPollOption(pollId: String) {
+        let request = SubmitPollRequest.builder()
+            .chatroomId(self.chatroomId)
+            .conversationId(pollId)
+            .build()
+        
+        LMChatClient.shared.submitPoll(request: request) { response in
+            
+        }
     }
     
     private func saveTemporaryPollConversation(uuid: String,

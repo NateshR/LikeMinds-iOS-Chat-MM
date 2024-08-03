@@ -1528,8 +1528,9 @@ extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
 extension LMChatMessageListViewController: LMChatPollViewDelegate {
     
     public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
+        guard let polls = viewModel?.chatMessages.first(where: {$0.id == messageId})?.polls else { return }
         do {
-            let viewcontroller = try LMChatPollResultViewModel.createModule(with: messageId, optionList: [], selectedOption: nil)
+            let viewcontroller = try LMChatPollResultViewModel.createModule(with: messageId, optionList: DataModelConverter.shared.convertPollOptionsIntoResultPollOptions(polls), selectedOption: optionID)
             navigationController?.pushViewController(viewcontroller, animated: true)
         } catch {
             print("Error in \(#function)")

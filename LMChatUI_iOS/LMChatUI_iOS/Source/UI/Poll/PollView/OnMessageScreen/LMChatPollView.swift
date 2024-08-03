@@ -62,6 +62,9 @@ open class LMChatPollView: LMBasePollView {
             self.isShowEditVote = isShowEditVote
         }
         
+        public var isPollExpired: Bool {
+            expiryDate < Date()
+        }
         
         public var expiryDateFormatted: String {
             let now = Date()
@@ -90,6 +93,12 @@ open class LMChatPollView: LMBasePollView {
         
         func getPluralText(withNumber number: Int, text: String) -> String {
             number > 1 ? "\(text)s" : text
+        }
+        
+        func pollTypeText() -> String {
+            let voteType = isAnonymousPoll ? "Secret voting" : "Public voting"
+            let pollType = isInstantPoll ? "Instant poll" : "Deferred poll"
+            return "\(pollType) \(Constants.shared.strings.dot) \(voteType)"
         }
     }
     
@@ -148,7 +157,7 @@ open class LMChatPollView: LMBasePollView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.appTintColor
         label.font = Appearance.shared.fonts.textFont1
-        label.text = "Be the first one to vote"
+        label.text = ""
         label.isUserInteractionEnabled = true
         return label
     }()
@@ -158,12 +167,12 @@ open class LMChatPollView: LMBasePollView {
         label.isUserInteractionEnabled = true
         label.textColor = Appearance.shared.colors.appTintColor
         label.font = Appearance.shared.fonts.textFont1
-        label.text = "Edit Vote"
+        label.text = ""
         return label
     }()
     
     open private(set) lazy var addOptionButton: LMButton = {
-        let button = LMButton.createButton(with: "Add an option", image: Constants.shared.images.plusIcon, textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 8, left: 0, bottom: 8, right: 0), imageSpacing: 0)
+        let button = LMButton.createButton(with: Constants.shared.strings.addNewOption, image: Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 18), textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 12, left: 0, bottom: 12, right: 0), imageSpacing: 2)
         button.tintColor = Appearance.shared.colors.black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -190,8 +199,8 @@ open class LMChatPollView: LMBasePollView {
         containerView.addSubview(optionStackView)
         containerView.addSubview(bottomStack)
         
-        bottomStack.addArrangedSubview(bottomMetaStack)
         bottomStack.addArrangedSubview(addOptionButton)
+        bottomStack.addArrangedSubview(bottomMetaStack)
         bottomStack.addArrangedSubview(submitButton)
         
         bottomMetaStack.addArrangedSubview(answerTitleLabel)
@@ -235,11 +244,10 @@ open class LMChatPollView: LMBasePollView {
     open override func setupAppearance() {
         super.setupAppearance()
         
-        addOptionButton.layer.borderColor = Appearance.shared.colors.gray155.cgColor
-        expiryDateLabel.backgroundColor = Appearance.shared.colors.appTintColor
+        addOptionButton.layer.borderColor = Appearance.shared.colors.pollOptionBorderColor.cgColor
         addOptionButton.layer.borderWidth = 1
         addOptionButton.layer.cornerRadius = 8
-        expiryDateLabel.cornerRadius(with: 12)
+        expiryDateLabel.cornerRadius(with: 11)
         submitButton.layer.cornerRadius = 8
     }
     
@@ -294,7 +302,7 @@ open class LMChatPollView: LMBasePollView {
         self.messageId = data.messageId
         
         questionTitle.text = data.question
-        
+        pollTypeLabel.text = data.pollTypeText()
         optionSelectCountLabel.text = data.optionStringFormatted
         optionSelectCountLabel.isHidden = !data.isShowOption
         
@@ -309,6 +317,7 @@ open class LMChatPollView: LMBasePollView {
         
         answerTitleLabel.text = data.answerText
         expiryDateLabel.text = data.expiryDateFormatted
+        expiryDateLabel.backgroundColor = data.isPollExpired ? Appearance.shared.colors.red : Appearance.shared.colors.appTintColor
         
         addOptionButton.isHidden = !data.allowAddOptions
         

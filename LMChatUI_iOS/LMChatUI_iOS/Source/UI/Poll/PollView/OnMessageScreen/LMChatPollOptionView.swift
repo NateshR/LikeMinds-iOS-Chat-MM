@@ -175,7 +175,7 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         innerContainerView.clipsToBounds = true
         innerContainerView.layer.cornerRadius = 10
         innerContainerView.layer.borderWidth = 1
-        innerContainerView.layer.borderColor = Appearance.shared.colors.pollBorderColor.cgColor
+        innerContainerView.layer.borderColor = Appearance.shared.colors.pollOptionBorderColor.cgColor
         innerContainerView.backgroundColor = Appearance.shared.colors.white
     }
     
@@ -210,7 +210,7 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         addedByLabel.isHidden = data.addedBy?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false
         
         voteCountContainer.isHidden = !data.showVoteCount
-        voteCount.setTitle("\(data.voteCount) Vote\(data.voteCount == 1 ? "" : "s")", for: .normal)
+        voteCount.setTitle("\(data.voteCount) vote\(data.voteCount < 2 ? "" : "s")", for: .normal)
         
         checkmarkIcon.isHidden = !data.showTickButton
         

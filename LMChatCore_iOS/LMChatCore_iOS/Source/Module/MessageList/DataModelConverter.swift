@@ -12,6 +12,18 @@ class DataModelConverter {
     
     static let shared = DataModelConverter()
     
+    func convertPollOptionsIntoResultPollOptions(_ polls: [Poll]) -> [LMChatPollDataModel.Option] {
+       return  polls.map { poll in
+            return LMChatPollDataModel.Option(id: poll.id ?? "",
+                         option: poll.text ?? "",
+                         isSelected: poll.isSelected ?? false,
+                         voteCount: poll.noVotes ?? 0,
+                         percentage: poll.percentage ?? 0,
+                         addedBy: .init(userName: poll.member?.name ?? "",
+                                        userUUID: poll.member?.sdkClientInfo?.uuid ?? ""))
+        }
+    }
+    
     func convertPostConversation(uuid: String, communityId: String, request: PostConversationRequest, fileUrls: [LMChatAttachmentMediaData]?) -> Conversation {
         let miliseconds = Int(Date().millisecondsSince1970)
         let member = LMChatClient.shared.getCurrentMember()?.data?.member

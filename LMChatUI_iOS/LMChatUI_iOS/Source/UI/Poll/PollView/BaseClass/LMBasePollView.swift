@@ -85,7 +85,7 @@ open class LMBasePollView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.gray102
         label.font = Appearance.shared.fonts.subHeadingFont1
-        label.text = "Instant poll \(Constants.shared.strings.dot) Public vote"
+        label.text = ""
         return label
     }()
 }
