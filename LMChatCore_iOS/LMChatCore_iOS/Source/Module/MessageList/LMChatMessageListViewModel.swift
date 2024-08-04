@@ -68,7 +68,6 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationId, nil))
         
         viewcontroller.viewModel = viewmodel
-        viewcontroller.delegate = viewmodel
         return viewcontroller
     }
     
@@ -823,7 +822,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
          LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
     
-    func pollOptionSelected(messageId: String, option: String) {
+    func pollOptionSelected(messageId: String, optionId: String) {
         guard var poll = chatMessages.first(where: {$0.id == messageId}) else { return }
         
         if (poll.expiryTime ?? 0) < Int(Date().millisecondsSince1970) {
@@ -940,7 +939,8 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     
 }
 
-extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
+// Post conversation api calls
+extension LMChatMessageListViewModel {
     
     func postPollConversation(pollData: LMChatCreatePollDataModel, temporaryId: String? = nil) {
         guard let communityId = chatroomViewData?.communityId else { return }
@@ -953,7 +953,9 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .text(pollData.pollQuestion)
             .temporaryId(temporaryId)
             .polls(pollData.pollOptions.map({ option in
-                return pollOptions(option: option)
+                return Poll.builder()
+                    .text(option)
+                    .build()
             }))
             .pollType(pollData.isInstantPoll ? 0 : 1)
             .expiryTime(Int(pollData.expiryTime.millisecondsSince1970))
@@ -962,7 +964,7 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .multipleSelectNo(pollData.selectStateCount)
             .multipleSelectState(pollData.selectState.rawValue)
             .build()
-        
+        return
         let tempConversation = saveTemporaryPollConversation(uuid: UserPreferences.shared.getClientUUID() ?? "", communityId: communityId, request: postPollConversationRequest, fileUrls: nil)
         insertOrUpdateConversationIntoList(tempConversation)
         delegate?.scrollToBottom(forceToBottom: true)
@@ -974,23 +976,6 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
                 return
             }
             onConversationPosted(response: conversation.conversation, updatedFileUrls: nil)
-        }
-    }
-    
-    func pollOptions(option: String) -> Poll {
-        return Poll.builder()
-            .text(option)
-            .build()
-    }
-    
-    func submitPollOption(pollId: String) {
-        let request = SubmitPollRequest.builder()
-            .chatroomId(self.chatroomId)
-            .conversationId(pollId)
-            .build()
-        
-        LMChatClient.shared.submitPoll(request: request) { response in
-            
         }
     }
     
@@ -1018,6 +1003,33 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
             .build()
         return conversation
     }
+    
+    
+    func submitPollOption(pollId: String, optionsIds: [String]) {
+        let request = SubmitPollRequest.builder()
+            .chatroomId(self.chatroomId)
+            .conversationId(pollId)
+            .polls(optionsIds.map({Poll.builder().id($0).build()}))
+            .build()
+        return
+        LMChatClient.shared.submitPoll(request: request) { response in
+            
+        }
+    }
+    
+    func addPollOption(pollId: String, option: String) {
+        let request = AddPollOptionRequest.builder()
+            .conversationId(pollId)
+            .poll(Poll.builder()
+                .text(option)
+                .build())
+            .build()
+        return
+        LMChatClient.shared.addPollOption(request: request) { response in
+            
+        }
+    }
+    
     
     func postMessage(message: String?,
                      filesUrls: [LMChatAttachmentMediaData]?,
@@ -1469,19 +1481,5 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
-    }
-    
-    func postMessageWithAttachment() {
-        
-    }
-    
-    func postMessageWithGifAttachment() {
-        
-    }
-    
-    func postMessageWithAudioAttachment(with url: URL) {
-        print(">>>Audio URL<<<")
-        print(url)
-        print(">>>Audio URL<<<")
     }
 }

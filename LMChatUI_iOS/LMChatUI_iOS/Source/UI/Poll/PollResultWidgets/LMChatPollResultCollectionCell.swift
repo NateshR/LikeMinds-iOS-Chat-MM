@@ -90,7 +90,7 @@ open class LMChatPollResultCollectionCell: LMCollectionViewCell {
         sepratorView.setHeightConstraint(with: 4, priority: .required)
         sepratorView.layer.cornerRadius = 2
         
-        containerView.pinSubView(subView: stackView, padding: .init(top: 8, left: 8, bottom: -8, right: -8))
+        containerView.pinSubView(subView: stackView, padding: .init(top: 12, left: 8, bottom: -12, right: -8))
     }
     
     

@@ -27,6 +27,7 @@ enum NavigationActions {
     case searchScreen
     case emojiPicker(conversationId: String?, chatroomId: String?)
     case createPoll(delegate: LMChatCreatePollViewDelegate?)
+    case pollResult(conversationId: String, pollOptions: [LMChatPollDataModel.Option], selectedOptionId: String)
 //    case giphy
     
 }
@@ -93,6 +94,9 @@ class NavigationScreen: NavigationScreenProtocol {
         case .createPoll(let delegate):
             guard let createPollScreen = try? LMChatCreatePollViewModel.createModule(withDelegate: delegate) else { return }
             source.navigationController?.pushViewController(createPollScreen, animated: true)
+        case .pollResult(let messageId, let options, let optionId):
+            guard let viewcontroller = try? LMChatPollResultViewModel.createModule(with: messageId, optionList: options, selectedOption: optionId) else { return }
+            source.navigationController?.pushViewController(viewcontroller, animated: true)
 //        case .giphy:
 //            let giphy = GiphyViewController()
 //            giphy.mediaTypeConfig = [.gifs]

@@ -47,7 +47,7 @@ public final class LMChatPollResultViewModel {
         let viewcontroller = LMCoreComponents.shared.pollResultScreen.init()
         let viewmodel = Self.init(pollID: pollID, selectedOptionID: selectedOption, optionList: optionList, delegate: viewcontroller)
         
-        viewcontroller.viewmodel = viewmodel
+        viewcontroller.viewModel = viewmodel
         
         return viewcontroller
     }

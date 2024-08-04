@@ -15,74 +15,58 @@ public protocol LMChatPollResultListViewModelProtocol: LMBaseViewControllerProto
 }
 
 public final class LMChatPollResultListViewModel {
-    let pollID: String
-    let optionID: String
+    let pollId: String
+    let optionId: String
     var pageNo: Int
     let pageSize: Int
     var isFetching: Bool
-    var shouldCallAPI: Bool
     var userList: [LMChatUserDataModel]
     weak var delegate: LMChatPollResultListViewModelProtocol?
     
-    init(pollID: String, optionID: String, delegate: LMChatPollResultListViewModelProtocol?) {
-        self.pollID = pollID
-        self.optionID = optionID
+    init(pollId: String, optionId: String, delegate: LMChatPollResultListViewModelProtocol?) {
+        self.pollId = pollId
+        self.optionId = optionId
         self.pageNo = 1
         self.pageSize = 10
         self.isFetching = false
-        self.shouldCallAPI = true
         self.userList = []
         self.delegate = delegate
     }
     
-    public static func createModule(for pollID: String, optionID: String) -> LMChatPollResultListScreen {
+    public static func createModule(for pollId: String, optionId: String) -> LMChatPollResultListScreen {
         let viewcontroller = LMCoreComponents.shared.pollResultList.init()
         
-        let viewmodel = Self.init(pollID: pollID, optionID: optionID, delegate: viewcontroller)
-        viewcontroller.viewmodel = viewmodel
+        let viewmodel = Self.init(pollId: pollId, optionId: optionId, delegate: viewcontroller)
+        viewcontroller.viewModel = viewmodel
         
         return viewcontroller
     }
     
     public func fetchUserList() {
-        guard shouldCallAPI,
-              !isFetching else { return }
-   /*
-        let request = GetPollVotesRequest
-            .builder()
-            .pollID(pollID)
-            .options([optionID])
-            .page(pageNo)
-            .pageSize(pageSize)
+        guard !isFetching else { return }
+        let request = GetPollUsersRequest.builder()
+            .conversationId(pollId)
+            .pollOptionId(optionId)
             .build()
-        
-        LMChatClient.shared.getPollVotes(request) { [weak self] response in
+        LMChatClient.shared.getPollUsers(request: request) {[weak self] response in
             defer {
                 self?.isFetching = false
                 self?.reloadResults(with: self?.userList ?? [])
             }
             
-            if let users = response.data?.users,
-               let voterList = response.data?.votes?.first(where: { $0.id == self?.optionID })?.users {
+            if let voterList = response.data?.members {
                 var transformedUsers: [LMChatUserDataModel] = []
-                
-                voterList.forEach { id in
-                    if let user = users[id],
-                       let uuid = user.sdkClientInfo?.uuid {
-                        transformedUsers.append(.init(userName: user.name ?? "User", userUUID: uuid, userProfileImage: user.imageUrl, customTitle: user.customTitle))
+                voterList.forEach { voter in
+                    if let uuid = voter.sdkClientInfo?.uuid {
+                        transformedUsers.append(.init(userName: voter.name ?? "", userUUID: uuid, userProfileImage: voter.imageUrl, customTitle: voter.customTitle))
                     }
                 }
-                
                 self?.userList.append(contentsOf: transformedUsers)
-                self?.shouldCallAPI = !transformedUsers.isEmpty
                 self?.pageNo += 1
-            } else {
-                self?.shouldCallAPI = false
             }
         }
-        */
     }
-    
+
     func reloadResults(with transformedUsers: [LMChatUserDataModel]) {
         userList = transformedUsers
         

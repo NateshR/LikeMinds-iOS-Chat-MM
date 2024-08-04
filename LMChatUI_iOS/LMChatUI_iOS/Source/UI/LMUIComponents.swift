@@ -86,8 +86,10 @@ public struct LMUIComponents {
     public var createPollDateView: LMChatCreatePollDateView.Type = LMChatCreatePollDateView.self
     public var createPollMetaView: LMChatCreatePollMetaView.Type = LMChatCreatePollMetaView.self
     public var createPollOptionCell: LMChatCreatePollOptionWidget.Type = LMChatCreatePollOptionWidget.self
+    
     // MARK: Display Poll Components
     public var pollContentView: LMChatPollContentView.Type = LMChatPollContentView.self
     public var pollDisplayView: LMChatPollView.Type = LMChatPollView.self
     public var pollOptionView: LMChatPollOptionView.Type = LMChatPollOptionView.self
+    public var resultPollOptionCell: LMChatPollResultCollectionCell.Type = LMChatPollResultCollectionCell.self
 }
