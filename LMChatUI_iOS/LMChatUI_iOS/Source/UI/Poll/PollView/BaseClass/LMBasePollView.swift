@@ -39,7 +39,7 @@ open class LMBasePollView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.numberOfLines = 0
         label.textColor = Appearance.shared.colors.gray51
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.textFont1
         return label
     }()
     

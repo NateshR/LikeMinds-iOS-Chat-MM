@@ -21,9 +21,9 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         public let voteCount: Int
         public let votePercentage: Double
         public let isOptionSelectedByUser: Bool
-        public let showVoteCount: Bool
-        public let showProgressBar: Bool
-        public let showTickButton: Bool
+        public var showVoteCount: Bool
+        public var showProgressBar: Bool
+        public var showTickButton: Bool
         
         public init(
             pollId: String,

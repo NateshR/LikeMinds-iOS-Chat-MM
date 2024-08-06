@@ -139,7 +139,7 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
     
     public func insertPollOption() {
         guard pollOptions.count < 10 else {
-            delegate?.showError(with: "You can add at max 10 options", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "You can add at max 10 options", isPopVC: false)
             return
         }
         pollOptions.append(nil)
@@ -198,7 +198,7 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
     public func validatePoll(with question: String?, options: [String?]) {
         guard let question,
               !question.isEmpty else {
-            delegate?.showError(with: "Question cannot be empty", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "Question cannot be empty", isPopVC: false)
             return
         }
         
@@ -209,28 +209,28 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
                !trimmedText.isEmpty {
                 filteredOptions.append(trimmedText)
             } else {
-                delegate?.showError(with: "Option \(idx + 1) cannot be empty", isPopVC: false)
+                delegate?.showError(withTitle: "Error", message: "Option \(idx + 1) cannot be empty", isPopVC: false)
                 return
             }
         }
         
         guard filteredOptions.count > 1 else {
-            delegate?.showError(with: "Need atleast 2 poll options", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "Need atleast 2 poll options", isPopVC: false)
             return
         }
         
         guard filteredOptions.count == Set(filteredOptions).count else {
-            delegate?.showError(with: "Options should be unique", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "Options should be unique", isPopVC: false)
             return
         }
         
         guard let pollExpiryDate else {
-            delegate?.showError(with: "Expiry date cannot be empty", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "Expiry date cannot be empty", isPopVC: false)
             return
         }
         
         guard pollExpiryDate > Date() else {
-            delegate?.showError(with: "Expiry date cannot be in past", isPopVC: false)
+            delegate?.showError(withTitle: "Error", message: "Expiry date cannot be in past", isPopVC: false)
             return
         }
         

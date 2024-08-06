@@ -31,6 +31,9 @@ open class LMChatPollView: LMBasePollView {
         public var answerText: String
         public var isShowSubmitButton: Bool
         public var isShowEditVote: Bool
+        public var enableSubmitButton: Bool = false
+        public var tempSelectedOptions: [String] = []
+        public var isEditingMode: Bool = false
         
         public init(
             chatroomId: String,
@@ -89,6 +92,15 @@ open class LMChatPollView: LMBasePollView {
             default:
                 return "Just Now"
             }
+        }
+        
+        public mutating func addTempSelectedOptions(_ option: String) {
+            self.tempSelectedOptions.append(option)
+        }
+        
+        public mutating func removeTempSelectedOptions(_ option: String) {
+            guard let index = self.tempSelectedOptions.firstIndex(where: {$0 == option}) else { return }
+            self.tempSelectedOptions.remove(at: index)
         }
         
         func getPluralText(withNumber number: Int, text: String) -> String {
@@ -162,17 +174,16 @@ open class LMChatPollView: LMBasePollView {
         return label
     }()
     
-    open private(set) lazy var editVoteLabel: LMLabel = {
-        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.isUserInteractionEnabled = true
-        label.textColor = Appearance.shared.colors.appTintColor
-        label.font = Appearance.shared.fonts.textFont1
-        label.text = ""
-        return label
+    open private(set) lazy var editVoteButton: LMButton = {
+        let button = LMButton.createButton(with: Constants.shared.strings.editVote, image: Constants.shared.images.pencilIcon.withSystemImageConfig(pointSize: 16, weight: .semibold), textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 8, bottom: 12, right: 8))
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = Appearance.shared.colors.white
+        button.backgroundColor = Appearance.shared.colors.appTintColor
+        return button
     }()
     
     open private(set) lazy var addOptionButton: LMButton = {
-        let button = LMButton.createButton(with: Constants.shared.strings.addNewOption, image: Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 18), textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 12, left: 0, bottom: 12, right: 0), imageSpacing: 2)
+        let button = LMButton.createButton(with: Constants.shared.strings.addNewOption, image: Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 12), textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 12, left: 0, bottom: 12, right: 0), imageSpacing: 2)
         button.tintColor = Appearance.shared.colors.black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -202,6 +213,7 @@ open class LMChatPollView: LMBasePollView {
         bottomStack.addArrangedSubview(addOptionButton)
         bottomStack.addArrangedSubview(bottomMetaStack)
         bottomStack.addArrangedSubview(submitButton)
+        bottomStack.addArrangedSubview(editVoteButton)
         
         bottomMetaStack.addArrangedSubview(answerTitleLabel)
         topStack.addArrangedSubview(pollTypeLabel)
@@ -249,6 +261,7 @@ open class LMChatPollView: LMBasePollView {
         addOptionButton.layer.cornerRadius = 8
         expiryDateLabel.cornerRadius(with: 11)
         submitButton.layer.cornerRadius = 8
+        editVoteButton.layer.cornerRadius = 8
     }
     
     
@@ -257,7 +270,7 @@ open class LMChatPollView: LMBasePollView {
         super.setupActions()
         
         submitButton.addTarget(self, action: #selector(didTapSubmitButton), for: .touchUpInside)
-        editVoteLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(editVoteTapped)))
+        editVoteButton.addTarget(self, action: #selector(editVoteTapped), for: .touchUpInside)
         answerTitleLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(voteCountTapped)))
         addOptionButton.addTarget(self, action: #selector(didTapAddOption), for: .touchUpInside)
     }
@@ -321,9 +334,11 @@ open class LMChatPollView: LMBasePollView {
         
         addOptionButton.isHidden = !data.allowAddOptions
         
-        editVoteLabel.isHidden = !data.isShowEditVote
+        editVoteButton.isHidden = !data.isShowEditVote
         
         submitButton.isHidden = !data.isShowSubmitButton
+        submitButton.isEnabled = data.enableSubmitButton
+        submitButton.alpha = data.enableSubmitButton ? 1 : 0.5
     }
 }
 

@@ -411,6 +411,12 @@ open class LMChatMessageListViewController: LMViewController {
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     
+    public func reloadMessage(at index: IndexPath) {
+        guard let sectionData = viewModel?.messagesList[index.section] else { return }
+        messageListView.tableSections[index.section] = sectionData
+        messageListView.tableView.reloadData()
+    }
+    
     public func approveRejectView(isShow: Bool) {
         if !isShow {
             messageListView.tableView.tableFooterView = nil
@@ -1517,20 +1523,31 @@ extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
 extension LMChatMessageListViewController: LMChatPollViewDelegate {
     
     public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
-        guard let polls = viewModel?.chatMessages.first(where: {$0.id == messageId})?.polls, let optionID else { return }
-        NavigationScreen.shared.perform(.pollResult(conversationId: messageId, pollOptions: DataModelConverter.shared.convertPollOptionsIntoResultPollOptions(polls), selectedOptionId: optionID), from: self, params: nil)
+        guard let poll = viewModel?.chatMessages.first(where: {$0.id == messageId}) else { return }
+        if poll.isAnonymous == true {
+            self.showErrorAlert("Anonymous poll", message: "This being an anonymous poll, the names of the voters can not be disclosed.")
+            return
+        } else if (poll.toShowResults == false) && (poll.expiryTime ?? 0) > Int(Date().millisecondsSince1970) {
+            self.showErrorAlert(nil, message: "The results will be visible after the poll has ended.")
+            return
+        }
+        
+        guard let polls = viewModel?.chatMessages.first(where: {$0.id == messageId})?.polls,
+              let optionId = (optionID ?? polls.first?.id) else { return }
+        NavigationScreen.shared.perform(.pollResult(conversationId: messageId, pollOptions: DataModelConverter.shared.convertPollOptionsIntoResultPollOptions(polls), selectedOptionId: optionId), from: self, params: nil)
     }
     
     public func didTapToVote(for chatroomId: String, messageId: String, optionID: String) {
-        print("Voted!")
         viewModel?.pollOptionSelected(messageId: messageId, optionId: optionID)
     }
     
     public func didTapSubmitVote(for chatroomId: String, messageId: String) {
-        print("Vote submitted!")
+        viewModel?.pollSubmit(messageId: messageId)
     }
     
-    public func editVoteTapped(for chatroomId: String, messageId: String) {}
+    public func editVoteTapped(for chatroomId: String, messageId: String) {
+        viewModel?.editVote(messageId: messageId)
+    }
     
     public func didTapAddOption(for chatroomId: String, messageId: String) {
         
