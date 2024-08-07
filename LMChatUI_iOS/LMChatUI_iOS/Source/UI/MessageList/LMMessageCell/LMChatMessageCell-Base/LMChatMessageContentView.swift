@@ -197,7 +197,7 @@ open class LMChatMessageContentView: LMView {
         return bubble
     }
     
-    open func setDataView(_ data: LMChatMessageCell.ContentModel, delegate: LMChatAudioProtocol?, index: IndexPath) {
+    open func setDataView(_ data: LMChatMessageCell.ContentModel, index: IndexPath) {
         dataView = data
         self.textLabel.isUserInteractionEnabled = true
         self.textLabel.attributedText = GetAttributedTextWithRoutes.getAttributedText(from: (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines), font: textLabelFont, withHighlightedColor: Appearance.Colors.shared.linkColor, withTextColor: textLabelColor)

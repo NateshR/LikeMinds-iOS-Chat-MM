@@ -51,6 +51,7 @@ open class LMChatMessageListViewController: LMViewController {
         view.delegate = self
         view.cellDelegate = self
         view.audioDelegate = self
+        view.pollDelegate = self
         view.chatroomHeaderCellDelegate = self
         return view
     }()
@@ -1470,7 +1471,7 @@ extension LMChatMessageListViewController: LMChatTaggedUserFoundProtocol {
     }
 }
 
-extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
+extension LMChatMessageListViewController: LMChatTaggingTextViewProtocol {
     
     public func mentionStarted(with text: String, chatroomId: String) {
         guard viewModel?.isChatroomType(type: .directMessage) == false else { return }
@@ -1522,4 +1523,29 @@ extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
     public func cancelledPollCreation() {
         
     }
+}
+
+extension LMChatMessageListViewController: LMChatPollViewDelegate {
+    
+    public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
+        
+    }
+    
+    public func didTapToVote(for chatroomId: String, messageId: String, optionID: String) {
+        
+    }
+    
+    public func didTapSubmitVote(for chatroomId: String, messageId: String) {
+        
+    }
+    
+    public func editVoteTapped(for chatroomId: String, messageId: String) {
+        
+    }
+    
+    public func didTapAddOption(for chatroomId: String, messageId: String) {
+        
+    }
+    
+    
 }

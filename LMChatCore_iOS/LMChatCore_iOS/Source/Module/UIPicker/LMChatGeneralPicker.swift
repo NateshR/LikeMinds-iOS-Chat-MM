@@ -1,6 +1,6 @@
 //
 //  LMChatGeneralPicker.swift
-//  LikeMindsFeedCore
+//  LikeMindsChatCore
 //
 //  Created by Pushpendra Singh on 17/07/24.
 //

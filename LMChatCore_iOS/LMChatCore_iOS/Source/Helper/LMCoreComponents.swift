@@ -47,6 +47,6 @@ public struct LMCoreComponents {
     public var createPollScreen: LMChatCreatePollViewController.Type = LMChatCreatePollViewController.self
     
     // MARK: Poll Result
-//    public var pollResultScreen: LMFeedPollResultScreen.Type = LMFeedPollResultScreen.self
-//    public var pollResultList: LMFeedPollResultListScreen.Type = LMFeedPollResultListScreen.self
+    public var pollResultScreen: LMChatPollResultScreen.Type = LMChatPollResultScreen.self
+    public var pollResultList: LMChatPollResultListScreen.Type = LMChatPollResultListScreen.self
 }
