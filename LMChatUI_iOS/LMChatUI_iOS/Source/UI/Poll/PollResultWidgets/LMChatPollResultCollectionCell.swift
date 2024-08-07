@@ -56,7 +56,7 @@ open class LMChatPollResultCollectionCell: LMCollectionViewCell {
     
     // MARK: Data Variables
     open var selectedPollColor: UIColor {
-        UIColor(r: 80, g: 70, b: 229)
+        Appearance.shared.colors.appTintColor
     }
     
     open var notSelectedPollColor: UIColor {

@@ -104,7 +104,7 @@ open class LMChatPollOptionView: LMBasePollOptionView {
     
     // MARK: Data Variables
     open var selectedPollColor: UIColor {
-        return UIColor(r: 80, g: 70, b: 229)
+        return Appearance.shared.colors.appTintColor
     }
     
     open var notSelectedPollColor: UIColor {

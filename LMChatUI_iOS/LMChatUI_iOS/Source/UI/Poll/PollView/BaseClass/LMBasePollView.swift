@@ -63,11 +63,11 @@ open class LMBasePollView: LMView {
     open private(set) lazy var expiryDateLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.white
-        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.font = Appearance.shared.fonts.subHeadingFont2
         label.paddingLeft = 8
         label.paddingRight = 8
-        label.paddingTop = 4
-        label.paddingBottom = 4
+        label.paddingTop = 8
+        label.paddingBottom = 8
         return label
     }()
     
@@ -84,8 +84,9 @@ open class LMBasePollView: LMView {
     open private(set) lazy var pollTypeLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.gray102
-        label.font = Appearance.shared.fonts.subHeadingFont1
+        label.font = Appearance.shared.fonts.subHeadingFont2
         label.text = ""
+        label.paddingBottom = 4
         return label
     }()
 }
@@ -109,6 +110,6 @@ public extension LMBasePollView.Content {
     }
     
     var isShowOption: Bool {
-        !(optionState.lowercased() == "exactly" && optionCount < 2)
+        !optionState.isEmpty && (optionCount != 0)
     }
 }

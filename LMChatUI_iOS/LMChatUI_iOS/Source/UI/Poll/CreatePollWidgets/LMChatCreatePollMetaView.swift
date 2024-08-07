@@ -167,6 +167,9 @@ open class LMChatCreatePollMetaView: LMView {
     }
     
     open func optionCountFormatted(_ count: Int) -> String {
-        return "\(count) option\(count == 1 ? "" : "s")"
+        if count == 0 {
+            return "Select option"
+        }
+        return "\(count) option\(count < 2 ? "" : "s")"
     }
 }

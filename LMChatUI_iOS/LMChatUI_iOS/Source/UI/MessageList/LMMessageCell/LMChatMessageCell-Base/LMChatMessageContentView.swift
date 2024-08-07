@@ -86,9 +86,8 @@ open class LMChatMessageContentView: LMView {
         label.numberOfLines = 1
         label.font = Appearance.shared.fonts.headingLabel
         label.textColor = Appearance.shared.colors.red
-        label.paddingLeft = 2
+        label.paddingLeft = 4
         label.paddingTop = 2
-        label.paddingBottom = 2
         label.text = ""
         label.isUserInteractionEnabled = true
         return label

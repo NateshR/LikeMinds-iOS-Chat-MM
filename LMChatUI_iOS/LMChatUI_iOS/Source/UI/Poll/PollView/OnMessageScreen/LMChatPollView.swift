@@ -34,6 +34,8 @@ open class LMChatPollView: LMBasePollView {
         public var enableSubmitButton: Bool = false
         public var tempSelectedOptions: [String] = []
         public var isEditingMode: Bool = false
+        public var submitTypeText: String?
+        public var pollTypeText: String?
         
         public init(
             chatroomId: String,
@@ -48,7 +50,9 @@ open class LMChatPollView: LMBasePollView {
             isInstantPoll: Bool,
             allowAddOptions: Bool,
             isShowSubmitButton: Bool,
-            isShowEditVote: Bool
+            isShowEditVote: Bool,
+            submitTypeText: String?,
+            pollTypeText: String?
         ) {
             self.chatroomId = chatroomId
             self.messageId = messageId
@@ -63,6 +67,8 @@ open class LMChatPollView: LMBasePollView {
             self.answerText = answerText
             self.isShowSubmitButton = isShowSubmitButton
             self.isShowEditVote = isShowEditVote
+            self.submitTypeText = submitTypeText
+            self.pollTypeText = pollTypeText
         }
         
         public var isPollExpired: Bool {
@@ -107,10 +113,10 @@ open class LMChatPollView: LMBasePollView {
             number > 1 ? "\(text)s" : text
         }
         
-        func pollTypeText() -> String {
-            let voteType = isAnonymousPoll ? "Secret voting" : "Public voting"
-            let pollType = isInstantPoll ? "Instant poll" : "Deferred poll"
-            return "\(pollType) \(Constants.shared.strings.dot) \(voteType)"
+        func pollTypeWithSubmitText() -> String {
+            let submitType = submitTypeText ?? ""
+            let pollType = pollTypeText ?? ""
+            return "\(pollType) \(Constants.shared.strings.dot) \(submitType)"
         }
     }
     
@@ -135,8 +141,9 @@ open class LMChatPollView: LMBasePollView {
     }()
     
     open private(set) lazy var submitButton: LMButton = {
-        let button = LMButton.createButton(with: Constants.shared.strings.submitVote, image: nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 8, bottom: 12, right: 8))
+        let button = LMButton.createButton(with: Constants.shared.strings.submitVote, image:nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 20, bottom: 12, right: 20))
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = Appearance.shared.colors.white
         button.backgroundColor = Appearance.shared.colors.appTintColor
         return button
     }()
@@ -175,7 +182,7 @@ open class LMChatPollView: LMBasePollView {
     }()
     
     open private(set) lazy var editVoteButton: LMButton = {
-        let button = LMButton.createButton(with: Constants.shared.strings.editVote, image: Constants.shared.images.pencilIcon.withSystemImageConfig(pointSize: 16, weight: .semibold), textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 8, bottom: 12, right: 8))
+        let button = LMButton.createButton(with: Constants.shared.strings.editVote, image: nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 20, bottom: 12, right: 20))
         button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = Appearance.shared.colors.white
         button.backgroundColor = Appearance.shared.colors.appTintColor
@@ -187,6 +194,15 @@ open class LMChatPollView: LMBasePollView {
         button.tintColor = Appearance.shared.colors.black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }()
+    
+    open private(set) lazy var questionAndSelectcount: LMStackView = {
+        let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = 2
+        return stack
     }()
     
     
@@ -204,8 +220,9 @@ open class LMChatPollView: LMBasePollView {
         containerView.addSubview(questionContainerStackView)
         
         questionContainerStackView.addArrangedSubview(topStack)
-        questionContainerStackView.addArrangedSubview(questionTitle)
-        questionContainerStackView.addArrangedSubview(optionSelectCountLabel)
+        questionContainerStackView.addArrangedSubview(questionAndSelectcount)
+        questionAndSelectcount.addArrangedSubview(questionTitle)
+        questionAndSelectcount.addArrangedSubview(optionSelectCountLabel)
         
         containerView.addSubview(optionStackView)
         containerView.addSubview(bottomStack)
@@ -230,11 +247,11 @@ open class LMChatPollView: LMBasePollView {
         
         pinSubView(subView: containerView)
         let standardMargin: CGFloat = 8
-        questionContainerStackView.addConstraint(top: (containerView.topAnchor, standardMargin),
+        questionContainerStackView.addConstraint(top: (containerView.topAnchor, 4),
                                                  leading: (containerView.leadingAnchor, standardMargin),
                                                  trailing: (containerView.trailingAnchor, -standardMargin))
         
-        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, standardMargin),
+        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, standardMargin + 8),
                                       leading: (questionContainerStackView.leadingAnchor, 0),
                                       trailing: (questionContainerStackView.trailingAnchor, 0))
         
@@ -315,7 +332,7 @@ open class LMChatPollView: LMBasePollView {
         self.messageId = data.messageId
         
         questionTitle.text = data.question
-        pollTypeLabel.text = data.pollTypeText()
+        pollTypeLabel.text = data.pollTypeWithSubmitText()
         optionSelectCountLabel.text = data.optionStringFormatted
         optionSelectCountLabel.isHidden = !data.isShowOption
         

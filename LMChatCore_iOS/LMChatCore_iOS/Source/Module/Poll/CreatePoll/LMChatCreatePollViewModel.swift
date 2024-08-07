@@ -55,7 +55,7 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
         self.pollQuestion = prefilledData?.pollQuestion
         self.defaultPollAnswerCount = 2
         self.optionSelectionState = prefilledData?.selectState ?? .exactly
-        self.currentOptionCount = prefilledData?.selectStateCount ?? 1
+        self.currentOptionCount = prefilledData?.selectStateCount ?? 0
         self.pollOptions = prefilledData?.pollOptions ?? Array(repeating: nil, count: defaultPollAnswerCount)
         self.isAnonymousPoll = prefilledData?.isAnonymous ?? false
         self.isInstantPoll = prefilledData?.isInstantPoll ?? true

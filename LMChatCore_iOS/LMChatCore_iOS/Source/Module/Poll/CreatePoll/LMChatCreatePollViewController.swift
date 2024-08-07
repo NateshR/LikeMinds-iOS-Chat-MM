@@ -148,14 +148,14 @@ open class LMChatCreatePollViewController: LMViewController {
     open override func setupObservers() {
         super.setupObservers()
         
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     @objc
-    open func keyboardWillShow(notification:NSNotification){
+    open override func keyboardWillShow(_ sender: Notification){
         //give room at the bottom of the scroll view, so it doesn't cover up anything the user needs to tap
-        guard let userInfo = notification.userInfo,
+        guard let userInfo = sender.userInfo,
               let nsVal = userInfo[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue else { return }
         
         var keyboardFrame = nsVal.cgRectValue
@@ -167,7 +167,7 @@ open class LMChatCreatePollViewController: LMViewController {
     }
     
     @objc
-    open func keyboardWillHide(notification:NSNotification){
+    open override func keyboardWillHide(_ sender: Notification){
         let contentInset:UIEdgeInsets = UIEdgeInsets.zero
         containerScrollView.contentInset = contentInset
     }

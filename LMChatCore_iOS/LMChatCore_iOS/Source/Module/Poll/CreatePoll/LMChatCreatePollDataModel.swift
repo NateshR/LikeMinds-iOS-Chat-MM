@@ -49,11 +49,11 @@ public enum LMChatPollSelectState: Int, CustomStringConvertible, CaseIterable {
         
         switch self {
         case .exactly:
-            return "You must select \(allowedCount) options. Unselect an option or submit your vote now."//count == allowedCount
+            return "You must select \(allowedCount) options. Unselect an option or submit your vote now."
         case .atMax:
-            return "You can select max \(allowedCount) options. Unselect an option or submit your vote now."//count > 0 && count <= allowedCount
+            return "You can select max \(allowedCount) options. Unselect an option or submit your vote now."
         case .atLeast:
-            return "Select at least \(allowedCount - count) more options to submit your vote."//count >= allowedCount
+            return "Select at least \(allowedCount - count) more options to submit your vote."
         }
     }
 }

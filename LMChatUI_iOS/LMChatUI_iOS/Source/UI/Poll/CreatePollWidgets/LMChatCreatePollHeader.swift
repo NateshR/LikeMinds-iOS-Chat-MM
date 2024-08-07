@@ -41,14 +41,14 @@ open class LMChatCreatePollHeader: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.font = Appearance.shared.fonts.headingFont1
         label.textColor = Appearance.shared.colors.gray1
-        label.text = "Devansh Mohata"
+        label.text = ""
         return label
     }()
     
     open private(set) lazy var pollQuestionTitle: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.font = Appearance.shared.fonts.buttonFont2
-        label.textColor = .blue // Appearance.shared.colors.appTintColor
+        label.textColor = Appearance.shared.colors.appTintColor
         label.text = "Poll question"
         return label
     }()
@@ -62,6 +62,7 @@ open class LMChatCreatePollHeader: LMView {
         textView.textColor = Appearance.shared.colors.gray4.withAlphaComponent(1)
         textView.text = textFieldPlaceholderText
         textView.font = Appearance.shared.fonts.textFont1
+        textView.backgroundColor = Appearance.shared.colors.white
         return textView
     }()
     
