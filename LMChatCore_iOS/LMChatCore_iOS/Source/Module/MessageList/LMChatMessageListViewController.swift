@@ -1545,7 +1545,29 @@ extension LMChatMessageListViewController: LMChatPollViewDelegate {
     
     public func didTapAddOption(for chatroomId: String, messageId: String) {
         
+        let alert = UIAlertController(title: Constants.shared.strings.addNewPollTitle, message: Constants.shared.strings.addNewPollMessage, preferredStyle: .alert)
+        alert.addTextField { pollTextField in
+            pollTextField.placeholder = "Type New Option"
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        alert.addAction(UIAlertAction(title: Constants.shared.strings.submit, style: .default, handler: { action in
+            if let textFields = alert.textFields,
+               let firstField = textFields.first,
+               let pollOption = firstField.text,
+               pollOption != "" {
+//                self.addPoll(withValue: pollOption)
+            }
+        }))
+        self.present(alert, animated: true)
     }
+}
+
+extension LMChatMessageListViewController: LMChatAddOptionProtocol {
     
-    
+    public func onAddOptionResponse(postID: String, success: Bool, errorMessage: String?) {
+        
+    }
+ 
 }

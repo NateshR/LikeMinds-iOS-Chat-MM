@@ -51,5 +51,7 @@ public extension Constants {
         public let dmRequestTextLimit = "Request can’t be more than 300 characters."
         public var submitVote = "Submit Vote"
         public var submit = "Submit"
+        public var addNewPollTitle = "Add new poll option!"
+        public var addNewPollMessage = "Enter an option that you think is missing in this poll. This can not be undone."
     }
 }
