@@ -1525,10 +1525,10 @@ extension LMChatMessageListViewController: LMChatPollViewDelegate {
     public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
         guard let poll = viewModel?.chatMessages.first(where: {$0.id == messageId}) else { return }
         if poll.isAnonymous == true {
-            self.showErrorAlert("Anonymous poll", message: "This being an anonymous poll, the names of the voters can not be disclosed.")
+            self.showErrorAlert(LMStringConstant.shared.anonymousPollTitle, message: LMStringConstant.shared.anonymousPollMessage)
             return
         } else if (poll.toShowResults == false) && (poll.expiryTime ?? 0) > Int(Date().millisecondsSince1970) {
-            self.showErrorAlert(nil, message: "The results will be visible after the poll has ended.")
+            self.showErrorAlert(nil, message: LMStringConstant.shared.endPollVisibleResultMessage)
             return
         }
         
@@ -1555,7 +1555,7 @@ extension LMChatMessageListViewController: LMChatPollViewDelegate {
         alert.addTextField { pollTextField in
             pollTextField.placeholder = "Type New Option"
         }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+        alert.addAction(UIAlertAction(title: LMStringConstant.shared.cancel, style: .cancel, handler: { _ in
             alert.dismiss(animated: true, completion: nil)
         }))
         alert.addAction(UIAlertAction(title: Constants.shared.strings.submit, style: .default, handler: {[weak self] action in

@@ -32,7 +32,6 @@ open class LMChatCreatePollHeader: LMView {
     
     open private(set) lazy var userProfileImage: LMImageView = {
         let image = LMImageView().translatesAutoresizingMaskIntoConstraints()
-        image.image = UIImage(systemName: "person.circle.fill")
         image.clipsToBounds = true
         return image
     }()

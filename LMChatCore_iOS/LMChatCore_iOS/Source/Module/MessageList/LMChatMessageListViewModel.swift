@@ -852,7 +852,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}) else { return }
         
         if (poll.expiryTime ?? 0) < Int(Date().millisecondsSince1970) {
-            delegate?.showToastMessage(message: "Poll ended. Vote can not be submitted now.")
+            delegate?.showToastMessage(message: LMStringConstant.shared.pollEndMessage)
             return
         } else if poll.polls?.contains(where: { $0.isSelected == true }) == true && messagesList[sectionIndex].data.first(where: {$0.messageId == messageId})?.pollData?.isEditingMode == false {
             return
@@ -1120,7 +1120,7 @@ extension LMChatMessageListViewModel {
             .build()
         LMChatClient.shared.submitPoll(request: request) {[weak self] response in
             guard let errorMessage = response.errorMessage else {
-                self?.delegate?.showError(withTitle: "Vote submission successful", message: "Your vote has been submitted successfully.", isPopVC: false)
+                self?.delegate?.showError(withTitle: LMStringConstant.shared.pollSubmittedTitle, message: LMStringConstant.shared.pollSubmittedMessage, isPopVC: false)
                 return
             }
             self?.delegate?.showToastMessage(message: errorMessage)

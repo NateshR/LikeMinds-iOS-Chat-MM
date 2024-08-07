@@ -55,5 +55,6 @@ public extension Constants {
         public var addNewPollTitle = "Add new poll option!"
         public var addNewPollMessage = "Enter an option that you think is missing in this poll. This can not be undone."
         public var addNewOption = " Add an option"
+        public var userCanVoteTitle = "User can vote for"
     }
 }

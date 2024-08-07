@@ -50,7 +50,7 @@ open class LMChatCreatePollMetaView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.font = Appearance.shared.fonts.buttonFont1
         label.textColor = Appearance.shared.colors.gray155
-        label.text = "User can vote for"
+        label.text = Constants.shared.strings.userCanVoteTitle
         return label
     }()
     

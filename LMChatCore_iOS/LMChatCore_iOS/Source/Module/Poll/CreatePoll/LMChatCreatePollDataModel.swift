@@ -23,7 +23,7 @@ public enum LMChatPollSelectState: Int, CustomStringConvertible, CaseIterable {
         }
     }
     
-    public var apiKey: String {
+    public var stateKey: String {
         switch self {
         case .exactly:
             return "exactly"
@@ -60,7 +60,7 @@ public enum LMChatPollSelectState: Int, CustomStringConvertible, CaseIterable {
 
 extension LMChatPollSelectState {
     init?(key: String) {
-        guard let type = LMChatPollSelectState.allCases.first(where: { $0.apiKey == key }) else { return nil }
+        guard let type = LMChatPollSelectState.allCases.first(where: { $0.stateKey == key }) else { return nil }
         self = type
     }
 }
