@@ -57,7 +57,7 @@ open class LMChatCreatePollQuestionView: LMView {
     
     open private(set) lazy var addOptionText: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.text = "Add an option..."
+        label.text = Constants.shared.strings.addNewOption
         label.font = Appearance.shared.fonts.buttonFont2
         label.textColor = Appearance.shared.colors.appTintColor
         return label

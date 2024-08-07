@@ -35,7 +35,7 @@ open class LMChatPollResultListScreen: LMViewController {
     
     // MARK: Data Variables
     public var userList: [LMChatParticipantCell.ContentModel] = []
-    public var viewmodel: LMChatPollResultListViewModel?
+    public var viewModel: LMChatPollResultListViewModel?
     
     
     // MARK: setupViews
@@ -66,8 +66,7 @@ open class LMChatPollResultListScreen: LMViewController {
     // MARK: viewDidLoad
     open override func viewDidLoad() {
         super.viewDidLoad()
-        
-        viewmodel?.fetchUserList()
+        viewModel?.fetchUserList()
     }
     
     
@@ -91,14 +90,6 @@ extension LMChatPollResultListScreen: UITableViewDataSource, UITableViewDelegate
         }
         
         return UITableViewCell()
-    }
-    
-    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat { 72 }
-    
-    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row == userList.count - 1 {
-            viewmodel?.fetchUserList()
-        }
     }
 }
 

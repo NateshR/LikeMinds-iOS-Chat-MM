@@ -10,17 +10,6 @@ import LikeMindsChatUI
 import GiphyUISDK
 import UIKit
 
-protocol LMChatMessageListControllerDelegate: AnyObject {
-    func postMessage(message: String?,
-                     filesUrls: [LMChatAttachmentMediaData]?,
-                     shareLink: String?,
-                     replyConversationId: String?,
-                     replyChatRoomId: String?, temporaryId: String?)
-    func postMessageWithAttachment()
-    func postMessageWithGifAttachment()
-    func postMessageWithAudioAttachment(with url: URL)
-}
-
 open class LMChatMessageListViewController: LMViewController {
     // MARK: UI Elements
     open private(set) lazy var bottomMessageBoxView: LMChatBottomMessageComposerView = { [unowned self] in
@@ -98,7 +87,6 @@ open class LMChatMessageListViewController: LMViewController {
     open private(set) var taggingViewHeightConstraints: NSLayoutConstraint?
     
     public var viewModel: LMChatMessageListViewModel?
-    weak var delegate: LMChatMessageListControllerDelegate?
     var linkDetectorTimer: Timer?
     var bottomTextViewContainerBottomConstraints: NSLayoutConstraint?
     
@@ -422,6 +410,12 @@ open class LMChatMessageListViewController: LMViewController {
 }
 
 extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
+    
+    public func reloadMessage(at index: IndexPath) {
+        guard let sectionData = viewModel?.messagesList[index.section] else { return }
+        messageListView.tableSections[index.section] = sectionData
+        messageListView.tableView.reloadData()
+    }
     
     public func approveRejectView(isShow: Bool) {
         if !isShow {
@@ -990,7 +984,7 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
             viewModel?.editChatMessage = nil
             viewModel?.postEditedConversation(text: message, shareLink: composeLink, conversation: chatMessage)
         } else {
-            delegate?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom, temporaryId: nil)
+            viewModel?.postMessage(message: message, filesUrls: nil, shareLink: composeLink, replyConversationId: viewModel?.replyChatMessage?.id, replyChatRoomId: viewModel?.replyChatroom, temporaryId: nil)
         }
         cancelReply()
         cancelLinkPreview()
@@ -1044,8 +1038,9 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
         
         if viewModel?.checkMemberRight(.createPolls) == true,
            viewModel?.isChatroomType(type: .directMessage) == false {
-            let microPollAction = UIAlertAction(title: "Poll", style: .default) { UIAlertAction in
-                NavigationScreen.shared.perform(.createPoll(delegate: nil), from: self, params: nil)
+            let microPollAction = UIAlertAction(title: "Poll", style: .default) {[weak self] alertView in
+                guard let self else { return }
+                NavigationScreen.shared.perform(.createPoll(delegate: self), from: self, params: nil)
             }
             let pollImage = Constants.shared.images.pollIcon
             microPollAction.setValue(pollImage, forKey: "image")
@@ -1528,19 +1523,30 @@ extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
 extension LMChatMessageListViewController: LMChatPollViewDelegate {
     
     public func didTapVoteCountButton(for chatroomId: String, messageId: String, optionID: String?) {
+        guard let poll = viewModel?.chatMessages.first(where: {$0.id == messageId}) else { return }
+        if poll.isAnonymous == true {
+            self.showErrorAlert(LMStringConstant.shared.anonymousPollTitle, message: LMStringConstant.shared.anonymousPollMessage)
+            return
+        } else if (poll.toShowResults == false) && (poll.expiryTime ?? 0) > Int(Date().millisecondsSince1970) {
+            self.showErrorAlert(nil, message: LMStringConstant.shared.endPollVisibleResultMessage)
+            return
+        }
         
+        guard let polls = viewModel?.chatMessages.first(where: {$0.id == messageId})?.polls,
+              let optionId = (optionID ?? polls.first?.id) else { return }
+        NavigationScreen.shared.perform(.pollResult(conversationId: messageId, pollOptions: DataModelConverter.shared.convertPollOptionsIntoResultPollOptions(polls), selectedOptionId: optionId), from: self, params: nil)
     }
     
     public func didTapToVote(for chatroomId: String, messageId: String, optionID: String) {
-        
+        viewModel?.pollOptionSelected(messageId: messageId, optionId: optionID)
     }
     
     public func didTapSubmitVote(for chatroomId: String, messageId: String) {
-        
+        viewModel?.pollSubmit(messageId: messageId)
     }
     
     public func editVoteTapped(for chatroomId: String, messageId: String) {
-        
+        viewModel?.editVote(messageId: messageId)
     }
     
     public func didTapAddOption(for chatroomId: String, messageId: String) {
@@ -1549,25 +1555,17 @@ extension LMChatMessageListViewController: LMChatPollViewDelegate {
         alert.addTextField { pollTextField in
             pollTextField.placeholder = "Type New Option"
         }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+        alert.addAction(UIAlertAction(title: LMStringConstant.shared.cancel, style: .cancel, handler: { _ in
             alert.dismiss(animated: true, completion: nil)
         }))
-        alert.addAction(UIAlertAction(title: Constants.shared.strings.submit, style: .default, handler: { action in
+        alert.addAction(UIAlertAction(title: Constants.shared.strings.submit, style: .default, handler: {[weak self] action in
             if let textFields = alert.textFields,
                let firstField = textFields.first,
                let pollOption = firstField.text,
                pollOption != "" {
-//                self.addPoll(withValue: pollOption)
+                self?.viewModel?.addPollOption(pollId: messageId, option: pollOption)
             }
         }))
         self.present(alert, animated: true)
     }
-}
-
-extension LMChatMessageListViewController: LMChatAddOptionProtocol {
-    
-    public func onAddOptionResponse(postID: String, success: Bool, errorMessage: String?) {
-        
-    }
- 
 }

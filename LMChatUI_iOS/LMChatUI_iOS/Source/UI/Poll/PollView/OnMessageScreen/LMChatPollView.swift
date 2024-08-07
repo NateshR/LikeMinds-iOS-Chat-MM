@@ -31,6 +31,11 @@ open class LMChatPollView: LMBasePollView {
         public var answerText: String
         public var isShowSubmitButton: Bool
         public var isShowEditVote: Bool
+        public var enableSubmitButton: Bool = false
+        public var tempSelectedOptions: [String] = []
+        public var isEditingMode: Bool = false
+        public var submitTypeText: String?
+        public var pollTypeText: String?
         
         public init(
             chatroomId: String,
@@ -45,7 +50,9 @@ open class LMChatPollView: LMBasePollView {
             isInstantPoll: Bool,
             allowAddOptions: Bool,
             isShowSubmitButton: Bool,
-            isShowEditVote: Bool
+            isShowEditVote: Bool,
+            submitTypeText: String?,
+            pollTypeText: String?
         ) {
             self.chatroomId = chatroomId
             self.messageId = messageId
@@ -60,8 +67,13 @@ open class LMChatPollView: LMBasePollView {
             self.answerText = answerText
             self.isShowSubmitButton = isShowSubmitButton
             self.isShowEditVote = isShowEditVote
+            self.submitTypeText = submitTypeText
+            self.pollTypeText = pollTypeText
         }
         
+        public var isPollExpired: Bool {
+            expiryDate < Date()
+        }
         
         public var expiryDateFormatted: String {
             let now = Date()
@@ -88,8 +100,23 @@ open class LMChatPollView: LMBasePollView {
             }
         }
         
+        public mutating func addTempSelectedOptions(_ option: String) {
+            self.tempSelectedOptions.append(option)
+        }
+        
+        public mutating func removeTempSelectedOptions(_ option: String) {
+            guard let index = self.tempSelectedOptions.firstIndex(where: {$0 == option}) else { return }
+            self.tempSelectedOptions.remove(at: index)
+        }
+        
         func getPluralText(withNumber number: Int, text: String) -> String {
             number > 1 ? "\(text)s" : text
+        }
+        
+        func pollTypeWithSubmitText() -> String {
+            let submitType = submitTypeText ?? ""
+            let pollType = pollTypeText ?? ""
+            return "\(pollType) \(Constants.shared.strings.dot) \(submitType)"
         }
     }
     
@@ -107,15 +134,16 @@ open class LMChatPollView: LMBasePollView {
     open private(set) lazy var topStack: LMStackView = {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
-        stack.alignment = .leading
+        stack.alignment = .fill
         stack.distribution = .fill
         stack.spacing = 8
         return stack
     }()
     
     open private(set) lazy var submitButton: LMButton = {
-        let button = LMButton.createButton(with: Constants.shared.strings.submitVote, image: nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 8, bottom: 12, right: 8))
+        let button = LMButton.createButton(with: Constants.shared.strings.submitVote, image:nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 20, bottom: 12, right: 20))
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = Appearance.shared.colors.white
         button.backgroundColor = Appearance.shared.colors.appTintColor
         return button
     }()
@@ -138,29 +166,43 @@ open class LMChatPollView: LMBasePollView {
         return stack
     }()
     
+    open private(set) lazy var topMetaStackSpacer: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        view.widthAnchor.constraint(greaterThanOrEqualToConstant: 4).isActive = true
+        return view
+    }()
+    
     open private(set) lazy var answerTitleLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.textColor = Appearance.shared.colors.appTintColor
         label.font = Appearance.shared.fonts.textFont1
-        label.text = "Be the first one to vote"
+        label.text = ""
         label.isUserInteractionEnabled = true
         return label
     }()
     
-    open private(set) lazy var editVoteLabel: LMLabel = {
-        let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.isUserInteractionEnabled = true
-        label.textColor = Appearance.shared.colors.appTintColor
-        label.font = Appearance.shared.fonts.textFont1
-        label.text = "Edit Vote"
-        return label
+    open private(set) lazy var editVoteButton: LMButton = {
+        let button = LMButton.createButton(with: Constants.shared.strings.editVote, image: nil, textColor: Appearance.shared.colors.white, textFont: Appearance.shared.fonts.buttonFont2, contentSpacing: .init(top: 12, left: 20, bottom: 12, right: 20))
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = Appearance.shared.colors.white
+        button.backgroundColor = Appearance.shared.colors.appTintColor
+        return button
     }()
     
     open private(set) lazy var addOptionButton: LMButton = {
-        let button = LMButton.createButton(with: "Add an Option", image: Constants.shared.images.plusIcon, textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 8, left: 0, bottom: 8, right: 0), imageSpacing: 4)
+        let button = LMButton.createButton(with: Constants.shared.strings.addNewOption, image: Constants.shared.images.plusIcon.withSystemImageConfig(pointSize: 12), textColor: Appearance.shared.colors.black, textFont: Appearance.shared.fonts.buttonFont1, contentSpacing: .init(top: 12, left: 0, bottom: 12, right: 0), imageSpacing: 2)
         button.tintColor = Appearance.shared.colors.black
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }()
+    
+    open private(set) lazy var questionAndSelectcount: LMStackView = {
+        let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = 2
+        return stack
     }()
     
     
@@ -178,20 +220,23 @@ open class LMChatPollView: LMBasePollView {
         containerView.addSubview(questionContainerStackView)
         
         questionContainerStackView.addArrangedSubview(topStack)
-        questionContainerStackView.addArrangedSubview(questionTitle)
-        questionContainerStackView.addArrangedSubview(optionSelectCountLabel)
+        questionContainerStackView.addArrangedSubview(questionAndSelectcount)
+        questionAndSelectcount.addArrangedSubview(questionTitle)
+        questionAndSelectcount.addArrangedSubview(optionSelectCountLabel)
         
         containerView.addSubview(optionStackView)
         containerView.addSubview(bottomStack)
         
-        bottomStack.addArrangedSubview(bottomMetaStack)
         bottomStack.addArrangedSubview(addOptionButton)
+        bottomStack.addArrangedSubview(bottomMetaStack)
         bottomStack.addArrangedSubview(submitButton)
+        bottomStack.addArrangedSubview(editVoteButton)
         
         bottomMetaStack.addArrangedSubview(answerTitleLabel)
         topStack.addArrangedSubview(pollTypeLabel)
         topStack.addArrangedSubview(topMetaStack)
         topMetaStack.addArrangedSubview(pollImageView)
+        topMetaStack.addArrangedSubview(topMetaStackSpacer)
         topMetaStack.addArrangedSubview(expiryDateLabel)
     }
     
@@ -201,20 +246,20 @@ open class LMChatPollView: LMBasePollView {
         super.setupLayouts()
         
         pinSubView(subView: containerView)
+        let standardMargin: CGFloat = 8
+        questionContainerStackView.addConstraint(top: (containerView.topAnchor, 4),
+                                                 leading: (containerView.leadingAnchor, standardMargin),
+                                                 trailing: (containerView.trailingAnchor, -standardMargin))
         
-        questionContainerStackView.addConstraint(top: (containerView.topAnchor, 16),
-                                                 leading: (containerView.leadingAnchor, 16),
-                                                 trailing: (containerView.trailingAnchor, -16))
-        
-        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, 16),
-                                      leading: (questionContainerStackView.leadingAnchor, -8),
-                                      trailing: (questionContainerStackView.trailingAnchor, 8))
+        optionStackView.addConstraint(top: (questionContainerStackView.bottomAnchor, standardMargin + 8),
+                                      leading: (questionContainerStackView.leadingAnchor, 0),
+                                      trailing: (questionContainerStackView.trailingAnchor, 0))
         
         addOptionButton.addConstraint(leading: (bottomStack.leadingAnchor, 0),
                                       trailing: (bottomStack.trailingAnchor, 0))
         
-        bottomStack.addConstraint(top: (optionStackView.bottomAnchor, 16),
-                                  bottom: (containerView.bottomAnchor, -16),
+        bottomStack.addConstraint(top: (optionStackView.bottomAnchor, standardMargin),
+                                  bottom: (containerView.bottomAnchor, -standardMargin),
                                   leading: (optionStackView.leadingAnchor, 0),
                                   trailing: (optionStackView.trailingAnchor, 0))
         
@@ -228,12 +273,12 @@ open class LMChatPollView: LMBasePollView {
     open override func setupAppearance() {
         super.setupAppearance()
         
-        addOptionButton.layer.borderColor = Appearance.shared.colors.gray155.cgColor
-        expiryDateLabel.backgroundColor = Appearance.shared.colors.appTintColor
+        addOptionButton.layer.borderColor = Appearance.shared.colors.pollOptionBorderColor.cgColor
         addOptionButton.layer.borderWidth = 1
         addOptionButton.layer.cornerRadius = 8
-        expiryDateLabel.cornerRadius(with: 12)
+        expiryDateLabel.cornerRadius(with: 11)
         submitButton.layer.cornerRadius = 8
+        editVoteButton.layer.cornerRadius = 8
     }
     
     
@@ -242,7 +287,7 @@ open class LMChatPollView: LMBasePollView {
         super.setupActions()
         
         submitButton.addTarget(self, action: #selector(didTapSubmitButton), for: .touchUpInside)
-        editVoteLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(editVoteTapped)))
+        editVoteButton.addTarget(self, action: #selector(editVoteTapped), for: .touchUpInside)
         answerTitleLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(voteCountTapped)))
         addOptionButton.addTarget(self, action: #selector(didTapAddOption), for: .touchUpInside)
     }
@@ -287,7 +332,7 @@ open class LMChatPollView: LMBasePollView {
         self.messageId = data.messageId
         
         questionTitle.text = data.question
-        
+        pollTypeLabel.text = data.pollTypeWithSubmitText()
         optionSelectCountLabel.text = data.optionStringFormatted
         optionSelectCountLabel.isHidden = !data.isShowOption
         
@@ -301,15 +346,16 @@ open class LMChatPollView: LMBasePollView {
         }
         
         answerTitleLabel.text = data.answerText
-        
-//        let expiryText = "• \(data.expiryDateFormatted)\(data.isShowEditVote ? " •": "")"
         expiryDateLabel.text = data.expiryDateFormatted
+        expiryDateLabel.backgroundColor = data.isPollExpired ? Appearance.shared.colors.red : Appearance.shared.colors.appTintColor
         
         addOptionButton.isHidden = !data.allowAddOptions
         
-        editVoteLabel.isHidden = !data.isShowEditVote
+        editVoteButton.isHidden = !data.isShowEditVote
         
         submitButton.isHidden = !data.isShowSubmitButton
+        submitButton.isEnabled = data.enableSubmitButton
+        submitButton.alpha = data.enableSubmitButton ? 1 : 0.5
     }
 }
 

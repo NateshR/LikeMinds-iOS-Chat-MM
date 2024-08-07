@@ -56,7 +56,7 @@ open class LMChatPollResultCollectionCell: LMCollectionViewCell {
     
     // MARK: Data Variables
     open var selectedPollColor: UIColor {
-        UIColor(r: 80, g: 70, b: 229)
+        Appearance.shared.colors.appTintColor
     }
     
     open var notSelectedPollColor: UIColor {
@@ -90,7 +90,7 @@ open class LMChatPollResultCollectionCell: LMCollectionViewCell {
         sepratorView.setHeightConstraint(with: 4, priority: .required)
         sepratorView.layer.cornerRadius = 2
         
-        containerView.pinSubView(subView: stackView, padding: .init(top: 8, left: 8, bottom: -8, right: -8))
+        containerView.pinSubView(subView: stackView, padding: .init(top: 12, left: 8, bottom: -12, right: -8))
     }
     
     

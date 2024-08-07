@@ -30,9 +30,9 @@ open class LMBasePollOptionView: LMView {
     
     open private(set) lazy var optionLabel: LMLabel = {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
-        label.font = Appearance.shared.fonts.headingFont1
+        label.font = Appearance.shared.fonts.textFont1
         label.textColor = Appearance.shared.colors.gray51
-        label.text = "Option Text"
+        label.text = ""
         return label
     }()
     
@@ -40,7 +40,7 @@ open class LMBasePollOptionView: LMView {
         let label = LMLabel().translatesAutoresizingMaskIntoConstraints()
         label.font = Appearance.shared.fonts.subHeadingFont1
         label.textColor = Appearance.shared.colors.blueGray.withAlphaComponent(0.7)
-        label.text = "Added By Text"
+        label.text = ""
         return label
     }()
 }

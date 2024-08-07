@@ -17,10 +17,9 @@ open class LMChatPollResultScreen: LMViewController {
     open private(set) lazy var optionView: LMCollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .horizontal
-        
         let collection = LMCollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collection.translatesAutoresizingMaskIntoConstraints = false
-        collection.registerCell(type: LMChatPollResultCollectionCell.self)
+        collection.registerCell(type: LMUIComponents.shared.resultPollOptionCell)
         collection.dataSource = self
         collection.delegate = self
         collection.bounces = false
@@ -36,10 +35,15 @@ open class LMChatPollResultScreen: LMViewController {
         return controller
     }()
     
+    open private(set) lazy var optionViewBottomLine: LMView = {
+        let view = LMView().translatesAutoresizingMaskIntoConstraints()
+        return view
+    }()
+    
     // MARK: Data Variables
     public var optionList: [LMChatPollResultCollectionCell.ContentModel] = []
     public var userListVC: [UIViewController] = []
-    public var viewmodel: LMChatPollResultViewModel?
+    public var viewModel: LMChatPollResultViewModel?
     
     
     open override func setupViews() {
@@ -47,6 +51,7 @@ open class LMChatPollResultScreen: LMViewController {
         
         view.addSubview(containerView)
         containerView.addSubview(optionView)
+        containerView.addSubview(optionViewBottomLine)
         
         self.addChild(pageController)
         containerView.addSubview(pageController.view)
@@ -59,13 +64,18 @@ open class LMChatPollResultScreen: LMViewController {
         view.safeAreaPinSubView(subView: containerView)
         
         optionView.addConstraint(top: (containerView.topAnchor, 0),
-                                 leading: (containerView.leadingAnchor, 16),
-                                 trailing: (containerView.trailingAnchor, -16))
+                                 leading: (containerView.leadingAnchor, 0),
+                                 trailing: (containerView.trailingAnchor, 0))
         optionView.setHeightConstraint(with: 56, priority: .required)
+        
+        optionViewBottomLine.addConstraint(top: (optionView.bottomAnchor, 0),
+                                 leading: (optionView.leadingAnchor, 0),
+                                 trailing: (optionView.trailingAnchor, 0))
+        optionViewBottomLine.setHeightConstraint(with: 1, priority: .required)
         
         pageController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        pageController.view.addConstraint(top: (optionView.bottomAnchor, 0),
+        pageController.view.addConstraint(top: (optionViewBottomLine.bottomAnchor, 0),
                                           bottom: (containerView.bottomAnchor, 8),
                                           leading: (containerView.leadingAnchor, 0),
                                           trailing: (containerView.trailingAnchor, 0))
@@ -78,6 +88,8 @@ open class LMChatPollResultScreen: LMViewController {
         
         view.backgroundColor = Appearance.shared.colors.white
         optionView.backgroundColor = Appearance.shared.colors.clear
+        optionViewBottomLine.backgroundColor = Appearance.shared.colors.previewBackgroundColor
+//        optionViewBottomLine.addShadow()
     }
     
     
@@ -85,7 +97,7 @@ open class LMChatPollResultScreen: LMViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         setNavigationTitleAndSubtitle(with: "Poll Results", subtitle: nil, alignment: .center)
-        viewmodel?.initializeView()
+        viewModel?.initializeView()
     }
 }
 
@@ -98,7 +110,7 @@ extension LMChatPollResultScreen: UICollectionViewDataSource, UICollectionViewDe
     
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let data = optionList[safe: indexPath.row],
-           let cell = collectionView.dequeueReusableCell(with: LMChatPollResultCollectionCell.self, for: indexPath) {
+           let cell = collectionView.dequeueReusableCell(with: LMUIComponents.shared.resultPollOptionCell, for: indexPath) {
             cell.configure(with: data)
             return cell
         }
@@ -143,7 +155,7 @@ extension LMChatPollResultScreen: LMChatPollResultViewModelProtocol {
     
     public func setupViewControllers(with pollID: String, optionList: [String], selectedID: Int) {
         optionList.forEach {
-            let viewController = LMChatPollResultListViewModel.createModule(for: pollID, optionID: $0)
+            let viewController = LMChatPollResultListViewModel.createModule(for: pollID, optionId: $0)
             userListVC.append(viewController)
         }
         

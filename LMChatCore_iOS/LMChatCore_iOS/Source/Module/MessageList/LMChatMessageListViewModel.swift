@@ -22,6 +22,7 @@ public protocol LMMessageListViewModelProtocol: LMBaseViewControllerProtocol {
     func directMessageStatus()
     func viewProfile(route: String)
     func approveRejectView(isShow: Bool)
+    func reloadMessage(at index: IndexPath)
 }
 
 public typealias ChatroomDetailsExtra = (chatroomId: String, conversationId: String?, reportedConversationId: String?)
@@ -68,7 +69,6 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let viewmodel = Self.init(delegate: viewcontroller, chatroomExtra: (chatroomId, conversationId, nil))
         
         viewcontroller.viewModel = viewmodel
-        viewcontroller.delegate = viewmodel
         return viewcontroller
     }
     
@@ -417,34 +417,57 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     func convertPollData(_ conversation: Conversation) -> LMChatPollView.ContentModel? {
         guard conversation.state == .microPoll else { return nil }
         let pollData: LMChatPollView.ContentModel = .init(chatroomId: conversation.chatroomId ?? "",
-                                                                 messageId: conversation.id ?? "",
-                                                                 question: conversation.answer,
-                                                                 answerText: conversation.pollAnswerText ?? "",
-                                                                 options: getPollOptions(conversation.polls),
-                                                                 expiryDate: Date(milliseconds: Double(conversation.expiryTime ?? 0)),
-                                                                 optionState: LMChatPollSelectState(rawValue:(conversation.multipleSelectState ?? 0))?.description ?? "",
-                                                                 optionCount: conversation.polls?.count ?? 0,
-                                                                 isAnonymousPoll: conversation.isAnonymous ?? false,
-                                                                 isInstantPoll: conversation.pollType == 0,
-                                                                 allowAddOptions: conversation.allowAddOption ?? false,
-                                                                 isShowSubmitButton: true,
-                                                                 isShowEditVote: true)
+                                                          messageId: conversation.id ?? "",
+                                                          question: conversation.answer,
+                                                          answerText: conversation.pollAnswerText ?? "",
+                                                          options: getPollOptions(conversation.polls, conversation: conversation),
+                                                          expiryDate: Date(milliseconds: Double(conversation.expiryTime ?? 0)),
+                                                          optionState: LMChatPollSelectState(rawValue:(conversation.multipleSelectState ?? 0))?.description ?? "",
+                                                          optionCount: conversation.multipleSelectNum ?? 0,
+                                                          isAnonymousPoll: conversation.isAnonymous ?? false,
+                                                          isInstantPoll: conversation.pollType == 0,
+                                                          allowAddOptions: isAllowAddOption(conversation),
+                                                          isShowSubmitButton: isShowSubmitButton(conversation),
+                                                          isShowEditVote: isShowEditToVoteAgain(conversation),
+                                                          submitTypeText: conversation.submitTypeText,
+                                                          pollTypeText: conversation.pollTypeText)
         return pollData
     }
     
-    func getPollOptions(_ polls: [Poll]?) -> [LMChatPollOptionView.ContentModel] {
+    func isAllowAddOption(_ conversation: Conversation) -> Bool {
+        let isExpired = (conversation.expiryTime ?? 0) < Int(Date().millisecondsSince1970)
+        let isAlreadyVoted = conversation.polls?.contains(where: {$0.isSelected == true}) ?? false
+        return !isExpired && !isAlreadyVoted && (conversation.allowAddOption ?? false)
+    }
+    
+    func isShowEditToVoteAgain(_ conversation: Conversation) -> Bool {
+        let isDeffered = conversation.pollType == 1
+        let isAlreadyVoted = conversation.polls?.contains(where: {$0.isSelected == true}) ?? false
+        let isExpired = (conversation.expiryTime ?? 0) < Int(Date().millisecondsSince1970)
+        return !isExpired && isAlreadyVoted && isDeffered
+    }
+    
+    func isShowSubmitButton(_ conversation: Conversation) -> Bool {
+        let isAlreadyVoted = conversation.polls?.contains(where: {$0.isSelected == true}) ?? false
+        let isExpired = (conversation.expiryTime ?? 0) < Int(Date().millisecondsSince1970)
+        return !isExpired && !isAlreadyVoted && (conversation.multipleSelectState != nil)
+    }
+    
+    func getPollOptions(_ polls: [Poll]?, conversation: Conversation) -> [LMChatPollOptionView.ContentModel] {
         guard let polls else { return [] }
-        let options = polls.map { poll in
+        let isAllowAddOption = conversation.allowAddOption ?? false
+        let pollOptions = polls.sorted(by: {($0.id ?? "0") < ($1.id ?? "0")})
+        let options = pollOptions.map { poll in
             return LMChatPollOptionView.ContentModel(pollId: poll.conversationId ?? "",
-                         optionId: poll.id ?? "",
-                         option: poll.text ?? "",
-                         addedBy: poll.member?.name ?? "",
-                         voteCount: poll.noVotes ?? 0,
-                         votePercentage: Double(poll.percentage ?? 0),
-                         isSelected: poll.isSelected ?? false,
-                         showVoteCount: true,
-                         showProgressBar: true,
-                         showTickButton: poll.isSelected ?? false)
+                                                     optionId: poll.id ?? "",
+                                                     option: poll.text ?? "",
+                                                     addedBy: (isAllowAddOption ? (poll.member?.name ?? "") : ""),
+                                                     voteCount: poll.noVotes ?? 0,
+                                                     votePercentage: Double(poll.percentage ?? 0),
+                                                     isSelected: poll.isSelected ?? false,
+                                                     showVoteCount: conversation.toShowResults ?? false,
+                                                     showProgressBar: conversation.toShowResults ?? false,
+                                                     showTickButton: poll.isSelected ?? false)
         }
         return options
     }
@@ -821,6 +844,111 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
          LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
          LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
+    
+    func pollOptionSelected(messageId: String, optionId: String) {
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        guard let poll = chatMessages.first(where: {$0.id == messageId}),
+        let conversationDate = poll.date,
+        let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}) else { return }
+        
+        if (poll.expiryTime ?? 0) < Int(Date().millisecondsSince1970) {
+            delegate?.showToastMessage(message: LMStringConstant.shared.pollEndMessage)
+            return
+        } else if poll.polls?.contains(where: { $0.isSelected == true }) == true && messagesList[sectionIndex].data.first(where: {$0.messageId == messageId})?.pollData?.isEditingMode == false {
+            return
+        } else if (poll.multipleSelectState == nil) {
+            guard let option = poll.polls?.filter({$0.id == optionId}).first else { return }
+            option.isSelected = true
+            option.noVotes = (option.noVotes ?? 0) + 1
+            submitPollOption(pollId: messageId, options: [option])
+        } else {
+            let multipleSelectState = LMChatPollSelectState(rawValue: poll.multipleSelectState ?? -1)
+            let selectionCount = poll.multipleSelectNum ?? 0
+            if let rowIndex = messagesList[sectionIndex].data.firstIndex(where: {$0.messageId == messageId}) {
+                var sectionData = messagesList[sectionIndex]
+                var rowData = sectionData.data[rowIndex]
+                guard var pollData = rowData.pollData,
+                      let optionIndex = pollData.options.firstIndex(where: {$0.optionId == optionId}) else { return }
+                if pollData.tempSelectedOptions.isEmpty {
+                    pollData.options = pollData.options.map{ option in
+                        var tempOptions = option
+                        tempOptions.showTickButton = false
+                        return tempOptions
+                    }
+                } else {
+                    if pollData.tempSelectedOptions.firstIndex(of: optionId) == nil && (multipleSelectState?.checkValidity(with: pollData.tempSelectedOptions.count + 1, allowedCount: selectionCount)) == false {
+                        delegate?.showToastMessage(message: multipleSelectState?.toastMessage(with: pollData.tempSelectedOptions.count, allowedCount: selectionCount))
+                        return
+                    }
+                }
+ 
+                if pollData.tempSelectedOptions.firstIndex(of: optionId) == nil {
+                    pollData.addTempSelectedOptions(optionId)
+                    pollData.options[optionIndex].showTickButton = true
+                } else {
+                    pollData.removeTempSelectedOptions(optionId)
+                    pollData.options[optionIndex].showTickButton = false
+                }
+                pollData.enableSubmitButton = (multipleSelectState?.checkValidity(with: pollData.tempSelectedOptions.count, allowedCount: selectionCount)) ?? false
+                rowData.pollData = pollData
+                sectionData.data[rowIndex] = rowData
+                messagesList[sectionIndex] = sectionData
+                delegate?.reloadMessage(at: IndexPath(row: rowIndex, section: sectionIndex))
+            }
+        }
+    }
+    
+    func pollSubmit(messageId: String) {
+        guard let poll = chatMessages.first(where: {$0.id == messageId}) else { return }
+        let multipleSelectState = LMChatPollSelectState(rawValue: poll.multipleSelectState ?? -1)
+        let selectionCount = poll.multipleSelectNum ?? 0
+        let conversationDate = poll.date ?? ""
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}),
+           let rowData = messagesList[sectionIndex].data.first(where: {$0.messageId == messageId}),
+           let pollData = rowData.pollData {
+            if (multipleSelectState?.checkValidity(with: pollData.tempSelectedOptions.count, allowedCount: selectionCount)) == true {
+                let options = pollData.tempSelectedOptions.compactMap { optionId in
+                    let pollOpt = poll.polls?.first(where:{ $0.id == optionId})
+                    pollOpt?.isSelected = true
+                    pollOpt?.noVotes = (pollOpt?.noVotes ?? 0) + 1
+                    return pollOpt
+                }
+                submitPollOption(pollId: messageId, options: options)
+            } else {
+                delegate?.showToastMessage(message: multipleSelectState?.toastMessage(with: pollData.tempSelectedOptions.count, allowedCount: selectionCount))
+            }
+        }
+    }
+    
+    func editVote(messageId: String) {
+        guard let poll = chatMessages.first(where: {$0.id == messageId}) else { return }
+        let conversationDate = poll.date ?? ""
+        messagesList.sort(by: {$0.timestamp < $1.timestamp})
+        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}),
+           let rowIndex = messagesList[sectionIndex].data.firstIndex(where: {$0.messageId == messageId}) {
+            var sectionData = messagesList[sectionIndex]
+            var rowData = sectionData.data[rowIndex]
+            guard var pollData = rowData.pollData else { return }
+            pollData.options = pollData.options.map{ option in
+                var tempOptions = option
+                tempOptions.showTickButton = false
+                tempOptions.showVoteCount = false
+                tempOptions.showProgressBar = false
+                return tempOptions
+            }
+            pollData.tempSelectedOptions = []
+            pollData.enableSubmitButton = false
+            pollData.isShowEditVote = false
+            pollData.allowAddOptions = poll.allowAddOption ?? false
+            pollData.isShowSubmitButton = true
+            pollData.isEditingMode = true
+            rowData.pollData = pollData
+            sectionData.data[rowIndex] = rowData
+            messagesList[sectionIndex] = sectionData
+            delegate?.reloadMessage(at: IndexPath(row: rowIndex, section: sectionIndex))
+        }
+    }
 }
 
 extension LMChatMessageListViewModel: ConversationClientObserver {
@@ -913,23 +1041,103 @@ extension LMChatMessageListViewModel: ConversationChangeDelegate {
     
 }
 
-extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
+// Post conversation api calls
+extension LMChatMessageListViewModel {
     
-    func postPollConversation(pollData: LMChatCreatePollDataModel) {
+    func postPollConversation(pollData: LMChatCreatePollDataModel, temporaryId: String? = nil) {
+        guard let communityId = chatroomViewData?.communityId else { return }
+        if !trackLastConversationExist {
+            fetchBottomConversations()
+        }
+        let temporaryId = temporaryId ?? ValueUtils.getTemporaryId()
+        
+        let selectStateCount = pollData.selectStateCount == 0 ? nil : pollData.selectStateCount
+        let selectState =  selectStateCount == nil ? nil : pollData.selectState.rawValue
+        
         let postPollConversationRequest = PostPollConversationRequest.builder()
             .chatroomId(self.chatroomId)
             .text(pollData.pollQuestion)
-            .polls([])
+            .temporaryId(temporaryId)
+            .polls(pollData.pollOptions.map({ option in
+                return Poll.builder()
+                    .text(option)
+                    .member(loggedInUser())
+                    .build()
+            }))
             .pollType(pollData.isInstantPoll ? 0 : 1)
             .expiryTime(Int(pollData.expiryTime.millisecondsSince1970))
             .isAnonymous(pollData.isAnonymous)
             .allowAddOption(pollData.allowAddOptions)
-            .multipleSelectNo(pollData.selectStateCount)
-            .multipleSelectState(pollData.selectState.rawValue)
+            .multipleSelectNo(selectStateCount)
+            .multipleSelectState(selectState)
+            .state(.microPoll)
             .build()
+        let tempConversation = saveTemporaryPollConversation(uuid: UserPreferences.shared.getClientUUID() ?? "", communityId: communityId, request: postPollConversationRequest, fileUrls: nil)
+        insertOrUpdateConversationIntoList(tempConversation)
+        delegate?.scrollToBottom(forceToBottom: true)
         
-        LMChatClient.shared.postPollConversation(request: postPollConversationRequest) { response in
-            
+        LMChatClient.shared.postPollConversation(request: postPollConversationRequest) {[weak self] response in
+            guard let self, let conversation = response.data else {
+                self?.delegate?.showToastMessage(message: response.errorMessage)
+                self?.updateConversationUploadingStatus(messageId: temporaryId, withStatus: .failed)
+                return
+            }
+            onConversationPosted(response: conversation.conversation, updatedFileUrls: nil)
+        }
+    }
+    
+    private func saveTemporaryPollConversation(uuid: String,
+                                           communityId: String,
+                                           request: PostPollConversationRequest,
+                                           fileUrls: [LMChatAttachmentMediaData]?) -> Conversation {
+        var conversation = DataModelConverter.shared.convertPostPollConversation(uuid: uuid, communityId: communityId, request: request)
+        
+        let saveConversationRequest = SaveConversationRequest.builder()
+            .conversation(conversation)
+            .build()
+        LMChatClient.shared.saveTemporaryConversation(request: saveConversationRequest)
+        if let replyId = conversation.replyConversationId {
+            let replyConversationRequest = GetConversationRequest.builder().conversationId(replyId).build()
+            if let replyConver = LMChatClient.shared.getConversation(request: replyConversationRequest)?.data?.conversation {
+                conversation = conversation.toBuilder()
+                    .replyConversation(replyConver)
+                    .build()
+            }
+        }
+        let member = LMChatClient.shared.getCurrentMember()?.data?.member
+        conversation = conversation.toBuilder()
+            .member(member)
+            .build()
+        return conversation
+    }
+    
+    
+    private func submitPollOption(pollId: String, options: [Poll]) {
+        let request = SubmitPollRequest.builder()
+            .chatroomId(self.chatroomId)
+            .conversationId(pollId)
+            .polls(options)
+            .build()
+        LMChatClient.shared.submitPoll(request: request) {[weak self] response in
+            guard let errorMessage = response.errorMessage else {
+                self?.delegate?.showError(withTitle: LMStringConstant.shared.pollSubmittedTitle, message: LMStringConstant.shared.pollSubmittedMessage, isPopVC: false)
+                return
+            }
+            self?.delegate?.showToastMessage(message: errorMessage)
+        }
+    }
+    
+    func addPollOption(pollId: String, option: String) {
+        let request = AddPollOptionRequest.builder()
+            .conversationId(pollId)
+            .poll(Poll.builder()
+                .text(option)
+                .member(loggedInUser())
+                .build())
+            .build()
+        LMChatClient.shared.addPollOption(request: request) {[weak self] response in
+            guard let errorMessage = response.errorMessage else { return }
+            self?.delegate?.showToastMessage(message: errorMessage)
         }
     }
     
@@ -1383,19 +1591,5 @@ extension LMChatMessageListViewModel: LMChatMessageListControllerDelegate {
         
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
-    }
-    
-    func postMessageWithAttachment() {
-        
-    }
-    
-    func postMessageWithGifAttachment() {
-        
-    }
-    
-    func postMessageWithAudioAttachment(with url: URL) {
-        print(">>>Audio URL<<<")
-        print(url)
-        print(">>>Audio URL<<<")
     }
 }
