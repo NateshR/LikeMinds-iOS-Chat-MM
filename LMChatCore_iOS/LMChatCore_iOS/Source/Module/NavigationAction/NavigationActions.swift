@@ -26,6 +26,7 @@ enum NavigationActions {
     case mediaPreview(data: LMChatMediaPreviewViewModel.DataModel, startIndex: Int)
     case searchScreen
     case emojiPicker(conversationId: String?, chatroomId: String?)
+    case createPoll(delegate: LMChatCreatePollViewDelegate?)
 //    case giphy
     
 }
@@ -89,6 +90,9 @@ class NavigationScreen: NavigationScreenProtocol {
             picker.chatroomId = chatroomId
             picker.delegate = source as? LMChatMessageListViewController
             source.present(picker, animated: true)
+        case .createPoll(let delegate):
+            guard let createPollScreen = try? LMChatCreatePollViewModel.createModule(withDelegate: delegate) else { return }
+            source.navigationController?.pushViewController(createPollScreen, animated: true)
 //        case .giphy:
 //            let giphy = GiphyViewController()
 //            giphy.mediaTypeConfig = [.gifs]

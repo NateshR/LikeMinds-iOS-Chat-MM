@@ -77,4 +77,12 @@ public struct LMUIComponents {
     public var searchMessageCell: LMChatSearchMessageCell.Type = LMChatSearchMessageCell.self
     public var searchChatroomCell: LMChatSearchChatroomCell.Type = LMChatSearchChatroomCell.self
     public var approveRejectRequestView: LMChatApproveRejectView.Type = LMChatApproveRejectView.self
+    
+//    public var createPollDisplayView: LMChatCreateDisplayPollView.Type = LMChatCreateDisplayPollView.self
+//    public var createPollDisplayWidget: LMChatDisplayCreatePollWidget.Type = LMChatDisplayCreatePollWidget.self
+    public var createPollHeaderView: LMChatCreatePollHeader.Type = LMChatCreatePollHeader.self
+    public var createPollQuestionView: LMChatCreatePollQuestionView.Type = LMChatCreatePollQuestionView.self
+    public var createPollDateView: LMChatCreatePollDateView.Type = LMChatCreatePollDateView.self
+    public var createPollMetaView: LMChatCreatePollMetaView.Type = LMChatCreatePollMetaView.self
+    public var createPollOptionCell: LMChatCreatePollOptionWidget.Type = LMChatCreatePollOptionWidget.self
 }

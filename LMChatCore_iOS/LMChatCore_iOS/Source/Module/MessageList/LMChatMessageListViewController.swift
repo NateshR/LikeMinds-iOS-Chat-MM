@@ -1041,6 +1041,16 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
         alert.addAction(audio)
         alert.addAction(document)
         
+        if viewModel?.checkMemberRight(.createPolls) == true,
+           viewModel?.isChatroomType(type: .directMessage) == false {
+            let microPollAction = UIAlertAction(title: "Poll", style: .default) { UIAlertAction in
+                NavigationScreen.shared.perform(.createPoll(delegate: nil), from: self, params: nil)
+            }
+            let pollImage = Constants.shared.images.pollIcon
+            microPollAction.setValue(pollImage, forKey: "image")
+            alert.addAction(microPollAction)
+        }
+        
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
     }
@@ -1503,3 +1513,13 @@ extension LMChatMessageListViewController: LMFeedTaggingTextViewProtocol {
     }
 }
 
+extension LMChatMessageListViewController: LMChatCreatePollViewDelegate {
+    
+    public func updatePollDetails(with data: LMChatCreatePollDataModel) {
+        viewModel?.postPollConversation(pollData: data)
+    }
+    
+    public func cancelledPollCreation() {
+        
+    }
+}
