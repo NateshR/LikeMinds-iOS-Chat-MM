@@ -204,7 +204,7 @@ extension LMChatPollResultScreen: UIPageViewControllerDataSource, UIPageViewCont
             }
             
             optionView.reloadData()
-            
+            viewModel?.trackEventForPageSwipe(optionId: optionList[index].optionID)
             DispatchQueue.main.async { [weak optionView] in
                 optionView?.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
             }

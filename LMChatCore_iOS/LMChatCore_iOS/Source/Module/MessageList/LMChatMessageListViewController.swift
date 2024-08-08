@@ -424,7 +424,7 @@ extension LMChatMessageListViewController: LMMessageListViewModelProtocol {
     }
     
     public func viewProfile(route: String) {
-        self.showAlertWithActions(title: "View Profile", message: "Handle route \(route) to view profile! ", withActions: nil)
+        LMChatCore.shared.coreCallback?.userProfileViewHandle(withRoute: route)
     }
     
     public func showToastMessage(message: String?) {
@@ -1416,7 +1416,7 @@ extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroom
     }
     
     public func didTapOnProfileLink(route: String) {
-        print(route)
+        LMChatCore.shared.coreCallback?.userProfileViewHandle(withRoute: route)
     }
 
 }
@@ -1534,6 +1534,7 @@ extension LMChatMessageListViewController: LMChatPollViewDelegate {
         
         guard let polls = viewModel?.chatMessages.first(where: {$0.id == messageId})?.polls,
               let optionId = (optionID ?? polls.first?.id) else { return }
+        viewModel?.trackEventForPoll(eventName: .pollAnswersViewed, pollId: messageId)
         NavigationScreen.shared.perform(.pollResult(conversationId: messageId, pollOptions: DataModelConverter.shared.convertPollOptionsIntoResultPollOptions(polls), selectedOptionId: optionId), from: self, params: nil)
     }
     

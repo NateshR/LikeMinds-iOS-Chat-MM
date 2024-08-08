@@ -102,14 +102,27 @@ public enum LMChatAnalyticsEventName: String {
     // Home and UI Events
     case homeFeedPageOpened = "Home feed page opened"
     case emoticonTrayOpened = "Emoticon Tray Opened"
+    
+    // Poll events
+    case pollVoted = "Poll voted"
+    case pollVotingSkiped = "Poll voting skipped"
+    case pollVotingEdited = "Poll voting edited"
+    case pollCreationCompleted = "Poll creation completed"
+    case pollOptionCreated = "Poll option created"
+    case pollAnswersViewed = "Poll answers viewed"
+    case pollResultsToggled = "Poll results toggled"
+    
 }
 
 
 public enum LMChatAnalyticsKeys: String {
     case chatroomId = "chatroom_id"
     case chatroomName = "chatroom_name"
+    case chatroomTitle = "chatroom_title"
     case chatroomType = "chatroom_type"
     case communityName = "community_name"
+    case conversationId = "conversation_id"
+    case pollOptionId = "poll_option_id"
     case messageId = "message_id"
     case communityId = "community_id"
     case uuid = "uuid"

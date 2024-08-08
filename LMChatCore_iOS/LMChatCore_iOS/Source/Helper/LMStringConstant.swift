@@ -12,6 +12,7 @@ public struct LMStringConstant {
     
     public static var shared = Self()
     
+    public var profileRoute = "route://member_profile/"
     public var appName = "LM Chat"
     public var genericErrorMessage = "Something went wrong!"
     public var maxUploadSizeErrorMessage = "Max Upload Size is %d"
