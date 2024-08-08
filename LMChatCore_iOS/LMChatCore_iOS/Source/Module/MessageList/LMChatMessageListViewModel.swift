@@ -444,7 +444,8 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         let isDeffered = conversation.pollType == 1
         let isAlreadyVoted = conversation.polls?.contains(where: {$0.isSelected == true}) ?? false
         let isExpired = (conversation.expiryTime ?? 0) < Int(Date().millisecondsSince1970)
-        return !isExpired && isAlreadyVoted && isDeffered
+        let isMultipleState = (conversation.multipleSelectState != nil)
+        return !isExpired && isAlreadyVoted && isDeffered && isMultipleState
     }
     
     func isShowSubmitButton(_ conversation: Conversation) -> Bool {
@@ -671,7 +672,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         case .unMute:
             muteUnmuteChatroom(value: false)
         case .viewProfile:
-            let route = "route://member_profile/"
+            let route = LMStringConstant.shared.profileRoute
             if chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid == loggedInUserData?.uuid {
                 delegate?.viewProfile(route: route + "\(chatroomViewData?.member?.sdkClientInfo?.uuid ?? "")")
             } else {
@@ -848,13 +849,20 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     func pollOptionSelected(messageId: String, optionId: String) {
         messagesList.sort(by: {$0.timestamp < $1.timestamp})
         guard let poll = chatMessages.first(where: {$0.id == messageId}),
-        let conversationDate = poll.date,
-        let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}) else { return }
+              let conversationDate = poll.date,
+              let sectionIndex = messagesList.firstIndex(where: {$0.section == conversationDate}) else { return }
         
         if (poll.expiryTime ?? 0) < Int(Date().millisecondsSince1970) {
             delegate?.showToastMessage(message: LMStringConstant.shared.pollEndMessage)
             return
-        } else if poll.polls?.contains(where: { $0.isSelected == true }) == true && messagesList[sectionIndex].data.first(where: {$0.messageId == messageId})?.pollData?.isEditingMode == false {
+        } else if (poll.pollType == 0) &&
+                    poll.polls?.contains(where: { $0.isSelected == true }) == true {
+            return
+        } else if (poll.pollType == 1) &&
+                    (((poll.multipleSelectNum ?? 0) > 1) || (poll.multipleSelectState != nil)) &&
+                    ((poll.polls?.contains(where: { $0.isSelected == true }) == true) &&
+                     (messagesList[sectionIndex].data.first(where: {$0.messageId == messageId})?.pollData?.isEditingMode == false
+                     )) {
             return
         } else if (poll.multipleSelectState == nil) {
             guard let option = poll.polls?.filter({$0.id == optionId}).first else { return }
@@ -881,7 +889,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
                         return
                     }
                 }
- 
+                
                 if pollData.tempSelectedOptions.firstIndex(of: optionId) == nil {
                     pollData.addTempSelectedOptions(optionId)
                     pollData.options[optionIndex].showTickButton = true
@@ -947,6 +955,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             sectionData.data[rowIndex] = rowData
             messagesList[sectionIndex] = sectionData
             delegate?.reloadMessage(at: IndexPath(row: rowIndex, section: sectionIndex))
+            self.trackEventForPoll(eventName: .pollVotingEdited, pollId: messageId)
         }
     }
 }
@@ -1082,6 +1091,7 @@ extension LMChatMessageListViewModel {
                 self?.updateConversationUploadingStatus(messageId: temporaryId, withStatus: .failed)
                 return
             }
+            trackEventForPoll(eventName: .pollCreationCompleted, pollId: conversation.id ?? "")
             onConversationPosted(response: conversation.conversation, updatedFileUrls: nil)
         }
     }
@@ -1120,6 +1130,7 @@ extension LMChatMessageListViewModel {
             .build()
         LMChatClient.shared.submitPoll(request: request) {[weak self] response in
             guard let errorMessage = response.errorMessage else {
+                self?.trackEventForPoll(eventName: .pollVoted, pollId: pollId)
                 self?.delegate?.showError(withTitle: LMStringConstant.shared.pollSubmittedTitle, message: LMStringConstant.shared.pollSubmittedMessage, isPopVC: false)
                 return
             }
@@ -1136,7 +1147,10 @@ extension LMChatMessageListViewModel {
                 .build())
             .build()
         LMChatClient.shared.addPollOption(request: request) {[weak self] response in
-            guard let errorMessage = response.errorMessage else { return }
+            guard let errorMessage = response.errorMessage else {
+                self?.trackEventForPoll(eventName: .pollOptionCreated, pollId: pollId)
+                return
+            }
             self?.delegate?.showToastMessage(message: errorMessage)
         }
     }
@@ -1592,4 +1606,19 @@ extension LMChatMessageListViewModel {
         let pasteBoard = UIPasteboard.general
         pasteBoard.string = copiedString
     }
+}
+
+
+extension LMChatMessageListViewModel {
+    
+    func trackEventForPoll(eventName: LMChatAnalyticsEventName, pollId: String) {
+        let props = [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
+                     LMChatAnalyticsKeys.conversationId.rawValue: pollId,
+                     LMChatAnalyticsKeys.messageId.rawValue: pollId,
+                     LMChatAnalyticsKeys.chatroomTitle.rawValue: chatroomViewData?.header ?? "",
+                     LMChatAnalyticsKeys.communityId.rawValue: chatroomViewData?.communityId ?? "",
+                     LMChatAnalyticsKeys.communityName.rawValue: SDKPreferences.shared.getCommunityName() ?? ""]
+        LMChatCore.analytics?.trackEvent(for: eventName, eventProperties: props)
+    }
+    
 }

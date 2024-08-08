@@ -27,7 +27,7 @@ public protocol LMChatCoreCallback: AnyObject {
     /// Called when user click on user profile view
     ///
     /// - Parameter uuid: user id to uniquely identify the user
-    func userProfileViewHandle(withUserId uuid: String)
+    func userProfileViewHandle(withRoute route: String)
 }
 public class LMChatCore {
     

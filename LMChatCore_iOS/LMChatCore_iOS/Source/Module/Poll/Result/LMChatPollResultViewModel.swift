@@ -67,3 +67,15 @@ public final class LMChatPollResultViewModel {
         delegate?.setupViewControllers(with: pollID, optionList: optionList.map(\.id), selectedID: selectedIndex)
     }
 }
+
+extension LMChatPollResultViewModel {
+    
+    func trackEventForPageSwipe(optionId: String) {
+        let props = [LMChatAnalyticsKeys.conversationId.rawValue: pollID ,
+                     LMChatAnalyticsKeys.messageId.rawValue: pollID,
+                     LMChatAnalyticsKeys.pollOptionId.rawValue: optionId,
+                     LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId() ?? "",
+                     LMChatAnalyticsKeys.communityName.rawValue: SDKPreferences.shared.getCommunityName() ?? ""]
+        LMChatCore.analytics?.trackEvent(for: .pollResultsToggled, eventProperties: props)
+    }
+}

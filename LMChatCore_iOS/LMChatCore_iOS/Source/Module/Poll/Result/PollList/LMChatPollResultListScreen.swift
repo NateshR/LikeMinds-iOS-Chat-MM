@@ -68,11 +68,6 @@ open class LMChatPollResultListScreen: LMViewController {
         super.viewDidLoad()
         viewModel?.fetchUserList()
     }
-    
-    
-    open func onTapUser(with uuid: String) {
-        
-    }
 }
 
 
@@ -90,6 +85,11 @@ extension LMChatPollResultListScreen: UITableViewDataSource, UITableViewDelegate
         }
         
         return UITableViewCell()
+    }
+    
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let participant = userList[safe: indexPath.row] else { return }
+        LMChatCore.shared.coreCallback?.userProfileViewHandle(withRoute: LMStringConstant.shared.profileRoute + (participant.id ?? ""))
     }
 }
 
