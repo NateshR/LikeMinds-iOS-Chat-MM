@@ -46,14 +46,17 @@ public enum LMChatPollSelectState: Int, CustomStringConvertible, CaseIterable {
     }
     
     public func toastMessage(with count: Int, allowedCount: Int) -> String {
-        
+        let optionTitle = "option"
+        let optionText = allowedCount > 1 ? "\(optionTitle)s" : optionTitle
         switch self {
         case .exactly:
-            return "You must select \(allowedCount) options. Unselect an option or submit your vote now."
+            return "You must select \(allowedCount) \(optionText). Unselect an option or submit your vote now."
         case .atMax:
-            return "You can select max \(allowedCount) options. Unselect an option or submit your vote now."
+            return "You can select max \(allowedCount) \(optionText). Unselect an option or submit your vote now."
         case .atLeast:
-            return "Select at least \(allowedCount - count) more options to submit your vote."
+            let leastCount = (allowedCount - count)
+            let optionSt = leastCount > 1 ? "\(optionTitle)s" : optionTitle
+            return "Select at least \(leastCount) more \(optionSt) to submit your vote."
         }
     }
 }
