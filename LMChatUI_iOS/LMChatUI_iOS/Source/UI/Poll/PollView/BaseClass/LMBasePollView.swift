@@ -55,7 +55,7 @@ open class LMBasePollView: LMView {
         let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
         stack.axis = .vertical
         stack.alignment = .fill
-        stack.distribution = .fillEqually
+        stack.distribution = .fillProportionally
         stack.spacing = 8
         return stack
     }()
