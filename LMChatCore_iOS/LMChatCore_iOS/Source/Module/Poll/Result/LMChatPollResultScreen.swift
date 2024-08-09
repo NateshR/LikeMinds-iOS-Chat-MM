@@ -64,8 +64,8 @@ open class LMChatPollResultScreen: LMViewController {
         view.safeAreaPinSubView(subView: containerView)
         
         optionView.addConstraint(top: (containerView.topAnchor, 0),
-                                 leading: (containerView.leadingAnchor, 0),
-                                 trailing: (containerView.trailingAnchor, 0))
+                                 leading: (containerView.leadingAnchor, 4),
+                                 trailing: (containerView.trailingAnchor, 2))
         optionView.setHeightConstraint(with: 56, priority: .required)
         
         optionViewBottomLine.addConstraint(top: (optionView.bottomAnchor, 0),

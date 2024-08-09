@@ -101,6 +101,13 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         return imageView
     }()
     
+    open private(set) lazy var checkMarkIconStackView: LMStackView = {
+        let stack = LMStackView().translatesAutoresizingMaskIntoConstraints()
+        stack.axis = .horizontal
+        stack.alignment = .fill
+        stack.distribution = .fill
+        return stack
+    }()
     
     // MARK: Data Variables
     open var selectedPollColor: UIColor {
@@ -128,7 +135,8 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         
         innerContainerView.addSubview(progressView)
         innerContainerView.addSubview(stackView)
-        innerContainerView.addSubview(checkmarkIcon)
+        innerContainerView.addSubview(checkMarkIconStackView)
+        checkMarkIconStackView.addArrangedSubview(checkmarkIcon)
         
         stackView.addArrangedSubview(optionLabel)
         stackView.addArrangedSubview(addedByLabel)
@@ -153,10 +161,10 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         
         stackView.addConstraint(top: (innerContainerView.topAnchor, 8),
                                 bottom: (innerContainerView.bottomAnchor, -8),
-                                leading: (innerContainerView.leadingAnchor, 16))
+                                leading: (innerContainerView.leadingAnchor, 12))
         
-        checkmarkIcon.addConstraint(leading: (stackView.trailingAnchor, 16),
-                                    trailing: (innerContainerView.trailingAnchor, -16),
+        checkMarkIconStackView.addConstraint(leading: (stackView.trailingAnchor, 8),
+                                    trailing: (innerContainerView.trailingAnchor, -12),
                                     centerY: (stackView.centerYAnchor, 0))
         checkmarkIcon.setWidthConstraint(with: 24)
         checkmarkIcon.setHeightConstraint(with: 24)
@@ -165,6 +173,8 @@ open class LMChatPollOptionView: LMBasePollOptionView {
         
         optionLabel.setContentCompressionResistancePriority(.required, for: .vertical)
         addedByLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        optionLabel.numberOfLines = 0
+        optionLabel.lineBreakMode = .byCharWrapping
     }
     
     
