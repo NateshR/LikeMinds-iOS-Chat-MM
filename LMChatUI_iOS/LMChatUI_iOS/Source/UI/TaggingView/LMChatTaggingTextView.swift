@@ -256,6 +256,11 @@ extension LMChatTaggingTextView: UITextViewDelegate {
         if textView.text != placeHolderText {
             handleTagging()
         }
+        // Added this conditon to fix the placeholder color, if text is placeholder text.
+        if textView.text == placeHolderText {
+            textView.text = placeHolderText
+            textView.textColor = placeholderColor
+        }
     }
     
     open func textViewDidChange(_ textView: UITextView) {
