@@ -20,6 +20,6 @@ Pod::Spec.new do |spec|
   spec.dependency "AWSCognito"
   spec.dependency "AWSS3"
   spec.dependency 'Giphy'
-  spec.dependency 'LikeMindsChatData'
+  spec.dependency 'LikeMindsChatData', '~> 1.3'
   spec.dependency 'LikeMindsChatUI'
 end
