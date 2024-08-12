@@ -81,6 +81,7 @@ open class LMChatBottomMessageComposerView: LMView {
         let view = LMChatTaggingTextView().translatesAutoresizingMaskIntoConstraints()
         view.backgroundColor = Appearance.shared.colors.white
         view.isScrollEnabled = false
+        view.font = Appearance.shared.fonts.textFont1
         return view
     }()
     
