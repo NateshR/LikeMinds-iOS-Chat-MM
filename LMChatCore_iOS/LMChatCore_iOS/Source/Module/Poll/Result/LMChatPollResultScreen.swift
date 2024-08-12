@@ -64,8 +64,8 @@ open class LMChatPollResultScreen: LMViewController {
         view.safeAreaPinSubView(subView: containerView)
         
         optionView.addConstraint(top: (containerView.topAnchor, 0),
-                                 leading: (containerView.leadingAnchor, 4),
-                                 trailing: (containerView.trailingAnchor, 2))
+                                 leading: (containerView.leadingAnchor, 0),
+                                 trailing: (containerView.trailingAnchor, 0))
         optionView.setHeightConstraint(with: 56, priority: .required)
         
         optionViewBottomLine.addConstraint(top: (optionView.bottomAnchor, 0),
@@ -205,8 +205,17 @@ extension LMChatPollResultScreen: UIPageViewControllerDataSource, UIPageViewCont
             
             optionView.reloadData()
             viewModel?.trackEventForPageSwipe(optionId: optionList[index].optionID)
-            DispatchQueue.main.async { [weak optionView] in
-                optionView?.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
+            DispatchQueue.main.async { [weak self] in
+                guard let self else {
+                    return
+                }
+                // if count greater than 3, then will scroll the cell in cetered
+                // else will call didSelect delegate manually to prevent moving cell in center
+                if optionList.count > 3 {
+                    optionView.scrollToItem(at: .init(row: index, section: 0), at: .centeredHorizontally, animated: false)
+                } else {
+                    collectionView(optionView, didSelectItemAt: .init(row: index, section: 0))
+                }
             }
         }
     }

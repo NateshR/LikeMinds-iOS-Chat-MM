@@ -43,7 +43,7 @@ open class LMChatTaggingTextView: LMTextView {
     
     public weak var mentionDelegate: LMChatTaggingTextViewProtocol?
     
-    public var textAttributes: [NSAttributedString.Key: Any] { [.font: Appearance.shared.fonts.textFont1,
+    public var textAttributes: [NSAttributedString.Key: Any] { [.font: self.font ?? Appearance.shared.fonts.textFont1,
                                                                 .foregroundColor: typingTextColor]
     }
     
@@ -112,7 +112,7 @@ open class LMChatTaggingTextView: LMTextView {
             let partTwoString = NSMutableAttributedString(attributedString: attributedText.attributedSubstring(from: NSRange(location: startIndex + 1 + characters.count, length: attributedText.length - startIndex - 1 - characters.count)))
             
             let attrName = NSAttributedString(string: "\(username.trimmingCharacters(in: .whitespacesAndNewlines))", attributes: [
-                .font: Appearance.shared.fonts.textFont1,
+                .font: (textAttributes[.font] as? UIFont) ?? Appearance.shared.fonts.textFont1,
                 .foregroundColor: Appearance.shared.colors.linkColor,
                 .route: route
             ])
