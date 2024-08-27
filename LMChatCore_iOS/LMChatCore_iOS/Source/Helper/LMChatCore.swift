@@ -150,6 +150,12 @@ public class LMChatCore {
                 return
             }
             
+            if let communitySettings = response.data?.community?.communitySettings, let setting = communitySettings.first(where: {$0.type == CommunitySetting.SettingType.enableDMWithoutConnectionRequest.rawValue}), setting.enabled == true {
+                LMSharedPreferences.setValue(true, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            } else {
+                LMSharedPreferences.setValue(false, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            }
+            
             if let deviceId = self?.deviceId, !deviceId.isEmpty{
                 self?.registerDevice(deviceId: deviceId)
             }
@@ -189,6 +195,12 @@ public class LMChatCore {
                 self?.logout(response.data?.refreshToken ?? "", deviceId: UIDevice.current.identifierForVendor?.uuidString ?? "")
                 completion?(.failure(.apiInitializationFailed(error: response.errorMessage)))
                 return
+            }
+            
+            if let communitySettings = response.data?.community?.communitySettings, let setting = communitySettings.first(where: {$0.type == CommunitySetting.SettingType.enableDMWithoutConnectionRequest.rawValue}), setting.enabled == true {
+                LMSharedPreferences.setValue(true, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
+            } else {
+                LMSharedPreferences.setValue(false, key: LMSharedPreferencesKeys.isDMWithRequestEnabled.rawValue)
             }
             
             if let deviceId = self?.deviceId, !deviceId.isEmpty{
