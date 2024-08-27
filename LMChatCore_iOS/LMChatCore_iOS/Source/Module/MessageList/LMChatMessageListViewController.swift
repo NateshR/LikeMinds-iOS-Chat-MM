@@ -901,7 +901,6 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         guard let conversation = viewModel?.chatMessages.first(where: {$0.id == message.messageId}),
               let reactions = conversation.reactions else { return }
         
-        let eventProps = viewModel?.trackEventBasicParams(messageId: message.messageId) ?? [:]
         LMChatCore.analytics?.trackEvent(for: .reactionListOpened, eventProperties: [:])
         
         NavigationScreen.shared.perform(.reactionSheet(reactions: reactions.reversed(), selectedReaction: reaction, conversation: conversation.id, chatroomId: nil), from: self, params: nil)

@@ -99,7 +99,6 @@ public class LMChatGroupFeedViewModel: LMChatBaseViewModel {
         let creatorName = isLoggedInUser ? "You" : (lastConversation?.member?.name ?? "").components(separatedBy: " ").first ?? ""
         var lastMessage = chatroom?.lastConversation?.answer ?? ""
         lastMessage = GetAttributedTextWithRoutes.getAttributedText(from: lastMessage).string
-        let fileType = lastConversation?.attachments?.first?.type
         
         return  LMChatHomeFeedChatroomView.ContentModel(userName: creatorName,
                                                         lastMessage: lastMessage,

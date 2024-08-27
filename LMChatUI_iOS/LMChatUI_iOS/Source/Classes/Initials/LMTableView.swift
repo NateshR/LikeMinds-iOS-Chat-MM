@@ -8,27 +8,27 @@
 import UIKit
 
 public extension UITableView {
-    public func register(_ type: UITableViewCell.Type) {
+    func register(_ type: UITableViewCell.Type) {
         let className = String(describing: type)
         register(type, forCellReuseIdentifier: className)
     }
     
-    public func registerHeaderFooter(_ type: UITableViewHeaderFooterView.Type) {
+    func registerHeaderFooter(_ type: UITableViewHeaderFooterView.Type) {
         let className = String(describing: type)
         register(type, forHeaderFooterViewReuseIdentifier: className)
     }
     
-    public func dequeueReusableCell<T>(_ type: T.Type) -> T? {
+    func dequeueReusableCell<T>(_ type: T.Type) -> T? {
         let className = String(describing: type)
         return dequeueReusableCell(withIdentifier: className) as? T
     }
     
-    public func dequeueReusableCell<T>(_ type: T.Type, atIndexPath indexPath: IndexPath) -> T? {
+    func dequeueReusableCell<T>(_ type: T.Type, atIndexPath indexPath: IndexPath) -> T? {
         let className = String(describing: type)
         return dequeueReusableCell(withIdentifier: className, for: indexPath) as? T
     }
     
-    public func dequeueReusableHeaderFooterView<T>(_ type: T.Type) -> T? {
+    func dequeueReusableHeaderFooterView<T>(_ type: T.Type) -> T? {
         let className = String(describing: type)
         return dequeueReusableHeaderFooterView(withIdentifier: className) as? T
     }
