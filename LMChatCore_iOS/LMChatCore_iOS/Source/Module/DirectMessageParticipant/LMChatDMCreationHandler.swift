@@ -9,17 +9,22 @@ import Foundation
 import LikeMindsChatUI
 import LikeMindsChat
 
-class LMChatDMCreationHandler {
+public final class LMChatDMCreationHandler {
     
-    static let shared = LMChatDMCreationHandler()
+    public static let shared = LMChatDMCreationHandler()
     let moduleName = "DM Createion Handler"
     var completion: ((_ chatroomId: String?) -> Void)?
     weak var viewController: LMViewController?
     
-    func openDMChatroom(uuid: String, viewController: LMViewController?, completion: ((_ chatroomId: String?) -> Void)?) {
+    public func openDMChatroom(uuid: String, viewController: LMViewController?, completion: ((_ chatroomId: String?) -> Void)?) {
         self.viewController = viewController
         self.completion = completion
         (self.viewController)?.showHideLoaderView(isShow: true, backgroundColor: .clear)
+        self.checkDMLimit(uuid: uuid)
+    }
+    
+    public func validateDMChatroom(withUUID uuid: String, completion: ((_ chatroomId: String?) -> Void)?) {
+        self.completion = completion
         self.checkDMLimit(uuid: uuid)
     }
     
@@ -53,7 +58,11 @@ class LMChatDMCreationHandler {
                 }
                 return
             }
-            self?.completion?("\(chatroomId)")
+            if let completion = self?.completion {
+                completion("\(chatroomId)")
+            } else {
+                self?.routeToChatroom(chatroomId: "\(chatroomId)")
+            }
         }
     }
     
@@ -69,7 +78,18 @@ class LMChatDMCreationHandler {
                 self?.completion?(nil)
                 return
             }
-            self?.completion?(chatroomId)
+            if let completion = self?.completion {
+                completion(chatroomId)
+            } else {
+                self?.routeToChatroom(chatroomId: chatroomId)
+            }
+        }
+    }
+    
+    private func routeToChatroom(chatroomId: String?) {
+        guard let viewController, let chatroomId else { return }
+        DispatchQueue.main.async {
+            NavigationScreen.shared.perform(.chatroom(chatroomId: chatroomId, conversationID: nil), from: viewController, params: nil)
         }
     }
 }

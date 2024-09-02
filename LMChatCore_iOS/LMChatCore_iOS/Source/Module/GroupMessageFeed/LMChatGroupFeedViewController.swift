@@ -52,7 +52,7 @@ open class LMChatGroupFeedViewController: LMViewController {
     open override func setupViews() {
         super.setupViews()
         self.view.addSubview(feedListView)
-        setupRightItemBars()
+//        setupRightItemBars()
     }
     
     // MARK: setupLayouts

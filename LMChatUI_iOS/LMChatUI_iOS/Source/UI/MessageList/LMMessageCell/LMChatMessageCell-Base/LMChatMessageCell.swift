@@ -171,8 +171,6 @@ open class LMChatMessageCell: LMTableViewCell {
     
     @objc open func retrySendMessage(_ sender: UIButton) {
         guard let currentIndexPath else { return }
-        retryButton.isHidden = true
-        layoutIfNeeded()
         delegate?.didRetryAttachmentUploading(indexPath: currentIndexPath )
     }
 }

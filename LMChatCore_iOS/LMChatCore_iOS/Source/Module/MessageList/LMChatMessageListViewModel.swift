@@ -295,10 +295,8 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         
         switch direction {
         case .scroll_UP:
-                print("fetch more data above data ....")
                 fetchConversationsOnScroll(conversationId: conversationId, type: .above)
         case .scroll_DOWN:
-                print("fetch more data below data ....")
                 fetchConversationsOnScroll(conversationId: conversationId, type: .below)
         default:
             break
@@ -1474,12 +1472,19 @@ extension LMChatMessageListViewModel {
     }
     
     func deleteTempConversation(conversationId: String) {
-//        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
-//        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
-//            var section = messagesList[sectionIndex]
-//            section.data.removeAll(where: {$0.messageId == conversationId})
-//        }
-//        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
+        guard let conversationIndex = chatMessages.firstIndex(where: {$0.id == conversationId}) else { return }
+        let conversation = chatMessages.remove(at: conversationIndex)
+        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
+            var section = messagesList[sectionIndex]
+            section.data.removeAll(where: {$0.messageId == conversationId})
+            if !section.data.isEmpty {
+                messagesList[sectionIndex] = section
+            } else {
+                messagesList.remove(at: sectionIndex)
+            }
+        }
+        delegate?.reloadChatMessageList()
+        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
     }
     
     func fetchConversation(withId conversationId: String) {

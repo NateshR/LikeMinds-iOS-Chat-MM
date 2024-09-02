@@ -33,7 +33,7 @@ enum NavigationActions {
 }
 
 protocol NavigationScreenProtocol: AnyObject {
-    func perform(_ action: NavigationActions, from source: LMViewController, params: Any?)
+    func perform(_ action: NavigationActions, from source: UIViewController, params: Any?)
 }
 
 
@@ -42,7 +42,7 @@ class NavigationScreen: NavigationScreenProtocol {
     
     private init() {}
     
-    func perform(_ action: NavigationActions, from source: LMViewController, params: Any?) {
+    func perform(_ action: NavigationActions, from source: UIViewController, params: Any?) {
         switch action {
         case .homeFeed:
             guard let homefeedvc = try? LMChatGroupFeedViewModel.createModule() else { return }

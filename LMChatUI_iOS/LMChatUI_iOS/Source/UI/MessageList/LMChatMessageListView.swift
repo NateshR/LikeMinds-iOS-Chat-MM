@@ -392,10 +392,10 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
         }
         guard let cell else { return  LMChatMessageCell() }
         let isSelected =  selectedItems.firstIndex(where: {$0.messageId == item.messageId})
-        cell.setData(with: .init(message: item, isSelected: isSelected != nil), index: indexPath)
         cell.currentIndexPath = indexPath
         cell.delegate = cellDelegate
         cell.audioDelegate = audioDelegate
+        cell.setData(with: .init(message: item, isSelected: isSelected != nil), index: indexPath)
         
         if self.isMultipleSelectionEnable, item.isDeleted == false {
             cell.selectedButton.isHidden = false

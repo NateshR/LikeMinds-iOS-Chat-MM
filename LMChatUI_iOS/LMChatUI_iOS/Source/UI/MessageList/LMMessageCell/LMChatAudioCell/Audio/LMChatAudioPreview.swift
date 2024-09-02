@@ -77,7 +77,7 @@ open class LMChatAudioPreview: LMView {
     }()
     
     
-    var delegate: LMChatAudioProtocol?
+    weak var delegate: LMChatAudioProtocol?
     var url: String?
     var duration = 0
     var index: IndexPath?
@@ -188,10 +188,10 @@ open class LMChatAudioPreview: LMView {
         titleLabel.isHidden = data.fileName?.isEmpty != false
         url = data.url
         duration = data.duration
-        thumbnailImage.kf.setImage(with: URL(string: data.thumbnail ?? ""))
         self.index = index
-        durationLbl.text = convertSecondsToFormattedTime(seconds: data.duration)
         self.delegate = delegate
+        durationLbl.text = convertSecondsToFormattedTime(seconds: data.duration)
+        thumbnailImage.kf.setImage(with: URL(string: data.thumbnail ?? ""))
     }
     
     

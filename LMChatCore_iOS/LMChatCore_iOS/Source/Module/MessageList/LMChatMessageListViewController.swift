@@ -350,8 +350,10 @@ open class LMChatMessageListViewController: LMViewController {
     public func directMessageValidation() {
         if viewModel?.loggedInUserData?.sdkClientInfo?.uuid == viewModel?.chatroomViewData?.chatWithUser?.sdkClientInfo?.uuid {
             setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.member?.name, subtitle: nil)
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.member?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.directMessageUserName().components(separatedBy: " ").first ?? ""))
         } else {
             setNavigationTitleAndSubtitle(with: viewModel?.chatroomViewData?.chatWithUser?.name, subtitle: nil)
+            backButtonItem.imageView.kf.setImage(with: URL(string: viewModel?.chatroomViewData?.chatWithUser?.imageUrl ?? ""), placeholder: UIImage.generateLetterImage(name: viewModel?.directMessageUserName().components(separatedBy: " ").first ?? ""))
         }
         if viewModel?.dmStatus?.showDM == false {
             bottomMessageBoxView.enableOrDisableMessageBox(withMessage: Constants.shared.strings.m2mDirectMessageDisable, isEnable: false)
@@ -593,9 +595,17 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         let retryIcon = Constants.shared.images.retryIcon
         tryAction.setValue(retryIcon, forKey: "image")
         
+        let deleteAction = UIAlertAction(title: "Delete", style: UIAlertAction.Style.default) {[weak self] (UIAlertAction) in
+            guard let self else { return }
+            viewModel?.deleteTempConversation(conversationId: messageId)
+        }
+        let deleteIcon = Constants.shared.images.trashIcon
+        deleteAction.setValue(deleteIcon, forKey: "image")
+        
         let cancel = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel)
         
         alert.addAction(tryAction)
+        alert.addAction(deleteAction)
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
     }
@@ -625,7 +635,6 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         
         // Check if user scrolled to the top
         if contentOffsetY <= 20 && !isLoadingMoreData && viewModel?.fetchingInitialBottomData == false {
-            print("end dragged top!$!$")
             guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
                   let firstIndexPath = visibleIndexPaths.first else {return}
             isLoadingMoreData = true
@@ -635,7 +644,6 @@ extension LMChatMessageListViewController: LMChatMessageListViewDelegate {
         
         // Check if user scrolled to the bottom
         if contentOffsetY + frameHeight >= contentHeight && !isLoadingMoreData && viewModel?.fetchingInitialBottomData == false {
-            print("end dragged bottom!$!$")
             guard let visibleIndexPaths = messageListView.tableView.indexPathsForVisibleRows,
                   let lastIndexPath = visibleIndexPaths.last else {return}
             isLoadingMoreData = true
