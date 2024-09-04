@@ -70,7 +70,6 @@ open class LMChatDMFeedViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
-//        setupRightItemBars()
     }
     
     // MARK: setupLayouts
