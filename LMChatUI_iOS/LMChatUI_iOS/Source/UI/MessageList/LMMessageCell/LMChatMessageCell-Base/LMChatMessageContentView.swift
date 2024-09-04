@@ -90,6 +90,7 @@ open class LMChatMessageContentView: LMView {
         label.paddingTop = 2
         label.text = ""
         label.isUserInteractionEnabled = true
+        label.widthAnchor.constraint(lessThanOrEqualToConstant: widthViewSize).isActive = true
         return label
     }()
     

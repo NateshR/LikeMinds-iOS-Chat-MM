@@ -656,7 +656,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             NavigationScreen.shared.perform(.participants(chatroomId: chatroomViewData?.id ?? "", isSecret: chatroomViewData?.isSecret ?? false), from: fromViewController, params: nil)
         case .invite:
             guard let chatroomId = chatroomViewData?.id else { return }
-            ShareContentUtil.shareChatroom(viewController: fromViewController, chatroomId: chatroomId)
+            LMChatShareContentUtil.shareChatroom(viewController: fromViewController, chatroomId: chatroomId)
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: chatroomViewData?.id ?? "", conversationId: nil, memberId: nil), from: fromViewController, params: nil)
         case .leaveChatRoom:
