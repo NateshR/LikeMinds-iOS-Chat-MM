@@ -57,7 +57,7 @@ class LMChatUploadConversationsAttachmentOperation: Operation {
                     print("======> \(attachment.name ?? "") progress \(progress) <=======")
                 } completion: {[weak self] awsFilePath, error in
                     guard let awsFilePath else {
-                        print("AWS Upload Error: \(error)")
+                        print("AWS Upload Error: \(String(describing: error))")
                         self?.groupQueue.leave()
                         return
                     }
@@ -69,7 +69,7 @@ class LMChatUploadConversationsAttachmentOperation: Operation {
                         { progress in }
                         completion: { awsThumbnailFilePath, error in
                             guard let awsThumbnailFilePath else {
-                                print("AWS thumbnail Upload Error: \(error)")
+                                print("AWS thumbnail Upload Error: \(String(describing: error))")
                                 self?.putConversationMultiMedia(attachment: attachment, awsFilePath: awsFilePath, awsThumbnailFilePath: nil)
                                 return
                             }

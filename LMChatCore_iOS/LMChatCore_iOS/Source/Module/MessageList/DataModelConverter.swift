@@ -13,15 +13,15 @@ class DataModelConverter {
     static let shared = DataModelConverter()
     
     func convertPollOptionsIntoResultPollOptions(_ polls: [Poll]) -> [LMChatPollDataModel.Option] {
-        var pollOptions = polls.sorted(by: {($0.id ?? "0") < ($1.id ?? "0")})
-       return  pollOptions.map { poll in
+        let pollOptions = polls.sorted(by: {($0.id ?? "0") < ($1.id ?? "0")})
+        return  pollOptions.map { poll in
             return LMChatPollDataModel.Option(id: poll.id ?? "",
-                         option: poll.text ?? "",
-                         isSelected: poll.isSelected ?? false,
-                         voteCount: poll.noVotes ?? 0,
-                         percentage: poll.percentage ?? 0,
-                         addedBy: .init(userName: poll.member?.name ?? "",
-                                        userUUID: poll.member?.sdkClientInfo?.uuid ?? ""))
+                                              option: poll.text ?? "",
+                                              isSelected: poll.isSelected ?? false,
+                                              voteCount: poll.noVotes ?? 0,
+                                              percentage: poll.percentage ?? 0,
+                                              addedBy: .init(userName: poll.member?.name ?? "",
+                                                             userUUID: poll.member?.sdkClientInfo?.uuid ?? ""))
         }
     }
     

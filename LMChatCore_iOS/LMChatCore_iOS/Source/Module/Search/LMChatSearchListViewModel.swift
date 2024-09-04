@@ -286,8 +286,8 @@ final public class LMChatSearchListViewModel: LMChatBaseViewModel {
     
     func trackEventBasicParams(chatroomId: String) -> [String: AnyHashable] {
         [LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
-         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId() ?? "",
-         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName() ?? ""]
+         LMChatAnalyticsKeys.communityId.rawValue: getCommunityId(),
+         LMChatAnalyticsKeys.communityName.rawValue: getCommunityName()]
     }
 }
 

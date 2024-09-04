@@ -56,7 +56,7 @@ extension LMChatMessageListViewController: GiphyDelegate {
             DispatchQueue.main.async {
                 URLSession.shared.dataTask(with: URL(string: media.url(rendition: .fixedHeight, fileType: .gif)!)!) { data, response, error in
                     guard let gifImageData = data, error == nil else {
-                        print(error)
+                        print(error?.localizedDescription ?? "Error in gifImageData")
                         return
                     }
                     let fileName = (media.title?.components(separatedBy: " ").joined(separator: "_") ?? "\(Date().millisecondsSince1970)") + ".gif"
@@ -72,7 +72,6 @@ extension LMChatMessageListViewController: GiphyDelegate {
                     }
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self, let giphyImage = GiphyYYImage(data: gifImageData) else {return}
-                        let size = giphyImage.size
                         
                         weakSelf.showHideLoaderView(isShow: false)
                         NavigationScreen.shared.perform(.messageAttachmentWithData(data: 

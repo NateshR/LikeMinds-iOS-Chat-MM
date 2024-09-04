@@ -166,10 +166,6 @@ open class LMViewController: UIViewController {
     
     @objc
     open func keyboardWillShow(_ sender: Notification) {
-        guard let userInfo = sender.userInfo else {
-            return
-        }
-        
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
