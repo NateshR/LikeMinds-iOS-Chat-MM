@@ -453,8 +453,11 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
     }
     
     func getPollOptions(_ polls: [Poll]?, conversation: Conversation) -> [LMChatPollOptionView.ContentModel] {
-        guard let polls else { return [] }
+        guard var polls else { return [] }
         let isAllowAddOption = conversation.allowAddOption ?? false
+        polls = polls.reduce([]) { result, element in
+            result.contains(where: {$0.id == element.id}) ? result : result + [element]
+        }
         let pollOptions = polls.sorted(by: {($0.id ?? "0") < ($1.id ?? "0")})
         let options = pollOptions.map { poll in
             return LMChatPollOptionView.ContentModel(pollId: poll.conversationId ?? "",
