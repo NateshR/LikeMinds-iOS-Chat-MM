@@ -98,6 +98,7 @@ open class LMChatNotificationCell: LMTableViewCell {
     open func setData(with data: ContentModel) {
         let message = (data.message?.message ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: data.loggedInUserTag, with: data.loggedInUserReplaceTag)
         infoLabel.attributedText =  GetAttributedTextWithRoutes.getAttributedText(from: message, font: infoLabelTextFont, withHighlightedColor: Appearance.shared.colors.white, withTextColor: Appearance.shared.colors.white)
+        infoLabel.alignTextVerticallyInContainer()
         self.layoutIfNeeded()
     }
 }

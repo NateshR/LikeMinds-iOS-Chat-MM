@@ -270,6 +270,7 @@ open class LMChatMessageContentView: LMView {
     }
     
     open func deletedConversationView(_ data: LMChatMessageCell.ContentModel) {
+        self.textLabel.attributedText = NSAttributedString(string: "")
         self.textLabel.font = deletedTextLabelFont
         self.textLabel.textColor = deletedTextLabelColor
         self.textLabel.text = Constants.shared.strings.messageDeleteText
