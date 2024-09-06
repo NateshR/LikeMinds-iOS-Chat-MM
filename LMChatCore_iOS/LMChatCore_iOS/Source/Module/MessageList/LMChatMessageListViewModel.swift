@@ -704,7 +704,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         }
     }
     
-    func sendDMRequest(text: String?, requestState: ChatRequestState, reason: String? = nil) {
+    func sendDMRequest(text: String?, requestState: ChatRequestState, isAutoApprove: Bool = false, reason: String? = nil) {
         let request = SendDMRequest.builder()
             .text(text)
             .chatRequestState(requestState.rawValue)
@@ -727,7 +727,9 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             self?.markChatroomAsRead()
             self?.trackEventSendDMRequest(requestState: requestState, reason: reason)
             self?.delegate?.approveRejectView(isShow: false)
-            self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
+            if !isAutoApprove {
+                self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
+            }
             self?.fetchChatroomActions()
             self?.syncConversation()
         }

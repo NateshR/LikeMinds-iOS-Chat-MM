@@ -366,7 +366,7 @@ open class LMChatMessageListViewController: LMViewController {
                 bottomMessageBoxView.attachmentButton.isHidden = true
                 bottomMessageBoxView.gifButton.isHidden = true
                 bottomMessageLabel.text = String(format: Constants.shared.strings.bottomMessage, viewModel?.directMessageUserName() ?? "")
-                bottomMessageLabel.isHidden = false
+                bottomMessageLabel.isHidden = !(viewModel?.chatroomViewData?.isPrivateMember == true)
             }
         } else {
             bottomMessageLabel.isHidden = true
@@ -975,13 +975,13 @@ extension LMChatMessageListViewController: LMChatBottomMessageComposerDelegate {
                         ])
                     } else {
                         bottomMessageBoxView.resetInputTextView()
-                        viewModel?.sendDMRequest(text: message, requestState: .approved)
+                        viewModel?.sendDMRequest(text: message, requestState: .approved, isAutoApprove: true)
                         bottomMessageLabel.isHidden = true
                     }
                 }
             } else {
                 bottomMessageBoxView.resetInputTextView()
-                viewModel?.sendDMRequest(text: message, requestState: .approved)
+                viewModel?.sendDMRequest(text: message, requestState: .approved, isAutoApprove: true)
                 bottomMessageLabel.isHidden = true
             }
             return
@@ -1341,7 +1341,11 @@ extension LMChatMessageListViewController: LMChatAudioProtocol {
 extension LMChatMessageListViewController: LMChatMessageCellDelegate, LMChatroomHeaderMessageCellDelegate {
     
     public func didTapURL(url: URL) {
-        NavigationScreen.shared.perform(.browser(url: url), from: self, params: nil)
+        if url.absoluteString.hasPrefix("http") {
+            NavigationScreen.shared.perform(.browser(url: url), from: self, params: nil)
+        } else {
+            UIApplication.shared.open(url)
+        }
     }
     
     public func didTapRoute(route: String) {
