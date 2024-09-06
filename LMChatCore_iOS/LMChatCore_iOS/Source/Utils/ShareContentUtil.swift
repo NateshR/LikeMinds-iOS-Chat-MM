@@ -8,13 +8,17 @@
 import Foundation
 import UIKit
 
-class ShareContentUtil {
+public class LMChatShareContentUtil {
     
-    static let domainUrl = "lmchat://www.chatsampleapp.com"
+    static var domainUrl = "lmchat://www.chatsampleapp.com"
     
     static func shareChatroom(viewController: UIViewController, domainUrl: String = domainUrl, chatroomId: String, description: String = "") {
         let shareUrl = "\(domainUrl)/chatroom_detail?chatroom_id=\(chatroomId)"
         Self.share(viewController: viewController, firstActivityItem: description, secondActivityItem: shareUrl)
+    }
+    
+    public static func setDomainUrl(_ url: String) {
+        Self.domainUrl = url
     }
     
     private static func share(viewController: UIViewController, firstActivityItem description: String = "", secondActivityItem url: String, image: UIImage? = nil) {

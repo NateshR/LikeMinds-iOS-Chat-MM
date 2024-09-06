@@ -295,10 +295,8 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         
         switch direction {
         case .scroll_UP:
-                print("fetch more data above data ....")
                 fetchConversationsOnScroll(conversationId: conversationId, type: .above)
         case .scroll_DOWN:
-                print("fetch more data below data ....")
                 fetchConversationsOnScroll(conversationId: conversationId, type: .below)
         default:
             break
@@ -658,7 +656,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             NavigationScreen.shared.perform(.participants(chatroomId: chatroomViewData?.id ?? "", isSecret: chatroomViewData?.isSecret ?? false), from: fromViewController, params: nil)
         case .invite:
             guard let chatroomId = chatroomViewData?.id else { return }
-            ShareContentUtil.shareChatroom(viewController: fromViewController, chatroomId: chatroomId)
+            LMChatShareContentUtil.shareChatroom(viewController: fromViewController, chatroomId: chatroomId)
         case .report:
             NavigationScreen.shared.perform(.report(chatroomId: chatroomViewData?.id ?? "", conversationId: nil, memberId: nil), from: fromViewController, params: nil)
         case .leaveChatRoom:
@@ -706,7 +704,7 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
         }
     }
     
-    func sendDMRequest(text: String?, requestState: ChatRequestState, reason: String? = nil) {
+    func sendDMRequest(text: String?, requestState: ChatRequestState, isAutoApprove: Bool = false, reason: String? = nil) {
         let request = SendDMRequest.builder()
             .text(text)
             .chatRequestState(requestState.rawValue)
@@ -729,7 +727,9 @@ public final class LMChatMessageListViewModel: LMChatBaseViewModel {
             self?.markChatroomAsRead()
             self?.trackEventSendDMRequest(requestState: requestState, reason: reason)
             self?.delegate?.approveRejectView(isShow: false)
-            self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
+            if !isAutoApprove {
+                self?.delegate?.showToastMessage(message: "Direct message request \(requestState.stringValue)!")
+            }
             self?.fetchChatroomActions()
             self?.syncConversation()
         }
@@ -1474,12 +1474,19 @@ extension LMChatMessageListViewModel {
     }
     
     func deleteTempConversation(conversationId: String) {
-//        guard let conversation = chatMessages.first(where: {$0.id == conversationId}) else { return }
-//        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
-//            var section = messagesList[sectionIndex]
-//            section.data.removeAll(where: {$0.messageId == conversationId})
-//        }
-//        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
+        guard let conversationIndex = chatMessages.firstIndex(where: {$0.id == conversationId}) else { return }
+        let conversation = chatMessages.remove(at: conversationIndex)
+        if let sectionIndex = messagesList.firstIndex(where: {$0.section == conversation.date}) {
+            var section = messagesList[sectionIndex]
+            section.data.removeAll(where: {$0.messageId == conversationId})
+            if !section.data.isEmpty {
+                messagesList[sectionIndex] = section
+            } else {
+                messagesList.remove(at: sectionIndex)
+            }
+        }
+        delegate?.reloadChatMessageList()
+        LMChatClient.shared.deleteTempConversations(conversationId: conversationId)
     }
     
     func fetchConversation(withId conversationId: String) {

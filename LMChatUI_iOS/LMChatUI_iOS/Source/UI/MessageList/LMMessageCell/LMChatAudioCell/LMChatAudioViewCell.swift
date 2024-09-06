@@ -35,11 +35,11 @@ open class LMChatAudioViewCell: LMChatMessageCell {
         
     // MARK: configure
     open override func setData(with data: ContentModel, index: IndexPath) {
+        audioMessageView.audioDelegate = audioDelegate
         super.setData(with: data, index: index)
         audioMessageView.onShowMoreCallback = { [weak self] in
             self?.updateForSeeMore(for: data.message?.messageId ?? "", index: index)
         }
-        
     }
     
     open func resetAudio() {

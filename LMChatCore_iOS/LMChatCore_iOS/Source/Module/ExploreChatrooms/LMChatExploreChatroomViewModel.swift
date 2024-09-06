@@ -116,7 +116,7 @@ public final class LMChatExploreChatroomViewModel {
         LMChatCore.analytics?.trackEvent(for: status ? .chatRoomFollowed : .chatRoomUnfollowed, eventProperties: [
             LMChatAnalyticsKeys.chatroomId.rawValue: chatroomId,
             LMChatAnalyticsKeys.communityId.rawValue: SDKPreferences.shared.getCommunityId(),
-            LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.exploreFeed])
+            LMChatAnalyticsKeys.source.rawValue: LMChatAnalyticsSource.exploreFeed.rawValue])
     }
     
     func updateChatroomData() {

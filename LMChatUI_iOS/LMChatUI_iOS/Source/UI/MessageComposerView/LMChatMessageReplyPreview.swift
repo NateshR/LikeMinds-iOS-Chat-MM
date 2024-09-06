@@ -63,6 +63,8 @@ open class LMChatMessageReplyPreview: LMView {
         label.text = ""
         label.font = Appearance.shared.fonts.subHeadingFont2
         label.numberOfLines = 2
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 10
         label.textColor = Appearance.shared.colors.textColor
         return label
     }()

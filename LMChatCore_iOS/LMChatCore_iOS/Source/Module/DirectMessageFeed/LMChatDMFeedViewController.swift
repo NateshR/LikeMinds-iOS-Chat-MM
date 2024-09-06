@@ -8,9 +8,14 @@
 import Foundation
 import LikeMindsChatUI
 
+public protocol LMChatDMFeedViewDelegate: AnyObject {
+    func didStartNewDM(withCommunityId communityId: String)
+}
+
 open class LMChatDMFeedViewController: LMViewController {
     
     var viewModel: LMChatDMFeedViewModel?
+    public weak var delegate: LMChatDMFeedViewDelegate?
     
     open private(set) lazy var feedListView: LMChatHomeFeedListView = {
         let view = LMChatHomeFeedListView().translatesAutoresizingMaskIntoConstraints()
@@ -65,7 +70,6 @@ open class LMChatDMFeedViewController: LMViewController {
         super.setupViews()
         self.view.addSubview(feedListView)
         self.view.addSubview(newDMFabButton)
-        setupRightItemBars()
     }
     
     // MARK: setupLayouts
@@ -105,7 +109,13 @@ open class LMChatDMFeedViewController: LMViewController {
     }
     
     @objc open func newFabButtonClicked() {
-        NavigationScreen.shared.perform(.dmMemberList(showList: viewModel?.showList), from: self, params: nil)
+        if let delegate, let communityId = viewModel?.getCommunityId() {
+            delegate.didStartNewDM(withCommunityId: communityId)
+            return
+        } 
+        else {
+            NavigationScreen.shared.perform(.dmMemberList(showList: viewModel?.showList), from: self, params: nil)
+        }
     }
     
     open func newDMButtonExapndAndCollapes(_ offsetY: CGFloat) {

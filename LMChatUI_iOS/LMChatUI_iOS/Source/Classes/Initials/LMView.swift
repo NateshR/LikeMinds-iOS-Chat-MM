@@ -176,8 +176,8 @@ open class LMView: UIView {
     public static var heightOfScreen: CGFloat { UIScreen.main.bounds.height }
     public static var widthOfScreen: CGFloat { UIScreen.main.bounds.width }
     
-    public let heightViewSize = widthOfScreen * 0.55
-    public let widthViewSize = widthOfScreen * 0.65
+    public let heightViewSize = widthOfScreen * 0.62
+    public let widthViewSize = widthOfScreen * 0.72
     
     public static var minSizeOfScreen: CGFloat {
          min(heightOfScreen, widthOfScreen)

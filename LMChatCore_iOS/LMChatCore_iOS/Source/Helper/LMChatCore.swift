@@ -34,8 +34,7 @@ public class LMChatCore {
     private init() {}
     
     public static var shared: LMChatCore = .init()
-    //    static var analytics: LMChatAnalyticsProtocol = LMChatAnalyticsTracker()
-    static private(set) var isInitialized: Bool = false
+    public static private(set) var isInitialized: Bool = false
     // Callbacks for accessToken and refreshToken strategy
     private(set) var coreCallback: LMChatCoreCallback?
 
@@ -301,6 +300,18 @@ public class LMChatCore {
         guard let route = userInfo["route"] as? String, UIApplication.shared.applicationState == .inactive else {return false }
         DeepLinkManager.sharedInstance.didReceivedRemoteNotification(route)
         return true
+    }
+    
+    public func disableIQKeyboardForViewControllers() -> [UIViewController.Type] {
+        return [LMChatCreatePollViewController.self,
+                LMChatMessageListViewController.self,
+                LMChatReportViewController.self,
+                LMChatAttachmentViewController.self]
+    }
+    
+    /// Method for exclude/filter conversation state
+    public func excludeConversations(_ states: [ConversationState]) {
+        LMChatClient.shared.excludeConversationStates(states)
     }
     
 }
