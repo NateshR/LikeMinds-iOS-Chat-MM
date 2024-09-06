@@ -114,10 +114,7 @@ open class LMChatDMFeedViewController: LMViewController {
             return
         } 
         else {
-            self.showAlertWithActions(title: "Default Implementation!", message: "Want to use default implementation fo member list?", withActions: [("No", nil), ("Yes", {[weak self] in
-                guard let self else { return }
-                NavigationScreen.shared.perform(.dmMemberList(showList: viewModel?.showList), from: self, params: nil)
-            })])
+            NavigationScreen.shared.perform(.dmMemberList(showList: viewModel?.showList), from: self, params: nil)
         }
     }
     
