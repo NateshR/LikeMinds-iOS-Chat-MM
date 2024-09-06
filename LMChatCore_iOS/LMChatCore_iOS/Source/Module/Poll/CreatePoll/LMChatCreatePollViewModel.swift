@@ -76,7 +76,7 @@ final public class LMChatCreatePollViewModel: LMChatBaseViewModel {
     }
     
     public func loadInitialData() {
-        let userDetails = LMChatClient.shared.getUserDetails()
+        let userDetails = LMChatClient.shared.getLoggedInUser()
         
         let pollHeaderData = LMChatCreatePollHeader.ContentModel(
             profileImage: userDetails?.imageUrl,
