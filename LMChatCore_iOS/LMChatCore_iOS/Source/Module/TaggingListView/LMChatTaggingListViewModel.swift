@@ -78,8 +78,11 @@ public final class LMChatTaggingListViewModel {
             .pageSize(pageSize)
             .build()
         LMChatClient.shared.getTaggingList(request: request) { [weak self] response in
+            var users = response.data?.communityMembers ?? []
+            users.append(contentsOf: response.data?.chatroomParticipants ?? [])
+            
             guard let self else { return }
-            guard let users = response.data?.communityMembers else { return }
+            
             isLastPage = users.isEmpty
             
             let tempUsers: [LMChatTagUser] = users.compactMap { user in
