@@ -74,38 +74,6 @@ public struct LMChatPollDataModel {
     }
 }
 
-public extension LMChatPollDataModel {
-    init?(postID: String, users: [String: User], widgets: [LMWidget]) {
-        guard let widget = widgets.first(where: { $0.parentEntityID == postID }),
-              let id = widget.id,
-              let question = widget.metadata?["title"] as? String,
-              let pollDisplayText = widget.lmMeta?.pollAnswerText else { return nil }
-        
-        let selectType: String = (widget.metadata?["multiple_select_state"] as? String) ?? "exactly"
-        let selectNumber: Int = (widget.metadata?["multiple_select_number"] as? Int) ?? 1
-        let expiryTime: Int = (widget.metadata?["expiry_time"] as? Int) ?? .zero
-        let isAnonymous: Bool = (widget.metadata?["is_anonymous"] as? Bool) ?? false
-        let allowAddOptions: Bool = (widget.metadata?["allow_add_option"] as? Bool) ?? false
-        let pollType: String = (widget.metadata?["poll_type"] as? String) ?? "instant"
-        
-        self.id = id
-        self.postID = postID
-        self.question = question
-        self.options = widget.lmMeta?.options.compactMap({ .init(users: users, option: $0) }) ?? []
-        self.pollDisplayText = pollDisplayText
-        self.pollSelectType = .init(key: selectType) ?? .exactly
-        self.pollSelectCount = selectNumber
-        self.expiryTime = expiryTime
-        self.isAnonymous = isAnonymous
-        self.allowAddOptions = allowAddOptions
-        self.showResults = widget.lmMeta?.isShowResult ?? false
-        self.isInstantPoll = pollType == "instant"
-        self.voteCount = widget.lmMeta?.voteCount ?? 0
-        self.userSelectedOptions = []
-    }
-}
-
-
 public extension LMChatPollDataModel.Option {
     init?(users: [String: User], option: PollOption) {
         guard let uuid = option.uuid,

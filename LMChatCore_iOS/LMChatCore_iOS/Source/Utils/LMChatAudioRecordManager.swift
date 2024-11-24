@@ -42,7 +42,7 @@ public final class LMChatAudioRecordManager {
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let timeVariable = String(Int(Date().timeIntervalSince1970))
-        let recordingName = "\(timeVariable)_voiceRecording.aac"
+        let recordingName = "\(timeVariable)_voiceRecording.wav"
         let pathArray = [dirPath, recordingName]
         print(pathArray)
         url = URL(string: pathArray.joined(separator: "/"))
@@ -50,11 +50,11 @@ public final class LMChatAudioRecordManager {
         guard let url else { return false }
         
         let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVLinearPCMIsNonInterleaved: false,
-            AVSampleRateKey: 44_100.0,
-            AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 16,
+            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+//            AVLinearPCMIsNonInterleaved: false,
+//            AVSampleRateKey: 44_100.0,
+//            AVNumberOfChannelsKey: 1,
+//            AVLinearPCMBitDepthKey: 16,
             AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue
         ]
         
@@ -122,4 +122,3 @@ public final class LMChatAudioRecordManager {
         url = nil
     }
 }
-

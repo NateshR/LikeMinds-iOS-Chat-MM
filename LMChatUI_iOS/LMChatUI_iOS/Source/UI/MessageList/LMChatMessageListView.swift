@@ -335,6 +335,8 @@ extension LMChatMessageListView: UITableViewDataSource, UITableViewDelegate {
             cell.setData(with: LMChatCustomCell.ContentModel(message: item), index: indexPath)
             tableViewCell = cell
         }else{
+            // TODO: Convert message type to enum
+            // TODO: Move custom widget message type into switch case
             switch item.messageType {
             case 0:
                 tableViewCell =  cellFor(rowAt: indexPath, tableView: tableView)

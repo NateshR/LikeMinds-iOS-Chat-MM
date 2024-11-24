@@ -31,6 +31,12 @@ class DataModelConverter {
     func convertPostConversation(uuid: String, communityId: String, request: PostConversationRequest, fileUrls: [LMChatAttachmentMediaData]?) -> Conversation {
         let miliseconds = Int(Date().millisecondsSince1970)
         let member = LMChatClient.shared.getCurrentMember()?.data?.member
+        
+        var widget: Widget.Builder = Widget.Builder()
+        
+        widget = widget.metadata(request.metadata)
+        widget = widget.id(request.temporaryId)
+        
         return Conversation.Builder()
             .id(request.temporaryId)
             .chatroomId(request.chatroomId)
@@ -52,6 +58,8 @@ class DataModelConverter {
             .replyChatroomId(request.repliedChatroomId)
             .attachmentUploaded(false)
             .conversationStatus(.sending)
+            .widget(widget.build())
+            .widgetId(request.temporaryId)
             .build()
     }
     
