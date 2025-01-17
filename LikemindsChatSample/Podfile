@@ -10,6 +10,7 @@ target 'LikemindsChatSample' do
   use_frameworks!
 
   # Pods for LikemindsChatSample
+ pod 'LikeMindsChatData', path: '../../likeminds-chat-ios-data/LikeMindsChatData.podspec'
  pod 'LikeMindsChatUI', path: '../LikeMindsChatUI.podspec'
  pod 'LikeMindsChatCore', path: '../LikeMindsChatCore.podspec'
  

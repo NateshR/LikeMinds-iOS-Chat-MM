@@ -120,6 +120,7 @@ open class LMChatMessageListViewController: LMViewController {
         viewModel?.syncConversation()
         
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
+        setRightNavigationWithAction(title: nil, image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(navigateToSearchConversationScreen))
         setupBackButtonItemWithImageView()
         self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
         let attText = GetAttributedTextWithRoutes.getAttributedText(from: LMSharedPreferences.getString(forKey: viewModel?.chatroomId ?? "NA") ?? "")
@@ -263,6 +264,16 @@ open class LMChatMessageListViewController: LMViewController {
     }
     
     @objc
+    open func navigateToSearchConversationScreen(){
+        do{
+            let searchListVC = try LMChatSearchListViewModel.createModule(searchOnlyConversations: true, chatroomId: viewModel?.chatroomId)
+            
+            self.navigationController?.pushViewController(searchListVC, animated: true)
+        }catch _{
+        }
+    }
+    
+    @objc
     open func scrollToBottomClicked(_ sender: UIButton) {
         self.scrollToBottomButton.isHidden = true
         viewModel?.fetchBottomConversations(onButtonClicked: true)
@@ -297,6 +308,7 @@ open class LMChatMessageListViewController: LMViewController {
         messageListView.selectedItems.removeAll()
         navigationItem.rightBarButtonItems = nil
         setRightNavigationWithAction(title: nil, image: Constants.shared.images.ellipsisCircleIcon, style: .plain, target: self, action: #selector(chatroomActions))
+        setRightNavigationWithAction(title: nil, image: Constants.shared.images.searchIcon, style: .plain, target: self, action: #selector(navigateToSearchConversationScreen))
         updateChatroomSubtitles()
         memberRightsCheck()
         messageListView.justReloadData()
