@@ -29,7 +29,6 @@ final public class LMChatSearchListViewModel: LMChatBaseViewModel {
         viewcontroller.viewmodel = viewmodel
 
         viewmodel.searchOnlyConversations = searchOnlyConversations
-        viewmodel.chatroomId = chatroomId
 
         return viewcontroller
     }
@@ -105,6 +104,10 @@ final public class LMChatSearchListViewModel: LMChatBaseViewModel {
             searchConversationList(
                 searchString: searchString)
         }
+    }
+    
+    public func fetchMoreData(){
+        fetchData(searchString: searchString)
     }
 
     // MARK: API CALL
